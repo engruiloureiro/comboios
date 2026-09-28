@@ -590,10 +590,15 @@ function audioInit(){
     const xBP=AC.createBiquadFilter();xBP.type='bandpass';xBP.Q.value=1.1;xBP.frequency.value=150;const xG=AC.createGain();xG.gain.value=0;
     const eS=[];for(const[det,gn]of[[1,1],[1.0035,0.55]]){const s=AC.createBufferSource();s.buffer=A.eng;s.loop=true;const g=AC.createGain();g.gain.value=gn;s.connect(g);g.connect(shaper);g.connect(xBP);s.start(0,Math.random()*2);eS.push([s,det])}
     shaper.connect(eLP);eLP.connect(eG);out(eG);xBP.connect(xG);out(xG);A.eS=eS;A.eLP=eLP;A.eG=eG;A.xG=xG;A.xBP=xBP;
-    // turbocompressor e caixa de velocidades
+    // turbocompressor Holset e, na transmissão diesel-elétrica, gerador principal e dois motores de tração Alsthom TA671
     {const tu=AC.createOscillator();tu.type='sine';const tn=src(),tb=AC.createBiquadFilter();tb.type='bandpass';tb.Q.value=9;const tg=AC.createGain();tg.gain.value=0;
      tu.connect(tg);tn.connect(tb);tb.connect(tg);out(tg);tu.start();A.tu=tu;A.tb=tb;A.tuG=tg;
-     const gw=AC.createOscillator();gw.type='triangle';const gg=AC.createGain();gg.gain.value=0;gw.connect(gg);out(gg);gw.start();A.gw=gw;A.gwG=gg}
+     const gw=AC.createOscillator();gw.type='triangle';const gg=AC.createGain();gg.gain.value=0;gw.connect(gg);out(gg);gw.start();A.gw=gw;A.gwG=gg;
+     // assobio dos motores de tração: fundamental e harmónicas das ranhuras e do engrenamento, proporcionais à velocidade
+     A.tm=[];const tmG=AC.createGain();tmG.gain.value=0;const tmF=AC.createBiquadFilter();tmF.type='lowpass';tmF.frequency.value=3000;tmF.connect(tmG);out(tmG);A.tmG=tmG;A.tmF=tmF;
+     for(const[k,ty,gn]of[[1,'sawtooth',0.45],[2.02,'sine',0.35],[3.97,'sine',0.22],[6.1,'sine',0.12]]){const o=AC.createOscillator();o.type=ty;const g=AC.createGain();g.gain.value=gn;o.connect(g);g.connect(tmF);o.start();A.tm.push([o,k])}
+     // ventiladores dos motores de tração
+     const vn=src(),vb=AC.createBiquadFilter();vb.type='bandpass';vb.frequency.value=900;vb.Q.value=0.6;const vG=AC.createGain();vG.gain.value=0;vn.connect(vb);vb.connect(vG);out(vG);A.venG=vG;A.venF=vb}
     // compressor de ar (ouve-se com o comboio parado)
     {const cn=src(),cl=AC.createBiquadFilter();cl.type='lowpass';cl.frequency.value=260;const cm=AC.createGain();cm.gain.value=0;const lf=AC.createOscillator();lf.type='square';lf.frequency.value=14;
      const ld=AC.createGain();ld.gain.value=0.5;const cG=AC.createGain();cG.gain.value=0;lf.connect(ld);ld.connect(cm.gain);cn.connect(cl);cl.connect(cm);cm.connect(cG);out(cG);lf.start();cm.gain.value=0.5;A.cmpG=cG}
@@ -616,9 +621,9 @@ function audioInit(){
     for(const[f0,dst]of[[660,hH],[555,hL]]){const bp=AC.createBiquadFilter();bp.type='peaking';bp.frequency.value=f0*2;bp.gain.value=8;bp.Q.value=2;bp.connect(dst);
       for(const[k,ty,gn]of[[1,'sawtooth',0.5],[1.004,'square',0.22],[0.997,'sawtooth',0.3]]){const o=AC.createOscillator();o.type=ty;o.frequency.value=f0*k;const g=AC.createGain();g.gain.value=gn;o.connect(g);g.connect(bp);o.start();A.hO.push([o,f0*k])}}
     // pancada das rodas nas juntas dos carris: impacto metálico com ressonâncias do carril e da roda
-    A.clicks=[];for(let v=0;v<3;v++){const cb=AC.createBuffer(1,AC.sampleRate*0.16,AC.sampleRate),cd=cb.getChannelData(0);const fr=[[78,0.03,1],[232+v*14,0.018,0.55],[610+v*40,0.01,0.35],[1480+v*90,0.006,0.25],[3100,0.003,0.18]];
-      for(let i=0;i<cd.length;i++){const t=i/AC.sampleRate;let y=(Math.random()*2-1)*Math.exp(-t/0.004)*0.6;for(const[f,dc,a]of fr)y+=a*Math.sin(2*Math.PI*f*t+v)*Math.exp(-t/dc);cd[i]=y*0.8}A.clicks.push(cb)}
-    A.click=A.clicks[0];A.erpm=620;A.gear=0;A.shiftT=0;A.lastNotch=6;A.cmpT=20;
+    A.clicks=[];for(let v=0;v<3;v++){const cb=AC.createBuffer(1,AC.sampleRate*0.16,AC.sampleRate),cd=cb.getChannelData(0);const fr=[[64+v*4,0.05,1.3],[118,0.032,0.9],[232+v*14,0.02,0.6],[610+v*40,0.011,0.4],[1480+v*90,0.007,0.28],[3100,0.003,0.16]];
+      for(let i=0;i<cd.length;i++){const t=i/AC.sampleRate;let y=(Math.random()*2-1)*Math.exp(-t/0.004)*0.7+(t<0.0015?1.2*(1-t/0.0015):0);for(const[f,dc,a]of fr)y+=a*Math.sin(2*Math.PI*f*t+v)*Math.exp(-t/dc);cd[i]=y*0.8}A.clicks.push(cb)}
+    A.click=A.clicks[0];A.erpm=620;A.lastNotch=6;A.cmpT=20;
   }catch(e){AC=null}
 }
 function oneShot(buf,gain,t,rate,filt){if(!AC||muted)return;const s=AC.createBufferSource();s.buffer=buf;if(rate)s.playbackRate.value=rate;
@@ -631,8 +636,8 @@ function beep(f,d,vol,type,when){if(!AC||muted)return;const o=AC.createOscillato
   o.connect(g);g.connect(A.bus);o.start(t);o.stop(t+d+.05)}
 function bogies(gain){if(!AC||muted||S.v<0.5)return;const t0=AC.currentTime;
   const ax=[1.8,4.0,11.1,13.3,17.3,19.5,26.6,28.8];
-  const sp=Math.min(1,0.25+S.v/18),lp=camMode==='cab'||camMode==='salao'?[ 'lowpass',900+S.v*60]:null;
-  ax.forEach((d,i)=>oneShot(A.clicks[(i+(Math.random()*3|0))%3],gain*sp*(i%2?0.8:1)*Math.exp(-d/26),t0+d/S.v,0.94+Math.random()*0.12,lp))}
+  const sp=Math.min(1.7,0.4+S.v/11),lp=camMode==='cab'||camMode==='salao'?['lowpass',1100+S.v*70]:null;
+  ax.forEach((d,i)=>oneShot(A.clicks[(i+(Math.random()*3|0))%3],gain*sp*(i%2?0.85:1)*(0.9+Math.random()*0.2)*Math.exp(-d/30),t0+d/S.v,0.94+Math.random()*0.12,lp))}
 function whoosh(){if(!AC||muted)return;const s=AC.createBufferSource();s.buffer=A.nb;const f=AC.createBiquadFilter();f.type='bandpass';f.Q.value=0.7;
   const g=AC.createGain(),t=AC.currentTime;f.frequency.setValueAtTime(1600,t);f.frequency.exponentialRampToValueAtTime(350,t+2.2);
   g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(0.9,t+0.25);g.gain.exponentialRampToValueAtTime(0.25,t+1.2);g.gain.exponentialRampToValueAtTime(0.001,t+2.6);
@@ -654,20 +659,25 @@ function say(text){return;if(!('speechSynthesis' in window))return;setTimeout(()
 let tunMix=0;
 function audioUpdate(dtR){
   if(!AC)return;const t=AC.currentTime,v=S.v,on=running&&!muted&&!paused;
-  // rotações do motor: ralenti a 620 rpm; em tração sobem com a velocidade dentro de cada mudança e caem na passagem de caixa
-  const tr=S.notch>6&&!S.doors&&!S.emerg?(S.notch-6)/5:0,kmh=v*3.6,tops=[18,36,55,80],dtA=Math.min(0.1,dtR);
-  let g=0;while(g<3&&kmh>tops[g])g++;
-  if(tr>0&&g!==A.gear&&v>0.5){A.shiftT=0.55}A.gear=g;A.shiftT=Math.max(0,A.shiftT-dtA);
-  const lo=g?tops[g-1]:0,f=clamp((kmh-lo)/(tops[g]-lo),0,1),top=1150+tr*700;
-  let tgt=620,load=0;if(tr>0&&A.shiftT<=0){tgt=Math.max(900,lerp(top*0.62,top,f));load=tr}else if(tr>0)tgt=900;
-  A.erpm+=clamp(tgt-A.erpm,-1300*dtA,(tgt>A.erpm&&load>0?520+260*tr:400)*dtA);A.load=(A.load||0)+(load-(A.load||0))*Math.min(1,dtA*4);
-  const rn=(A.erpm-620)/1230,L=A.load,inside=camMode==='cab'||camMode==='salao';
-  for(const[s,det]of A.eS)s.playbackRate.setTargetAtTime(A.erpm/1000*det,t,.05);
-  A.eLP.frequency.setTargetAtTime((inside?260:420)+rn*500+L*(inside?700:1600),t,.1);
-  A.eG.gain.setTargetAtTime(on?(0.16+0.12*rn+0.14*L)*(inside?1:0.8):0,t,.08);
-  A.xBP.frequency.setTargetAtTime(110+rn*140,t,.1);A.xG.gain.setTargetAtTime(on?L*(0.22+0.2*rn)*(inside?0.6:1.2):0,t,.08);
-  const tuf=1400+rn*rn*2600;A.tu.frequency.setTargetAtTime(tuf,t,.3);A.tb.frequency.setTargetAtTime(tuf*1.02,t,.3);A.tuG.gain.setTargetAtTime(on?(0.004+0.018*L*rn)*(inside?1:0.6):0,t,.4);
-  A.gw.frequency.setTargetAtTime(40+kmh*(9-g*1.6),t,.1);A.gwG.gain.setTargetAtTime(on&&v>0.5?0.012*Math.min(1,v/6)*(0.4+L):0,t,.2);
+  // transmissão diesel-elétrica: as rotações do motor Saurer seguem o ponto do manípulo (regulador), não a velocidade;
+  // o motor sobe devagar (atraso do turbo) e a carga do gerador acompanha as rotações
+  const tr=S.notch>6&&!S.doors&&!S.emerg?(S.notch-6)/5:0,kmh=v*3.6,dtA=Math.min(0.1,dtR);
+  const tgt=620+tr*880;
+  A.erpm+=clamp(tgt-A.erpm,-240*dtA,(150+120*tr)*dtA);
+  const rn=(A.erpm-620)/880,L0=tr>0?clamp(rn/Math.max(0.2,tr),0,1)*tr:0;A.load=(A.load||0)+(L0-(A.load||0))*Math.min(1,dtA*1.5);
+  const L=A.load,inside=camMode==='cab'||camMode==='salao';
+  for(const[s,det]of A.eS)s.playbackRate.setTargetAtTime(A.erpm/1000*det,t,.08);
+  A.eLP.frequency.setTargetAtTime((inside?240:400)+rn*520+L*(inside?650:1500),t,.15);
+  A.eG.gain.setTargetAtTime(on?(0.15+0.12*rn+0.12*L)*(inside?1:0.8):0,t,.12);
+  A.xBP.frequency.setTargetAtTime(105+rn*130,t,.15);A.xG.gain.setTargetAtTime(on?L*(0.2+0.2*rn)*(inside?0.6:1.2):0,t,.15);
+  A.tuS=(A.tuS||0)+(rn*(0.35+0.65*L)-(A.tuS||0))*Math.min(1,dtA*0.8);const tuf=1300+A.tuS*A.tuS*3200;
+  A.tu.frequency.setTargetAtTime(tuf,t,.3);A.tb.frequency.setTargetAtTime(tuf*1.02,t,.3);A.tuG.gain.setTargetAtTime(on?(0.003+0.02*A.tuS)*(inside?1:0.6):0,t,.4);
+  // gerador principal: zumbido proporcional às rotações e à excitação
+  A.gw.frequency.setTargetAtTime(A.erpm/60*8,t,.1);A.gwG.gain.setTargetAtTime(on?0.004+0.012*L:0,t,.2);
+  // motores de tração: assobio que sobe com a velocidade, mais forte com corrente de tração
+  const f0=12+kmh*7.4;for(const[o,k]of A.tm)o.frequency.setTargetAtTime(f0*k,t,.08);A.tmF.frequency.setTargetAtTime(1200+kmh*40,t,.2);
+  A.tmG.gain.setTargetAtTime(on&&v>0.2?(0.006+0.03*L)*Math.min(1,v/3)*(inside?0.8:1):0,t,.15);
+  A.venG.gain.setTargetAtTime(on?0.012+0.03*rn:0,t,.4);A.venF.frequency.setTargetAtTime(700+rn*600,t,.4);
   // compressor: arranca de vez em quando com o comboio parado
   A.cmpT-=dtA;if(A.cmpT<-14)A.cmpT=25+Math.random()*35;A.cmpG.gain.setTargetAtTime(on&&A.cmpT<0&&v<3?0.09:0,t,.4);
   // travão: sopro de ar ao apertar e ao soltar, atrito das cepas e chiadeira a baixa velocidade
@@ -676,7 +686,7 @@ function audioUpdate(dtR){
   A.brG.gain.setTargetAtTime(on&&brk>0&&v>0.2?brk*Math.min(1,v/5)*0.06*(1+Math.max(0,1-v/10)):0,t,.15);
   A.bsG.gain.setTargetAtTime(on&&brk>0&&v>0.15&&v<2.2?0.012*brk:0,t,.1);
   const tf=tunMix;
-  A.rg1.gain.setTargetAtTime(on?Math.min(0.5,v*0.012)*(1+tf*1.2):0,t,.2);
+  A.rg1.gain.setTargetAtTime(on?Math.min(0.32,v*0.009)*(1+tf*1.2):0,t,.2);
   A.rg2.gain.setTargetAtTime(on?Math.min(0.14,v*0.004)*(1+tf*1.5):0,t,.2);A.rb.frequency.setTargetAtTime(300+v*22,t,.2);
   A.wg.gain.setTargetAtTime(on?Math.max(0,(v-15))*0.002*(1+tf):0,t,.3);
   A.fg.gain.setTargetAtTime(on?0.05:0,t,.5);
@@ -719,8 +729,8 @@ function step(dt,dr){
   S.bump*=Math.exp(-dt*6);
 
   // juntas e aparelhos de via
-  while(S.jI<JOINTS.length&&JOINTS[S.jI]<=S.pos){if(S.pos>S.prevPos){bogies(0.55);S.bump=0.035}S.jI++}
-  while(S.jI>0&&JOINTS[S.jI-1]>S.pos){if(S.pos<S.prevPos){bogies(0.55);S.bump=0.035}S.jI--}
+  while(S.jI<JOINTS.length&&JOINTS[S.jI]<=S.pos){if(S.pos>S.prevPos){bogies(1);S.bump=0.035}S.jI++}
+  while(S.jI>0&&JOINTS[S.jI-1]>S.pos){if(S.pos<S.prevPos){bogies(1);S.bump=0.035}S.jI--}
 
   // velocidade (CONVEL)
   const lim=S.back?Math.min(30,limitAt(S.pos)):limitAt(S.pos);S.over=false;
@@ -2274,7 +2284,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)se
 window.addEventListener('resize',resize);
 reset(0,6,false);resize();
 if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);use3D=false;glc.style.display='none';const el=document.getElementById('err');el.style.display='block';el.textContent='3D indisponível, a usar gráficos simples: '+e.message}}else glc.style.display='none';setNotch(3,true);requestAnimationFrame(frame);
-window.__T={aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),gear:A.gear,load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
+window.__T={aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
 })();
 </script>
 </body>
