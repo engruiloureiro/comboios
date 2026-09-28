@@ -156,6 +156,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <li>Nas estações, espere o apito do <b>chefe</b> para partir. Nos apeadeiros, parta à hora.</li>
       <li>Buzine antes de cada <b>passagem de nível</b> (o painel mostra a distância). Carregue em <b>Homem-morto</b> quando piscar.</li>
       <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: E portas, H buzina, Q homem-morto, P pausa, R inversor.</li>
+      <li><b>Cruzamentos</b>: na via única as automotoras cruzam-se nas estações. Se a contrária ainda não chegou, o chefe não dá a partida: espere. Partir antes é falta grave e pode acabar em colisão.</li>
       <li><b>Marcha atrás</b> (botão Marcha ou R): com a automotora parada e o manípulo em 0 ou travão, mude o inversor para recuar, por exemplo depois de passar a placa de paragem. Em marcha atrás o limite é 30 km/h.</li>
     </ul>
     <div class="per" id="perSel" role="radiogroup" aria-label="Hora da viagem"><span>Hora da viagem:</span><button data-p="dia">Dia</button><button data-p="tarde" class="on">Fim de tarde</button><button data-p="noite">Noite</button></div>
@@ -210,28 +211,28 @@ const km=k=>OFF+k*1000;
 const G0=59.385,kmG=k=>km(G0+k);
 // [nome, lat, lon, km, hora ida, hora volta, tipo, edifício, disposição, lado, comp. plataforma, altura, cota aprox., estilo]
 const RAW=[
- ['Porto-Trindade',41.1525,-8.6094,0.00,'14:39','21:20','term',2,'VG',-1,160,0.35,95,'v-trin'],
- ['Avenida de França',41.1588,-8.6262,1.75,'14:44','21:15','ap',0,'SR',1,70,0.3,100,'v-ap'],
+ ['Porto-Trindade',41.1525,-8.6094,0.00,'14:59','21:00','term',2,'VG',-1,160,0.35,95,'v-trin'],
+ ['Avenida de França',41.1588,-8.6262,1.75,'15:04','20:55','ap',0,'SR',1,70,0.3,100,'v-ap'],
  ['Porto-Boavista',41.1597,-8.6322,2.25,null,null,'est',1,'SX',-1,100,0.35,100,'v-est'],
- ['Francos',41.1655,-8.6385,3.20,'14:48','21:11','ap',0,'SL',-1,60,0.3,96,'v-ap'],
- ['Ramalde',41.1716,-8.6424,3.95,'14:51','21:08','ap',0,'SR',1,60,0.3,93,'v-ap'],
- ['Viso',41.1787,-8.6462,4.80,'14:54','21:05','ap',0,'SL',-1,60,0.3,96,'v-ap'],
- ['Senhora da Hora',41.1880,-8.6545,6.05,'15:00','20:59','est',1,'SX',-1,110,0.35,101,'v-est2'],
- ['Araújo',41.2010,-8.6460,8.00,'15:05','20:54','ap',0,'SR',1,60,0.3,96,'v-ap'],
- ['Maia',41.2335,-8.6215,12.20,'15:13','20:46','est',1,'SX',-1,110,0.35,86,'v-est2'],
- ['Mandim',41.2555,-8.6075,14.95,'15:19','20:40','ap',0,'SL',-1,60,0.3,80,'v-ap'],
- ['Castêlo da Maia',41.2705,-8.5985,16.80,'15:24','20:35','est',1,'SX',1,90,0.35,75,'v-est'],
- ['Muro',41.2985,-8.5870,20.30,'15:31','20:28','ap',0,'SR',1,60,0.3,60,'v-ap'],
- ['Bougado',41.3215,-8.5705,23.20,'15:38','20:21','ap',0,'SL',-1,60,0.3,46,'v-est1'],
- ['Trofa',41.3383,-8.5595,25.40,'15:44','20:15','est',2,'VG',-1,140,0.35,42,'v-fafe'],
- ['Lousado',41.3505,-8.5190,29.60,'15:54','20:05','est',1,'SX',1,100,0.35,36,'v-est'],
- ['Santo Tirso',41.3430,-8.4755,35.60,'16:05','19:54','est',2,'VG',-1,130,0.35,44,'v-fafe'],
- ['Caniços',41.3525,-8.4515,37.90,'16:11','19:48','ap',0,'SR',1,60,0.3,55,'v-ap'],
- ['Negrelos',41.3555,-8.4230,40.60,'16:17','19:42','est',1,'SX',-1,90,0.35,64,'v-est1'],
- ['Vila das Aves',41.3695,-8.4095,42.50,'16:22','19:37','est',1,'SX',1,100,0.35,74,'v-est'],
- ['Lordelo',41.3765,-8.3905,44.50,'16:27','19:32','ap',0,'SL',-1,60,0.3,90,'v-ap'],
- ['Giesteira',41.3830,-8.3600,47.20,'16:33','19:26','ap',0,'SR',1,60,0.3,100,'v-ap'],
- ['Vizela',41.3785,-8.3075,51.80,'16:42','19:17','est',1,'SX',-1,110,0.35,116,'v-est2'],
+ ['Francos',41.1655,-8.6385,3.20,'15:08','20:51','ap',0,'SL',-1,60,0.3,96,'v-ap'],
+ ['Ramalde',41.1716,-8.6424,3.95,'15:11','20:48','ap',0,'SR',1,60,0.3,93,'v-ap'],
+ ['Circunvalação',41.1787,-8.6462,4.80,'15:14','20:45','ap',0,'SL',-1,60,0.3,96,'v-ap'],
+ ['Senhora da Hora',41.1880,-8.6545,6.05,'15:18','20:41','est',1,'SX',-1,110,0.35,101,'v-est2'],
+ ['Araújo',41.2010,-8.6460,8.00,'15:22','20:37','ap',0,'SR',1,60,0.3,96,'v-ap'],
+ ['Maia',41.2335,-8.6215,12.20,'15:28','20:31','est',1,'SX',-1,110,0.35,86,'v-est2'],
+ ['Mandim',41.2555,-8.6075,14.95,'15:33','20:26','ap',0,'SL',-1,60,0.3,80,'v-ap'],
+ ['Castêlo da Maia',41.2705,-8.5985,16.80,'15:37','20:22','est',1,'SX',1,90,0.35,75,'v-est'],
+ ['Muro',41.2985,-8.5870,20.30,'15:43','20:16','est',1,'SX',1,90,0.35,60,'v-est1'],
+ ['Bougado',41.3215,-8.5705,23.20,'15:48','20:11','ap',0,'SL',-1,60,0.3,46,'v-est1'],
+ ['Trofa',41.3383,-8.5595,25.40,'15:53','20:06','est',2,'VG',-1,140,0.35,42,'v-fafe'],
+ ['Lousado',41.3505,-8.5190,29.60,'16:00','19:59','est',1,'SX',1,100,0.35,36,'v-est'],
+ ['Santo Tirso',41.3430,-8.4755,35.60,'16:09','19:50','est',2,'VG',-1,130,0.35,44,'v-fafe'],
+ ['Caniços',41.3525,-8.4515,37.90,'16:14','19:45','ap',0,'SR',1,60,0.3,55,'v-ap'],
+ ['Negrelos',41.3555,-8.4230,40.60,'16:19','19:40','est',1,'SX',-1,90,0.35,64,'v-est1'],
+ ['Vila das Aves',41.3695,-8.4095,42.50,'16:23','19:36','est',1,'SX',1,100,0.35,74,'v-est'],
+ ['Lordelo',41.3765,-8.3905,44.50,'16:28','19:31','ap',0,'SL',-1,60,0.3,90,'v-ap'],
+ ['Giesteira',41.3830,-8.3600,47.20,'16:34','19:25','ap',0,'SR',1,60,0.3,100,'v-ap'],
+ ['Vizela',41.3785,-8.3075,51.80,'16:43','19:16','est',1,'SX',-1,110,0.35,116,'v-est2'],
  ['Pereirinhas',41.3920,-8.3150,53.40,'16:47','19:12','ap',0,'SR',1,60,0.3,136,'v-ap'],
  ['Cuca',41.4025,-8.3175,54.80,'16:51','19:08','ap',0,'SL',-1,60,0.3,150,'v-ap'],
  ['Nespereira',41.4145,-8.3140,56.30,'16:55','19:04','ap',0,'SR',1,60,0.3,166,'v-ap'],
@@ -319,7 +320,9 @@ function stF(p){let d=1e9;for(const s of STN)d=Math.min(d,p<s.pa?s.pa-p:p>s.pb?p
 function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/60)}
 function branchOffs(p){return[]}
-function capAt(k){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 40;return 50}if(Math.abs(k-6.05)<0.35)return 30;if(Math.abs(k-25.4)<0.5)return 30;if(Math.abs(k-29.6)<0.45)return 30;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3)return 40;if(Math.abs(k-35.6)<0.4)return 40;if(Math.abs(k-51.8)<0.4)return 40;const g=k-G0;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
+function capAt(k){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
+  if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3)return 60;if(Math.abs(k-35.6)<0.4)return 50;
+  if(k<42.5)return 80;if(Math.abs(k-51.8)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
 let LIMCH=[];
 (function build(){
@@ -329,7 +332,7 @@ let LIMCH=[];
   for(let pass=0;pass<3;pass++){const c=HDG.slice();for(let i=0;i<=TOTAL;i++){let s=0,n=0;for(let j=-12;j<=12;j++){const q=i+j;if(q>=0&&q<=TOTAL){s+=c[q];n++}}HDG[i]=s/n}}
   // via métrica sinuosa: curvas em S sobrepostas ao traçado geral (descrição: traçado apertado e cheio de curvas)
   {let ph=0,i=0;while(i<=TOTAL){const lam=380+rnd()*520,A=(0.18+rnd()*0.22)*(rnd()<0.5?-1:1),n=Math.round(lam/SEG);
-    for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
+    const sc=i*SEG<km(42.5)?0.28:1;for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
   for(let i=0;i<TOTAL;i++){let c=(HDG[i+1]-HDG[i])*SEG;const m=SEG*SEG/140;curve[i]=clamp(c,-m,m)}
   for(let i=0;i<=TOTAL;i++){const p=i*SEG;let q=0;while(q<STN.length-2&&STN[q+1].pos<p)q++;
     const a=STN[q],b=STN[q+1];let e;
@@ -361,7 +364,7 @@ let LIMCH=[];
     if(riv[k]<0)bankL[k]=0;if(riv[k]>0)bankR[k]=0;
     // muros de granito em trincheira junto ao túnel
     if(p>PV.pos-260&&p<PV.pos-106){wallL[k]={x:-3.6,h:4.5,t:'g'};wallR[k]={x:3.6,h:4.5,t:'g'}}
-    if(p>km(0.78)&&p<km(1.55)&&!plat[k]){const hh=5.5*sstep((km(1.55)-p)/300);if(hh>0.6){wallL[k]={x:-3.6,h:hh,t:'g'};wallR[k]={x:3.6,h:hh,t:'g'}}}}
+    if(p>km(0.78)&&p<km(1.55)&&!plat[k]){const hh=5.5*sstep((km(1.55)-p)/300);if(hh>0.6){wallL[k]={x:-3.6,h:hh,t:'g'};wallR[k]={x:3.6+Math.max(0,...trk[k]),h:hh,t:'g'}}}}
 })();
 const limitAt=p=>LIMA[clamp(Math.floor(p/50),0,LIMA.length-1)];
 function nextLimitR(p){const c=limitAt(p);for(let d=50;d<4000;d+=50){const l=limitAt(p-d);if(l!==c){const q=Math.ceil((p-d)/50)*50;return{v:l,d:p-q}}}return null}
@@ -534,6 +537,11 @@ function reset(startIdx,endIdx,rev,svc){
   S.back=false;updRev();while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;
   S.maxPts=(STOPS.length-1)*100+STOPS.length*100+PN.filter(p=>!p.done).length*15;
   TRAINS=PARKED.map(t=>({...t,v:0}));
+  // cruzamentos nas estações com via de resguardo dos troços de via única
+  {let last=p0;const dir=REV?1:-1;
+   for(const X of STOPS){if(X===st||X===en||!X.ex.length||X.pos<LOU.pos+200)continue;if(Math.abs(X.pos-last)<3500&&rnd()<0.7)continue;last=X.pos;
+     const e=X.ex[0],len=rnd()<0.75?31:62,stopA=REV?X.pos-8-len:X.pa+6,arrT=X.dep-150+Math.round(rnd()*330);
+     TRAINS.push({cross:X,e,stopA,arrT,len,o:0,c:'u',v:0,vmax:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:p=>p<LOU.pos?4:(exOff(e,p)??0)})}}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   buildStrip();
 }
@@ -646,6 +654,7 @@ function hyAt(p){const i=clamp(Math.floor(p/SEG),0,TOTAL-1),f=p/SEG-i;return hy[
 function emergency(why){if(S.emerg)return;S.emerg=true;S.emWhy=why;toast(why+'. Pare e ponha o manípulo em travão para rearmar.','bad');beep(440,.9,.2,'square');hiss(1.5,.3)}
 function penal(n,t){S.sc.pen+=n;if(t)toast(t+' (−'+n+')','bad')}
 const nextStop=()=>STOPS.find(s=>!s.served);
+const crossPending=X=>TRAINS.some(t=>t.cross===X&&t.st==='app');
 
 function step(dt,dr){
   S.clock+=dt;
@@ -694,9 +703,10 @@ function step(dt,dr){
     if(S.horn&&dpn<450&&dpn>10)pn.honk=true;
     if(dpn<0){pn.done=true;if(pn.honk){S.sc.pn+=15;toast('Buzina a tempo na passagem de nível (+15)','good')}else penal(25,'Faltou buzinar na passagem de nível')}}
 
-  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep-15){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira: partida!','good')}else toast('Pode seguir.','')}
+  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep-15&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira: partida!','good')}else toast('Pode seguir.','')}
   // partida
   if(S.atSt&&!S.departed&&S.v>0.3&&!S.back){S.departed=true;const st=S.atSt,d=S.clock-st.dep;
+    if(crossPending(st)){emergency('Partida sem cruzamento em '+st.n);penal(200)}
     if(d<-3){penal(30,'Partida antecipada de '+st.n);S.delay=d}
     else{const pts=Math.round(d<=60?100:Math.max(0,100-(d-60)/2));S.sc.pun+=pts;S.delay=d}
     S.atSt=null;$('#card').hidden=true;S.announceAt=S.clock+4}
@@ -717,10 +727,18 @@ function step(dt,dr){
     const len=rnd()<0.7?31:62,c='u',v=10+rnd()*5;
     if(!REV){const p0=S.pos+1500+rnd()*900;if(p0<LOU.pos)TRAINS.push({o:4,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:-1})}
     else{const p0=S.pos-1500-rnd()*900-len;if(p0>km(1.2))TRAINS.push({o:4,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:1})}
-    S.nextSpawn=S.clock+160+rnd()*260}
+    S.nextSpawn=S.clock+80+rnd()*140}
+  for(const t of TRAINS){if(!t.cross)continue;const X=t.cross;
+    if(t.st==='app'){const d=Math.max(0,t.arrT-S.clock)*t.vmax;t.a=t.stopA-t.dir*d;
+      if(S.clock>=t.arrT){t.st='wait';t.a=t.stopA;if(S.atSt===X&&!S.departed){X.dep=Math.max(X.dep,S.clock+30);toast('Cruzamento em '+X.n+': a automotora contrária chegou. Partida às '+fHM(X.dep)+'.','good')}}}
+    else if(t.st==='wait'){if(S.atSt===X||X.served&&S.atSt!==X){t.st='go';t.goT=S.clock+12}}
+    else if(t.st==='go'&&S.clock>t.goT){t.v=Math.min(t.vmax,t.v+0.4*dt);t.a+=t.dir*t.v*dt}
+    // colisão frontal se a automotora passar a estação de cruzamento antes de a outra chegar
+    if(t.st==='app'){const gap=REV?S.pos-(t.a+t.len):t.a-S.pos;if(gap<4&&Math.abs(t.xo(REV?t.a+t.len:t.a))<1){gameOver('Colisão frontal com a automotora contrária: não esperou pelo cruzamento em '+X.n+'.');return}}}
+  TRAINS=TRAINS.filter(t=>!t.cross||t.st!=='go'||Math.abs(t.a-S.pos)<2500);
   for(const t of TRAINS){if(!t.mov)continue;t.a+=t.dir*t.v*dt;
     if(!t.passed&&(t.dir<0?t.a<S.pos+30:t.a+t.len>S.pos-30)){t.passed=true;whoosh()}}
-  TRAINS=TRAINS.filter(t=>!t.mov||(t.dir<0?t.a+t.len>S.pos-100:t.a<S.pos+100));
+  TRAINS=TRAINS.filter(t=>t.cross||!t.mov||(t.dir<0?t.a+t.len>S.pos-100:t.a<S.pos+100));
 
   // para-choques
   if(!REV&&S.pos>=BUFFER-1){if(kmh>6){gameOver('O comboio embateu no para-choques de Fafe a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER-1;S.v=0}
@@ -1207,6 +1225,7 @@ function hud(dtR){
   else if(S.over)st='Excesso de velocidade';
   else if(S.doors&&S.notch>6)st='Tração cortada: portas abertas';
   else if(ns&&!S.doors&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20)st='Na plataforma: abra as portas';
+  else if(S.atSt&&!S.departed&&!S.doors&&crossPending(S.atSt))st='Aguarde o cruzamento com a automotora contrária';
   else if(S.atSt&&!S.departed&&!S.doors)st=S.clock>=S.atSt.dep-20?'Sinal aberto: pode partir':'Aguarde a hora de partida';
   $('#dMsg').textContent=st;
   const bd=$('#bDoor'),canOpen=ns&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20&&!S.doors;
@@ -1963,7 +1982,8 @@ function render3D(dtR){
   const lights=dark>0.2||true;
   trainDraw(S.pos,dir,trackX,[1,0,0,1],eyeY,camMode==='cab');
   for(const t of TRAINS){if(Math.abs(t.a-S.pos)>1800)continue;const lit=t.lit;
-    if(t.mov){const fwd=t.dir>0;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false)}
+    if(t.cross){const fwd=t.dir>0;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false)}
+    else if(t.mov){const fwd=t.dir>0;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false)}
     else trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false)}
   gl.bindVertexArray(null);
   // sobreposição
