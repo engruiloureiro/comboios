@@ -80,7 +80,8 @@ canvas{display:block;width:100%;height:100%}
 .notch.t{color:#8fd27f}.notch.b{color:#f0a05a}.notch.e{color:#ff6b5e}.notch.on{color:#fff}
 #handle{position:absolute;right:8px;width:38px;height:16px;border-radius:4px;background:linear-gradient(#e2e6e8,#8b949a);
   box-shadow:0 2px 3px rgba(0,0,0,.6);transform:translateY(-50%);transition:top .06s}
-#btns{grid-column:1 / span 2;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#btns{grid-column:1 / span 2;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+#bRev.on{background:#b5561c;color:#fff}
 .btn{border:0;border-radius:8px;background:#414a51;color:var(--ink);font:600 15px/1.05 'Barlow Condensed',Arial,sans-serif;
   box-shadow:0 3px 0 #181c1f;cursor:pointer;touch-action:manipulation;padding:0 4px}
 @media (min-width:700px){.btn{font-size:17px}}
@@ -140,6 +141,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <button class="btn" id="bHorn">Buzina</button>
       <button class="btn" id="bVig">Homem-morto</button>
       <button class="btn" id="bWarp">Tempo ×1</button>
+      <button class="btn" id="bRev" aria-pressed="false">Marcha: frente</button>
     </div>
   </div>
 </div>
@@ -153,7 +155,8 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <li>Não há CONVEL: respeite os limites. Entrar numa curva muito acima do limite faz descarrilar.</li>
       <li>Nas estações, espere o apito do <b>chefe</b> para partir. Nos apeadeiros, parta à hora.</li>
       <li>Buzine antes de cada <b>passagem de nível</b> (o painel mostra a distância). Carregue em <b>Homem-morto</b> quando piscar.</li>
-      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: E portas, H buzina, Q homem-morto, P pausa.</li>
+      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: E portas, H buzina, Q homem-morto, P pausa, R inversor.</li>
+      <li><b>Marcha atrás</b> (botão Marcha ou R): com a automotora parada e o manípulo em 0 ou travão, mude o inversor para recuar, por exemplo depois de passar a placa de paragem. Em marcha atrás o limite é 30 km/h.</li>
     </ul>
     <div class="per" id="perSel" role="radiogroup" aria-label="Hora da viagem"><span>Hora da viagem:</span><button data-p="dia">Dia</button><button data-p="tarde" class="on">Fim de tarde</button><button data-p="noite">Noite</button></div>
     <button class="cta" id="bLoad" hidden style="background:#4d5a3a">Continuar o jogo guardado<small id="loadInfo"></small></button>
@@ -213,7 +216,6 @@ const RAW=[
  ['Francos',41.1655,-8.6385,3.20,'14:48','21:11','ap',0,'SL',-1,60,0.3,96,'v-ap'],
  ['Ramalde',41.1716,-8.6424,3.95,'14:51','21:08','ap',0,'SR',1,60,0.3,93,'v-ap'],
  ['Viso',41.1787,-8.6462,4.80,'14:54','21:05','ap',0,'SL',-1,60,0.3,96,'v-ap'],
- ['Sete Bicas',41.1848,-8.6500,5.55,'14:57','21:02','ap',0,'SR',1,60,0.3,100,'v-ap'],
  ['Senhora da Hora',41.1880,-8.6545,6.05,'15:00','20:59','est',1,'SX',-1,110,0.35,101,'v-est2'],
  ['Araújo',41.2010,-8.6460,8.00,'15:05','20:54','ap',0,'SR',1,60,0.3,96,'v-ap'],
  ['Maia',41.2335,-8.6215,12.20,'15:13','20:46','est',1,'SX',-1,110,0.35,86,'v-est2'],
@@ -526,7 +528,7 @@ function reset(startIdx,endIdx,rev,svc){
   for(const s of STN){s.served=!inRoute(s)||s===st;s.skipped=false;s.paxGone=s===st?0:(inRoute(s)?0:1)}
   const pEnd=REV?en.stopR:en.pos;
   for(const pn of PN){pn.honk=false;pn.done=!(REV?(pn.pos<p0&&pn.pos>pEnd):(pn.pos>p0&&pn.pos<pEnd))}
-  if(REV){S.jI=JOINTS.length-1;while(S.jI>=0&&JOINTS[S.jI]>=S.pos)S.jI--}else{while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++}
+  S.back=false;updRev();while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;
   S.maxPts=(STOPS.length-1)*100+STOPS.length*100+PN.filter(p=>!p.done).length*15;
   TRAINS=PARKED.map(t=>({...t,v:0}));
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
@@ -653,23 +655,23 @@ function step(dt,dr){
   const rate=S.emerg||S.notch===0?1.6:(target<S.aCmd?0.55:0.9);
   S.aCmd+=clamp(target-S.aCmd,-rate*dt,rate*dt);
   const aRes=S.v>0.01?0.016+0.0008*S.v+0.00013*S.v*S.v:0;
-  const g=9.81*gradeAt(S.pos)*(REV?-1:1);
+  const mv=(REV?-1:1)*(S.back?-1:1);const g=9.81*gradeAt(S.pos)*mv;
   let a=S.aCmd-aRes-g;
   if(S.v<=0.001&&S.aCmd<=0.001){const drive=-g;a=drive>Math.abs(S.aCmd)+0.02?drive-Math.abs(S.aCmd):0;if(a===0)S.v=0}
   S.v=Math.max(0,S.v+a*dt);
   if(S.doors)S.v=0;
-  S.prevPos=S.pos;S.pos+=(REV?-1:1)*S.v*dt;
+  S.prevPos=S.pos;S.pos+=mv*S.v*dt;
   const kmh=S.v*3.6;
   if(S.emerg&&S.v===0&&S.notch<=5){S.emerg=false;toast('Emergência rearmada.','')}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   S.bump*=Math.exp(-dt*6);
 
   // juntas e aparelhos de via
-  if(REV){while(S.jI>=0&&JOINTS[S.jI]>=S.pos){bogies(0.55);S.bump=0.035;S.jI--}}
-  else while(S.jI<JOINTS.length&&JOINTS[S.jI]<=S.pos){bogies(0.55);S.bump=0.035;S.jI++}
+  while(S.jI<JOINTS.length&&JOINTS[S.jI]<=S.pos){if(S.pos>S.prevPos){bogies(0.55);S.bump=0.035}S.jI++}
+  while(S.jI>0&&JOINTS[S.jI-1]>S.pos){if(S.pos<S.prevPos){bogies(0.55);S.bump=0.035}S.jI--}
 
   // velocidade (CONVEL)
-  const lim=limitAt(S.pos);S.over=false;
+  const lim=S.back?Math.min(30,limitAt(S.pos)):limitAt(S.pos);S.over=false;
   S.derT=S.derT||0;if(kmh>lim+18){S.derT+=dt;if(S.derT>2.5){gameOver('A automotora descarrilou: entrou numa curva a '+Math.round(kmh)+' km/h com limite de '+lim+'.');return}}else S.derT=Math.max(0,S.derT-dt);
   if(kmh>lim+1.5){S.over=true;S.sc.pen+=2*dt}
   if(S.notch===0&&kmh>20&&!S.emUsed){S.emUsed=true;penal(20,'Travagem de emergência')}
@@ -691,7 +693,7 @@ function step(dt,dr){
 
   if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep-15){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira: partida!','good')}else toast('Pode seguir.','')}
   // partida
-  if(S.atSt&&!S.departed&&S.v>0.3){S.departed=true;const st=S.atSt,d=S.clock-st.dep;
+  if(S.atSt&&!S.departed&&S.v>0.3&&!S.back){S.departed=true;const st=S.atSt,d=S.clock-st.dep;
     if(d<-3){penal(30,'Partida antecipada de '+st.n);S.delay=d}
     else{const pts=Math.round(d<=60?100:Math.max(0,100-(d-60)/2));S.sc.pun+=pts;S.delay=d}
     S.atSt=null;$('#card').hidden=true;S.announceAt=S.clock+4}
@@ -722,6 +724,9 @@ function step(dt,dr){
   if(REV&&S.pos<=BUFFER_R+1){if(kmh>6){gameOver('O comboio embateu no para-choques da Trindade a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER_R+1;S.v=0}
 }
 
+function updRev(){const b=$('#bRev');if(!b)return;b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
+function revBtn(){if(!running||!S)return;if(S.v>0.05){toast('Pare a automotora antes de mudar o inversor.','');return}if(S.notch>6){toast('Ponha o manípulo em 0 ou travão antes de mudar o inversor.','');return}
+  S.back=!S.back;updRev();beep(300,.08,.1,'square');toast(S.back?'Inversor em marcha atrás. Limite de 30 km/h.':'Inversor em marcha à frente.','')}
 function doorBtn(){
   if(!running)return;
   if(S.doors){
@@ -2035,7 +2040,7 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
   const o={v:1,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
-    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,rpm:S.rpm,jI:S.jI,nextSpawn:S.nextSpawn,vigT:S.vigT},
+    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
     st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])};
   try{localStorage.setItem(SAVEK,JSON.stringify(o));toast('Jogo guardado às '+fHMS(S.clock)+' (hora do jogo).','good');refreshLoad()}catch(e){toast('Não foi possível guardar neste navegador.','bad')}}
 function readSave(){try{const r=localStorage.getItem(SAVEK);return r?JSON.parse(r):null}catch(e){return null}}
@@ -2044,13 +2049,13 @@ function refreshLoad(){const o=readSave(),b=$('#bLoad');if(!o){b.hidden=true;ret
 function loadGame(){const o=readSave();if(!o)return;PERIOD=o.period||'tarde';updPeriod();start(o.start,o.end,o.rev);
   Object.assign(S,o.s);S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
   o.st.forEach((q,k)=>{STN[k].served=!!q[0];STN[k].skipped=!!q[1];STN[k].paxGone=q[2]});o.pn.forEach((q,k)=>{if(PN[k]){PN[k].done=!!q[0];PN[k].honk=!!q[1]}});
-  setNotch(S.notch,true);$('#bWarp').textContent='Tempo ×'+S.warp;$('#card').hidden=true;buildStrip();toast('Jogo retomado em '+fHMS(S.clock)+'.','good')}
+  setNotch(S.notch,true);updRev();$('#bWarp').textContent='Tempo ×'+S.warp;$('#card').hidden=true;buildStrip();toast('Jogo retomado em '+fHMS(S.clock)+'.','good')}
 $('#bLoad').onclick=loadGame;$('#bSave').onclick=saveGame;$('#bQS').onclick=saveGame;
 $('#bMenu').onclick=()=>{running=false;paused=false;$('#ovPause').hidden=true;refreshLoad();$('#ovStart').hidden=false};
 setInterval(()=>{if(running&&!paused&&S&&S.finishT<0)try{saveGame.silent=1;const t=toast;toast=()=>{};saveGame();toast=t}catch(e){}},45000);
 updPeriod();refreshLoad();
 document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i)});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
-$('#bDoor').onclick=doorBtn;
+$('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;
 $('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.','');return}setCam(CAMS[(CAMS.indexOf(camMode)+1)%CAMS.length])};
 {let drag=null,pinch=null;const vw=$('#view');
  vw.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,id:e.pointerId}});
@@ -2071,7 +2076,7 @@ $('#bPause').onclick=()=>setPause(!paused);$('#bResume').onclick=()=>setPause(fa
 document.addEventListener('keydown',e=>{if(!S)return;const k=e.key.toLowerCase();
   if(k==='arrowup'||k==='w'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='s'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused)});
+  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='h'||k===' ')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);
