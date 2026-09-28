@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Guimarães – Fafe 1985 — automotora 9600</title>
+<title>Porto-Trindade – Guimarães – Fafe 1985 — automotora 9600</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Special+Elite&display=swap" rel="stylesheet">
@@ -146,8 +146,8 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 
 <div class="ov" id="ovStart">
   <div class="panel">
-    <div class="azulejo">Guimarães – Fafe<small>Via métrica, outono de 1985</small></div>
-    <p>A antiga Linha de Guimarães continuava 21,2 km até Fafe, em via estreita, até fechar em 1986. Conduza uma automotora Alsthom da série 9600, a diesel, a subir até Paçô Vieira, o ponto mais alto, a descer ao vale do Vizela e a subir de novo até Fafe.</p>
+    <div class="azulejo">Porto-Trindade – Fafe<small>Linha de Guimarães, via métrica, outono de 1985</small></div>
+    <p>A antiga Linha de Guimarães em via estreita: 80,6 km desde a estação da Trindade, no Porto, pela Senhora da Hora, Maia e Trofa, pelo vale do Ave até Santo Tirso e Vizela, a Guimarães e, até 1986, a Fafe. Conduza uma automotora da série 9600, a diesel, pelos túneis e trincheiras do Porto, pelas terras da Maia e pelo vale industrial do Ave, a subir até Guimarães e depois a Paçô Vieira, o ponto mais alto.</p>
     <ul>
       <li><b>Manípulo</b> (arrastar, ou ↑ ↓): pontos de aceleração 1 a 5, 0, freio F1 a F5 e emergência. O motor diesel demora a subir de rotação e o freio a ar demora a apertar: antecipe.</li>
       <li>Não há CONVEL: respeite os limites. Entrar numa curva muito acima do limite faz descarrilar.</li>
@@ -158,8 +158,12 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <div class="per" id="perSel" role="radiogroup" aria-label="Hora da viagem"><span>Hora da viagem:</span><button data-p="dia">Dia</button><button data-p="tarde" class="on">Fim de tarde</button><button data-p="noite">Noite</button></div>
     <button class="cta" id="bLoad" hidden style="background:#4d5a3a">Continuar o jogo guardado<small id="loadInfo"></small></button>
     <div class="startgrid">
-    <button class="cta" id="bStart" style="background:#c0601c">Guimarães → Fafe<small id="t1">Automotora 9611, 17:05, cerca de 39 min</small></button>
-    <button class="cta" id="bStart3" style="background:#8a4a1c">Fafe → Guimarães<small id="t2">Automotora 9611, 18:13, cerca de 38 min</small></button>
+    <button class="cta" id="bStart4" style="background:#a8431c" data-r="Porto-Trindade>Guimarães">Porto-Trindade → Guimarães<small></small></button>
+    <button class="cta" id="bStart5" style="background:#7a3a1c" data-r="Guimarães>Porto-Trindade">Guimarães → Porto-Trindade<small></small></button>
+    <button class="cta" id="bStart" style="background:#c0601c" data-r="Guimarães>Fafe">Guimarães → Fafe<small></small></button>
+    <button class="cta" id="bStart3" style="background:#8a4a1c" data-r="Fafe>Guimarães">Fafe → Guimarães<small></small></button>
+    <button class="cta" id="bStart6" style="background:#94371a" data-r="Porto-Trindade>Fafe">Porto-Trindade → Fafe<small></small></button>
+    <button class="cta" id="bStart7" style="background:#6a321a" data-r="Fafe>Porto-Trindade">Fafe → Porto-Trindade<small></small></button>
     </div>
     <p style="font-size:14px;color:#aab">Horário e parte do traçado reconstituídos: não há registo público do horário de 1985 nem do traçado detalhado.</p>
   </div>
@@ -192,25 +196,54 @@ const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967
 const hash=n=>{let x=Math.imul(n|0,2654435761)>>>0;x^=x>>>15;x=Math.imul(x,2246822519)>>>0;x^=x>>>13;return (x>>>0)/4294967296};
 const T=s=>{const[h,m]=s.split(':').map(Number);return h*3600+m*60};
 
-/* ================= LINHA (Guimarães – Fafe, via métrica, 1985) ================= */
+/* ================= LINHA (Porto-Trindade – Guimarães – Fafe, via métrica, 1985) ================= */
 const VINT=true;
 const SEG=5, DRAW=220, CAM_H=2.95, DRV_X=-0.45, OFF=400;
 const km=k=>OFF+k*1000;
-// Estações: PK antigos da Linha de Guimarães (Fafe 80,585; Paçô Vieira 67,910; Cepães 76,3; Fareja 73,3; Penha 66,2; PK 64,0) – km contados a partir de Guimarães.
-// Coordenadas: Guimarães (Wikipédia), início da ecopista em Mesão Frio, limite Guimarães/Fafe e fim em Fafe (ciclovia.pt); restantes estimadas.
+// PK da Linha de Guimarães contados a partir de Porto-Trindade (Guimarães 59,385; Paçô Vieira 67,910; Fafe 80,585).
+// Porto-Trindade – Senhora da Hora: troço comum com a Linha da Póvoa (túnel da Trindade, Avenida de França, Boavista só mercadorias).
+// Senhora da Hora – Trofa (1932): Araújo, Maia (Barreiros), Mandim, Castêlo da Maia, Muro, Bougado. Trofa – Lousado – Guimarães (1883-1884).
+// Coordenadas aproximadas; PK entre Porto e Guimarães estimados a partir da distância ao longo do traçado.
+const G0=59.385,kmG=k=>km(G0+k);
 // [nome, lat, lon, km, hora ida, hora volta, tipo, edifício, disposição, lado, comp. plataforma, altura, cota aprox., estilo]
 const RAW=[
- ['Guimarães',41.43529,-8.29506,0,'17:05','18:51','est',2,'VG',1,160,0.35,200,'v-gmr'],
- ['Aldão - S. Torcato',41.4480,-8.2800,4.62,'17:13','18:44','ap',0,'SL',-1,60,0.3,285,'v-ap'],
- ['Penha',41.4515,-8.2610,6.82,'17:17','18:40','ap',0,'SR',1,60,0.3,305,'v-ap'],
- ['Paçô Vieira',41.4462,-8.2508,8.53,'17:22','18:36','est',1,'SX',-1,110,0.35,350,'v-est2'],
- ['Fareja',41.4235,-8.2170,13.92,'17:30','18:26','est',1,'SX',-1,90,0.35,262,'v-est'],
- ['Cepães',41.4380,-8.1930,16.92,'17:36','18:20','ap',0,'SR',1,70,0.3,262,'v-est1'],
- ['Fafe',41.4535,-8.1695,21.20,'17:44','18:13','term',2,'VF',-1,140,0.35,318,'v-fafe'],
+ ['Porto-Trindade',41.1525,-8.6094,0.00,'14:39','21:20','term',2,'VG',-1,160,0.35,95,'v-trin'],
+ ['Avenida de França',41.1588,-8.6262,1.75,'14:44','21:15','ap',0,'SR',1,70,0.3,100,'v-ap'],
+ ['Porto-Boavista',41.1597,-8.6322,2.25,null,null,'est',1,'SX',-1,100,0.35,100,'v-est'],
+ ['Francos',41.1655,-8.6385,3.20,'14:48','21:11','ap',0,'SL',-1,60,0.3,96,'v-ap'],
+ ['Ramalde',41.1716,-8.6424,3.95,'14:51','21:08','ap',0,'SR',1,60,0.3,93,'v-ap'],
+ ['Viso',41.1787,-8.6462,4.80,'14:54','21:05','ap',0,'SL',-1,60,0.3,96,'v-ap'],
+ ['Sete Bicas',41.1848,-8.6500,5.55,'14:57','21:02','ap',0,'SR',1,60,0.3,100,'v-ap'],
+ ['Senhora da Hora',41.1880,-8.6545,6.05,'15:00','20:59','est',1,'SX',-1,110,0.35,101,'v-est2'],
+ ['Araújo',41.2010,-8.6460,8.00,'15:05','20:54','ap',0,'SR',1,60,0.3,96,'v-ap'],
+ ['Maia',41.2335,-8.6215,12.20,'15:13','20:46','est',1,'SX',-1,110,0.35,86,'v-est2'],
+ ['Mandim',41.2555,-8.6075,14.95,'15:19','20:40','ap',0,'SL',-1,60,0.3,80,'v-ap'],
+ ['Castêlo da Maia',41.2705,-8.5985,16.80,'15:24','20:35','est',1,'SX',1,90,0.35,75,'v-est'],
+ ['Muro',41.2985,-8.5870,20.30,'15:31','20:28','ap',0,'SR',1,60,0.3,60,'v-ap'],
+ ['Bougado',41.3215,-8.5705,23.20,'15:38','20:21','ap',0,'SL',-1,60,0.3,46,'v-est1'],
+ ['Trofa',41.3383,-8.5595,25.40,'15:44','20:15','est',2,'VG',-1,140,0.35,42,'v-fafe'],
+ ['Lousado',41.3505,-8.5190,29.60,'15:54','20:05','est',1,'SX',1,100,0.35,36,'v-est'],
+ ['Santo Tirso',41.3430,-8.4755,35.60,'16:05','19:54','est',2,'VG',-1,130,0.35,44,'v-fafe'],
+ ['Caniços',41.3525,-8.4515,37.90,'16:11','19:48','ap',0,'SR',1,60,0.3,55,'v-ap'],
+ ['Negrelos',41.3555,-8.4230,40.60,'16:17','19:42','est',1,'SX',-1,90,0.35,64,'v-est1'],
+ ['Vila das Aves',41.3695,-8.4095,42.50,'16:22','19:37','est',1,'SX',1,100,0.35,74,'v-est'],
+ ['Lordelo',41.3765,-8.3905,44.50,'16:27','19:32','ap',0,'SL',-1,60,0.3,90,'v-ap'],
+ ['Giesteira',41.3830,-8.3600,47.20,'16:33','19:26','ap',0,'SR',1,60,0.3,100,'v-ap'],
+ ['Vizela',41.3785,-8.3075,51.80,'16:42','19:17','est',1,'SX',-1,110,0.35,116,'v-est2'],
+ ['Pereirinhas',41.3920,-8.3150,53.40,'16:47','19:12','ap',0,'SR',1,60,0.3,136,'v-ap'],
+ ['Cuca',41.4025,-8.3175,54.80,'16:51','19:08','ap',0,'SL',-1,60,0.3,150,'v-ap'],
+ ['Nespereira',41.4145,-8.3140,56.30,'16:55','19:04','ap',0,'SR',1,60,0.3,166,'v-ap'],
+ ['Covas',41.4260,-8.3040,57.90,'16:59','19:00','ap',0,'SL',-1,60,0.3,186,'v-ap'],
+ ['Guimarães',41.43529,-8.29506,59.385,'17:05','18:55','est',2,'VG',1,160,0.35,200,'v-gmr'],
+ ['Aldão - S. Torcato',41.448,-8.28,64.005,'17:13','18:44','ap',0,'SL',-1,60,0.3,285,'v-ap'],
+ ['Penha',41.4515,-8.261,66.205,'17:17','18:40','ap',0,'SR',1,60,0.3,305,'v-ap'],
+ ['Paçô Vieira',41.4462,-8.2508,67.915,'17:22','18:36','est',1,'SX',-1,110,0.35,350,'v-est2'],
+ ['Fareja',41.4235,-8.217,73.305,'17:30','18:26','est',1,'SX',-1,90,0.35,262,'v-est'],
+ ['Cepães',41.438,-8.193,76.305,'17:36','18:20','ap',0,'SR',1,70,0.3,262,'v-est1'],
+ ['Fafe',41.4535,-8.1695,80.585,'17:44','18:13','term',2,'VF',-1,140,0.35,318,'v-fafe']
 ];
-const WPT=[[41.43529,-8.29506,0],[41.4480,-8.2800,4.62],[41.45597,-8.26722,5.77],[41.4515,-8.2610,6.82],[41.4462,-8.2508,8.53],
-  [41.41949,-8.22899,12.72],[41.4235,-8.2170,13.92],[41.4285,-8.2040,15.40],[41.4380,-8.1930,16.92],[41.45231,-8.17224,20.9],[41.4535,-8.1695,21.20]];
-const TOT_KM=21.20;
+const WPT=RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.45597,-8.26722,G0+5.77],[41.41949,-8.22899,G0+12.72],[41.4285,-8.2040,G0+15.40],[41.45231,-8.17224,G0+20.9]]).sort((a,b)=>a[2]-b[2]);
+const TOT_KM=80.585;
 const PROJ=(la,lo)=>[(lo+8.23)*Math.cos(41.44*Math.PI/180)*111320,(la-41.44)*110574];
 const GEO=(function(){
   const P=WPT.map(r=>PROJ(r[0],r[1]));const n=P.length;const at=i=>P[clamp(i,0,n-1)];const spans=[];
@@ -224,9 +257,10 @@ const GEO=(function(){
     spans.push({pts,cum,len})}
   return{spans,km:WPT.map(w=>w[2])}})();
 let REV=false,DIRC='F';
-const STN=RAW.map((r,i)=>({n:r[0],i,k:r[3],pos:km(r[3]),depF:T(r[4]),depR:T(r[5]),dep:T(r[4]),ty:r[6],big:r[7],lay:r[8],bside:r[9],plen:r[10],ph:r[11],el:r[12],sty:r[13]}));
+const STN=RAW.map((r,i)=>({n:r[0],i,k:r[3],pos:km(r[3]),depF:r[4]?T(r[4]):null,depR:r[5]?T(r[5]):null,dep:r[4]?T(r[4]):null,ty:r[6],big:r[7],lay:r[8],bside:r[9],plen:r[10],ph:r[11],el:r[12],sty:r[13]}));
 const DEPR=RAW.map(r=>r[5]);
-const SB=STN[0], GMR=STN[STN.length-1], PV=STN[3];
+function byNameE(n){return STN.find(s=>s.n===n)}
+const SB=STN[0], GMR=STN[STN.length-1], PV=byNameE('Paçô Vieira'), GUI=byNameE('Guimarães'), TRF=byNameE('Trofa');
 const DUM={pos:-1e9,pa:-1e9,pb:-1e9,k:-1e6,n:'—'};
 const LOU=DUM,TRO=DUM,ERM=DUM,VIZ=DUM,SFR=DUM,LEA=DUM,CAN=DUM,CPA=DUM,CTM=DUM;
 const byName=n=>STN.find(s=>s.n===n);
@@ -249,25 +283,26 @@ const LAY={
 for(const s of STN){
   const L=LAY[s.lay];s.pl=L.pl;
   s.pa=s.pos-s.plen; s.pb=s.pos+14;
-  s.ex=L.ex.map(([from,to])=>({from,to,a:s===SB?OFF-600:s.pa-110,b:s.ty==='term'?BUFFER+40:s.pb+110}));
+  s.ex=L.ex.map(([from,to])=>({from,to,a:s===SB?s.pa-140:s.pa-110,b:s===GMR?BUFFER+40:s.pb+110}));
   s.door=s.pl.some(r=>r[0]===-1.8)?-1:1;
   s.sig=false;
   s.stopF=s.pos; s.stopR=s.pa;
   const C={'neo-g':{a:-90,b:-40,h:3.6,all:false}};
   s.cano=C[s.sty]||null;s.tiles=false;
 }
-const BUFFER_R=-1e9;
+const BUFFER_R=SB.pa-25;
 function trackXR(p){return 0}
 const trackX=p=>0;
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
-const TUN=[{a:PV.pos-106,b:PV.pos-35,tc:0}];
-const BRIDGES=[{a:km(15.37),b:km(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:km(18.38),b:km(18.40),t:1,n:'Passagem sobre a estrada'}];
-const ZONES=[[0,1.3,'city'],[1.3,4.9,'penha'],[4.9,8.3,'mixed'],[8.3,12.6,'dense'],[12.6,15.0,'rural'],[15.0,15.9,'valley'],[15.9,18.2,'rural'],[18.2,20.7,'mixed'],[20.7,99,'urban']];
+const TUN=[{a:PV.pos-106,b:PV.pos-35,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
+const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:3,n:'Ponte sobre o rio Ave'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(41.2),b:km(41.3),t:3,n:'Ponte sobre o rio Vizela'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
+const ZONES=[[0,6.4,'porto'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,51.0,'dense'],[51.0,52.6,'urban'],[52.6,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
 const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])return z[2];return 'rural'};
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
-const RIVER=[{a:km(18.2),b:km(20.7),side:1,x:12,w:20},{a:km(14.9),b:km(15.37),side:-1,x:16,w:20},{a:km(15.44),b:km(15.9),side:1,x:14,w:20}];
+const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(28.1),side:1,x:14,w:26},{a:km(36.8),b:km(39.6),side:1,x:18,w:28},{a:km(40.7),b:km(41.2),side:-1,x:14,w:18},{a:km(41.3),b:km(42.1),side:1,x:14,w:18},{a:km(50.3),b:km(51.4),side:-1,x:16,w:18},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 
+const PROF=RAW.map(r=>[r[3],r[12]]).concat([[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
 const curve=new Float32Array(TOTAL), grade=new Float32Array(TOTAL), hy=new Float32Array(TOTAL+1), HDG=new Float32Array(TOTAL+1);
 const tun=new Uint8Array(TOTAL), shed=new Uint8Array(TOTAL), brg=new Uint8Array(TOTAL), lc=new Uint8Array(TOTAL), riv=new Int8Array(TOTAL);
 const bankL=new Float32Array(TOTAL), bankR=new Float32Array(TOTAL);
@@ -279,7 +314,7 @@ function stF(p){let d=1e9;for(const s of STN)d=Math.min(d,p<s.pa?s.pa-p:p>s.pb?p
 function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/60)}
 function branchOffs(p){return[]}
-function capAt(k){if(k<0.5)return 30;if(k<1.6)return 40;if(Math.abs(k-8.49)<0.25)return 30;if(Math.abs(k-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
+function capAt(k){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 40;return 50}if(Math.abs(k-6.05)<0.35)return 30;if(Math.abs(k-25.4)<0.5)return 30;if(Math.abs(k-29.6)<0.45)return 30;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3)return 40;if(Math.abs(k-35.6)<0.4)return 40;if(Math.abs(k-51.8)<0.4)return 40;const g=k-G0;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
 let LIMCH=[];
 (function build(){
@@ -295,7 +330,7 @@ let LIMCH=[];
     const a=STN[q],b=STN[q+1];let e;
     // Paçô Vieira é o ponto mais alto; descida até ao vale do Vizela (≈230 m) e subida para Fafe
     const kk=(p-OFF)/1000;
-    const prof=[[0,200],[4.62,285],[6.82,305],[8.53,350],[12.72,280],[13.92,262],[15.40,232],[16.92,262],[21.2,318]];
+    const prof=PROF;
     let z=0;while(z<prof.length-2&&prof[z+1][0]<kk)z++;const f=clamp((kk-prof[z][0])/(prof[z+1][0]-prof[z][0]),0,1);
     hy[i]=lerp(prof[z][1],prof[z+1][1],sstep(f)*0.5+f*0.5)}
   for(let i=0;i<TOTAL;i++)grade[i]=(hy[i+1]-hy[i])/SEG;
@@ -320,7 +355,8 @@ let LIMCH=[];
     for(const o of trk[k]){if(o<-3)bankL[k]=0;if(o>3)bankR[k]=0}
     if(riv[k]<0)bankL[k]=0;if(riv[k]>0)bankR[k]=0;
     // muros de granito em trincheira junto ao túnel
-    if(p>PV.pos-260&&p<PV.pos-106){wallL[k]={x:-3.6,h:4.5,t:'g'};wallR[k]={x:3.6,h:4.5,t:'g'}}}
+    if(p>PV.pos-260&&p<PV.pos-106){wallL[k]={x:-3.6,h:4.5,t:'g'};wallR[k]={x:3.6,h:4.5,t:'g'}}
+    if(p>km(0.78)&&p<km(1.55)&&!plat[k]){const hh=5.5*sstep((km(1.55)-p)/300);if(hh>0.6){wallL[k]={x:-3.6,h:hh,t:'g'};wallR[k]={x:3.6,h:hh,t:'g'}}}}
 })();
 const limitAt=p=>LIMA[clamp(Math.floor(p/50),0,LIMA.length-1)];
 function nextLimitR(p){const c=limitAt(p);for(let d=50;d<4000;d+=50){const l=limitAt(p-d);if(l!==c){const q=Math.ceil((p-d)/50)*50;return{v:l,d:p-q}}}return null}
@@ -330,13 +366,13 @@ const hdgAt=p=>{const i=clamp(Math.floor(p/SEG),0,TOTAL-1),f=p/SEG-i;return HDG[
 /* passagens de nível com guarda (muitas na via estreita) */
 const PN=[];
 for(let s=0;s<STN.length-1;s++){const a=STN[s].pb+250,b=STN[s+1].pa-250;for(let p=a+rnd()*500;p<b;p+=700+rnd()*900){
-  if(inRange(BRIDGES,p)||inRange(TUN,p)||inRange(BRIDGES,p-450)||(p>PV.pos-500&&p<PV.pos))continue;PN.push({pos:p,honk:false,done:false})}}
+  if(inRange(BRIDGES,p)||inRange(TUN,p)||inRange(BRIDGES,p-450)||(p>PV.pos-500&&p<PV.pos)||p<km(6.6))continue;PN.push({pos:p,honk:false,done:false})}}
 PN.sort((a,b)=>a.pos-b.pos);
 /* sem sinais luminosos: a partida é dada pelo chefe da estação */
 const SIG=[];
 function sigState(g){return'G'}
 /* comboios parados: automotora à espera do cruzamento em Paçô Vieira e reservas em Guimarães */
-const PARKED=[{o:4,a:PV.pos-70,len:39.6,c:'u',lit:true},{o:-9.5,a:SB.pos-120,len:39.6,c:'u',lit:false}];
+const PARKED=[{o:4,a:PV.pos-70,len:39.6,c:'u',lit:true},{o:-9.5,a:GUI.pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:4,a:TRF.pos-110,len:39.6,c:'u',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
 for(let p=OFF;p<END;p+=18)JOINTS.push(p+(rnd()-0.5)*0.4);
@@ -354,7 +390,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     spr[k-1].push({t:'pn',x:-4.4},{t:'pn',x:4.4});
     spr[k].push({t:'car',x:rnd()<0.5?-11:11,c:[[196,120,40],[222,210,170],[120,160,190],[230,230,224],[150,40,34],[70,110,70]][Math.floor(rnd()*6)]});
     spr[Math.floor((pn.pos-420)/SEG)].push({t:'silvo',x:-3.4,d:'F'});spr[Math.floor((pn.pos+420)/SEG)].push({t:'silvo',x:3.4,d:'R'})}
-  let nextOver=km(2.9);
+  let nextOver=km(1.9);
   for(let k=0;k<TOTAL;k++){
     const p=k*SEG,z=zoneI[k],pl=plat[k];
     if(p>BUFFER+90)continue;
@@ -416,7 +452,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
       }
       if(rnd()<0.012&&z!=='porto')spr[k].push({t:'pole',x:side*(minX+2+rnd()*6),y:yb});
       if((z==='mixed'||z==='urban')&&rnd()<0.012)spr[k].push({t:'espig',x:side*(minX+8+rnd()*25)});
-      if(z==='urban'&&(k*SEG)>km(18)&&rnd()<0.02)spr[k].push({t:'bras',x:side*(minX+10+rnd()*25),c:[[236,200,120],[180,210,220],[240,190,180],[200,220,170]][Math.floor(rnd()*4)]});
+      if(z==='urban'&&(k*SEG)>kmG(18)&&rnd()<0.02)spr[k].push({t:'bras',x:side*(minX+10+rnd()*25),c:[[236,200,120],[180,210,220],[240,190,180],[200,220,170]][Math.floor(rnd()*4)]});
     }
   }
   // estações
@@ -426,7 +462,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
       const txr=trackXR(s.stopR),isOurs=r[0]===-1.8||r[0]===1.8,isOursR=Math.abs(Math.abs(r[0]-txr)-1.8)<0.01;
       if(isOursR){at(s.stopR).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'R'});s.doorR=-Math.sign(r[0]-txr)}
       for(const d of[200,120,40])if(s.pos-d>s.pa)at(s.pos-d).push({t:'board',x:mid,y:s.ph,n:s.n});
-      if(s!==SB)at(s.pos-80).push({t:'shelter',x:outer-sd*1.6,y:s.ph});
+      if(s!==SB&&s.ty==='ap')at(s.pos-80).push({t:'shelter',x:outer-sd*1.6,y:s.ph});
       for(let p=s.pa+10;p<=s.pos;p+=30)at(p).push({t:'lamp',x:outer-sd*0.5,y:s.ph});
       if(isOurs){at(s.pos).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'F'});at(s.pos-60).push({t:'bench',x:outer-sd*1.2,y:s.ph})}
       if(isOurs||isOursR||s.pl.length===1){
@@ -435,10 +471,10 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
         for(let j=0;j<np;j++){const sp={t:'pax',x:r[0]+sd*(1.0+rnd()*(Math.abs(r[1]-r[0])-1.4)),y:s.ph,st:s,c:[[192,57,43],[46,134,193],[241,196,15],[39,174,96],[142,68,173],[52,73,94],[230,126,34],[90,90,90]][Math.floor(rnd()*8)]};at(s.pos-200+rnd()*190).push(sp)}
       }
     }
-    if(s!==SB){
+    {
       const bs=s.bside;let outer=0;for(const r of s.pl)if(Math.sign(r[0])===bs)outer=Math.max(outer,Math.abs(r[1]));
       if(!outer)outer=bs<0?3.5:(Math.max(0,...s.ex.map(e=>e.to))+3.5);
-      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-gmr':-80}[s.sty];
+      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-gmr':-80,'v-trin':-95}[s.sty];
       if(bp!==undefined&&s.sty!=='trofa')at(s.pos+bp).push({t:'bldg',x:bs*(outer+0.8),sty:s.sty,n:s.n,st:s,w:{neo:60,'neo-g':34,old:22,old2:16,erm:26,new:22,ns:12,ho:8}[s.sty],h:{neo:9.5,'neo-g':9,old:7,old2:8,erm:7,new:5.5,ns:4.2,ho:3.6}[s.sty],az:true});
       if(s.sty==='hn-foot')at(s.pos-55).push({t:'foot',x:2,w:16});
       if(s.sty==='hn'||s.sty==='hn-foot'||s.sty==='new'||s.sty==='ns'){for(const r of s.pl){const sd=Math.sign(r[0]);at(s.pos-(s.plen*0.45)).push({t:'kiosk',x:(r[0]+r[1])/2+sd*0.6,y:s.ph,st:s})}}
@@ -447,10 +483,13 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // marcos da paisagem (1985)
   const put=(p,o)=>{const k=clamp(Math.floor(p/SEG),0,TOTAL-1);spr[k].push(o)};
   spr[Math.floor(BUFFER/SEG)].push({t:'buffer',x:0},{t:'buffer',x:4},{t:'buffer',x:11});
-  put(GMR.pos-40,{t:'armazem',x:15,w:26});put(SB.pos-60,{t:'armazem',x:14,w:22});
-  put(PV.pos-20,{t:'wtank',x:-9});put(SB.pos-25,{t:'wcol',x:5.4});put(GMR.pos-100,{t:'wtank',x:-11});put(SB.pos+30,{t:'wtank',x:13});
-  for(let j=0;j<4;j++)put(km(15.6)+j*140,{t:'mill',x:1*(14+22+3+rnd()*4)});
-  put(km(15.3),{t:'mill',x:-(18+22+3)});
+  spr[Math.floor(BUFFER_R/SEG)+1].push({t:'buffer',x:0},{t:'buffer',x:4},{t:'buffer',x:-9.5});
+  put(GMR.pos-40,{t:'armazem',x:15,w:26});put(GUI.pos-60,{t:'armazem',x:14,w:22});put(TRF.pos-60,{t:'armazem',x:15,w:24});put(byNameE('Santo Tirso').pos-40,{t:'armazem',x:15,w:20});
+  put(PV.pos-20,{t:'wtank',x:-9});put(GUI.pos-25,{t:'wcol',x:5.4});put(GMR.pos-100,{t:'wtank',x:-11});put(GUI.pos+30,{t:'wtank',x:13});put(TRF.pos-30,{t:'wtank',x:-12});put(SB.pos-40,{t:'wcol',x:-5.4});
+  for(let j=0;j<4;j++)put(kmG(15.6)+j*140,{t:'mill',x:1*(14+22+3+rnd()*4)});
+  put(kmG(15.3),{t:'mill',x:-(18+22+3)});
+  // fábricas têxteis do vale do Ave
+  for(const k0 of[36.9,37.5,38.6,39.3,41.6,42.9])put(km(k0),{t:'factory',x:(k0*7|0)%2?40:-44,w:40,h:8,chim:true});
   // placas de velocidade
   for(const c of LIMCH){const k=Math.floor(c.p/SEG);if(k>=TOTAL)continue;
     spr[k].push({t:'lim',x:-3.5,v:c.v,d:'F'});spr[k].push({t:'lim',x:trackXR(c.p)+3.5,v:c.prev,d:'R'});
@@ -469,11 +508,12 @@ let S=null,TRAINS=[];
 const SEMI={
  '15157':{'Porto São Bento':'09:20','Porto Campanhã':'09:25','Rio Tinto':'09:30','Ermesinde':'09:37','São Romão':'09:43','Trofa':'09:48','Santo Tirso':'09:55','Vila das Aves':'10:02','Lordelo':'10:11','Vizela':'10:17','Guimarães':'10:25'},
  '15154':{'Guimarães':'07:00','Vizela':'07:08','Lordelo':'07:18','Vila das Aves':'07:22','Santo Tirso':'07:30','Trofa':'07:37','São Romão':'07:43','Ermesinde':'07:49','Rio Tinto':'07:53','Porto Campanhã':'08:01','Porto São Bento':'08:05'}};
-let SHIFT=0,PERIOD='tarde';const PSH={dia:-5*3600,tarde:0,noite:4.5*3600};
+let SHIFT=0,PERIOD='tarde';
+const routeShift=(i,rev)=>!rev&&i<GUI.i?2*3600:0;const PSH={dia:-5*3600,tarde:0,noite:4.5*3600};
 function reset(startIdx,endIdx,rev,svc){
   REV=!!rev;DIRC=REV?'R':'F';
   for(const s of STN)s.dep=svc&&SEMI[svc]?(SEMI[svc][s.n]?T(SEMI[svc][s.n]):null):(REV?s.depR:s.depF);
-  if(VINT)for(const s of STN)if(s.dep!==null)s.dep+=SHIFT;
+  if(VINT){const x=SHIFT+routeShift(startIdx,REV);for(const s of STN)if(s.dep!==null)s.dep+=x}
   ORD=REV?STN.slice().reverse():STN;
   const st=STN[startIdx],en=STN[endIdx];
   const inRoute=s=>REV?(s.i<=startIdx&&s.i>=endIdx):(s.i>=startIdx&&s.i<=endIdx);
@@ -678,8 +718,8 @@ function step(dt,dr){
   TRAINS=TRAINS.filter(t=>!t.mov||(t.dir<0?t.a+t.len>S.pos-100:t.a<S.pos+100));
 
   // para-choques
-  if(!REV&&S.pos>=BUFFER-1){if(kmh>6){gameOver('O comboio embateu no para-choques de Guimarães a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER-1;S.v=0}
-  if(REV&&S.pos<=BUFFER_R+1){if(kmh>6){gameOver('O comboio embateu no para-choques de São Bento a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER_R+1;S.v=0}
+  if(!REV&&S.pos>=BUFFER-1){if(kmh>6){gameOver('O comboio embateu no para-choques de Fafe a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER-1;S.v=0}
+  if(REV&&S.pos<=BUFFER_R+1){if(kmh>6){gameOver('O comboio embateu no para-choques da Trindade a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER_R+1;S.v=0}
 }
 
 function doorBtn(){
@@ -1202,9 +1242,9 @@ function terrH(i,o,wx,wz){i=clamp(i,0,TOTAL-1);const base=hy[i]-0.45,E=EDGE[i];
   const d=o<E[0]?E[0]-o:o>E[1]?o-E[1]:0;let h=base;const amp=AMP[zoneI[i]]||20;
   if(d>0){h+=amp*sstep(Math.min(1,d/150))*(fbm(wx*0.0042,wz*0.0042)*0.8+0.3);
     h+=sstep(Math.min(1,d/14))*fbm(wx*0.028,wz*0.028)*(amp>12?2.4:0.8);
-    if(d>420&&!(o<0&&(i*SEG-OFF)<7600))h+=(fbm(wx*0.0011+7,wz*0.0011)*0.5+0.55)*110*sstep((d-420)/1100);
+    if(d>420&&!(o<0&&i*SEG-GUI.pos<7600&&i*SEG-GUI.pos>-2000))h+=(fbm(wx*0.0011+7,wz*0.0011)*0.5+0.55)*110*sstep((d-420)/1100);
     if(plat[i]&&d<30)h=base+(h-base)*sstep(d/30)}
-  {const kk=(i*SEG-OFF)/1000,pf=sstep((kk-0.9)/1.6)*sstep((7.6-kk)/1.4);if(pf>0&&d>0){if(o>0)h+=240*pf*sstep(Math.min(1,d/650));else{h=base+(h-base)*(1-0.8*pf)-75*pf*sstep(Math.min(1,d/450))}}}
+  {const kk=(i*SEG-GUI.pos)/1000,pf=sstep((kk-0.9)/1.6)*sstep((7.6-kk)/1.4);if(pf>0&&d>0){if(o>0)h+=240*pf*sstep(Math.min(1,d/650));else{h=base+(h-base)*(1-0.8*pf)-75*pf*sstep(Math.min(1,d/450))}}}
   if(TUNP[i]>0&&(tun[i]||d>0)){const cover=hy[i]+11+TUNP[i]*5;const w=tun[i]?1:sstep(1-Math.max(0,d-8)/60);h=Math.max(h,lerp(h,cover,TUNP[i]*w))}
   if(BRD[i]>0)h-=BRD[i]*(1-sstep(Math.max(0,d-4)/95));
   if(riv[i]){const R=inRange(RIVER,i*SEG),so=o*riv[i];if(so>R.x-6&&so<R.x+R.w+8){const e=Math.min(so-(R.x-6),R.x+R.w+8-so);h=Math.min(h,hy[i]-3.2+2.4*(1-sstep(e/7)))}}
@@ -1301,10 +1341,11 @@ function makeTextures(){
   return L}
 
 /* ---- atlas de texto ---- */
-const AT=2048,atC=document.createElement('canvas');atC.width=atC.height=AT;const atX=atC.getContext('2d');let atCur={x:0,y:0,h:0};const ATL={};
+const AT=2048,ATH=4096,atC=document.createElement('canvas');atC.width=AT;atC.height=ATH;const atX=atC.getContext('2d');let atCur={x:0,y:0,h:0};const ATL={};
 function atAlloc(key,w,h,draw){if(ATL[key])return ATL[key];if(atCur.x+w>AT){atCur={x:0,y:atCur.y+atCur.h+2,h:0}}
   const X=atCur.x,Y=atCur.y;atX.save();atX.translate(X,Y);draw(atX,w,h);atX.restore();atCur.x+=w+2;atCur.h=Math.max(atCur.h,h);
-  return ATL[key]={u0:(X+1)/AT,v0:(Y+1)/AT,u1:(X+w-1)/AT,v1:(Y+h-1)/AT}}
+  if(Y+h>ATH)console.warn('atlas cheio',key);
+  return ATL[key]={u0:(X+1)/AT,v0:(Y+1)/ATH,u1:(X+w-1)/AT,v1:(Y+h-1)/ATH}}
 const FONT='"Barlow Condensed","Arial Narrow",Arial,sans-serif';
 function fitText(x,t,maxw,size,weight,fam){let s=size;x.font=weight+' '+s+'px '+fam;const w=x.measureText(t).width;if(w>maxw){s*=maxw/w;x.font=weight+' '+s+'px '+fam}}
 const atBoard=n=>atAlloc('b:'+n,600,100,(x,w,h)=>{x.fillStyle='#123f78';x.fillRect(0,0,w,h);x.fillStyle='#fff';fitText(x,n,w-40,64,'600',FONT);x.textAlign='center';x.textBaseline='middle';x.fillText(n,w/2,h/2+3)});
@@ -1375,9 +1416,9 @@ function init3D(){
   gl.generateMipmap(gl.TEXTURE_2D_ARRAY);gl.texParameteri(gl.TEXTURE_2D_ARRAY,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
   gl.texParameteri(gl.TEXTURE_2D_ARRAY,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D_ARRAY,gl.TEXTURE_WRAP_T,gl.REPEAT);
   const an=gl.getExtension('EXT_texture_filter_anisotropic');if(an)gl.texParameterf(gl.TEXTURE_2D_ARRAY,an.TEXTURE_MAX_ANISOTROPY_EXT,8);
-  for(const s of STN){atBoard(s.n);atAzul(s.n);atAlloc('pn:'+s.n,560,100,(x,w,h)=>{const pk=s.sty==='v-gmr';x.fillStyle=pk?'rgb(218,160,148)':'rgb(238,236,228)';x.fillRect(0,0,w,h);x.fillStyle='#2a2522';fitText(x,s.n.toUpperCase(),w-20,72,'700','"Barlow Condensed",Arial,sans-serif');x.textAlign='center';x.textBaseline='middle';x.fillText(s.n.toUpperCase(),w/2,h/2+4)})}
+  for(const s of STN){atBoard(s.n);atAlloc('pn:'+s.n,560,100,(x,w,h)=>{const pk=s.sty==='v-gmr';x.fillStyle=pk?'rgb(218,160,148)':'rgb(238,236,228)';x.fillRect(0,0,w,h);x.fillStyle='#2a2522';fitText(x,s.n.toUpperCase(),w-20,72,'700','"Barlow Condensed",Arial,sans-serif');x.textAlign='center';x.textBaseline='middle';x.fillText(s.n.toUpperCase(),w/2,h/2+4)})}
   for(const c of LIMCH){atLim(c.v);atLim(c.prev);atAvis(c.v);atAvis(c.prev)}
-  for(let k=0;k<60;k++)atTxt('pk'+k,String(k),'#f2f2ee','#111',64,64,46);
+  for(let k=0;k<90;k++)atTxt('pk'+k,String(k),'#f2f2ee','#111',64,64,46);
   atAlloc('cplogo',256,150,(x,w,h)=>{x.fillStyle='rgb(214,215,212)';x.fillRect(0,0,w,h);x.save();x.transform(1,0,-0.3,1,34,8);x.strokeStyle='#c8202a';x.lineWidth=24;x.lineCap='round';x.lineJoin='round';
     x.beginPath();x.moveTo(116,22);x.lineTo(66,22);x.arc(66,56,34,-Math.PI/2,Math.PI/2,true);x.lineTo(116,90);x.stroke();
     x.beginPath();x.moveTo(146,22);x.lineTo(176,22);x.arc(176,56,34,-Math.PI/2,Math.PI/2,false);x.lineTo(146,90);x.lineTo(146,132);x.stroke();x.restore()});
@@ -1495,7 +1536,7 @@ function portal3(mb,i,L){const tc=0,urban=false;const col=[1,1,1];const HW=2.9,S
   mb.q(P(W1-0.3,H),P(W2+0.3,H),P(W2+0.3,H+0.8),P(W1-0.3,H+0.8),cc(170,160,146),13)}
 const sd2=(n,R)=>-(n[0]*R[0]+n[2]*R[2]);
 function vStation(mb,st,cc2,F,R,n,yb,nm){
-  const cfg={'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-gmr':[24,11,2]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr';
+  const cfg={'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-gmr':[24,11,2],'v-trin':[38,13,3]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr';
   const WH=pink?cc(218,160,148):cc(238,236,228),OC=pink?cc(196,140,130):cc(132,142,152),GRn=cc(184,178,166),SH=cc(52,92,62),DR=cc(96,62,40),GL=cc(40,48,56);
   boxRF(mb,cc2,F,R,w,d,yb,yb+H,WH,6,3,3);
   boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+0.85,OC,6,3,3,0,1,true);
@@ -1513,7 +1554,7 @@ function vStation(mb,st,cc2,F,R,n,yb,nm){
     q(-wd/2-0.16,-wd/2,y0-0.12,y0+ht+0.16,GRn,0.06,13);q(wd/2,wd/2+0.16,y0-0.12,y0+ht+0.16,GRn,0.06,13);q(-wd/2-0.16,wd/2+0.16,y0+ht,y0+ht+0.18,GRn,0.07,13);
     if(!door){q(-wd/2-0.2,wd/2+0.2,y0-0.16,y0-0.02,GRn,0.1,13);for(const sg of[-1,1]){const a=fp(u+sg*(wd/2+0.18),y0,0.08),b=fp(u+sg*(wd/2+0.18),y0+ht,0.08);const b2=[b[0]+n[0]*0.3+F[0]*sg*0.35,b[1],b[2]+n[2]*0.3+F[2]*sg*0.35],a2=[a[0]+n[0]*0.3+F[0]*sg*0.35,a[1],a[2]+n[2]*0.3+F[2]*sg*0.35];mb.q(a,a2,b2,b,SH,0)}}};
   const nb=Math.max(2,Math.floor(w/2.9));for(let k=0;k<nb;k++){const u=-w/2+(k+0.5)*w/nb;const isDoor=nb>2?(k===Math.floor(nb/2)||(w>12&&k===1)):k===0;
-    opening(u,yb+(isDoor?0.02:1.0),isDoor?1.2:0.95,isDoor?2.55:1.45,isDoor);if(fl>1)opening(u,yb+4.5,0.9,1.4,false)}
+    opening(u,yb+(isDoor?0.02:1.0),isDoor?1.2:0.95,isDoor?2.55:1.45,isDoor);if(fl>1)opening(u,yb+4.5,0.9,1.4,false);if(fl>2)opening(u,yb+8,0.9,1.4,false)}
   const nmp=ATL['pn:'+nm];const pn=fp(pink?w*0.18:w*0.18,yb+H-(fl>1?1.25:0.9),0.07);if(nmp)plateQ(mb,pn,n,Math.min(w*0.4,5),Math.min(w*0.4,5)*0.18,nmp,0,false);
   for(const e of[-1,1]){const ec=[cc2[0]+F[0]*e*(w/2+0.07),0,cc2[2]+F[2]*e*(w/2+0.07)],en=mulv(F,e);
     if(pink){const oc=[ec[0],yb+H-1.4,ec[2]];for(let q=0;q<16;q++){const a0=q/16*6.283,a1=(q+1)/16*6.283,r=0.55;const rr=[R[0],0,R[2]];const P2=(a,rad)=>[oc[0]+rr[0]*Math.cos(a)*rad,oc[1]+Math.sin(a)*rad,oc[2]+rr[2]*Math.cos(a)*rad];
@@ -1531,7 +1572,7 @@ function vStation(mb,st,cc2,F,R,n,yb,nm){
 }
 function bldg3(mb,sp,i,base,R,F,sd,L){
   const st=sp.sty,yb=hy[i]-0.25,n=mulv(R,-sd);
-  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-gmr':11}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
+  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-gmr':11,'v-trin':13}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
   const C0=(d)=>L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);
   const front=(cc2,d,y)=>[cc2[0]+n[0]*(d/2+0.06),y,cc2[2]+n[2]*(d/2+0.06)];
   const gr=cc(196,188,172),cream=cc(238,224,194),white=cc(246,244,238);
@@ -1925,13 +1966,24 @@ function render3D(dtR){
   tunMix+=((inTun?1:0)-tunMix)*0.05;
 }
 let LANDM=null;
-function buildLandmarks(){const g=fr3(VINT?SB.pos:GMR.pos);const mb=new MB();const ox=g.x,oz=g.z;
-  if(VINT){let sd=4242;const rr=()=>{sd=(Math.imul(sd,1664525)+1013904223)>>>0;return sd/4294967296};const iMax=Math.floor(km(3.5)/SEG);
-    for(let n=0;n<420;n++){const ang=rr()*6.283,rad=120+Math.sqrt(rr())*1300;const x=Math.cos(ang)*rad-150,z=Math.sin(ang)*rad-500;const wx=ox+x,wz=oz+z;
-      let bi=0,bd=1e9;for(let i=Math.floor(OFF/SEG);i<iMax;i+=4){const d=(WX[i]-wx)**2+(WZ[i]-wz)**2;if(d<bd){bd=d;bi=i}}if(bd<85*85)continue;
-      const Rv=RV(bi),o=(wx-WX[bi])*Rv[0]+(wz-WZ[bi])*Rv[2];if(o>40&&(bi*SEG-OFF)>1300)continue;
-      const y=terrH(bi,o,wx,wz),w=8+rr()*14,d=8+rr()*10,h=rr()<0.15?12+rr()*10:5+rr()*6;const R2=norm([Math.cos(ang*3),0,Math.sin(ang*3)]),F2=[-R2[2],0,R2[0]];
-      boxRF(mb,[x,0,z],R2,F2,w,d,y-2,y+h,cc(...FAC[Math.floor(rr()*FAC.length)]),4,12,12,-1);hipRoof(mb,[x,0,z],R2,F2,w,d,y+h,h>11?2.2:1.8,cc(186,98,68),0.3)}}
+function buildLandmarks(){const g=fr3(GUI.pos);const mb=new MB();const ox=g.x,oz=g.z;
+  // casario à volta de uma cidade (Guimarães e Porto), afastado da via
+  const town=(cp,x0,z0,N,R0,R1,seed,tall,skipE)=>{let sd=seed;const rr=()=>{sd=(Math.imul(sd,1664525)+1013904223)>>>0;return sd/4294967296};
+    const iA=Math.max(0,Math.floor((cp-3500)/SEG)),iB=Math.min(TOTAL-1,Math.floor((cp+3500)/SEG)),gc=fr3(cp);
+    for(let n=0;n<N;n++){const ang=rr()*6.283,rad=R0+Math.sqrt(rr())*R1;const wx=gc.x+Math.cos(ang)*rad+x0,wz=gc.z+Math.sin(ang)*rad+z0,x=wx-ox,z=wz-oz;
+      let bi=0,bd=1e9;for(let i=iA;i<iB;i+=4){const d=(WX[i]-wx)**2+(WZ[i]-wz)**2;if(d<bd){bd=d;bi=i}}if(bd<85*85)continue;
+      const Rv=RV(bi),o=(wx-WX[bi])*Rv[0]+(wz-WZ[bi])*Rv[2];if(skipE&&skipE(o,bi))continue;
+      const y=terrH(bi,o,wx,wz),w=8+rr()*14,d=8+rr()*10,h=rr()<tall?12+rr()*14:5+rr()*6;const R2=norm([Math.cos(ang*3),0,Math.sin(ang*3)]),F2=[-R2[2],0,R2[0]];
+      boxRF(mb,[x,0,z],R2,F2,w,d,y-2,y+h,cc(...FAC[Math.floor(rr()*FAC.length)]),4,12,12,-1);hipRoof(mb,[x,0,z],R2,F2,w,d,y+h,h>11?2.2:1.8,cc(186,98,68),0.3)}};
+  town(GUI.pos,-150,-500,420,120,1300,4242,0.15,(o,bi)=>o>40&&(bi*SEG-GUI.pos)>1300);
+  town(SB.pos+800,0,0,700,110,1500,777,0.45,null);
+  // Torre dos Clérigos e igreja, ~0,8 km a sul da Trindade
+  {const t=fr3(SB.pos);const cx=t.x-436-ox,cz=t.z+752-oz,by=t.y+4,gr=[1,1,1];
+   boxRF(mb,[cx,0,cz],[1,0,0],[0,0,1],9,9,by-4,by+50,gr,13,4,4);boxRF(mb,[cx,0,cz],[1,0,0],[0,0,1],10,10,by+30,by+31,cc(200,194,180),13);
+   boxRF(mb,[cx,0,cz],[1,0,0],[0,0,1],7.6,7.6,by+50,by+62,gr,13,3,3);boxRF(mb,[cx,0,cz],[1,0,0],[0,0,1],8.6,8.6,by+62,by+63,cc(200,194,180),13);
+   cyl(mb,[cx,0,cz],by+63,by+69,3.2,2.2,12,gr,13);cyl(mb,[cx,0,cz],by+69,by+73,1.2,0.3,10,gr,13);cyl(mb,[cx,0,cz],by+73,by+75.5,0.12,0.12,6,cc(60,60,60),0);
+   boxRF(mb,[cx,0,cz+32],[1,0,0],[0,0,1],18,50,by-4,by+20,gr,13,5,5);hipRoof(mb,[cx,0,cz+32],[1,0,0],[0,0,1],18,50,by+20,5,cc(150,140,126),0.3);
+   boxRF(mb,[cx,0,cz+57],[1,0,0],[0,0,1],20,2,by+20,by+30,gr,13,4,4)}
   // Castelo de Guimarães (~1,4 km a norte da estação) no monte
   const cx=350,cz=-1450,by=g.y+18;blob(mb,[cx,by-30,cz],110,34,110,cc(96,126,70),5);
   const st=[1,1,1];boxRF(mb,[cx,0,cz],[1,0,0],[0,0,1],44,34,by,by+9,st,13,6,6);
@@ -1966,7 +2018,7 @@ function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);setNotc
 function finish(){running=false;S.horn=false;
   const sc=S.sc,t=Math.max(0,total()),r=t/S.maxPts,stars=r>0.85?3:r>0.65?2:r>0.4?1:0;
   const rest=STOPS.filter(s=>s!==S.startSt),served=rest.filter(s=>s.served&&!s.skipped).length,tot=rest.length;
-  $('#endTitle').innerHTML=S.endSt.n+'<small>'+(S.endSt===GMR?'A Sala de Visitas do Minho':'Aqui nasceu Portugal')+'</small>';
+  $('#endTitle').innerHTML=S.endSt.n+'<small>'+(S.endSt===GMR?'A Sala de Visitas do Minho':S.endSt===SB?'A Cidade Invicta':'Aqui nasceu Portugal')+'</small>';
   $('#endStars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
   $('#endTbl').innerHTML=`<tr><td>Paragens servidas</td><td>${served} de ${tot}</td></tr>
   <tr><td>Precisão de paragem</td><td>+${Math.round(sc.acc)}</td></tr><tr><td>Pontualidade</td><td>+${Math.round(sc.pun)}</td></tr>
@@ -1975,9 +2027,10 @@ function finish(){running=false;S.horn=false;
   $('#ovEnd').hidden=false}
 function gameOver(why){running=false;S.horn=false;beep(200,1,.2);$('#endTitle').innerHTML='Serviço interrompido<small>'+why+'</small>';$('#endStars').textContent='';$('#endTbl').innerHTML='';$('#ovEnd').hidden=false}
 
-const SAVEK='gf1985-save-v1';
+const SAVEK='gf1985-save-v2';
 function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia claro',tarde:'fim de tarde',noite:'de noite'}[PERIOD];
-  $('#t1').textContent='Automotora 9611, '+f('17:05')+', '+lab+', cerca de 39 min';$('#t2').textContent='Automotora 9611, '+f('18:13')+', '+lab+', cerca de 38 min';
+  document.querySelectorAll('#ovStart [data-r]').forEach(b=>{const[a,z]=b.dataset.r.split('>').map(byNameE),rev=z.i<a.i,t0=rev?a.depR:a.depF,t1=rev?z.depR:z.depF,x=SHIFT+routeShift(a.i,rev);
+    b.querySelector('small').textContent='Automotora 9611, '+fHM(t0+x)+', '+lab+', cerca de '+(Math.round((t1-t0)/60)>=90?Math.floor((t1-t0)/3600)+' h '+fmt2(Math.round((t1-t0)/60)%60):Math.round((t1-t0)/60)+' min')});
   document.querySelectorAll('#perSel button').forEach(b=>{b.classList.toggle('on',b.dataset.p===PERIOD);b.setAttribute('aria-checked',b.dataset.p===PERIOD)})}
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
@@ -1996,7 +2049,7 @@ $('#bLoad').onclick=loadGame;$('#bSave').onclick=saveGame;$('#bQS').onclick=save
 $('#bMenu').onclick=()=>{running=false;paused=false;$('#ovPause').hidden=true;refreshLoad();$('#ovStart').hidden=false};
 setInterval(()=>{if(running&&!paused&&S&&S.finishT<0)try{saveGame.silent=1;const t=toast;toast=()=>{};saveGame();toast=t}catch(e){}},45000);
 updPeriod();refreshLoad();
-$('#bStart').onclick=()=>start(0,6,false);$('#bStart3').onclick=()=>start(6,0,true);$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
+document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i)});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
 $('#bDoor').onclick=doorBtn;
 $('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.','');return}setCam(CAMS[(CAMS.indexOf(camMode)+1)%CAMS.length])};
 {let drag=null,pinch=null;const vw=$('#view');
