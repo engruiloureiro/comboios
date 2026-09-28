@@ -2241,11 +2241,13 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
   document.querySelectorAll('#perSel button').forEach(b=>{b.classList.toggle('on',b.dataset.p===PERIOD);b.setAttribute('aria-checked',b.dataset.p===PERIOD)})}
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
-  const o={v:1,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
+  const o={v:1,ns:STN.length,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
     s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
     st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])};
   try{localStorage.setItem(SAVEK,JSON.stringify(o));toast('Jogo guardado às '+fHMS(S.clock)+' (hora do jogo).','good');refreshLoad()}catch(e){toast('Não foi possível guardar neste navegador.','bad')}}
-function readSave(){try{const r=localStorage.getItem(SAVEK);return r?JSON.parse(r):null}catch(e){return null}}
+function readSave(){try{const r=localStorage.getItem(SAVEK);const o=r?JSON.parse(r):null;
+  // jogos guardados antes de a lista de estações mudar deixam de ser válidos
+  if(o&&(o.ns!==STN.length||!STN[o.start]||!STN[o.end])){localStorage.removeItem(SAVEK);return null}return o}catch(e){return null}}
 function refreshLoad(){const o=readSave(),b=$('#bLoad');if(!o){b.hidden=true;return}b.hidden=false;
   const a=STN[o.start].n,z=STN[o.end].n;$('#loadInfo').textContent=a+' → '+z+', guardado a '+new Date(o.t).toLocaleString('pt-PT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
 function loadGame(){const o=readSave();if(!o)return;PERIOD=o.period||'tarde';updPeriod();start(o.start,o.end,o.rev);
