@@ -205,45 +205,43 @@ const VINT=true;
 const SEG=5, DRAW=220, CAM_H=2.95, DRV_X=-0.45, OFF=400;
 const km=k=>OFF+k*1000;
 // PK da Linha de Guimarães contados a partir de Porto-Trindade (Guimarães 59,385; Paçô Vieira 67,910; Fafe 80,585).
-// Porto-Trindade – Senhora da Hora: troço comum com a Linha da Póvoa (túnel da Trindade, Avenida de França, Boavista só mercadorias).
+// Porto-Trindade – Senhora da Hora: troço comum com a Linha da Póvoa, em via dupla (túnel da Trindade, Avenida de França).
 // Senhora da Hora – Trofa (1932): Araújo, Maia (Barreiros), Mandim, Castêlo da Maia, Muro, Bougado. Trofa – Lousado – Guimarães (1883-1884).
 // Coordenadas aproximadas; PK entre Porto e Guimarães estimados a partir da distância ao longo do traçado.
 const G0=59.385,kmG=k=>km(G0+k);
 // [nome, lat, lon, km, hora ida, hora volta, tipo, edifício, disposição, lado, comp. plataforma, altura, cota aprox., estilo]
 const RAW=[
- ['Porto-Trindade',41.1525,-8.6094,0.00,'14:59','21:00','term',2,'VT',1,160,0.35,95,'v-trin'],
- ['Avenida de França',41.1588,-8.6262,1.75,'15:04','20:55','ap',0,'SR',1,70,0.3,100,'v-ap'],
- ['Porto-Boavista',41.1597,-8.6322,2.25,null,null,'est',1,'SX',-1,100,0.35,100,'v-est'],
- ['Francos',41.1655,-8.6385,3.20,'15:08','20:51','ap',0,'SL',-1,60,0.3,96,'v-ap'],
- ['Ramalde',41.1716,-8.6424,3.95,'15:11','20:48','ap',0,'SR',1,60,0.3,93,'v-ap'],
- ['Circunvalação',41.1787,-8.6462,4.80,'15:14','20:45','ap',0,'SL',-1,60,0.3,96,'v-ap'],
- ['Senhora da Hora',41.1880,-8.6545,6.05,'15:18','20:41','est',1,'SX',-1,110,0.35,101,'v-est2'],
- ['Araújo',41.2010,-8.6460,8.00,'15:22','20:37','ap',0,'SR',1,60,0.3,96,'v-ara'],
- ['Maia',41.2335,-8.6215,12.20,'15:28','20:31','est',1,'SX',-1,110,0.35,86,'v-maia'],
- ['Mandim',41.2555,-8.6075,14.95,'15:33','20:26','ap',0,'SL',-1,60,0.3,80,'v-ap'],
- ['Castêlo da Maia',41.2705,-8.5985,16.80,'15:37','20:22','est',1,'SX',1,90,0.35,75,'v-maia'],
- ['Muro',41.2985,-8.5870,20.30,'15:43','20:16','est',1,'SX',1,90,0.35,60,'v-maia'],
- ['Bougado',41.3215,-8.5705,23.20,'15:48','20:11','ap',0,'SL',-1,60,0.3,46,'v-est1'],
- ['Trofa',41.3383,-8.5595,25.40,'15:53','20:06','est',2,'VG',-1,140,0.35,42,'v-fafe'],
- ['Lousado',41.3505,-8.5190,29.60,'16:00','19:59','est',1,'SX',1,100,0.35,36,'v-est'],
- ['Santo Tirso',41.3430,-8.4755,35.60,'16:09','19:50','est',2,'VG',-1,130,0.35,44,'v-fafe'],
- ['Caniços',41.3525,-8.4515,37.90,'16:14','19:45','ap',0,'SR',1,60,0.3,55,'v-ap'],
- ['Negrelos',41.3555,-8.4230,40.60,'16:19','19:40','est',1,'SX',-1,90,0.35,64,'v-est1'],
- ['Vila das Aves',41.3695,-8.4095,42.50,'16:23','19:36','est',1,'SX',1,100,0.35,74,'v-est'],
- ['Lordelo',41.3765,-8.3905,44.50,'16:28','19:31','ap',0,'SL',-1,60,0.3,90,'v-lord'],
- ['Giesteira',41.3830,-8.3600,47.20,'16:34','19:25','ap',0,'SR',1,60,0.3,100,'v-ap'],
- ['Vizela',41.3785,-8.3075,51.80,'16:43','19:16','est',1,'SX',-1,110,0.35,116,'v-est2'],
- ['Pereirinhas',41.3920,-8.3150,53.40,'16:47','19:12','ap',0,'SR',1,60,0.3,136,'v-ap'],
- ['Cuca',41.4025,-8.3175,54.80,'16:51','19:08','ap',0,'SL',-1,60,0.3,150,'v-ap'],
- ['Nespereira',41.4145,-8.3140,56.30,'16:55','19:04','ap',0,'SR',1,60,0.3,166,'v-ap'],
+ ['Porto-Trindade',41.1525,-8.6094,0.00,'14:58','21:01','term',2,'VT',1,160,0.35,95,'v-trin'],
+ ['Avenida de França',41.1588,-8.6262,1.75,'15:03','20:56','ap',0,'SR',1,70,0.3,100,'v-ap'],
+ ['Francos',41.1655,-8.6385,3.20,'15:07','20:52','ap',0,'SL',-1,60,0.3,96,'v-ap'],
+ ['Ramalde',41.1716,-8.6424,3.95,'15:10','20:49','ap',0,'SR',1,60,0.3,93,'v-ap'],
+ ['Circunvalação',41.1787,-8.6462,4.80,'15:13','20:46','ap',0,'SL',-1,60,0.3,96,'v-ap'],
+ ['Senhora da Hora',41.1880,-8.6545,6.05,'15:17','20:42','est',1,'SX',-1,110,0.35,101,'v-est2'],
+ ['Araújo',41.2010,-8.6460,8.00,'15:21','20:38','ap',0,'SR',1,60,0.3,96,'v-ara'],
+ ['Maia',41.2335,-8.6215,12.20,'15:27','20:32','est',1,'SX',-1,110,0.35,86,'v-maia'],
+ ['Mandim',41.2555,-8.6075,14.95,'15:32','20:27','ap',0,'SL',-1,60,0.3,80,'v-ap'],
+ ['Castêlo da Maia',41.2705,-8.5985,16.80,'15:36','20:23','est',1,'SX',1,90,0.35,75,'v-maia'],
+ ['Muro',41.2985,-8.5870,20.30,'15:42','20:17','est',1,'SX',1,90,0.35,60,'v-maia'],
+ ['Bougado',41.3215,-8.5705,23.20,'15:47','20:12','ap',0,'SL',-1,60,0.3,46,'v-est1'],
+ ['Trofa',41.3383,-8.5595,25.40,'15:52','20:07','est',2,'VG',1,140,0.35,42,'v-fafe'],
+ ['Lousado',41.3505,-8.5190,29.60,'15:59','20:00','est',1,'SX',1,100,0.35,36,'v-est'],
+ ['Santo Tirso',41.3430,-8.4755,35.60,'16:08','19:51','est',2,'VG',-1,130,0.35,44,'v-fafe'],
+ ['Caniços',41.3525,-8.4515,37.90,'16:13','19:46','ap',0,'SR',1,60,0.3,55,'v-ap'],
+ ['Vila das Aves - Negrelos',41.3650,-8.4150,41.50,'16:19','19:40','est',1,'SX',1,110,0.35,70,'v-est'],
+ ['Giesteira',41.3760,-8.3900,44.30,'16:25','19:34','ap',0,'SR',1,60,0.3,88,'v-ap'],
+ ['Lordelo',41.3830,-8.3620,46.60,'16:31','19:28','est',1,'SX',-1,90,0.35,100,'v-lord'],
+ ['Cuca',41.3800,-8.3380,49.00,'16:37','19:22','ap',0,'SL',-1,60,0.3,108,'v-ap'],
+ ['Pereirinhas',41.3790,-8.3200,51.00,'16:42','19:17','ap',0,'SR',1,60,0.3,112,'v-ap'],
+ ['Vizela',41.3850,-8.3100,53.20,'16:47','19:12','est',1,'SX',-1,110,0.35,122,'v-est2'],
+ ['Nespereira',41.4100,-8.3120,56.00,'16:54','19:05','ap',0,'SR',1,60,0.3,160,'v-ap'],
  ['Covas',41.4260,-8.3040,57.90,'16:59','19:00','ap',0,'SL',-1,60,0.3,186,'v-gran'],
- ['Guimarães',41.43529,-8.29506,59.385,'17:05','18:55','est',2,'VG',1,160,0.35,200,'v-gmr'],
+ ['Guimarães',41.43529,-8.29506,59.385,'17:05','18:55','est',2,'VF',-1,160,0.35,200,'v-gmr'],
  ['Aldão - S. Torcato',41.448,-8.28,64.005,'17:13','18:44','ap',0,'SL',-1,60,0.3,285,'v-ap'],
  ['Penha',41.4515,-8.261,66.205,'17:17','18:40','ap',0,'SR',1,60,0.3,305,'v-ap'],
  ['Paçô Vieira',41.4462,-8.2508,67.915,'17:22','18:36','est',1,'SX',-1,110,0.35,350,'v-est2'],
  ['Fareja',41.4235,-8.217,73.305,'17:30','18:26','est',1,'SX',-1,90,0.35,262,'v-est'],
  ['Cepães',41.438,-8.193,76.305,'17:36','18:20','ap',0,'SR',1,70,0.3,262,'v-est1'],
- ['Fafe',41.4535,-8.1695,80.585,'17:44','18:13','term',2,'VF',-1,140,0.35,318,'v-fafe']
+ ['Fafe',41.4535,-8.1695,80.585,'17:44','18:13','term',2,'VFM',1,140,0.35,318,'v-fafe']
 ];
 const WPT=RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.45597,-8.26722,G0+5.77],[41.41949,-8.22899,G0+12.72],[41.4285,-8.2040,G0+15.40],[41.45231,-8.17224,G0+20.9]]).sort((a,b)=>a[2]-b[2]);
 const TOT_KM=80.585;
@@ -278,6 +276,7 @@ const CASTLE=PROJ(41.4479,-8.2903),PENHA=PROJ(41.4262,-8.2646);
 const bearing=(from,to)=>Math.atan2(to[0]-from[0],to[1]-from[1]);
 const LAY={
  VG:{pl:[[-1.8,-6.5],[5.8,9.8]],ex:[[0,4],[0,-9.5]]},
+ VFM:{pl:[[1.8,7.5],[-5.8,-9.2]],ex:[[0,-4],[0,-11]]},
  VT:{pl:[[-1.8,-3.2],[5.8,6.7]],ex:[[0,-5],[0,-9.5],[0,8.5],[0,12.5]]},
  VF:{pl:[[-1.8,-7.5],[5.8,9.2]],ex:[[0,4],[0,11]]},
  SX:{pl:[[-1.8,-5.2],[5.8,8.6]],ex:[[0,4]]},
@@ -304,7 +303,7 @@ let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=[{a:PV.pos-106,b:PV.pos-35,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
 const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:3,n:'Ponte sobre o rio Ave'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(41.2),b:km(41.3),t:3,n:'Ponte sobre o rio Vizela'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
-const ZONES=[[0,6.4,'porto'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,51.0,'dense'],[51.0,52.6,'urban'],[52.6,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
+const ZONES=[[0,6.4,'porto'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
 const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])return z[2];return 'rural'};
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
 const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(28.1),side:1,x:14,w:26},{a:km(36.8),b:km(39.6),side:1,x:18,w:28},{a:km(40.7),b:km(41.2),side:-1,x:14,w:18},{a:km(41.3),b:km(42.1),side:1,x:14,w:18},{a:km(50.3),b:km(51.4),side:-1,x:16,w:18},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
@@ -323,7 +322,7 @@ function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.f
 function branchOffs(p){return[]}
 function capAt(k){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
   if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3)return 60;if(Math.abs(k-35.6)<0.4)return 50;
-  if(k<42.5)return 80;if(Math.abs(k-51.8)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
+  if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
 let LIMCH=[];
 (function build(){
@@ -334,6 +333,7 @@ let LIMCH=[];
   // via métrica sinuosa: curvas em S sobrepostas ao traçado geral (descrição: traçado apertado e cheio de curvas)
   {let ph=0,i=0;while(i<=TOTAL){const lam=380+rnd()*520,A=(0.18+rnd()*0.22)*(rnd()<0.5?-1:1),n=Math.round(lam/SEG);
     const sc=i*SEG<km(42.5)?0.28:1;for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
+  {const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
   for(let i=0;i<TOTAL;i++){let c=(HDG[i+1]-HDG[i])*SEG;const m=SEG*SEG/140;curve[i]=clamp(c,-m,m)}
   for(let i=0;i<=TOTAL;i++){const p=i*SEG;let q=0;while(q<STN.length-2&&STN[q+1].pos<p)q++;
     const a=STN[q],b=STN[q+1];let e;
@@ -383,7 +383,7 @@ const SIG=[];
 function sigState(g){return'G'}
 /* comboios parados: automotora à espera do cruzamento em Paçô Vieira e reservas em Guimarães */
 function freight(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'wag',len:8.2});return c}
-const PARKED=[{o:4,a:PV.pos-70,len:39.6,c:'u',lit:true},{o:-9.5,a:GUI.pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:-5,a:SB.pa+14,len:39.6,c:'u',lit:false},{o:8.5,a:SB.pa+6,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+4,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+50,len:39.6,c:'u',lit:false},{o:-9.5,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:39.6,c:'u',lit:false}];
+const PARKED=[{o:4,a:PV.pos-70,len:39.6,c:'u',lit:true},{o:11,a:GUI.pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:-5,a:SB.pa+14,len:39.6,c:'u',lit:false},{o:8.5,a:SB.pa+6,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+4,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+50,len:39.6,c:'u',lit:false},{o:11,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:39.6,c:'u',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
 for(let p=OFF;p<END;p+=18)JOINTS.push(p+(rnd()-0.5)*0.4);
@@ -493,10 +493,10 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   }
   // marcos da paisagem (1985)
   const put=(p,o)=>{const k=clamp(Math.floor(p/SEG),0,TOTAL-1);spr[k].push(o)};
-  spr[Math.floor(BUFFER/SEG)].push({t:'buffer',x:0},{t:'buffer',x:4},{t:'buffer',x:11});
+  spr[Math.floor(BUFFER/SEG)].push({t:'buffer',x:0},{t:'buffer',x:-4},{t:'buffer',x:-11});
   spr[Math.floor(BUFFER_R/SEG)+1].push({t:'buffer',x:0},{t:'buffer',x:4},{t:'buffer',x:-9.5});
-  put(GMR.pos-40,{t:'armazem',x:15,w:26});put(GUI.pos-60,{t:'armazem',x:14,w:22});put(TRF.pos-60,{t:'armazem',x:15,w:24});put(byNameE('Santo Tirso').pos-40,{t:'armazem',x:15,w:20});
-  put(PV.pos-20,{t:'wtank',x:-9});put(GUI.pos-25,{t:'wcol',x:5.4});put(GMR.pos-100,{t:'wtank',x:-11});put(GUI.pos+30,{t:'wtank',x:13});put(TRF.pos-30,{t:'wtank',x:-12});put(SB.pos-40,{t:'wcol',x:-5.4});
+  put(GMR.pos-40,{t:'armazem',x:15,w:26});put(GUI.pos-60,{t:'armazem',x:15,w:22});put(TRF.pos-60,{t:'armazem',x:-14,w:24});put(byNameE('Santo Tirso').pos-40,{t:'armazem',x:15,w:20});
+  put(PV.pos-20,{t:'wtank',x:-9});put(GUI.pos-25,{t:'wcol',x:5.4});put(GMR.pos-100,{t:'wtank',x:-11});put(GUI.pos+30,{t:'wtank',x:15});put(TRF.pos-30,{t:'wtank',x:-13});put(SB.pos-40,{t:'wcol',x:-5.4});
   for(let j=0;j<4;j++)put(kmG(15.6)+j*140,{t:'mill',x:1*(14+22+3+rnd()*4)});
   put(kmG(15.3),{t:'mill',x:-(18+22+3)});
   // palas dos cais da Trindade
