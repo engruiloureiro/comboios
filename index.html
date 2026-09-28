@@ -219,10 +219,10 @@ const RAW=[
  ['Circunvalação',41.1787,-8.6462,4.80,'15:14','20:45','ap',0,'SL',-1,60,0.3,96,'v-ap'],
  ['Senhora da Hora',41.1880,-8.6545,6.05,'15:18','20:41','est',1,'SX',-1,110,0.35,101,'v-est2'],
  ['Araújo',41.2010,-8.6460,8.00,'15:22','20:37','ap',0,'SR',1,60,0.3,96,'v-ap'],
- ['Maia',41.2335,-8.6215,12.20,'15:28','20:31','est',1,'SX',-1,110,0.35,86,'v-est2'],
+ ['Maia',41.2335,-8.6215,12.20,'15:28','20:31','est',1,'SX',-1,110,0.35,86,'v-maia'],
  ['Mandim',41.2555,-8.6075,14.95,'15:33','20:26','ap',0,'SL',-1,60,0.3,80,'v-ap'],
- ['Castêlo da Maia',41.2705,-8.5985,16.80,'15:37','20:22','est',1,'SX',1,90,0.35,75,'v-est'],
- ['Muro',41.2985,-8.5870,20.30,'15:43','20:16','est',1,'SX',1,90,0.35,60,'v-est1'],
+ ['Castêlo da Maia',41.2705,-8.5985,16.80,'15:37','20:22','est',1,'SX',1,90,0.35,75,'v-maia'],
+ ['Muro',41.2985,-8.5870,20.30,'15:43','20:16','est',1,'SX',1,90,0.35,60,'v-maia'],
  ['Bougado',41.3215,-8.5705,23.20,'15:48','20:11','ap',0,'SL',-1,60,0.3,46,'v-est1'],
  ['Trofa',41.3383,-8.5595,25.40,'15:53','20:06','est',2,'VG',-1,140,0.35,42,'v-fafe'],
  ['Lousado',41.3505,-8.5190,29.60,'16:00','19:59','est',1,'SX',1,100,0.35,36,'v-est'],
@@ -236,7 +236,7 @@ const RAW=[
  ['Pereirinhas',41.3920,-8.3150,53.40,'16:47','19:12','ap',0,'SR',1,60,0.3,136,'v-ap'],
  ['Cuca',41.4025,-8.3175,54.80,'16:51','19:08','ap',0,'SL',-1,60,0.3,150,'v-ap'],
  ['Nespereira',41.4145,-8.3140,56.30,'16:55','19:04','ap',0,'SR',1,60,0.3,166,'v-ap'],
- ['Covas',41.4260,-8.3040,57.90,'16:59','19:00','ap',0,'SL',-1,60,0.3,186,'v-ap'],
+ ['Covas',41.4260,-8.3040,57.90,'16:59','19:00','ap',0,'SL',-1,60,0.3,186,'v-gran'],
  ['Guimarães',41.43529,-8.29506,59.385,'17:05','18:55','est',2,'VG',1,160,0.35,200,'v-gmr'],
  ['Aldão - S. Torcato',41.448,-8.28,64.005,'17:13','18:44','ap',0,'SL',-1,60,0.3,285,'v-ap'],
  ['Penha',41.4515,-8.261,66.205,'17:17','18:40','ap',0,'SR',1,60,0.3,305,'v-ap'],
@@ -482,7 +482,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     {
       const bs=s.bside;let outer=0;for(const r of s.pl)if(Math.sign(r[0])===bs)outer=Math.max(outer,Math.abs(r[1]));
       if(!outer)outer=bs<0?3.5:(Math.max(0,...s.ex.map(e=>e.to))+3.5);
-      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-gmr':-80,'v-trin':-95}[s.sty];
+      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48}[s.sty];
       if(bp!==undefined&&s.sty!=='trofa')at(s.pos+bp).push({t:'bldg',x:bs*(outer+0.8),sty:s.sty,n:s.n,st:s,w:{neo:60,'neo-g':34,old:22,old2:16,erm:26,new:22,ns:12,ho:8}[s.sty],h:{neo:9.5,'neo-g':9,old:7,old2:8,erm:7,new:5.5,ns:4.2,ho:3.6}[s.sty],az:true});
       if(s.sty==='hn-foot')at(s.pos-55).push({t:'foot',x:2,w:16});
       if(s.sty==='hn'||s.sty==='hn-foot'||s.sty==='new'||s.sty==='ns'){for(const r of s.pl){const sd=Math.sign(r[0]);at(s.pos-(s.plen*0.45)).push({t:'kiosk',x:(r[0]+r[1])/2+sd*0.6,y:s.ph,st:s})}}
@@ -1443,7 +1443,11 @@ function init3D(){
   gl.generateMipmap(gl.TEXTURE_2D_ARRAY);gl.texParameteri(gl.TEXTURE_2D_ARRAY,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
   gl.texParameteri(gl.TEXTURE_2D_ARRAY,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D_ARRAY,gl.TEXTURE_WRAP_T,gl.REPEAT);
   const an=gl.getExtension('EXT_texture_filter_anisotropic');if(an)gl.texParameterf(gl.TEXTURE_2D_ARRAY,an.TEXTURE_MAX_ANISOTROPY_EXT,8);
-  for(const s of STN){atBoard(s.n);atAlloc('pn:'+s.n,560,100,(x,w,h)=>{const pk=s.sty==='v-gmr';x.fillStyle=pk?'rgb(218,160,148)':'rgb(238,236,228)';x.fillRect(0,0,w,h);x.fillStyle='#2a2522';fitText(x,s.n.toUpperCase(),w-20,72,'700','"Barlow Condensed",Arial,sans-serif');x.textAlign='center';x.textBaseline='middle';x.fillText(s.n.toUpperCase(),w/2,h/2+4)})}
+  const azF=(x,w,h,nm)=>{x.fillStyle='#f4f6fa';x.fillRect(0,0,w,h);x.strokeStyle='#1f4e9c';x.fillStyle='#1f4e9c';x.lineWidth=5;x.strokeRect(4,4,w-8,h-8);
+    for(let u=18;u<w;u+=46){x.beginPath();x.arc(u,h-14,9,Math.PI,0);x.stroke();x.beginPath();x.arc(u+23,14,9,0,Math.PI);x.stroke()}
+    if(nm){x.fillStyle='#f4f6fa';x.fillRect(w*0.2,16,w*0.6,h-32);x.fillStyle='#1f4e9c';fitText(x,nm.toUpperCase(),w*0.56,h*0.5,'700','"Cormorant Garamond",Georgia,serif');x.textAlign='center';x.textBaseline='middle';x.fillText(nm.toUpperCase(),w/2,h/2+3)}};
+  atAlloc('az:',512,80,(x,w,h)=>azF(x,w,h,''));
+  for(const s of STN){if(s.sty==='v-maia')atAlloc('az:'+s.n,640,80,(x,w,h)=>azF(x,w,h,s.n));atBoard(s.n);atAlloc('pn:'+s.n,560,100,(x,w,h)=>{const pk=s.sty==='v-gmr';x.fillStyle=pk?'rgb(218,160,148)':'rgb(238,236,228)';x.fillRect(0,0,w,h);x.fillStyle='#2a2522';fitText(x,s.n.toUpperCase(),w-20,72,'700','"Barlow Condensed",Arial,sans-serif');x.textAlign='center';x.textBaseline='middle';x.fillText(s.n.toUpperCase(),w/2,h/2+4)})}
   for(const c of LIMCH){atLim(c.v);atLim(c.prev);atAvis(c.v);atAvis(c.prev)}
   for(let k=0;k<90;k++)atTxt('pk'+k,String(k),'#f2f2ee','#111',64,64,46);
   atAlloc('cplogo',256,150,(x,w,h)=>{x.fillStyle='rgb(214,215,212)';x.fillRect(0,0,w,h);x.save();x.transform(1,0,-0.3,1,34,8);x.strokeStyle='#c8202a';x.lineWidth=24;x.lineCap='round';x.lineJoin='round';
@@ -1562,11 +1566,51 @@ function portal3(mb,i,L){const xr=Math.max(0,...trk[Math.min(i,TOTAL-1)],...trk[
   for(let k=0;k<12;k++){const a=arch[k],b=arch[k+1];mb.q(P(a[0],a[1]),P(b[0],b[1]),P(b[0],H),P(a[0],H),col,13,[a[0]/4,(H-a[1])/4,b[0]/4,0])}
   mb.q(P(W1-0.3,H),P(W2+0.3,H),P(W2+0.3,H+0.8),P(W1-0.3,H+0.8),cc(170,160,146),13)}
 const sd2=(n,R)=>-(n[0]*R[0]+n[2]*R[2]);
-function vStation(mb,st,cc2,F,R,n,yb,nm){
+// edifícios desenhados a partir de fotografias: tipo da linha de 1932 (Maia, Castêlo da Maia, Muro) e granito (Covas)
+function vStation2(mb,st,cc2,F,R,n,yb,nm){
+  const maia=st==='v-maia',big=nm==='Maia',w=maia?(big?12:10):11,d=maia?8:7.5,fl=maia?2:1,H=fl*3.4+0.4;
+  const WH=maia?cc(246,245,240):[0.8,0.78,0.74],WL=maia?6:13,ROOF=cc(192,98,66),GRN=[0.86,0.84,0.8],GLc=cc(38,46,56);
+  const fp=(u,y,out,c0,dd)=>{c0=c0||cc2;dd=dd===undefined?d:dd;return[c0[0]+n[0]*(dd/2+out)+F[0]*u,y,c0[2]+n[2]*(dd/2+out)+F[2]*u]};
+  const Q=(u0,u1,y0,y1,col,out,l,c0,dd)=>mb.q(fp(u0,y0,out,c0,dd),fp(u1,y0,out,c0,dd),fp(u1,y1,out,c0,dd),fp(u0,y1,out,c0,dd),col,l||0);
+  boxRF(mb,cc2,F,R,w,d,yb,yb+H,WH,WL,2,2);
+  boxRF(mb,cc2,F,R,w+0.1,d+0.1,yb,yb+0.7,GRN,13,2,2,0,1,true);
+  if(!maia)for(let k=1;k<4;k++)boxRF(mb,cc2,F,R,w+0.06,d+0.06,yb+k*0.78,yb+k*0.78+0.05,cc(210,206,198),0,0,0,0,1,true);
+  boxRF(mb,cc2,F,R,w+0.3,d+0.3,yb+H-0.14,yb+H,maia?WH:cc(206,202,194),0);
+  hipRoof(mb,cc2,F,R,w,d,yb+H,maia?2.3:2.9,ROOF,maia?0.95:0.6);
+  {const ch=add(cc2,add(mulv(F,-w*0.28),mulv(n,-d*0.12))),hc=maia?3.1:4.2;boxRF(mb,ch,F,R,0.8,0.8,yb+H,yb+H+hc,maia?WH:[0.84,0.82,0.78],WL,1,1);boxRF(mb,ch,F,R,1.0,1.0,yb+H+hc,yb+H+hc+0.2,cc(176,170,160),0)}
+  // friso de azulejo com o nome sob o beirado (tipo Maia) ou nome pintado (Covas)
+  if(maia){plateQ(mb,fp(0,yb+H-0.6,0.03),n,w-0.3,0.85,ATL['az:'+nm],0,false);
+    for(const e of[-1,1]){const en=mulv(F,e);plateQ(mb,[cc2[0]+en[0]*(w/2+0.03),yb+H-0.6,cc2[2]+en[2]*(w/2+0.03)],en,d-0.3,0.85,ATL['az:'],0,false)}}
+  else{Q(-w*0.34,-w*0.04,yb+2.55,yb+3.05,cc(236,232,222),0.03);const pn=ATL['pn:'+nm];if(pn)plateQ(mb,fp(-w*0.19,yb+2.8,0.045),n,2.8,0.5,pn,0,false)}
+  // portas e janelas (caixilhos azuis no tipo Maia, brancos no granito)
+  const fr=maia?cc(30,50,112):cc(238,236,230);
+  for(let k=0;k<3;k++){const u=-w/2+(k+0.5)*w/3,door=k===1||(maia&&k===2);
+    if(door){Q(u-0.62,u+0.62,yb+0.02,yb+2.6,maia?cc(150,120,90):GRN,0.02,13);Q(u-0.5,u+0.5,yb+0.05,yb+2.5,maia?cc(34,60,140):cc(112,82,54),0.04);Q(u-0.4,u+0.4,yb+1.6,yb+2.4,GLc,0.05,16)}
+    else{Q(u-0.58,u+0.58,yb+0.95,yb+2.5,fr,0.03);Q(u-0.46,u+0.46,yb+1.05,yb+2.4,GLc,0.045,16);Q(u-0.03,u+0.03,yb+1.05,yb+2.4,fr,0.05);Q(u-0.46,u+0.46,yb+1.9,yb+1.96,fr,0.05)}
+    if(maia){Q(u-0.52,u+0.52,yb+4.1,yb+5.8,fr,0.03);Q(u-0.42,u+0.42,yb+4.2,yb+5.7,GLc,0.045,16);Q(u-0.42,u+0.42,yb+5.0,yb+5.06,fr,0.05);
+      mb.q(fp(u-0.25,yb+3.2,0.02),fp(u+0.25,yb+3.2,0.02),fp(u+0.25,yb+3.2,0.25),fp(u-0.25,yb+3.2,0.25),cc(180,160,130),0)}}
+  // anexo de um piso com montra
+  const aw=maia?7:6,ad=d-1.4,an=add(add(cc2,mulv(F,w/2+aw/2)),mulv(n,-0.7)),ah=3.1;
+  boxRF(mb,an,F,R,aw,ad,yb,yb+ah,WH,WL,2,2);boxRF(mb,an,F,R,aw+0.1,ad+0.1,yb,yb+0.6,GRN,13,2,2,0,1,true);hipRoof(mb,an,F,R,aw,ad,yb+ah,1.3,ROOF,0.5);
+  Q(-aw*0.38,aw*0.38,yb+0.7,yb+2.5,GLc,0.03,16,an,ad);
+  // pala azul sobre o cais (Castêlo da Maia, Covas)
+  if(!big){const y=yb+3.0,u0=w/2-1.5,u1=w/2+aw+1.2,D=3.0,bl=cc(34,78,168);const P=(u,o)=>fp(u,y,o);
+    mb.q(P(u0,0.1),P(u1,0.1),P(u1,D),P(u0,D),cc(110,112,116),0);mb.q(add(P(u0,D),[0,-0.45,0]),add(P(u1,D),[0,-0.45,0]),P(u1,D),P(u0,D),bl,0);
+    for(const u of[u0+0.3,(u0+u1)/2,u1-0.3]){const b=fp(u,yb,D-0.25);boxRF(mb,b,F,R,0.22,0.22,yb,y,maia?WH:cc(190,186,178),maia?6:13,1,1)}}
+  // relógio de ponteiro em braço
+  {const cp=fp(maia?w*0.3:w*0.12,yb+2.75,0.55);plateQ(mb,cp,mulv(F,1),0.55,0.55,ATL['clock'],0,true);limb(mb,fp(maia?w*0.3:w*0.12,yb+2.75,0.02),cp,0.04,0.04,cc(40,40,40),F)}
+  // escadaria exterior na empena (Maia)
+  if(big){for(let k=0;k<9;k++){const c=add(add(cc2,mulv(F,-(w/2+0.65))),mulv(n,-d/2+0.3+k*0.36));boxRF(mb,c,F,R,1.1,0.4,yb,yb+0.4+k*0.38,GRN,13,1,1)}
+    boxRF(mb,add(cc2,mulv(F,-(w/2+0.65))),F,R,1.2,d*0.9,yb,yb+0.25,GRN,13,1,1)}
+  // palmeira junto à estação (Muro)
+  if(nm==='Muro'){const pc=add(cc2,add(mulv(F,-w/2-3),mulv(n,d/2-0.5)));cyl(mb,pc,yb,yb+6.5,0.22,0.16,8,cc(120,100,76),0);
+    for(let k=0;k<9;k++){const a=k/9*6.283,tip=[pc[0]+Math.cos(a)*2.4,yb+5.6,pc[2]+Math.sin(a)*2.4];limb(mb,[pc[0],yb+6.5,pc[2]],tip,0.5,0.06,cc(70,110,52),[0,1,0])}}
+}
+function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-maia'||st==='v-gran'){vStation2(mb,st,cc2,F,R,n,yb,nm);return}
   const cfg={'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-gmr':[24,11,2],'v-trin':[38,13,3]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr';
   const WH=pink?cc(218,160,148):cc(238,236,228),OC=pink?cc(196,140,130):cc(132,142,152),GRn=cc(184,178,166),SH=cc(52,92,62),DR=cc(96,62,40),GL=cc(40,48,56);
   boxRF(mb,cc2,F,R,w,d,yb,yb+H,WH,6,3,3);
-  boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+0.85,OC,6,3,3,0,1,true);
+  if(pink)boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+1.25,[1,1,1],15,1.5,1.5,0,1,true);else boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+0.85,OC,6,3,3,0,1,true);
   for(const u of[-1,1])for(const v of[-1,1])boxRF(mb,[cc2[0]+F[0]*u*w/2+R[0]*v*d/2,0,cc2[2]+F[2]*u*w/2+R[2]*v*d/2],F,R,0.5,0.5,yb,yb+H,[1,1,1],13,1.5,1.5);
   if(fl>1)boxRF(mb,cc2,F,R,w+0.14,d+0.14,yb+3.5,yb+3.7,pink?GRn:OC,pink?13:6,2,2);
   boxRF(mb,cc2,F,R,w+0.4,d+0.4,yb+H,yb+H+0.3,GRn,13,2,2);
@@ -1594,12 +1638,14 @@ function vStation(mb,st,cc2,F,R,n,yb,nm){
   // canteiros de flores do jardim da estação
   for(const u of[-w*0.38,w*0.38]){const fb=fp(u,0,1.05);boxRF(mb,fb,F,R,2.4,0.7,yb,yb+0.35,[1,1,1],13,1,1);
     for(let k=0;k<7;k++){const q=add(fb,mulv(F,-1.0+k*0.33));const fc=[[210,40,60],[240,200,60],[250,250,250],[220,90,160],[250,120,40]][(((k+Math.floor(u))%5)+5)%5];blob(mb,[q[0],yb+0.48,q[2]],0.16,0.14,0.16,cc(...fc),k+11)}}
-  if(pink){const an=add(add(cc2,mulv(F,w/2+4.2)),mulv(n,d*0.18));boxRF(mb,an,F,R,8,d*0.62,yb,yb+3.1,cc(218,160,148),6,3,3);boxRF(mb,an,F,R,8.06,d*0.62+0.06,yb,yb+1.3,[1,1,1],15,1.5,1.5,0,1,true);hipRoof(mb,an,F,R,8,d*0.62,yb+3.1,1.7,cc(180,92,62),0.5)}
+  if(pink){const an=add(add(cc2,mulv(F,w/2+4.2)),mulv(n,d*0.18));boxRF(mb,an,F,R,8,d*0.62,yb,yb+3.1,cc(218,160,148),6,3,3);boxRF(mb,an,F,R,8.06,d*0.62+0.06,yb,yb+1.3,[1,1,1],15,1.5,1.5,0,1,true);hipRoof(mb,an,F,R,8,d*0.62,yb+3.1,1.7,cc(180,92,62),0.5);
+    {const y=yb+3.6,u0=-w/2-14,u1=-w/2-0.5,D=3.4,bl=cc(34,78,168),P=(u,o)=>fp(u,y,o);mb.q(P(u0,0.1),P(u1,0.1),P(u1,D),P(u0,D),cc(110,112,116),0);mb.q(add(P(u0,D),[0,-0.4,0]),add(P(u1,D),[0,-0.4,0]),P(u1,D),P(u0,D),bl,0);
+     for(let u=u0+0.5;u<u1;u+=4.5)boxRF(mb,fp(u,yb,D-0.3),F,R,0.2,0.2,yb,y,cc(70,74,80),0)}}
   if(st==='v-est2'||st==='v-fafe'){const an=add(cc2,mulv(F,w/2+2.2));boxRF(mb,an,F,R,3.2,d*0.6,yb,yb+2.8,WH,6,3,3);boxRF(mb,an,F,R,3.3,d*0.6+0.08,yb,yb+0.85,OC,6,3,3,0,1,true);hipRoof(mb,an,F,R,3.2,d*0.6,yb+2.8,1.0,cc(188,98,66),0.3)}
 }
 function bldg3(mb,sp,i,base,R,F,sd,L){
   const st=sp.sty,yb=hy[i]-0.25,n=mulv(R,-sd);
-  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-gmr':11,'v-trin':13}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
+  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-gmr':11,'v-trin':13,'v-maia':8,'v-gran':7.5}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
   const C0=(d)=>L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);
   const front=(cc2,d,y)=>[cc2[0]+n[0]*(d/2+0.06),y,cc2[2]+n[2]*(d/2+0.06)];
   const gr=cc(196,188,172),cream=cc(238,224,194),white=cc(246,244,238);
