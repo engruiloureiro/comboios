@@ -264,7 +264,7 @@ const DEPR=RAW.map(r=>r[5]);
 function byNameE(n){return STN.find(s=>s.n===n)}
 const SB=STN[0], GMR=STN[STN.length-1], PV=byNameE('Paçô Vieira'), GUI=byNameE('Guimarães'), TRF=byNameE('Trofa');
 const DUM={pos:-1e9,pa:-1e9,pb:-1e9,k:-1e6,n:'—'};
-const LOU=DUM,TRO=DUM,ERM=DUM,VIZ=DUM,SFR=DUM,LEA=DUM,CAN=DUM,CPA=DUM,CTM=DUM;
+const SDH=byNameE('Senhora da Hora'),LOU={...DUM,pos:SDH.pos+74},TRO=DUM,ERM=DUM,VIZ=DUM,SFR=DUM,LEA=DUM,CAN=DUM,CPA=DUM,CTM=DUM;
 const byName=n=>STN.find(s=>s.n===n);
 const END=GMR.pos, BUFFER=END+30;
 const TOTAL=Math.ceil((END+700)/SEG);
@@ -281,8 +281,10 @@ const LAY={
  SX:{pl:[[-1.8,-5.2],[5.8,8.6]],ex:[[0,4]]},
  SL:{pl:[[-1.8,-4.6]],ex:[]},
  SR:{pl:[[1.8,4.6]],ex:[]},
+ DB:{pl:[[-1.8,-4.6],[5.8,8.6]],ex:[]},
 };
 for(const s of STN){
+  if(s.k<6&&(s.lay==='SL'||s.lay==='SR'))s.lay='DB';
   const L=LAY[s.lay];s.pl=L.pl;
   s.pa=s.pos-s.plen; s.pb=s.pos+14;
   s.ex=L.ex.map(([from,to])=>({from,to,a:s===SB?s.pa-140:s.pa-110,b:s===GMR?BUFFER+40:s.pb+110}));
@@ -293,6 +295,7 @@ for(const s of STN){
   s.cano=C[s.sty]||null;s.tiles=false;
 }
 const BUFFER_R=SB.pa-25;
+const DBL={from:0,to:4,a:SB.pa-160,b:SDH.pb+170};
 function trackXR(p){return 0}
 const trackX=p=>0;
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
@@ -347,7 +350,7 @@ let LIMCH=[];
     tun[i]=inRange(TUN,p)?1:0;brg[i]=(inRange(BRIDGES,p)||{t:0}).t;shed[i]=0;
     const rv=inRange(RIVER,p);riv[i]=rv?rv.side:0;
     for(const s of STN)if(p>=s.pa&&p<=s.pb){plat[i]=s;break}
-    const r=[];for(const s of STN){if(p<s.pa-400||p>s.pb+400)continue;for(const e of s.ex){const v=exOff(e,p);if(v!==null&&Math.abs(v-e.from)>0.25)r.push(v)}}
+    const r=[];{const v=exOff(DBL,p);if(v!==null&&Math.abs(v)>0.25)r.push(v)}for(const s of STN){if(p<s.pa-400||p>s.pb+400)continue;for(const e of s.ex){const v=exOff(e,p);if(v!==null&&Math.abs(v-e.from)>0.25)r.push(v)}}
     trk[i]=r}
   for(let k=0;k<TOTAL;k++){const p=k*SEG,z=zoneI[k];
     const f=(z==='rural'||z==='valley'||z==='mixed'||z==='penha')?1:(z==='urban'||z==='dense'?0.4:0);
@@ -711,9 +714,9 @@ function step(dt,dr){
 
   // comboios em sentido contrário (via dupla)
   if(S.pos<LOU.pos-(REV?800:1500)&&S.clock>S.nextSpawn&&!S.atSt){
-    const len=rnd()<0.8?90:180,c=rnd()<0.85?'u':'ic',v=18+rnd()*14;
+    const len=rnd()<0.7?31:62,c='u',v=10+rnd()*5;
     if(!REV){const p0=S.pos+1500+rnd()*900;if(p0<LOU.pos)TRAINS.push({o:4,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:-1})}
-    else{const p0=S.pos-1500-rnd()*900-len;if(p0>km(1.2))TRAINS.push({o:0,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:1})}
+    else{const p0=S.pos-1500-rnd()*900-len;if(p0>km(1.2))TRAINS.push({o:4,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:1})}
     S.nextSpawn=S.clock+160+rnd()*260}
   for(const t of TRAINS){if(!t.mov)continue;t.a+=t.dir*t.v*dt;
     if(!t.passed&&(t.dir<0?t.a<S.pos+30:t.a+t.len>S.pos-30)){t.passed=true;whoosh()}}
