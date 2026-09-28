@@ -1504,10 +1504,10 @@ function buildChunk(c){
     for(const w of[wallL[i],wallR[i]]){if(!w)continue;const g=w.t==='g';
       mb.q(LP(i,w.x,-0.3),LP(j,w.x,-0.3),LP(j,w.x,w.h),LP(i,w.x,w.h),g?[1,1,1]:cc(110,150,120),g?13:6,[p/8,w.h/4,(p+SEG)/8,0]);
       const s=Math.sign(w.x);mb.q(LP(i,w.x,w.h),LP(j,w.x,w.h),LP(j,w.x+s*0.5,w.h),LP(i,w.x+s*0.5,w.h),cc(170,166,158),6)}
-    if(tun[i]){const tc=0,pts=[[-2.9,0],[-2.9,3.6],[-2.2,4.6],[-0.9,5.2],[0.9,5.2],[2.2,4.6],[2.9,3.6],[2.9,0]];
+    if(tun[i]){const xr=Math.max(0,...trk[i]),tc=xr/2,sx=1+xr/5.8,pts=[[-2.9,0],[-2.9,3.6],[-2.2,4.6],[-0.9,5.2],[0.9,5.2],[2.2,4.6],[2.9,3.6],[2.9,0]].map(([x,y])=>[tc+x*sx,y+(y>3.6?(sx-1)*0.9:0)]);
       const tcol=cc(128,120,108);
       for(let k=0;k<pts.length-1;k++){const a=pts[k],b=pts[k+1];mb.q(LP(i,a[0],a[1]),LP(i,b[0],b[1]),LP(j,b[0],b[1]),LP(j,a[0],a[1]),tcol,6,[0,p/6,1,(p+SEG)/6],0,0.2)}
-      mb.q(LP(i,-2.9,-0.2),LP(i,2.9,-0.2),LP(j,2.9,-0.2),LP(j,-2.9,-0.2),cc(70,68,64),3,[0,0,3,1],0,0.2);
+      mb.q(LP(i,tc-2.9*sx,-0.2),LP(i,tc+2.9*sx,-0.2),LP(j,tc+2.9*sx,-0.2),LP(j,tc-2.9*sx,-0.2),cc(70,68,64),3,[0,0,3,1],0,0.2);
       if(false)for(const lx of[tc-6.15,tc+6.15]){const c=PI(i,lx,3.2);boxRF(mb,L(c),RV(i),FV(i),0.12,0.5,hy[i]+3.1,hy[i]+3.25,cc(255,236,190),0,0,0,1)}}
     if(tun[i]!==tun[i-1]&&i>0)portal3(mb,i,L);
     if(i===Math.floor((TUN[0].a+TUN[0].b)/2/SEG)){let prv=null;for(let o=-90;o<=90;o+=10){const w=PI(i,o,0);const y=Math.max(terrH(i,o,w[0],w[2]),hy[i]+5.6)+0.3;const F2=FV(i);
@@ -1535,11 +1535,11 @@ function buildChunk(c){
           mb.q(L(prv),L(cur),L(add(cur,[0,0.025,0])),L(add(prv,[0,0.025,0])),cc(40,40,40),0);prv=cur}}}}}}
   if(!mb.d.length)return{empty:true,ox,oz};
   const g=upload(mb);g.ox=ox;g.oz=oz;return g}
-function portal3(mb,i,L){const tc=0,urban=false;const col=[1,1,1];const HW=2.9,SPR=3.6;
-  const arch=[];for(let k=0;k<=12;k++){const a=Math.PI*k/12;arch.push([-HW*Math.cos(a),SPR+1.6*Math.sin(a)])}
-  const W1=-7.5,W2=7.5,H=7.5;const P=(x,y)=>L(PI(i,x,y));
-  mb.q(P(W1,-0.5),P(-HW,-0.5),P(-HW,H),P(W1,H),col,13,[0,H/4,(W1+HW)/-4,0]);
-  mb.q(P(HW,-0.5),P(W2,-0.5),P(W2,H),P(HW,H),col,13,[0,H/4,(W2-HW)/4,0]);
+function portal3(mb,i,L){const xr=Math.max(0,...trk[Math.min(i,TOTAL-1)],...trk[Math.max(0,i-1)]),tc=xr/2,col=[1,1,1];const HW=2.9+xr/2,SPR=3.6;
+  const arch=[];for(let k=0;k<=12;k++){const a=Math.PI*k/12;arch.push([tc-HW*Math.cos(a),SPR+(1.6+xr*0.2)*Math.sin(a)])}
+  const W1=tc-7.5-xr/2,W2=tc+7.5+xr/2,H=7.5;const P=(x,y)=>L(PI(i,x,y));
+  mb.q(P(W1,-0.5),P(tc-HW,-0.5),P(tc-HW,H),P(W1,H),col,13,[0,H/4,(tc-HW-W1)/4,0]);
+  mb.q(P(tc+HW,-0.5),P(W2,-0.5),P(W2,H),P(tc+HW,H),col,13,[0,H/4,(W2-tc-HW)/4,0]);
   for(let k=0;k<12;k++){const a=arch[k],b=arch[k+1];mb.q(P(a[0],a[1]),P(b[0],b[1]),P(b[0],H),P(a[0],H),col,13,[a[0]/4,(H-a[1])/4,b[0]/4,0])}
   mb.q(P(W1-0.3,H),P(W2+0.3,H),P(W2+0.3,H+0.8),P(W1-0.3,H+0.8),cc(170,160,146),13)}
 const sd2=(n,R)=>-(n[0]*R[0]+n[2]*R[2]);
