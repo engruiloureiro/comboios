@@ -94,6 +94,12 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .ov{position:fixed;inset:0;background:rgba(18,22,26,.92);display:grid;place-items:center;padding:20px;z-index:10;overflow:auto}
 .ov[hidden]{display:none}
 .panel{max-width:460px;width:100%;line-height:1.35;font-size:17px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cgrid label{display:flex;flex-direction:column;font-size:14px;color:#cdd;gap:3px}.cgrid label:last-child{grid-column:1 / span 2}
+.cgrid select,.cgrid input{font:600 17px 'Barlow Condensed',Arial,sans-serif;padding:7px;border-radius:7px;border:0;background:#eef0f2;color:#111;min-width:0}
+.cbar{display:flex;align-items:center;gap:6px;margin:12px 0 6px;font-size:14px;color:#cdd}.cbar span{flex:1}.cbar button{border:0;border-radius:6px;padding:5px 9px;background:#3d4a55;color:#fff;font:600 14px 'Barlow Condensed',Arial,sans-serif;cursor:pointer}
+#cList{max-height:38vh;overflow:auto;background:rgba(255,255,255,.05);border-radius:8px;padding:4px 8px}
+#cList label{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:16px;cursor:pointer}
+#cList label b{margin-left:auto;font-variant-numeric:tabular-nums;color:#ffd24a;font-weight:600}#cList label.end{color:#9ab;cursor:default}#cList input{width:18px;height:18px}
 .panel .azulejo{font-size:34px;line-height:1.05;padding:16px 20px;margin-bottom:16px}
 .panel .azulejo small{display:block;font-size:17px;font-weight:600;margin-top:4px}
 .panel p{margin:0 0 10px;color:#d5dbde}
@@ -169,7 +175,23 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <button class="cta" id="bStart6" style="background:#94371a" data-r="Porto-Trindade>Fafe">Porto-Trindade → Fafe<small></small></button>
     <button class="cta" id="bStart7" style="background:#6a321a" data-r="Fafe>Porto-Trindade">Fafe → Porto-Trindade<small></small></button>
     </div>
+    <button class="cta alt" id="bCustom">Horário à medida<small>Escolha a partida, o destino, a hora e as paragens</small></button>
     <p style="font-size:14px;color:#aab">Horário e parte do traçado reconstituídos: não há registo público do horário de 1985 nem do traçado detalhado.</p>
+  </div>
+</div>
+<div class="ov" id="ovCustom" hidden>
+  <div class="panel">
+    <div class="azulejo">Horário à medida<small>Defina o seu comboio</small></div>
+    <div class="cgrid">
+      <label>Partida<select id="cFrom"></select></label>
+      <label>Destino<select id="cTo"></select></label>
+      <label>Hora de partida<input type="time" id="cTime" value="17:00" step="60"></label>
+    </div>
+    <div class="cbar"><span>Paragens</span><button type="button" id="cAll">Todas</button><button type="button" id="cEst">Só estações</button><button type="button" id="cNone">Nenhuma</button></div>
+    <div id="cList" role="group" aria-label="Paragens intermédias"></div>
+    <p id="cSum" style="font-size:14px;color:#aab;margin:6px 0 0"></p>
+    <button class="cta" id="cGo">Partir</button>
+    <button class="cta alt" id="cBack">Voltar ao menu</button>
   </div>
 </div>
 <div class="ov" id="ovPause" hidden>
@@ -526,8 +548,9 @@ let SHIFT=0,PERIOD='tarde';
 const routeShift=(i,rev)=>!rev&&i<GUI.i?2*3600:0;const PSH={dia:-5*3600,tarde:0,noite:4.5*3600};
 function reset(startIdx,endIdx,rev,svc){
   REV=!!rev;DIRC=REV?'R':'F';
-  for(const s of STN)s.dep=svc&&SEMI[svc]?(SEMI[svc][s.n]?T(SEMI[svc][s.n]):null):(REV?s.depR:s.depF);
-  if(VINT){const x=SHIFT+routeShift(startIdx,REV);for(const s of STN)if(s.dep!==null)s.dep+=x}
+  const cust=svc&&typeof svc==='object'?svc:null;
+  for(const s of STN)s.dep=cust?(cust.t[s.i]!==undefined?cust.t[s.i]:null):svc&&SEMI[svc]?(SEMI[svc][s.n]?T(SEMI[svc][s.n]):null):(REV?s.depR:s.depF);
+  if(VINT&&!cust){const x=SHIFT+routeShift(startIdx,REV);for(const s of STN)if(s.dep!==null)s.dep+=x}
   ORD=REV?STN.slice().reverse():STN;
   const st=STN[startIdx],en=STN[endIdx];
   const inRoute=s=>REV?(s.i<=startIdx&&s.i>=endIdx):(s.i>=startIdx&&s.i<=endIdx);
@@ -2231,7 +2254,7 @@ function frame(now){
   if(use3D)render3D(dtR);else render();hud(dtR);audioUpdate(dtR);
   requestAnimationFrame(frame);
 }
-function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
+function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
   running=true;paused=false;$('#bWarp').textContent='Tempo ×1';
   const st=STN[idx];toast('Automotora 9600 para '+S.endSt.n+'. Partida de '+st.n+' às '+fHM(st.dep)+'. Arranque depois do apito do chefe da estação.','');
   setTimeout(()=>say((S.semi?'Comboio semirrápido com destino a ':'Comboio urbano com destino a ')+S.endSt.n+(S.semi?', com paragem em '+STOPS.slice(1,-1).map(x=>x.n.replace('Porto ','')).join(', '):'')+'. Partida às '+fHM(st.dep).replace(':',' e ')+'.'),900)}
@@ -2254,7 +2277,7 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
   document.querySelectorAll('#perSel button').forEach(b=>{b.classList.toggle('on',b.dataset.p===PERIOD);b.setAttribute('aria-checked',b.dataset.p===PERIOD)})}
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
-  const o={v:1,ns:STN.length,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
+  const o={v:1,ns:STN.length,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
     s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
     st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])};
   try{localStorage.setItem(SAVEK,JSON.stringify(o));toast('Jogo guardado às '+fHMS(S.clock)+' (hora do jogo).','good');refreshLoad()}catch(e){toast('Não foi possível guardar neste navegador.','bad')}}
@@ -2263,7 +2286,7 @@ function readSave(){try{const r=localStorage.getItem(SAVEK);const o=r?JSON.parse
   if(o&&(o.ns!==STN.length||!STN[o.start]||!STN[o.end])){localStorage.removeItem(SAVEK);return null}return o}catch(e){return null}}
 function refreshLoad(){const o=readSave(),b=$('#bLoad');if(!o){b.hidden=true;return}b.hidden=false;
   const a=STN[o.start].n,z=STN[o.end].n;$('#loadInfo').textContent=a+' → '+z+', guardado a '+new Date(o.t).toLocaleString('pt-PT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
-function loadGame(){const o=readSave();if(!o)return;PERIOD=o.period||'tarde';updPeriod();start(o.start,o.end,o.rev);
+function loadGame(){const o=readSave();if(!o)return;PERIOD=o.period||'tarde';updPeriod();start(o.start,o.end,o.rev,o.cust||undefined);
   Object.assign(S,o.s);S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
   o.st.forEach((q,k)=>{STN[k].served=!!q[0];STN[k].skipped=!!q[1];STN[k].paxGone=q[2]});o.pn.forEach((q,k)=>{if(PN[k]){PN[k].done=!!q[0];PN[k].honk=!!q[1]}});
   setNotch(S.notch,true);updRev();$('#bWarp').textContent='Tempo ×'+S.warp;$('#card').hidden=true;buildStrip();toast('Jogo retomado em '+fHMS(S.clock)+'.','good')}
@@ -2271,6 +2294,31 @@ $('#bLoad').onclick=loadGame;$('#bSave').onclick=saveGame;$('#bQS').onclick=save
 $('#bMenu').onclick=()=>{running=false;paused=false;$('#ovPause').hidden=true;refreshLoad();$('#ovStart').hidden=false};
 setInterval(()=>{if(running&&!paused&&S&&S.finishT<0)try{saveGame.silent=1;const t=toast;toast=()=>{};saveGame();toast=t}catch(e){}},45000);
 updPeriod();refreshLoad();
+/* ---- horário à medida ---- */
+// tempo mínimo de marcha entre duas posições, parando nas duas pontas (limites de velocidade, aceleração e travagem da automotora)
+function runMin(a,b){const dx=4,n=Math.max(2,Math.ceil(Math.abs(b-a)/dx)),sg=Math.sign(b-a),v=new Float64Array(n+1);
+  for(let i=0;i<=n;i++)v[i]=limitAt(a+sg*i*dx)/3.6*0.95;v[0]=0;v[n]=0;
+  for(let i=1;i<=n;i++){const acc=Math.min(0.5,3.4/Math.max(v[i-1],0.1))-0.03;v[i]=Math.min(v[i],Math.sqrt(v[i-1]**2+2*acc*dx))}
+  for(let i=n-1;i>=0;i--)v[i]=Math.min(v[i],Math.sqrt(v[i+1]**2+2*0.55*dx));
+  let t=0;for(let i=0;i<n;i++)t+=dx/Math.max(0.3,(v[i]+v[i+1])/2);return t}
+const CU={};
+function custPlan(){const a=+$('#cFrom').value,z=+$('#cTo').value,rev=z<a,[h,m]=($('#cTime').value||'17:00').split(':').map(Number);
+  const route=STN.filter(s=>rev?s.i<=a&&s.i>=z:s.i>=a&&s.i<=z);if(rev)route.reverse();
+  const stops=route.filter((s,k)=>k===0||k===route.length-1||CU.sel[s.i]);const t={};let c=h*3600+m*60;t[stops[0].i]=c;
+  for(let k=1;k<stops.length;k++){const p=stops[k-1],q=stops[k],pa=rev?p.stopR:p.pos,pb=rev?q.stopR:q.pos;
+    c+=Math.ceil((runMin(pa,pb)*1.14+45)/60)*60;if(k<stops.length-1)c+=q.ty==='ap'?30:60;t[q.i]=c}
+  return{a,z,rev,route,stops,t}}
+function custRender(){const P=custPlan();const el=$('#cList');el.innerHTML='';
+  if(P.a===P.z){el.innerHTML='<p style="color:#f99">A partida e o destino têm de ser diferentes.</p>';$('#cGo').disabled=true;$('#cSum').textContent='';return}$('#cGo').disabled=false;
+  P.route.forEach((s,k)=>{const end=k===0||k===P.route.length-1,lb=document.createElement('label');if(end)lb.className='end';
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=end||!!CU.sel[s.i];cb.disabled=end;cb.onchange=()=>{CU.sel[s.i]=cb.checked;custRender()};
+    lb.append(cb,document.createTextNode(s.n+(s.ty==='ap'?' (apeadeiro)':'')));const b=document.createElement('b');b.textContent=P.t[s.i]!==undefined?fHM(P.t[s.i]):'—';lb.append(b);el.append(lb)});
+  const d=P.t[P.z]-P.t[P.a];$('#cSum').textContent=(P.stops.length-2)+' paragens intermédias, chegada às '+fHM(P.t[P.z])+' ('+(d>=3600?Math.floor(d/3600)+' h '+fmt2(Math.round(d/60)%60):Math.round(d/60)+' min')+').'}
+{const f=$('#cFrom'),z=$('#cTo');for(const s of STN){f.add(new Option(s.n,s.i));z.add(new Option(s.n,s.i))}f.value=0;z.value=GUI.i;CU.sel={};for(const s of STN)CU.sel[s.i]=true;
+ for(const e of[f,z,$('#cTime')])e.onchange=custRender;$('#cTime').oninput=custRender;
+ $('#cAll').onclick=()=>{for(const s of STN)CU.sel[s.i]=true;custRender()};$('#cEst').onclick=()=>{for(const s of STN)CU.sel[s.i]=s.ty!=='ap';custRender()};$('#cNone').onclick=()=>{for(const s of STN)CU.sel[s.i]=false;custRender()};
+ $('#bCustom').onclick=()=>{$('#ovStart').hidden=true;$('#ovCustom').hidden=false;custRender()};$('#cBack').onclick=()=>{$('#ovCustom').hidden=true;$('#ovStart').hidden=false};
+ $('#cGo').onclick=()=>{const P=custPlan();if(P.a===P.z)return;$('#ovCustom').hidden=true;start(P.a,P.z,P.rev,{t:P.t})}}
 document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i)});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
 $('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;
 $('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.','');return}setCam(CAMS[(CAMS.indexOf(camMode)+1)%CAMS.length])};
