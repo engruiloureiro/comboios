@@ -320,7 +320,9 @@ for(const s of STN){
 const BUFFER_R=SB.pa-25;
 const DBL={from:0,to:4,a:SB.pa-160,b:SDH.pb+170};
 function trackXR(p){return 0}
-const trackX=p=>0;
+// via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
+let SIDE=[];
+const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return 0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=[{a:PV.pos-106,b:PV.pos-35,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
@@ -567,10 +569,13 @@ function reset(startIdx,endIdx,rev,svc){
   S.maxPts=(STOPS.length-1)*100+STOPS.length*100+PN.filter(p=>!p.done).length*15;
   TRAINS=PARKED.map(t=>({...t,v:0}));
   // cruzamentos nas estações com via de resguardo dos troços de via única
+  SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}
   {let last=p0;const dir=REV?1:-1;
    for(const X of STOPS){if(X===st||X===en||!X.ex.length||X.pos<LOU.pos+200)continue;if(Math.abs(X.pos-last)<3500&&rnd()<0.7)continue;last=X.pos;
      const fr=rnd()<0.35,cons=fr?freight(4+Math.floor(rnd()*4)):null,e=X.ex[0],len=fr?cons.reduce((s,q)=>s+q.len+0.6,0):rnd()<0.75?31:62,stopA=REV?X.pos-8-len:X.pa+6,arrT=X.dep-150+Math.round(rnd()*330);
-     TRAINS.push({cross:X,e,stopA,arrT,len,cons,o:0,c:fr?'loco':'u',v:0,vmax:fr?9+rnd()*3:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:p=>p<LOU.pos?4:(exOff(e,p)??0)})}}
+     // nem sempre a nossa automotora fica na via principal: às vezes é ela que entra na via desviada
+     const busy=PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a),weDiv=!busy&&rnd()<0.45;if(weDiv){SIDE.push(e);X.divert=true}
+     TRAINS.push({cross:X,e,stopA,arrT,len,cons,o:0,c:fr?'loco':'u',v:0,vmax:fr?9+rnd()*3:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:weDiv?(p=>p<LOU.pos?4:0):(p=>p<LOU.pos?4:(exOff(e,p)??0))})}}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   buildStrip();
 }
@@ -769,7 +774,8 @@ function step(dt,dr){
   while(S.jI>0&&JOINTS[S.jI-1]>S.pos){if(S.pos<S.prevPos){bogies(1);S.bump=0.035}S.jI--}
 
   // velocidade (CONVEL)
-  const lim=S.back?Math.min(30,limitAt(S.pos)):limitAt(S.pos);S.over=false;
+  const inDiv=SIDE.some(e=>S.pos>e.a&&S.pos<e.b);const lim=S.back||inDiv?Math.min(30,limitAt(S.pos)):limitAt(S.pos);S.limNow=lim;
+  for(const X of STN)if(X.divert&&!X.divAnn&&ahead(X)<1200&&ahead(X)>0){X.divAnn=true;toast('Cruzamento em '+X.n+': entrada pela via desviada, a 30 km/h nas agulhas.','')}S.over=false;
   S.derT=S.derT||0;if(kmh>lim+18){S.derT+=dt;if(S.derT>2.5){gameOver('A automotora descarrilou: entrou numa curva a '+Math.round(kmh)+' km/h com limite de '+lim+'.');return}}else S.derT=Math.max(0,S.derT-dt);
   if(kmh>lim+1.5){S.over=true;S.sc.pen+=2*dt}
   if(S.notch===0&&kmh>20&&!S.emUsed){S.emUsed=true;penal(20,'Travagem de emergência')}
@@ -820,7 +826,7 @@ function step(dt,dr){
     else if(t.st==='wait'){if(S.atSt===X||X.served&&S.atSt!==X){t.st='go';t.goT=S.clock+12}}
     else if(t.st==='go'&&S.clock>t.goT){t.v=Math.min(t.vmax,t.v+0.4*dt);t.a+=t.dir*t.v*dt}
     // colisão frontal se a automotora passar a estação de cruzamento antes de a outra chegar
-    if(t.st==='app'){const gap=REV?S.pos-(t.a+t.len):t.a-S.pos;if(gap<4&&Math.abs(t.xo(REV?t.a+t.len:t.a))<1){gameOver('Colisão frontal com a automotora contrária: não esperou pelo cruzamento em '+X.n+'.');return}}}
+    if(t.st==='app'){const gap=REV?S.pos-(t.a+t.len):t.a-S.pos;if(gap<4&&Math.abs(t.xo(REV?t.a+t.len:t.a)-trackX(REV?t.a+t.len:t.a))<1){gameOver('Colisão frontal com a automotora contrária: não esperou pelo cruzamento em '+X.n+'.');return}}}
   TRAINS=TRAINS.filter(t=>!t.cross||t.st!=='go'||Math.abs(t.a-S.pos)<2500);
   for(const t of TRAINS){if(!t.mov)continue;t.a+=t.dir*t.v*dt;
     if(!t.passed&&(t.dir<0?t.a<S.pos+30:t.a+t.len>S.pos-30)){t.passed=true;whoosh()}}
@@ -1286,7 +1292,7 @@ function buildStrip(){const el=$('#dots');el.innerHTML='';const a=SB.pos,Ln=END-
 let hudT=0;
 function hud(dtR){
   needle.setAttribute('transform','rotate('+ang(S.v*3.6)+' 60 60)');
-  const lim=limitAt(S.pos);limG.setAttribute('transform','rotate('+ang(lim)+' 60 60)');
+  const lim=S.limNow||limitAt(S.pos);limG.setAttribute('transform','rotate('+ang(lim)+' 60 60)');
   $('#me').style.borderTopColor=REV?'#7fd3ff':'#ffd24a';$('#me').style.left=(clamp((S.pos-SB.pos)/(END-SB.pos),0,1)*100)+'%';
   if(toastT>0){toastT-=dtR;if(toastT<=0)$('#toast').classList.remove('show')}
   hudT-=dtR;if(hudT>0)return;hudT=0.12;
