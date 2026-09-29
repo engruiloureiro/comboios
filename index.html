@@ -571,7 +571,8 @@ function reset(startIdx,endIdx,rev,svc){
   // cruzamentos nas estações com via de resguardo dos troços de via única
   SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}
   {let last=p0;const dir=REV?1:-1;
-   for(const X of STOPS){if(X===st||X===en||!X.ex.length||X.pos<LOU.pos+200)continue;if(Math.abs(X.pos-last)<3500&&rnd()<0.7)continue;last=X.pos;
+   for(const X of STOPS){if(X===st||X===en||!X.ex.length||X.pos<LOU.pos+200)continue;// cada estação só tem cruzamento umas vezes: cerca de metade, menos se a anterior foi perto
+     if(rnd()<0.5||(Math.abs(X.pos-last)<3500&&rnd()<0.6))continue;last=X.pos;
      const fr=rnd()<0.35,cons=fr?freight(4+Math.floor(rnd()*4)):null,e=X.ex[0],len=fr?cons.reduce((s,q)=>s+q.len+0.6,0):rnd()<0.75?31:62,stopA=REV?X.pos-8-len:X.pa+6,arrT=X.dep-150+Math.round(rnd()*330);
      // nem sempre a nossa automotora fica na via principal: às vezes é ela que entra na via desviada
      const busy=PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a),weDiv=!busy&&rnd()<0.45;if(weDiv){SIDE.push(e);X.divert=true}
