@@ -238,7 +238,7 @@ const RAW=[
  ['Francos',41.1655,-8.6385,3.20,'15:07','20:52','ap',0,'SL',-1,60,0.3,96,'v-ap'],
  ['Ramalde',41.1716,-8.6424,3.95,'15:10','20:49','ap',0,'SR',1,60,0.3,93,'v-ap'],
  ['Circunvalação',41.1787,-8.6462,4.80,'15:13','20:46','ap',0,'SL',-1,60,0.3,96,'v-ap'],
- ['Senhora da Hora',41.1880,-8.6545,6.05,'15:17','20:42','est',1,'SX',-1,110,0.35,101,'v-est2'],
+ ['Senhora da Hora',41.1880,-8.6545,6.05,'15:17','20:42','est',1,'SX',-1,110,0.35,101,'v-sdh'],
  ['Araújo',41.2010,-8.6460,8.00,'15:21','20:38','ap',0,'SR',1,60,0.3,96,'v-ara'],
  ['Maia',41.2335,-8.6215,12.20,'15:27','20:32','est',1,'SX',-1,110,0.35,86,'v-maia'],
  ['Mandim',41.2555,-8.6075,14.95,'15:32','20:27','ap',0,'SL',-1,60,0.3,80,'v-ap'],
@@ -321,10 +321,11 @@ for(const s of STN){
 PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
 const BUFFER_R=SB.pa-25;
 const DBL={from:0,to:4,a:SB.pa-160,b:SDH.pb+170};
-function trackXR(p){return 0}
+// no sentido da Trindade circula-se pela via da esquerda desse sentido, que é a segunda via (x=4)
+function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
 // via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
 let SIDE=[];
-const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return 0};
+const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
@@ -530,7 +531,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     {
       const bs=s.bside;let outer=0;for(const r of s.pl)if(Math.sign(r[0])===bs)outer=Math.max(outer,Math.abs(r[1]));
       if(!outer)outer=bs<0?3.5:(Math.max(0,...s.ex.map(e=>e.to))+3.5);
-      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30}[s.sty];
+      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-sdh':-60,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30}[s.sty];
       if(bp!==undefined&&s.sty!=='trofa')at(s.pos+bp).push({t:'bldg',x:s===SB?bs*17:bs*(outer+0.8),sty:s.sty,n:s.n,st:s,w:{neo:60,'neo-g':34,old:22,old2:16,erm:26,new:22,ns:12,ho:8}[s.sty],h:{neo:9.5,'neo-g':9,old:7,old2:8,erm:7,new:5.5,ns:4.2,ho:3.6}[s.sty],az:true});
       if(s.sty==='hn-foot')at(s.pos-55).push({t:'foot',x:2,w:16});
       if(s.sty==='hn'||s.sty==='hn-foot'||s.sty==='new'||s.sty==='ns'){for(const r of s.pl){const sd=Math.sign(r[0]);at(s.pos-(s.plen*0.45)).push({t:'kiosk',x:(r[0]+r[1])/2+sd*0.6,y:s.ph,st:s})}}
@@ -598,7 +599,7 @@ function reset(startIdx,endIdx,rev,svc){
      const fr=rnd()<0.35,cons=fr?freight(4+Math.floor(rnd()*4)):null,e=X.ex[0],len=fr?cons.reduce((s,q)=>s+q.len+0.6,0):rnd()<0.75?31:62,stopA=X===PV?(REV?e.b-65-len:e.a+65):REV?X.pos-8-len:X.pa+6,arrT=X.dep-150+Math.round(rnd()*330);
      // nem sempre a nossa automotora fica na via principal: às vezes é ela que entra na via desviada
      const busy=PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a),weDiv=!busy&&X!==PV&&rnd()<0.45;if(weDiv){SIDE.push(e);X.divert=true}
-     TRAINS.push({cross:X,e,stopA,arrT,len,cons,o:0,c:fr?'loco':'u',v:0,vmax:fr?9+rnd()*3:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:weDiv?(p=>p<LOU.pos?4:0):(p=>p<LOU.pos?4:(exOff(e,p)??0))})}}
+     TRAINS.push({cross:X,e,stopA,arrT,len,cons,o:0,c:fr?'loco':'u',v:0,vmax:fr?9+rnd()*3:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:weDiv?(p=>p<LOU.pos?(REV?0:4):0):(p=>p<LOU.pos?(REV?0:4):(exOff(e,p)??0))})}}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   buildStrip();
 }
@@ -841,7 +842,7 @@ function step(dt,dr){
   if(S.pos<LOU.pos-(REV?800:1500)&&S.clock>S.nextSpawn&&!S.atSt){
     const len=rnd()<0.7?31:62,c='u',v=10+rnd()*5;
     if(!REV){const p0=S.pos+1500+rnd()*900;if(p0<LOU.pos)TRAINS.push({o:4,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:-1})}
-    else{const p0=S.pos-1500-rnd()*900-len;if(p0>km(1.2))TRAINS.push({o:4,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:1})}
+    else{const p0=S.pos-1500-rnd()*900-len;if(p0>km(1.2))TRAINS.push({o:0,a:p0,len,c,v,lit:true,mov:true,passed:false,dir:1})}
     S.nextSpawn=S.clock+80+rnd()*140}
   for(const t of TRAINS){if(!t.cross)continue;const X=t.cross;
     if(t.st==='app'){const d=Math.max(0,t.arrT-S.clock)*t.vmax;t.a=t.stopA-t.dir*d;
@@ -1713,15 +1714,17 @@ function vStation2(mb,st,cc2,F,R,n,yb,nm){
   hipRoof(mb,cc2,F,R,w,d,yb+H,white?2.3:2.9,ROOF,white?0.95:0.6);
   {const ch=add(cc2,add(mulv(F,-w*0.28),mulv(n,-d*0.12))),hc=white?3.1:4.2;boxRF(mb,ch,F,R,0.8,0.8,yb+H,yb+H+hc,white?WH:[0.84,0.82,0.78],WL,1,1);boxRF(mb,ch,F,R,1.0,1.0,yb+H+hc,yb+H+hc+0.2,cc(176,170,160),0)}
   // friso de azulejo com o nome sob o beirado (tipo Maia) ou nome pintado (Covas)
-  if(maia){plateQ(mb,fp(0,yb+H-0.6,0.03),n,w-0.3,0.85,ATL['az:'+nm],0,false);
-    for(const e of[-1,1]){const en=mulv(F,e);plateQ(mb,[cc2[0]+en[0]*(w/2+0.03),yb+H-0.6,cc2[2]+en[2]*(w/2+0.03)],en,d-0.3,0.85,ATL['az:'],0,false)}}
-  else if(lord){const pn=ATL['pn:'+nm];if(pn)plateQ(mb,fp(-w*0.12,yb+5.5,0.04),n,3.2,0.57,pn,0,false);
+  if(maia){plateQ(mb,fp(0,yb+H-0.6,0.03),n,w-0.3,0.85,ATL['az:'],0,false);
+    for(const e of[-1,1]){const en=mulv(F,e);plateQ(mb,[cc2[0]+en[0]*(w/2+0.03),yb+H-0.6,cc2[2]+en[2]*(w/2+0.03)],en,d-0.3,0.85,ATL['az:'+nm],0,false)}}
+  else if(lord){const pn=ATL['pn:'+nm];if(pn)for(const e of[-1,1]){const en=mulv(F,e);plateQ(mb,[cc2[0]+en[0]*(w/2+0.05),yb+4.35,cc2[2]+en[2]*(w/2+0.05)],en,3.2,0.57,pn,0,false)}
     const oc=(c,nn)=>{const r=[nn[2],0,-nn[0]];for(let q=0;q<16;q++){const a0=q/16*6.283,a1=(q+1)/16*6.283,P=(a,rr)=>[c[0]+r[0]*Math.cos(a)*rr,c[1]+Math.sin(a)*rr,c[2]+r[2]*Math.cos(a)*rr];
       mb.t(c,P(a0,0.38),P(a1,0.38),nn,nn,nn,GLc,[0,0],[1,0],[0,1],16,0,1);mb.q(P(a0,0.38),P(a1,0.38),P(a1,0.5),P(a0,0.5),cc(200,198,190),0)}};
     oc(fp(w*0.28,yb+5.5,0.05),n);for(const e of[-1,1]){const en=mulv(F,e);oc([cc2[0]+en[0]*(w/2+0.05),yb+5.5,cc2[2]+en[2]*(w/2+0.05)],en)}
     // vasos de flores no cais
     for(let k=0;k<7;k++){const b=fp(-w/2+0.6+k*1.1,yb,1.6);boxRF(mb,b,F,R,0.42,0.42,yb,yb+0.45,k%2?cc(200,40,36):cc(230,200,90),0);blob(mb,[b[0],yb+0.62,b[2]],0.3,0.25,0.3,cc(80,130,60),k+3)}}
-  else{Q(-w*0.34,-w*0.04,yb+2.55,yb+3.05,cc(236,232,222),0.03);const pn=ATL['pn:'+nm];if(pn)plateQ(mb,fp(-w*0.19,yb+2.8,0.045),n,2.8,0.5,pn,0,false)}
+  else{const pn=ATL['pn:'+nm],en=mulv(F,-1),ec=[cc2[0]+en[0]*(w/2+0.04),0,cc2[2]+en[2]*(w/2+0.04)],rr=[n[0],0,n[2]];
+    mb.q([ec[0]-rr[0]*1.6,yb+2.55,ec[2]-rr[2]*1.6],[ec[0]+rr[0]*1.6,yb+2.55,ec[2]+rr[2]*1.6],[ec[0]+rr[0]*1.6,yb+3.05,ec[2]+rr[2]*1.6],[ec[0]-rr[0]*1.6,yb+3.05,ec[2]-rr[2]*1.6],cc(236,232,222),0);
+    if(pn)plateQ(mb,[ec[0]+en[0]*0.02,yb+2.8,ec[2]+en[2]*0.02],en,2.8,0.5,pn,0,false)}
   // portas e janelas (caixilhos azuis no tipo Maia, brancos no granito)
   const fr=maia&&!ara?cc(30,50,112):cc(238,236,230),SHUT=cc(96,58,34);
   for(let k=0;k<3;k++){const u=-w/2+(k+0.5)*w/3,door=ara?k===2:k===1||(maia&&k===2);if(lord&&k===0)continue;
@@ -1781,7 +1784,7 @@ function vStationPV(mb,cc2,F,R,n,yb,nm){const w=13,d=6.5,H=4.3,WH=cc(214,212,204
   for(let k=0;k<6;k++){const q=fp(-w/2+1+k*2.2,yb,0.4);blob(mb,[q[0],yb+0.25,q[2]],0.5,0.3,0.4,cc(96,120,64),k+21)}
 }
 function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n,yb,nm);return}if(st==='v-maia'||st==='v-gran'||st==='v-ara'||st==='v-lord'){vStation2(mb,st,cc2,F,R,n,yb,nm);return}
-  const cfg={'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-st':[22,10,1],'v-gmr':[24,11,2],'v-trin':[38,13,3]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr',fafe=nm==='Fafe';
+  const cfg={'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-st':[22,10,1],'v-sdh':[16,8.5,1],'v-gmr':[24,11,2],'v-trin':[38,13,3]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr',fafe=nm==='Fafe';
   const WH=pink?cc(218,160,148):cc(238,236,228),OC=pink?cc(196,140,130):cc(132,142,152),GRn=cc(184,178,166),SH=cc(52,92,62),DR=cc(96,62,40),GL=cc(40,48,56);
   boxRF(mb,cc2,F,R,w,d,yb,yb+H,WH,6,3,3);
   if(pink||fafe)boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+1.25,[1,1,1],15,1.5,1.5,0,1,true);else boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+0.85,OC,6,3,3,0,1,true);
@@ -1800,12 +1803,12 @@ function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n
     if(!door){q(-wd/2-0.2,wd/2+0.2,y0-0.16,y0-0.02,GRn,0.1,13);for(const sg of[-1,1]){const a=fp(u+sg*(wd/2+0.18),y0,0.08),b=fp(u+sg*(wd/2+0.18),y0+ht,0.08);const b2=[b[0]+n[0]*0.3+F[0]*sg*0.35,b[1],b[2]+n[2]*0.3+F[2]*sg*0.35],a2=[a[0]+n[0]*0.3+F[0]*sg*0.35,a[1],a[2]+n[2]*0.3+F[2]*sg*0.35];mb.q(a,a2,b2,b,SH,0)}}};
   const nb=Math.max(2,Math.floor(w/2.9));for(let k=0;k<nb;k++){const u=-w/2+(k+0.5)*w/nb;const isDoor=nb>2?(k===Math.floor(nb/2)||(w>12&&k===1)):k===0;
     opening(u,yb+(isDoor?0.02:1.0),isDoor?1.2:0.95,isDoor?2.55:1.45,isDoor);if(fl>1)opening(u,yb+4.5,0.9,1.4,false);if(fl>2)opening(u,yb+8,0.9,1.4,false)}
-  const nmp=ATL['pn:'+nm];const pn=fp(pink?w*0.18:w*0.18,yb+H-(fl>1?1.25:0.9),0.07);if(nmp)plateQ(mb,pn,n,Math.min(w*0.4,5),Math.min(w*0.4,5)*0.18,nmp,0,false);
+  const nmp=ATL['pn:'+nm];
   for(const e of[-1,1]){const ec=[cc2[0]+F[0]*e*(w/2+0.07),0,cc2[2]+F[2]*e*(w/2+0.07)],en=mulv(F,e);
     if(pink){const oc=[ec[0],yb+H-1.4,ec[2]];for(let q=0;q<16;q++){const a0=q/16*6.283,a1=(q+1)/16*6.283,r=0.55;const rr=[R[0],0,R[2]];const P2=(a,rad)=>[oc[0]+rr[0]*Math.cos(a)*rad,oc[1]+Math.sin(a)*rad,oc[2]+rr[2]*Math.cos(a)*rad];
       mb.t(oc,P2(a0,r),P2(a1,r),en,en,en,cc(40,46,52),[0,0],[1,0],[0,1],16,0,1);mb.q(P2(a0,r),P2(a1,r),P2(a1,r+0.14),P2(a0,r+0.14),cc(236,232,224),0)}
       if(nmp&&e>0&&pink)plateQ(mb,[ec[0]+R[0]*sd2(n,R)*d*0.12,yb+H-2.5,ec[2]+R[2]*sd2(n,R)*d*0.12],en,4.2,0.75,nmp,0,false)}
-    if(fafe&&e>0&&nmp)plateQ(mb,[ec[0],yb+H-2.2,ec[2]],en,3.4,0.62,nmp,0,false);
+    if(!pink&&nmp){const pw=Math.min(d*0.62,fafe?3.6:4.2);plateQ(mb,[ec[0]+en[0]*0.01,fafe?yb+H-2.2:yb+(fl>1?3.15:H-0.9),ec[2]+en[2]*0.01],en,pw,pw*0.18,nmp,0,false)}
     if(!pink&&fl>1){const w0=[ec[0],yb+4.5,ec[2]];boxRF(mb,[w0[0]+en[0]*0.02,0,w0[2]+en[2]*0.02],R,F,0.9,0.05,yb+4.6,yb+6.0,GL,16,1,1)}}
   if(st!=='v-ap'){plateQ(mb,fp(-w*0.32,yb+2.95,0.07),n,0.55,0.55,ATL['clock'],0,false)}
   const bell=fp(w*0.22,yb+2.55,0.25);cyl(mb,bell,bell[1]-0.14,bell[1]+0.06,0.13,0.06,10,cc(196,158,70),0);limb(mb,fp(w*0.22,yb+2.72,0.02),fp(w*0.22,yb+2.72,0.26),0.03,0.03,cc(40,40,40),n);
@@ -1824,7 +1827,7 @@ function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n
 }
 function bldg3(mb,sp,i,base,R,F,sd,L){
   const st=sp.sty,yb=hy[i]-0.25,n=mulv(R,-sd);
-  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-st':10,'v-gmr':11,'v-trin':13,'v-maia':8,'v-gran':7.5,'v-ara':6.5,'v-lord':7,'v-pv':6.5}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
+  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-st':10,'v-sdh':8.5,'v-gmr':11,'v-trin':13,'v-maia':8,'v-gran':7.5,'v-ara':6.5,'v-lord':7,'v-pv':6.5}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
   const C0=(d)=>L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);
   const front=(cc2,d,y)=>[cc2[0]+n[0]*(d/2+0.06),y,cc2[2]+n[2]*(d/2+0.06)];
   const gr=cc(196,188,172),cream=cc(238,224,194),white=cc(246,244,238);
