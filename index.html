@@ -248,7 +248,7 @@ const RAW=[
  ['Trofa',41.3383,-8.5595,25.40,'15:52','20:07','est',2,'VG',1,140,0.35,42,'v-fafe'],
  ['Lousado',41.3505,-8.5190,29.60,'15:59','20:00','est',1,'SX',1,100,0.35,36,'v-est'],
  ['Santo Tirso',41.3430,-8.4755,35.60,'16:08','19:51','est',2,'VG',-1,130,0.35,44,'v-st'],
- ['Caniços',41.3525,-8.4515,37.90,'16:13','19:46','ap',0,'SR',1,60,0.3,55,'v-ap'],
+ ['Caniços',41.3525,-8.4515,37.90,'16:13','19:46','est',1,'SX',1,90,0.35,55,'v-can'],
  ['Vila das Aves - Negrelos',41.3650,-8.4150,41.50,'16:19','19:40','est',1,'SX',-1,110,0.35,70,'v-est'],
  ['Giesteira',41.3760,-8.3900,44.30,'16:25','19:34','ap',0,'SR',1,60,0.3,88,'v-ap'],
  ['Lordelo',41.3830,-8.3620,46.60,'16:31','19:28','est',1,'SX',-1,90,0.35,100,'v-lord'],
@@ -329,11 +329,11 @@ const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
-const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:3,n:'Ponte sobre o rio Ave'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(41.2),b:km(41.3),t:3,n:'Ponte sobre o rio Vizela'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
+const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:3,n:'Ponte sobre o rio Ave'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(37.52),b:km(37.66),t:3,n:'Ponte sobre o rio Ave (Caniços)'},{a:km(41.2),b:km(41.3),t:3,n:'Ponte sobre o rio Vizela'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
 const ZONES=[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
 const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])return z[2];return 'rural'};
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
-const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(28.1),side:1,x:14,w:26},{a:km(36.8),b:km(39.6),side:1,x:18,w:28},{a:km(40.7),b:km(41.2),side:-1,x:14,w:18},{a:km(41.3),b:km(42.1),side:1,x:14,w:18},{a:km(49.4),b:km(50.6),side:-1,x:16,w:18},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
+const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(28.1),side:1,x:14,w:26},{a:km(36.4),b:km(37.52),side:-1,x:16,w:28},{a:km(37.66),b:km(39.6),side:1,x:18,w:28},{a:km(40.7),b:km(41.2),side:-1,x:14,w:18},{a:km(41.3),b:km(42.1),side:1,x:14,w:18},{a:km(49.4),b:km(50.6),side:-1,x:16,w:18},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 
 const PROF=RAW.map(r=>[r[3],r[12]]).concat([[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
 const curve=new Float32Array(TOTAL), grade=new Float32Array(TOTAL), hy=new Float32Array(TOTAL+1), HDG=new Float32Array(TOTAL+1);
@@ -348,7 +348,7 @@ function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/60)}
 function branchOffs(p){return[]}
 function capAt(k){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
-  if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3)return 60;if(Math.abs(k-35.6)<0.4)return 50;
+  if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-37.59)<0.25)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
   if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
 let LIMCH=[];
@@ -460,6 +460,8 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // casario, campos e matas: cada lado da via é preenchido em duas faixas (junto à via e mais atrás) com peças escolhidas
   // conforme a terra: frentes de rua contínuas no Porto, blocos de habitação nos bairros, casas minhotas de granito e de
   // emigrante no Minho, milheirais, vinha, pinhais e eucaliptais, fábricas têxteis no vale do Ave
+  // o Ave passa por baixo da ponte de Caniços
+  spr[Math.floor(km(37.59)/SEG)].push({t:'rivx',x:0});
   // Cuca (curva) e Pereirinhas (entre duas fábricas): o espaço junto ao apeadeiro é das fábricas
   {const cu=byNameE('Cuca'),pe=byNameE('Pereirinhas');for(const s of[cu,pe])for(let q=Math.floor((s.pos-110)/SEG);q<=Math.floor((s.pos+90)/SEG);q++){MX[0][q]=-1;MX[1][q]=-1}
    const put2=(p,o)=>spr[clamp(Math.floor(p/SEG),0,TOTAL-1)].push(o);
@@ -537,7 +539,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     {
       const bs=s.bside;let outer=0;for(const r of s.pl)if(Math.sign(r[0])===bs)outer=Math.max(outer,Math.abs(r[1]));
       if(!outer)outer=bs<0?3.5:(Math.max(0,...s.ex.map(e=>e.to))+3.5);
-      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-sdh':-60,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30}[s.sty];
+      const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-sdh':-60,'v-can':-50,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30}[s.sty];
       if(bp!==undefined&&s.sty!=='trofa'&&s.sty!=='v-ap')at(s.pos+bp).push({t:'bldg',x:s===SB?bs*17:bs*(outer+0.8),sty:s.sty,n:s.n,st:s,w:{neo:60,'neo-g':34,old:22,old2:16,erm:26,new:22,ns:12,ho:8}[s.sty],h:{neo:9.5,'neo-g':9,old:7,old2:8,erm:7,new:5.5,ns:4.2,ho:3.6}[s.sty],az:true});
       if(s.sty==='hn-foot')at(s.pos-55).push({t:'foot',x:2,w:16});
       if(s.sty==='hn'||s.sty==='hn-foot'||s.sty==='new'||s.sty==='ns'){for(const r of s.pl){const sd=Math.sign(r[0]);at(s.pos-(s.plen*0.45)).push({t:'kiosk',x:(r[0]+r[1])/2+sd*0.6,y:s.ph,st:s})}}
@@ -1794,8 +1796,38 @@ function vStationPV(mb,cc2,F,R,n,yb,nm){const w=13,d=6.5,H=4.3,WH=cc(214,212,204
   // ervas junto às paredes
   for(let k=0;k<6;k++){const q=fp(-w/2+1+k*2.2,yb,0.4);blob(mb,[q[0],yb+0.25,q[2]],0.5,0.3,0.4,cc(96,120,64),k+21)}
 }
-function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n,yb,nm);return}if(st==='v-maia'||st==='v-gran'||st==='v-ara'||st==='v-lord'){vStation2(mb,st,cc2,F,R,n,yb,nm);return}
-  const cfg={'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-st':[22,10,1],'v-sdh':[16,8.5,1],'v-gmr':[24,11,2],'v-trin':[38,13,3]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr',fafe=nm==='Fafe';
+// Caniços: dois pisos cor de creme com cunhais de granito, portas altas com painéis de azulejo entre elas, relógio de braço;
+// na ponta, corpo baixo com terraço de balaustrada no primeiro andar, escada exterior e alpendre sobre a porta de cima; nome grande na empena
+function vStationCan(mb,cc2,F,R,n,yb,nm){const w=12,d=8,H=7.2,CR=cc(232,222,190),GRN=[0.86,0.84,0.8],RF=cc(186,98,66),GLc=cc(36,42,48),DR=cc(40,70,62);
+  const fp=(u,y,out,dd)=>{dd=dd===undefined?d:dd;return[cc2[0]+n[0]*(dd/2+out)+F[0]*u,y,cc2[2]+n[2]*(dd/2+out)+F[2]*u]};
+  const Q=(u0,u1,y0,y1,col,out,l,dd)=>mb.q(fp(u0,y0,out,dd),fp(u1,y0,out,dd),fp(u1,y1,out,dd),fp(u0,y1,out,dd),col,l||0);
+  boxRF(mb,cc2,F,R,w,d,yb-0.5,yb+H,CR,6,3,3,-1);boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb-0.5,yb+0.5,GRN,13,2,2,0,1,true);
+  for(const e of[-1,1])for(const q of[-1,1])boxRF(mb,add(add(cc2,mulv(F,e*w/2)),mulv(n,q*d/2)),F,R,0.6,0.6,yb-0.5,yb+H,GRN,13,1,1);
+  boxRF(mb,cc2,F,R,w+0.4,d+0.4,yb+3.45,yb+3.65,GRN,13,2,2);boxRF(mb,cc2,F,R,w+0.5,d+0.5,yb+H-0.2,yb+H,cc(220,212,190),6);
+  hipRoof(mb,cc2,F,R,w,d,yb+H,2.2,RF,0.7);
+  for(const u of[-w*0.28,w*0.3]){const ch=add(add(cc2,mulv(F,u)),mulv(n,-d*0.1));boxRF(mb,ch,F,R,0.9,0.9,yb+H,yb+H+2.6,CR,6,1,1);boxRF(mb,ch,F,R,1.1,1.1,yb+H+2.6,yb+H+2.8,GRN,13,1,1)}
+  // fachada do cais: quatro portas altas verdes com moldura de granito, azulejo entre elas; janelas no andar
+  for(let k=0;k<4;k++){const u=-w/2+1.5+k*(w-3)/3;Q(u-0.62,u+0.62,yb,yb+2.9,GRN,0.03,13);Q(u-0.48,u+0.48,yb+0.02,yb+2.8,DR,0.05);Q(u-0.4,u+0.4,yb+2.0,yb+2.7,GLc,0.06,16);
+    if(k<3){const v=u+(w-3)/6;Q(v-0.55,v+0.55,yb+0.6,yb+2.0,[1,1,1],0.04,15);Q(v-0.62,v+0.62,yb+0.5,yb+0.6,GRN,0.045,13)}
+    Q(u-0.55,u+0.55,yb+4.3,yb+6.3,GRN,0.03,13);Q(u-0.42,u+0.42,yb+4.4,yb+6.2,GLc,0.05,16);Q(u-0.42,u+0.42,yb+5.5,yb+5.56,cc(230,226,214),0.06)}
+  {const cp=fp(-w*0.18,yb+3.0,0.6);plateQ(mb,cp,mulv(F,1),0.6,0.6,ATL['clock'],0,true);limb(mb,fp(-w*0.18,yb+3.0,0.02),cp,0.04,0.04,cc(40,40,40),F)}
+  // corpo baixo na ponta com terraço e balaustrada
+  const ac=add(cc2,mulv(F,w/2+2.4)),aw=4.8,ad=d-1.2;boxRF(mb,add(ac,mulv(n,-0.6)),F,R,aw,ad,yb-0.5,yb+3.4,CR,6,2,2,-1);boxRF(mb,add(ac,mulv(n,-0.6)),F,R,aw+0.08,ad+0.08,yb-0.5,yb+0.5,GRN,13,2,2,0,1,true);
+  boxRF(mb,add(ac,mulv(n,-0.6)),F,R,aw+0.3,ad+0.3,yb+3.4,yb+3.6,GRN,13,2,2);
+  for(const[du,dv,lw,ld]of[[aw/2,0,0.2,ad],[0,ad/2,aw,0.2]]){const bc=add(add(ac,mulv(n,-0.6)),add(mulv(F,du),mulv(n,dv)));boxRF(mb,bc,F,R,lw+0.1,ld+0.1,yb+3.6,yb+3.75,GRN,13,1,1);boxRF(mb,bc,F,R,lw,ld,yb+4.45,yb+4.6,GRN,13,1,1);
+    const L=Math.max(lw,ld),nb=Math.floor(L/0.3);for(let q=0;q<nb;q++){const o=-L/2+0.15+q*L/nb,pc=add(bc,lw>ld?mulv(F,o):mulv(n,o));cyl(mb,pc,yb+3.75,yb+4.45,0.07,0.09,6,[0.9,0.88,0.84],0)}}
+  Q(w/2+0.6,w/2+4.2,yb+0.7,yb+2.2,GLc,-0.55,16);
+  // escada exterior a descer ao longo da empena
+  for(let q=0;q<10;q++){const sc=add(add(cc2,mulv(F,w/2+5.2)),mulv(n,d/2-1.2-q*0.45));boxRF(mb,sc,F,R,1.1,0.45,yb-0.5,yb+0.36*(q+1),GRN,13,1,1)}
+  // porta de cima com alpendre de duas águas
+  {const u=w/2-1.6,P=(uu,o,yy)=>fp(uu,yy,o);Q(u-0.55,u+0.55,yb+3.6,yb+6.0,DR,0.04);mb.q(P(u-1.1,0.05,yb+6.6),P(u+1.1,0.05,yb+6.6),P(u+1.1,1.4,yb+6.1),P(u-1.1,1.4,yb+6.1),RF,5);
+   for(const s of[-1,1])limb(mb,fp(u+s*1.0,yb+5.4,0.04),fp(u+s*1.0,yb+6.15,1.3),0.06,0.06,cc(90,62,40),F)}
+  // nome grande na empena e placa pequena na fachada junto ao canto
+  const pn=ATL['pn:'+nm];if(pn){for(const e of[-1,1]){const en=mulv(F,e),c0=add(cc2,mulv(F,e*(w/2+0.05)));plateQ(mb,[c0[0],yb+H-0.7,c0[2]],en,4.0,0.7,pn,0,false)}
+    plateQ(mb,fp(-w/2+1.3,yb+3.95,0.06),n,1.4,0.26,pn,0,false)}
+}
+function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n,yb,nm);return}if(st==='v-can'){vStationCan(mb,cc2,F,R,n,yb,nm);return}if(st==='v-maia'||st==='v-gran'||st==='v-ara'||st==='v-lord'){vStation2(mb,st,cc2,F,R,n,yb,nm);return}
+  const cfg={'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-st':[22,10,1],'v-sdh':[16,8.5,1],'v-can':[12,8,2],'v-gmr':[24,11,2],'v-trin':[38,13,3]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr',fafe=nm==='Fafe';
   const WH=pink?cc(218,160,148):cc(238,236,228),OC=pink?cc(196,140,130):cc(132,142,152),GRn=cc(184,178,166),SH=cc(52,92,62),DR=cc(96,62,40),GL=cc(40,48,56);
   boxRF(mb,cc2,F,R,w,d,yb,yb+H,WH,6,3,3);
   if(pink||fafe)boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+1.25,[1,1,1],15,1.5,1.5,0,1,true);else boxRF(mb,cc2,F,R,w+0.08,d+0.08,yb,yb+0.85,OC,6,3,3,0,1,true);
@@ -1838,7 +1870,7 @@ function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n
 }
 function bldg3(mb,sp,i,base,R,F,sd,L){
   const st=sp.sty,yb=hy[i]-0.25,n=mulv(R,-sd);
-  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-st':10,'v-sdh':8.5,'v-gmr':11,'v-trin':13,'v-maia':8,'v-gran':7.5,'v-ara':6.5,'v-lord':7,'v-pv':6.5}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
+  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-st':10,'v-sdh':8.5,'v-can':8,'v-gmr':11,'v-trin':13,'v-maia':8,'v-gran':7.5,'v-ara':6.5,'v-lord':7,'v-pv':6.5}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
   const C0=(d)=>L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);
   const front=(cc2,d,y)=>[cc2[0]+n[0]*(d/2+0.06),y,cc2[2]+n[2]*(d/2+0.06)];
   const gr=cc(196,188,172),cream=cc(238,224,194),white=cc(246,244,238);
@@ -2022,6 +2054,7 @@ function obj3(mb,sp,i,L){
     boxRF(mb,bk,R,F,0.08,6,y,y+2.6,cc(150,190,205),16,3,3,0.05);for(const s of[-2.9,2.9])boxRF(mb,add(bk,mulv(F,s)),R,F,0.12,0.12,y,y+2.6,cc(60,70,80),0);
     boxRF(mb,add(bk,mulv(fr,0.5)),R,F,0.5,4,y+0.45,y+0.55,cc(120,90,60),0);break}
   case'bench':{const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.5,2,y+0.42,y+0.5,cc(90,100,110),0);boxRF(mb,add(c,mulv(fr,-0.25)),R,F,0.06,2,y+0.5,y+0.9,cc(90,100,110),0);break}
+  case'rivx':{const yw=hy[i]-15.5;boxRF(mb,c,R,F,150,170,yw-0.4,yw,[1,1,1],9,0.06,0.06,0,1,false,cc(150,190,210),9);break}
   case'slamp':{boxRF(mb,c,R,F,0.16,0.16,y0,y0+6.2,cc(64,66,68),0);const tip=add(c,mulv(fr,1.3));limb(mb,[c[0],y0+6.1,c[2]],[tip[0],y0+6.3,tip[2]],0.08,0.08,cc(64,66,68),F);
     boxRF(mb,tip,R,F,0.45,0.32,y0+5.95,y0+6.2,cc(255,226,160),0,0,0,0.95);boxRF(mb,tip,R,F,0.55,0.4,y0+6.2,y0+6.35,cc(50,52,54),0);break}
   case'lamp':if(VINT){const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.2,0.2,y,y+6.4,cc(176,174,168),6,2,2);boxRF(mb,c,R,F,0.3,0.3,y+6.4,y+6.55,cc(60,60,60),0);boxRF(mb,c,R,F,0.26,0.26,y+6.55,y+6.95,cc(255,238,196),0,0,0,0.9);boxRF(mb,c,R,F,0.36,0.36,y+6.95,y+7.05,cc(40,40,40),0);break}{const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.1,0.1,y,y+4.8,cc(70,78,84),0);boxRF(mb,add(c,mulv(fr,0.4)),R,F,0.8,0.25,y+4.7,y+4.85,cc(70,78,84),0);
