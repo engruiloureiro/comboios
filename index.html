@@ -333,7 +333,7 @@ const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26
 const ZONES=[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
 const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])return z[2];return 'rural'};
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
-const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(28.1),side:1,x:14,w:26},{a:km(36.8),b:km(39.6),side:1,x:18,w:28},{a:km(40.7),b:km(41.2),side:-1,x:14,w:18},{a:km(41.3),b:km(42.1),side:1,x:14,w:18},{a:km(50.3),b:km(51.4),side:-1,x:16,w:18},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
+const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(28.1),side:1,x:14,w:26},{a:km(36.8),b:km(39.6),side:1,x:18,w:28},{a:km(40.7),b:km(41.2),side:-1,x:14,w:18},{a:km(41.3),b:km(42.1),side:1,x:14,w:18},{a:km(49.4),b:km(50.6),side:-1,x:16,w:18},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 
 const PROF=RAW.map(r=>[r[3],r[12]]).concat([[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
 const curve=new Float32Array(TOTAL), grade=new Float32Array(TOTAL), hy=new Float32Array(TOTAL+1), HDG=new Float32Array(TOTAL+1);
@@ -359,7 +359,8 @@ let LIMCH=[];
   for(let pass=0;pass<3;pass++){const c=HDG.slice();for(let i=0;i<=TOTAL;i++){let s=0,n=0;for(let j=-12;j<=12;j++){const q=i+j;if(q>=0&&q<=TOTAL){s+=c[q];n++}}HDG[i]=s/n}}
   // via métrica sinuosa: curvas em S sobrepostas ao traçado geral (descrição: traçado apertado e cheio de curvas)
   {let ph=0,i=0;while(i<=TOTAL){const lam=380+rnd()*520,A=(0.18+rnd()*0.22)*(rnd()<0.5?-1:1),n=Math.round(lam/SEG);
-    const sc=i*SEG<km(42.5)?0.28:1;for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
+    const sc=(i*SEG<km(42.5)?0.28:1)*(Math.abs(i*SEG-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
+  {const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
   {const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
   for(let i=0;i<TOTAL;i++){let c=(HDG[i+1]-HDG[i])*SEG;const m=SEG*SEG/140;curve[i]=clamp(c,-m,m)}
   for(let i=0;i<=TOTAL;i++){const p=i*SEG;let q=0;while(q<STN.length-2&&STN[q+1].pos<p)q++;
@@ -459,6 +460,11 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // casario, campos e matas: cada lado da via é preenchido em duas faixas (junto à via e mais atrás) com peças escolhidas
   // conforme a terra: frentes de rua contínuas no Porto, blocos de habitação nos bairros, casas minhotas de granito e de
   // emigrante no Minho, milheirais, vinha, pinhais e eucaliptais, fábricas têxteis no vale do Ave
+  // Cuca (curva) e Pereirinhas (entre duas fábricas): o espaço junto ao apeadeiro é das fábricas
+  {const cu=byNameE('Cuca'),pe=byNameE('Pereirinhas');for(const s of[cu,pe])for(let q=Math.floor((s.pos-110)/SEG);q<=Math.floor((s.pos+90)/SEG);q++){MX[0][q]=-1;MX[1][q]=-1}
+   const put2=(p,o)=>spr[clamp(Math.floor(p/SEG),0,TOTAL-1)].push(o);
+   put2(cu.pos-25,{t:'factory',x:-6.5,w:48,h:8.5,chim:true});put2(cu.pos+40,{t:'ware',x:-12,w:26,h:7,c:[176,150,120]});
+   put2(pe.pos-25,{t:'factory',x:-6.5,w:56,h:9,chim:true});put2(pe.pos-20,{t:'factory',x:7,w:44,h:8,chim:false})}
   // a estrada da passagem superior não leva casas por cima
   for(const k of OVK)for(let q=k-5;q<=k+5;q++)if(q>=0&&q<TOTAL){MX[0][q]=-1;MX[1][q]=-1}
   const ZW={porto:[['row',82],['apt',6],['garden',9],['church',3]],
@@ -500,7 +506,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
         if(!ok){next=p+SEG;continue}
         const g=GAP[z]||[6,30],kc=clamp(k+Math.floor(n/2),0,TOTAL-1);
         it.x=sd*(mx+(back?(z==='porto'?24:28+rnd()*30):0)+(it.off||0.5));
-        spr[kc].push(it);next=p+it.len+g[0]+rnd()*(g[1]-g[0])}}}
+        spr[kc].push(it);if(!back&&(it.t==='row'||it.t==='apt'||(it.t==='emig'&&rnd()<0.4))&&rnd()<0.6)spr[kc].push({t:'slamp',x:sd*(mx+0.2)});next=p+it.len+g[0]+rnd()*(g[1]-g[0])}}}
   // marcos de cada terra
   {const put=(p,o)=>{const k=clamp(Math.floor(p/SEG),0,TOTAL-1);spr[k].push(o)};
    put(km(0.95),{t:'bigchurch',x:70,s:3,tw:true});                   // Igreja da Lapa
@@ -532,7 +538,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
       const bs=s.bside;let outer=0;for(const r of s.pl)if(Math.sign(r[0])===bs)outer=Math.max(outer,Math.abs(r[1]));
       if(!outer)outer=bs<0?3.5:(Math.max(0,...s.ex.map(e=>e.to))+3.5);
       const bp={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-sdh':-60,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30}[s.sty];
-      if(bp!==undefined&&s.sty!=='trofa')at(s.pos+bp).push({t:'bldg',x:s===SB?bs*17:bs*(outer+0.8),sty:s.sty,n:s.n,st:s,w:{neo:60,'neo-g':34,old:22,old2:16,erm:26,new:22,ns:12,ho:8}[s.sty],h:{neo:9.5,'neo-g':9,old:7,old2:8,erm:7,new:5.5,ns:4.2,ho:3.6}[s.sty],az:true});
+      if(bp!==undefined&&s.sty!=='trofa'&&s.sty!=='v-ap')at(s.pos+bp).push({t:'bldg',x:s===SB?bs*17:bs*(outer+0.8),sty:s.sty,n:s.n,st:s,w:{neo:60,'neo-g':34,old:22,old2:16,erm:26,new:22,ns:12,ho:8}[s.sty],h:{neo:9.5,'neo-g':9,old:7,old2:8,erm:7,new:5.5,ns:4.2,ho:3.6}[s.sty],az:true});
       if(s.sty==='hn-foot')at(s.pos-55).push({t:'foot',x:2,w:16});
       if(s.sty==='hn'||s.sty==='hn-foot'||s.sty==='new'||s.sty==='ns'){for(const r of s.pl){const sd=Math.sign(r[0]);at(s.pos-(s.plen*0.45)).push({t:'kiosk',x:(r[0]+r[1])/2+sd*0.6,y:s.ph,st:s})}}
     }
@@ -1481,21 +1487,23 @@ function makeTextures(){
     else if(t===2){x.fillRect(X,Y+11,32,10);x.fillStyle=b;x.fillRect(X+11,Y,10,32)}
     else{x.beginPath();x.arc(X+16,Y+16,12,0,7);x.fill();x.fillStyle=b;x.beginPath();x.arc(X+16,Y+16,5,0,7);x.fill()}
     x.fillStyle='rgba(0,0,0,.15)';x.fillRect(X,Y,32,1);x.fillRect(X,Y,1,32)}}); //17 azulejos de padrão (Contumil)
+  // vidros com transparência no canal alfa acendem-se à noite (cerca de 40% das janelas)
+  let LIT=[];const lit=x=>{for(const[X,Y,w,hh]of LIT)if(R()<0.42){const id=x.getImageData(X,Y,w,hh);for(let q=3;q<id.data.length;q+=4)id.data[q]=150;x.putImageData(id,X,Y)}LIT=[]};
   // 18 fachada de casa do Porto: três vãos altos por piso com cantarias de granito e varandas de ferro
   draw(x=>{x.fillStyle='#fff';x.fillRect(0,0,TS,TS);for(let r=0;r<4;r++)for(let c=0;c<3;c++){const X=c*85+20,Y=r*64+6,w=44,hh=50;
     x.fillStyle='rgb(176,172,164)';x.fillRect(X-5,Y-4,w+10,hh+7);x.fillStyle='rgb(238,236,230)';x.fillRect(X,Y,w,hh);
-    x.fillStyle='rgb(40,50,60)';x.fillRect(X+4,Y+4,w/2-6,hh-6);x.fillRect(X+w/2+2,Y+4,w/2-6,hh-6);x.fillStyle='rgba(150,170,190,.45)';x.fillRect(X+4,Y+4,w-8,8);
+    x.fillStyle='rgb(40,50,60)';x.fillRect(X+4,Y+4,w/2-6,hh-6);x.fillRect(X+w/2+2,Y+4,w/2-6,hh-6);x.fillStyle='rgba(150,170,190,.45)';x.fillRect(X+4,Y+4,w-8,8);LIT.push([X+4,Y+4,w-8,hh-6]);
     if(r<3&&(c+r)%2===0){x.fillStyle='rgb(26,26,28)';x.fillRect(X-8,Y+hh-14,w+16,3);x.fillRect(X-8,Y+hh,w+16,3);for(let q=0;q<9;q++)x.fillRect(X-7+q*7,Y+hh-14,2,16)}}
-    x.fillStyle='rgba(0,0,0,.06)';for(let r=0;r<4;r++)x.fillRect(0,r*64+60,TS,4)}); //18 casa do Porto
+    x.fillStyle='rgba(0,0,0,.06)';for(let r=0;r<4;r++)x.fillRect(0,r*64+60,TS,4);lit(x)}); //18 casa do Porto
   // 19 fachada de azulejo com vãos
   draw(x=>{x.fillStyle='rgb(240,243,248)';x.fillRect(0,0,TS,TS);x.strokeStyle='rgb(40,92,170)';x.lineWidth=2;
     for(let r=0;r<16;r++)for(let c=0;c<16;c++){const X=c*16,Y=r*16;x.beginPath();x.moveTo(X+8,Y+1);x.lineTo(X+15,Y+8);x.lineTo(X+8,Y+15);x.lineTo(X+1,Y+8);x.closePath();x.stroke()}
     for(let r=0;r<4;r++)for(let c=0;c<3;c++){const X=c*85+20,Y=r*64+6,w=44,hh=50;x.fillStyle='rgb(246,244,238)';x.fillRect(X-4,Y-3,w+8,hh+6);x.fillStyle='rgb(40,50,60)';x.fillRect(X+3,Y+3,w-6,hh-5);
-      x.fillStyle='rgb(246,244,238)';x.fillRect(X+w/2-1,Y+3,2,hh-5);x.fillStyle='rgba(150,170,190,.45)';x.fillRect(X+3,Y+3,w-6,8)}}); //19 azulejo com vãos
+      x.fillStyle='rgb(246,244,238)';x.fillRect(X+w/2-1,Y+3,2,hh-5);x.fillStyle='rgba(150,170,190,.45)';x.fillRect(X+3,Y+3,w-6,8);LIT.push([X+3,Y+3,w-6,hh-5])}lit(x)}); //19 azulejo com vãos
   // 20 granito de casa minhota com janelas de portadas
   draw(x=>{x.fillStyle='rgb(150,142,130)';x.fillRect(0,0,TS,TS);for(let r=0;r<16;r++){let X=-R()*30;while(X<TS){const w=18+R()*26,v=R()*44-22;x.fillStyle='rgb('+(156+v)+','+(148+v)+','+(134+v)+')';x.fillRect(X+1,r*16+1,w-2,14);X+=w}}
-    for(let r=0;r<2;r++)for(let c=0;c<2;c++){const X=c*128+44,Y=r*128+30,w=40,hh=56;x.fillStyle='rgb(196,190,178)';x.fillRect(X-6,Y-6,w+12,hh+12);x.fillStyle='rgb(36,40,44)';x.fillRect(X,Y,w,hh);
-      x.fillStyle='rgb(112,70,40)';x.fillRect(X-16,Y,14,hh);x.fillRect(X+w+2,Y,14,hh);x.fillStyle='rgba(0,0,0,.25)';for(let q=0;q<6;q++){x.fillRect(X-16,Y+q*9+4,14,2);x.fillRect(X+w+2,Y+q*9+4,14,2)}}}); //20 granito minhoto
+    for(let r=0;r<2;r++)for(let c=0;c<2;c++){const X=c*128+44,Y=r*128+30,w=40,hh=56;x.fillStyle='rgb(196,190,178)';x.fillRect(X-6,Y-6,w+12,hh+12);x.fillStyle='rgb(36,40,44)';x.fillRect(X,Y,w,hh);LIT.push([X,Y,w,hh]);
+      x.fillStyle='rgb(112,70,40)';x.fillRect(X-16,Y,14,hh);x.fillRect(X+w+2,Y,14,hh);x.fillStyle='rgba(0,0,0,.25)';for(let q=0;q<6;q++){x.fillRect(X-16,Y+q*9+4,14,2);x.fillRect(X+w+2,Y+q*9+4,14,2)}}lit(x)}); //20 granito minhoto
   // 21 milho: canas e folhas
   draw(x=>{x.fillStyle='rgb(70,80,40)';x.fillRect(0,0,TS,TS);for(let k=0;k<70;k++){const X=R()*TS,v=R()*50;x.fillStyle='rgb('+(150+v)+','+(160+v)+','+(80+v/2)+')';x.fillRect(X,0,3,TS);
       for(let q=0;q<8;q++){const Y=R()*TS;x.save();x.translate(X,Y);x.rotate((R()-0.5)*2.2);x.fillRect(0,0,22+R()*20,3);x.restore()}}
@@ -1527,7 +1535,7 @@ void main(){vec4 w=uM*vec4(aP,1.);vW=w.xyz;vN=mat3(uM)*aN;vC=aC;vU=aU;vE=aE;gl_P
 const FS=`#version 300 es
 precision highp float;precision highp sampler2DArray;
 uniform sampler2DArray uT;uniform sampler2D uA;
-uniform vec3 uSun,uSunC,uSky,uGnd,uFog,uHP,uHD;uniform float uFogD,uNight,uHI;uniform vec2 uHT;
+uniform vec3 uSun,uSunC,uSky,uGnd,uFog,uHP,uHD;uniform float uFogD,uNight,uHI;uniform vec2 uHT;uniform vec4 uPL[24];
 in vec3 vN,vC,vU,vW;in vec2 vE;out vec4 o;
 void main(){
   vec4 t=vU.z<-0.5?texture(uA,vU.xy):texture(uT,vU);
@@ -1539,7 +1547,9 @@ void main(){
   float L=vU.z;
   if(abs(L-12.)<0.5||abs(L-16.)<0.5){vec3 h=normalize(uSun+V);c+=uSunC*pow(max(dot(n,h),0.),40.)*0.55*ao;float fr=pow(1.-max(dot(n,V),0.),3.);c=mix(c,uSky*1.1,fr*0.35*(L>15.5?1.:0.5));}
   if(abs(L-9.)<0.5){float fr=pow(1.-max(dot(n,V),0.),4.);c=mix(c,uSky,0.25+fr*0.5);}
-  if(uHI>0.){vec3 dl=vW-uHP;float dd=length(dl);float sp=pow(max(dot(dl/dd,uHD),0.),10.);c+=b*uHI*sp*max(dot(n,-dl/dd),0.)*18./(4.+dd*0.35);}
+  if(uHI>0.){vec3 dl=vW-uHP;float dd=length(dl);float sp=pow(max(dot(dl/dd,uHD),0.),8.);c+=b*uHI*sp*max(dot(n,-dl/dd),0.)*30./(4.+dd*0.25)*(1.-smoothstep(120.,220.,dd));}
+  if(uNight>0.){vec3 acc=vec3(0.);for(int k=0;k<24;k++){vec4 P=uPL[k];if(P.w<=0.)continue;vec3 dl=P.xyz-vW;float dd=length(dl);if(dd>34.)continue;
+    acc+=P.w/(1.+dd*dd*0.05)*(1.-smoothstep(20.,34.,dd))*(0.3+0.7*max(dot(n,dl/max(dd,0.01)),0.));}c+=b*vec3(1.,.78,.5)*acc*uNight*2.2;}
   float e=vE.x;
   if(e>2.5)c=mix(c,vec3(1.,.08,.04)*1.4,uHT.y);
   else if(e>1.5)c=mix(c,vec3(1.,.97,.9)*1.6,uHT.x);
@@ -1550,13 +1560,14 @@ void main(){
 const SVS=`#version 300 es
 layout(location=0) in vec2 aP;out vec2 vP;void main(){vP=aP;gl_Position=vec4(aP,0.9999,1.);}`;
 const SFS=`#version 300 es
-precision highp float;uniform vec3 uF,uR,uU,uST,uSH,uFog,uSun;uniform vec2 uTan;uniform float uSI,uStar;in vec2 vP;out vec4 o;
+precision highp float;uniform vec3 uF,uR,uU,uST,uSH,uFog,uSun,uMoon;uniform vec2 uTan;uniform float uSI,uStar;in vec2 vP;out vec4 o;
 float hh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hh(i),hh(i+vec2(1,0)),f.x),mix(hh(i+vec2(0,1)),hh(i+vec2(1,1)),f.x),f.y);}
 void main(){vec3 d=normalize(uF+vP.x*uTan.x*uR+vP.y*uTan.y*uU);
   float t=clamp(d.y,0.,1.);vec3 c=mix(uSH,uST,pow(t,0.5));
   float s=max(dot(d,uSun),0.);c+=vec3(1.,.86,.62)*pow(s,900.)*8.*uSI+vec3(1.,.72,.45)*pow(s,6.)*0.28*uSI;
   if(d.y>0.){vec2 cp=d.xz/(d.y+0.08)*2.;float cl=vn(cp)*0.6+vn(cp*2.3)*0.4;cl=smoothstep(0.55,0.85,cl)*smoothstep(0.,0.25,d.y);c=mix(c,mix(uSH,vec3(1.),0.6)*1.02,cl*0.55);}
+  if(uStar>0.){float m=dot(d,uMoon);c+=vec3(0.95,0.94,0.86)*smoothstep(0.99955,0.9997,m)*uStar*1.3+vec3(0.5,0.55,0.7)*pow(max(m,0.),300.)*0.25*uStar;}
   if(uStar>0.&&d.y>0.02){vec2 sp=floor(d.xz/(d.y+0.35)*260.);float h=hh(sp);if(h>0.9975)c+=vec3(0.9,0.92,1.)*uStar*(h-0.9975)*400.*smoothstep(0.02,0.2,d.y);}
   c=mix(c,uFog,exp(-max(d.y,0.)*12.)*0.7);if(d.y<0.)c=uFog;
   o=vec4(c,1.);}`;
@@ -1570,8 +1581,8 @@ function upload(mb,usage,old){const data=new Float32Array(mb.d);let vao=old?old.
   gl.bindVertexArray(null);return{vao,buf,n:data.length/NV}}
 function init3D(){
   PR=prog(VS,FS);PS=prog(SVS,SFS);
-  for(const u of['uVP','uM','uT','uA','uSun','uSunC','uSky','uGnd','uFog','uHP','uHD','uFogD','uNight','uHI','uHT'])UL[u]=gl.getUniformLocation(PR,u);
-  for(const u of['uF','uR','uU','uST','uSH','uFog','uSun','uTan','uSI','uStar'])US[u]=gl.getUniformLocation(PS,u);
+  for(const u of['uVP','uM','uT','uA','uSun','uSunC','uSky','uGnd','uFog','uHP','uHD','uFogD','uNight','uHI','uHT','uPL'])UL[u]=gl.getUniformLocation(PR,u);
+  for(const u of['uF','uR','uU','uST','uSH','uFog','uSun','uTan','uSI','uStar','uMoon'])US[u]=gl.getUniformLocation(PS,u);
   const L=makeTextures();TEX=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D_ARRAY,TEX);
   gl.texImage3D(gl.TEXTURE_2D_ARRAY,0,gl.RGBA8,TS,TS,LAYERS,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
   L.forEach((d,k)=>gl.texSubImage3D(gl.TEXTURE_2D_ARRAY,0,0,0,k,TS,TS,1,gl.RGBA,gl.UNSIGNED_BYTE,d));
@@ -1890,7 +1901,7 @@ function obj3(mb,sp,i,L){
     let u=-sp.len/2;while(u<sp.len/2-2){const w=Math.min(sp.len/2-u,4.6+r()*3),fl=sp.f0+Math.floor(r()*(sp.f1-sp.f0+1)),d=9+r()*4,hh=fl*3.4+0.7;
       const A=at(u+w/2,0),cc2=add(A.c,mulv(A.n,-d/2)),tile=r()<sp.tile;
       const col=tile?[[1,1,1],[0.8,0.95,0.86],[1,0.95,0.76],[0.88,0.9,1]][Math.floor(r()*4)]:(r()<0.12?[0.82,0.8,0.76]:cc(...[[236,226,206],[226,200,160],[214,176,140],[200,212,206],[236,236,230],[230,214,170],[196,170,150],[220,190,184],[186,200,214],[240,214,190]][Math.floor(r()*10)]));
-      boxRF(mb,cc2,A.F,A.R,w,d,A.y-2,A.y+hh,col,tile?19:18,6.6,13.6);
+      boxRF(mb,cc2,A.F,A.R,w,d,A.y-2,A.y+hh,col,tile?19:18,6.6,13.6,-1);
       boxRF(mb,cc2,A.F,A.R,w+0.04,d+0.3,A.y+hh-0.3,A.y+hh,cc(206,200,190),6,2,2);
       boxRF(mb,cc2,A.F,A.R,w+0.02,d+0.06,A.y-0.3,A.y+0.6,[0.86,0.84,0.8],13,2,2,0,1,true);
       hipRoof(mb,cc2,A.F,A.R,w,d,A.y+hh,1.3+r()*0.9,ROOF(),0.3);
@@ -1903,7 +1914,7 @@ function obj3(mb,sp,i,L){
   case'emig':{// casa de emigrante: dois pisos, varanda de betão, azulejo ou cor viva, garagem e muro com portão
     const w=10+r()*3,d=8.5,hh=6.6,A=at(0,0),cc2=add(A.c,mulv(A.n,-d/2)),tile=r()<0.4;
     const col=tile?[[1,1,1],[0.86,1,0.9],[1,0.92,0.7]][Math.floor(r()*3)]:cc(...sp.c);
-    boxRF(mb,cc2,A.F,A.R,w,d,A.y-1.5,A.y+hh,col,tile?19:4,9,13.2);
+    boxRF(mb,cc2,A.F,A.R,w,d,A.y-1.5,A.y+hh,col,tile?19:4,9,13.2,-1);
     boxRF(mb,cc2,A.F,A.R,w+0.08,d+0.08,A.y-1.5,A.y+0.7,[0.86,0.84,0.8],13,2,2,0,1,true);
     if(r()<0.3){boxRF(mb,cc2,A.F,A.R,w+0.6,d+0.6,A.y+hh,A.y+hh+0.25,cc(230,228,222),6);boxRF(mb,cc2,A.F,A.R,w+0.3,d+0.3,A.y+hh+0.25,A.y+hh+0.9,col,6,2,2)}
     else hipRoof(mb,cc2,A.F,A.R,w,d,A.y+hh,1.7,ROOF(),0.8);
@@ -1914,7 +1925,7 @@ function obj3(mb,sp,i,L){
     break}
   case'minho':{// casa minhota de granito: varanda de madeira no andar, escada exterior de pedra, telhado de quatro águas
     const w=9+r()*3,d=7+r()*1.5,hh=6.5,A=at(0,0),cc2=add(A.c,mulv(A.n,-d/2)),gc=0.88+r()*0.14;
-    boxRF(mb,cc2,A.F,A.R,w,d,A.y-1.5,A.y+hh,[gc,gc*0.97,gc*0.92],20,8,6.6);
+    boxRF(mb,cc2,A.F,A.R,w,d,A.y-1.5,A.y+hh,[gc,gc*0.97,gc*0.92],20,8,6.6,-0.7);
     hipRoof(mb,cc2,A.F,A.R,w,d,A.y+hh,2.3,ROOF(),0.55);
     {const ch=add(cc2,mulv(A.F,w*0.3));boxRF(mb,ch,A.F,A.R,0.7,0.7,A.y+hh,A.y+hh+2.2,[0.84,0.82,0.78],13,1,1)}
     const vw=w*0.62,vu=-w*0.12,vc=add(add(cc2,mulv(A.F,vu)),mulv(A.n,d/2+0.6)),WD=cc(102,66,40);
@@ -1947,7 +1958,7 @@ function obj3(mb,sp,i,L){
       for(let q=-2;q<=2;q++)boxRF(mb,add(wc,mulv(F,q*12)),F,R,0.8,18.1,y0-1,y0+9.5,GR,13,1,1);hipRoof(mb,wc,F,R,52,18,y0+9.5,3,cc(184,96,66),0.5)}
     break}
   case'termas':{// balneário termal de Vizela: edifício longo neoclássico com pórtico central
-    const A={n:mulv(R,-sd)},cc2=add(c,mulv(A.n,-7));boxRF(mb,cc2,F,R,60,14,y0-1,y0+10,cc(236,206,140),18,6.6,13.6);boxRF(mb,cc2,F,R,60.3,14.3,y0+9.5,y0+10.3,cc(246,240,226),6,2,2);
+    const A={n:mulv(R,-sd)},cc2=add(c,mulv(A.n,-7));boxRF(mb,cc2,F,R,60,14,y0-1,y0+10,cc(236,206,140),18,6.6,13.6,-1);boxRF(mb,cc2,F,R,60.3,14.3,y0+9.5,y0+10.3,cc(246,240,226),6,2,2);
     hipRoof(mb,cc2,F,R,60,14,y0+10.3,2.6,cc(184,96,66),0.4);const pc=add(c,mulv(A.n,1.6));boxRF(mb,pc,F,R,14,3.2,y0-1,y0+0.6,[0.86,0.84,0.8],13,2,2);
     for(let q=-3;q<=3;q++)cyl(mb,add(pc,mulv(F,q*2)),y0+0.6,y0+9,0.4,0.36,8,cc(246,242,232),0);boxRF(mb,pc,F,R,14.4,3.4,y0+9,y0+10.4,cc(246,240,226),6,2,2);
     const P=(uu,yy)=>[pc[0]+F[0]*uu+A.n[0]*1.72,yy,pc[2]+F[2]*uu+A.n[2]*1.72];mb.t(P(-7.2,y0+10.4),P(7.2,y0+10.4),P(0,y0+13),A.n,A.n,A.n,cc(246,240,226),[0,0],[1,0],[0,1],0,0,1);break}
@@ -1971,6 +1982,7 @@ function obj3(mb,sp,i,L){
   case'factory':{const w=sp.w,d=16,h=sp.h,cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);boxRF(mb,cc2,F,R,w,d,y0-0.5,y0+h,[1,1,1],7,6,6,0,true);
     const n=Math.max(3,Math.floor(w/5));for(let k=0;k<n;k++){const a=-w/2+k*w/n,b=a+w/n;const P=(u,v,y)=>[cc2[0]+F[0]*u+R[0]*v,y,cc2[2]+F[2]*u+R[2]*v];
       mb.q(P(a,-d/2,y0+h),P(a,d/2,y0+h),P(b,d/2,y0+h+3),P(b,-d/2,y0+h+3),cc(130,120,112),11,[0,0,2,1]);mb.q(P(b,-d/2,y0+h+3),P(b,d/2,y0+h+3),P(b,d/2,y0+h),P(b,-d/2,y0+h),cc(60,70,80),16,[0,0,2,1])}
+    {const nn=mulv(R,-sd);for(let u=-w/2+2.5;u<w/2-2;u+=4.5){const P=(uu,yy)=>[cc2[0]+F[0]*uu+nn[0]*(d/2+0.04),yy,cc2[2]+F[2]*uu+nn[2]*(d/2+0.04)];mb.q(P(u-1.3,y0+2.6),P(u+1.3,y0+2.6),P(u+1.3,y0+5.4),P(u-1.3,y0+5.4),cc(40,48,56),16,0,(u*7|0)%3?-0.7:0)}}
     if(sp.chim)cyl(mb,[cc2[0]+F[0]*w*0.35,0,cc2[2]+F[2]*w*0.35],y0,y0+h*3.5,1.2,0.8,8,cc(160,86,64),7);break}
   case'chim':cyl(mb,c,y0,y0+sp.h,2.2,1.3,10,cc(186,182,176),6);cyl(mb,c,y0+sp.h*0.92,y0+sp.h,1.4,1.3,10,cc(190,50,40),0);break;
   case'church':{const cc2=c;boxRF(mb,cc2,F,R,10,18,y0-0.5,y0+8,cc(244,242,236),6,20,20);hipRoof(mb,cc2,F,R,10,18,y0+8,3,cc(200,110,80),0.3);
@@ -2010,6 +2022,8 @@ function obj3(mb,sp,i,L){
     boxRF(mb,bk,R,F,0.08,6,y,y+2.6,cc(150,190,205),16,3,3,0.05);for(const s of[-2.9,2.9])boxRF(mb,add(bk,mulv(F,s)),R,F,0.12,0.12,y,y+2.6,cc(60,70,80),0);
     boxRF(mb,add(bk,mulv(fr,0.5)),R,F,0.5,4,y+0.45,y+0.55,cc(120,90,60),0);break}
   case'bench':{const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.5,2,y+0.42,y+0.5,cc(90,100,110),0);boxRF(mb,add(c,mulv(fr,-0.25)),R,F,0.06,2,y+0.5,y+0.9,cc(90,100,110),0);break}
+  case'slamp':{boxRF(mb,c,R,F,0.16,0.16,y0,y0+6.2,cc(64,66,68),0);const tip=add(c,mulv(fr,1.3));limb(mb,[c[0],y0+6.1,c[2]],[tip[0],y0+6.3,tip[2]],0.08,0.08,cc(64,66,68),F);
+    boxRF(mb,tip,R,F,0.45,0.32,y0+5.95,y0+6.2,cc(255,226,160),0,0,0,0.95);boxRF(mb,tip,R,F,0.55,0.4,y0+6.2,y0+6.35,cc(50,52,54),0);break}
   case'lamp':if(VINT){const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.2,0.2,y,y+6.4,cc(176,174,168),6,2,2);boxRF(mb,c,R,F,0.3,0.3,y+6.4,y+6.55,cc(60,60,60),0);boxRF(mb,c,R,F,0.26,0.26,y+6.55,y+6.95,cc(255,238,196),0,0,0,0.9);boxRF(mb,c,R,F,0.36,0.36,y+6.95,y+7.05,cc(40,40,40),0);break}{const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.1,0.1,y,y+4.8,cc(70,78,84),0);boxRF(mb,add(c,mulv(fr,0.4)),R,F,0.8,0.25,y+4.7,y+4.85,cc(70,78,84),0);
     boxRF(mb,add(c,mulv(fr,0.55)),R,F,0.45,0.18,y+4.62,y+4.7,cc(255,240,200),0,0,0,0.9);break}
   case'stop':{const y=hy[i]+sp.y,n=sp.d==='R'?F:mulv(F,-1);boxRF(mb,c,R,F,0.07,0.07,y,y+1.6,cc(80,80,80),0);plateQ(mb,[c[0]+n[0]*0.05,y+1.85,c[2]+n[2]*0.05],n,0.55,0.55,atStop(),0,true);break}
@@ -2340,6 +2354,13 @@ function camera(dtR){
       const i=clamp(Math.floor(p/SEG),0,TOTAL-1),w=PI(i,o,0);sideCam={p,pos:[w[0],Math.max(terrH(i,o,w[0],w[2]),hy[i])+1.8,w[2]]}}
     const tgt=wp(pf-dir*20,tx(pf-dir*20),2);return{eye:sideCam.pos,fd:norm(sub(tgt,sideCam.pos)),fov:0.5,near:0.5}}
   const eye=add(mid,add(add(mulv(F,-42),mulv(Rg,18)),[0,48,0]));const tg=wp(pf+dir*15,tx(pf),0);return{eye,fd:norm(sub(tg,eye)),fov:0.9,near:1}}
+// fontes de luz: candeeiros dos cais e das ruas, luz à porta das estações e das passagens de nível
+let LAMPS=null;
+function collectLamps(){LAMPS=[];for(let i=0;i<TOTAL;i++)for(const sp of spr[i]){const b=PI(i,sp.x,0);
+  if(sp.t==='lamp')LAMPS.push({i,p:[b[0],hy[i]+(sp.y||0)+6.7,b[2]],w:1.0});
+  else if(sp.t==='slamp'){const g=terrH(i,sp.x,b[0],b[2]),f=faceTrack(i,sp.x);LAMPS.push({i,p:[b[0]+f[0]*1.3,g+6.0,b[2]+f[2]*1.3],w:0.9})}
+  else if(sp.t==='bldg')LAMPS.push({i,p:[b[0],hy[i]+3.0,b[2]],w:0.7})}
+  for(const pn of PN){const i=Math.floor(pn.pos/SEG);for(const x of[-6,6]){const b=PI(i,x,0);LAMPS.push({i,p:[b[0],hy[i]+5,b[2]],w:0.6})}}}
 function render3D(dtR){
   lighting();
   const cam=camera(dtR),eye=cam.eye;const w=glc.width,h=glc.height;gl.viewport(0,0,w,h);
@@ -2348,17 +2369,19 @@ function render3D(dtR){
   const inTun=tun[clamp(Math.floor(S.pos/SEG),0,TOTAL-1)]===1;
   // sol
   const az=SUNAZ,el=Math.max(-6,sunE)*Math.PI/180;
-  const sun=norm([Math.sin(az)*Math.cos(el),Math.sin(el)+0.02,-Math.cos(az)*Math.cos(el)]);
+  let sun=norm([Math.sin(az)*Math.cos(el),Math.sin(el)+0.02,-Math.cos(az)*Math.cos(el)]);const MOON=norm([-0.42,0.55,0.72]);
   const sI=clamp((sunE+2)/9,0,1),warm=clamp(sunE/18,0,1);
-  const sunC=[lerp(1.0,1.02,warm)*sI*1.15,lerp(0.62,0.96,warm)*sI*1.1,lerp(0.4,0.88,warm)*sI*1.05];
+  let sunC=[lerp(1.0,1.02,warm)*sI*1.15,lerp(0.62,0.96,warm)*sI*1.1,lerp(0.4,0.88,warm)*sI*1.05];
+  // de noite a luz direta passa a ser o luar, fraco e azulado
+  const nf=clamp((dark-0.63)*3.5,0,1);if(sI<0.01){sun=MOON;sunC=[0.16*nf,0.2*nf,0.3*nf]}
   const skyT=SKYT.map(v=>v/255),skyH=SKYH.map(v=>v/255),fog=FOG.map(v=>v/255);
-  const amb=VINT?0.06+0.86*L:0.42+0.5*L;
+  const amb=VINT?0.08+0.84*L:0.42+0.5*L;
   gl.clearColor(fog[0],fog[1],fog[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // céu
   gl.disable(gl.DEPTH_TEST);gl.useProgram(PS);
   const z=norm(cam.fd),x=norm(cross(z,up)),y=cross(x,z);const th=Math.tan(fovY/2);
   gl.uniform3fv(US.uF,z);gl.uniform3fv(US.uR,x);gl.uniform3fv(US.uU,y);gl.uniform2f(US.uTan,th*asp,th);
-  gl.uniform3fv(US.uST,skyT);gl.uniform3fv(US.uSH,skyH);gl.uniform3fv(US.uFog,fog);gl.uniform3fv(US.uSun,sun);gl.uniform1f(US.uSI,clamp((sunE+4)/6,0,1));gl.uniform1f(US.uStar,clamp((dark-0.62)*3,0,1));
+  gl.uniform3fv(US.uST,skyT);gl.uniform3fv(US.uSH,skyH);gl.uniform3fv(US.uFog,fog);gl.uniform3fv(US.uSun,sun);gl.uniform1f(US.uSI,clamp((sunE+4)/6,0,1));gl.uniform1f(US.uStar,clamp((dark-0.62)*3,0,1));gl.uniform3fv(US.uMoon,MOON);
   gl.bindVertexArray(SKYB);gl.drawArrays(gl.TRIANGLES,0,3);
   // mundo
   gl.enable(gl.DEPTH_TEST);gl.useProgram(PR);
@@ -2370,6 +2393,10 @@ function render3D(dtR){
   const dir=REV?-1:1,Fr=fr3(S.pos);const hp=wp(S.pos+dir*0.3,trackX(S.pos),1.3);
   gl.uniform3f(UL.uHP,hp[0]-eye[0],hp[1]-eye[1],hp[2]-eye[2]);gl.uniform3f(UL.uHD,Fr.fx*dir,-0.04,Fr.fz*dir);gl.uniform1f(UL.uHI,inTun?1.0:clamp((dark-0.25)*1.6,0,0.8));
   gl.uniform2f(UL.uHT,1,0);
+  {if(!LAMPS)collectLamps();const pl=new Float32Array(96);if(dark>0.3){const c0=Math.floor((S.pos-450)/SEG),c1=Math.floor((S.pos+450)/SEG),cand=[];
+     for(const q of LAMPS){if(q.i<c0||q.i>c1)continue;const dx=q.p[0]-eye[0],dy=q.p[1]-eye[1],dz=q.p[2]-eye[2];cand.push([dx*dx+dy*dy+dz*dz,dx,dy,dz,q.w])}
+     cand.sort((a,b)=>a[0]-b[0]);for(let k=0;k<Math.min(24,cand.length);k++){pl[k*4]=cand[k][1];pl[k*4+1]=cand[k][2];pl[k*4+2]=cand[k][3];pl[k*4+3]=cand[k][4]}}
+   gl.uniform4fv(UL.uPL,pl)}
   const cp=clamp(Math.floor(S.pos/SEG/CH),0,1e9);let built=0;const ahead=camMode==='cab'?8:7,behind=camMode==='cab'?1:6;
   for(const [k,g] of chunks){if(Math.abs(k-cp)>14){if(g&&!g.empty){gl.deleteBuffer(g.buf);gl.deleteVertexArray(g.vao)}chunks.delete(k)}}
   const order=[];for(let d=0;d<=Math.max(ahead,behind);d++){if(d<=ahead)order.push(cp+dir*d);if(d>0&&d<=behind)order.push(cp-dir*d)}
