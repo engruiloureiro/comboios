@@ -364,7 +364,11 @@ PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
 const BUFFER_R=SB.pa-25;
 // entre a Trofa e Lousado a via estreita partilha a via da Linha do Minho: carris de bitola larga por fora dos de via métrica
 const DUAL=RP?{a:FAM.pa-160,b:BUFFER+60}:{a:TRF.pa-160,b:LSD.pb+160};
-const DBL={from:0,to:4,a:SB.pa-160,b:SDH.pb+170};
+// bifurcação da Senhora da Hora: ~500 m a norte da estação, agulha para a direita para a Linha de Guimarães; em frente segue a da Póvoa
+const JSH=SDH.pos+500,JSHR=800,JSHL=400;
+const DBL={from:0,to:4,a:SB.pa-160,b:JSH-60};
+// via da outra linha que se afasta na bifurcação: na Póvoa sai à direita (Guimarães); na de Guimarães a Póvoa segue à esquerda
+function jshOff(p){if(p<=JSH||p>JSH+JSHL)return null;const d=p-JSH;return (RP?1:-1)*d*d/(2*JSHR)}
 // no sentido da Trindade circula-se pela via da esquerda desse sentido, que é a segunda via (x=4)
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
 // via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
@@ -395,7 +399,7 @@ function branchOffs(p){return[]}
 function capAt(k){if(RP){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
   if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526)return 60;return 70}
   if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
-  if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
+  if(Math.abs(k-6.05)<0.35)return 40;if(k>=6.4&&k<6.75)return 30;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
   if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
 let LIMCH=[];
@@ -429,7 +433,7 @@ let LIMCH=[];
     tun[i]=inRange(TUN,p)?1:0;brg[i]=(inRange(BRIDGES,p)||{t:0}).t;shed[i]=0;
     const rv=inRange(RIVER,p);riv[i]=rv?rv.side:0;
     for(const s of STN)if(p>=s.pa&&p<=s.pb){plat[i]=s;break}
-    const r=[];{const v=exOff(DBL,p);if(v!==null&&Math.abs(v)>0.25)r.push(v)}for(const s of STN){if(p<s.pa-400||p>s.pb+400)continue;for(const e of s.ex){const v=exOff(e,p);if(v!==null&&Math.abs(v-e.from)>0.25)r.push(v)}}
+    const r=[];{const v=exOff(DBL,p);if(v!==null&&Math.abs(v)>0.25)r.push(v)}{const v=jshOff(p);if(v!==null&&Math.abs(v)>0.25)r.push(v)}for(const s of STN){if(p<s.pa-400||p>s.pb+400)continue;for(const e of s.ex){const v=exOff(e,p);if(v!==null&&Math.abs(v-e.from)>0.25)r.push(v)}}
     trk[i]=r}
   for(let k=0;k<TOTAL;k++){const p=k*SEG,z=zoneI[k];
     const f=(z==='rural'||z==='valley'||z==='mixed'||z==='penha')?1:(z==='urban'||z==='dense'?0.4:0);
@@ -460,15 +464,16 @@ PN.sort((a,b)=>a.pos-b.pos);
    estações de cruzamento da via única, que mostram amarelo quando o itinerário está feito para a via desviada (agulhas a 30 km/h) */
 const SIG=[],SIGB={F:[],R:[]};
 {const st=STN.filter(s=>s.pos<=SDH.pos+1);
- const pf=[];for(const s of st)pf.push(s.pb+15);pf.push(DBL.b-60);
+ const pf=[];for(const s of st)pf.push(s.pb+15);
  const pr=[];for(const s of st)if(s!==SB)pr.push(s.pa-15);pr.push(SB.pb+90);pr.push(DBL.b+120);
  const fill=a=>{a.sort((x,y)=>x-y);const o=[];for(let k=0;k<a.length;k++){o.push(a[k]);if(k<a.length-1&&a[k+1]-a[k]>1100)o.push((a[k]+a[k+1])/2)}return o};
  for(const p of fill(pf))if(p>SB.pos&&p<DBL.b)SIGB.F.push({p,d:'F',k:'blk'});
  for(const p of fill(pr))if(p>SB.pos)SIGB.R.push({p,d:'R',k:'blk'});
  SIGB.R.sort((a,b)=>b.p-a.p);SIG.push(...SIGB.F,...SIGB.R);
+ SIG.push({p:JSH-90,d:'F',k:'jn'});           // sinal da bifurcação: amarelo para a agulha desviada de Guimarães
  for(const s of STN){if(!s.ex.length||s===SB||s.pos<DBL.b+100||!(s.ex[0].a>0))continue;
    SIG.push({p:s.ex[0].a-60,d:'F',k:'ent',st:s});if(s!==GMR)SIG.push({p:s.ex[0].b+60,d:'R',k:'ent',st:s})}}
-function sigState(g){if(g.k==='ent')return g.st.divert?'Y':'G';
+function sigState(g){if(g.k==='ent')return g.st.divert?'Y':'G';if(g.k==='jn')return RG?'Y':'G';
   const L=SIGB[g.d],ix=L.indexOf(g),n1=L[ix+1],n2=L[ix+2],F=g.d==='F';
   const occ=(a,b)=>TRAINS.some(t=>t.lead&&t.d===g.d&&t.a<Math.max(a,b)&&t.a+t.len>Math.min(a,b));
   const end=F?DBL.b+300:SB.pa-100;
@@ -686,6 +691,9 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     spr[k].push({t:'lim',x:-3.5,v:c.v,d:'F'});spr[k].push({t:'lim',x:trackXR(c.p)+3.5,v:c.prev,d:'R'});
     if(c.v<c.prev){const k2=Math.floor((c.p-450)/SEG);if(k2>0)spr[k2].push({t:'avis',x:-3.5,v:c.v,d:'F'})}
     else if(c.prev<c.v){const k2=Math.floor((c.p+450)/SEG);if(k2<TOTAL)spr[k2].push({t:'avis',x:trackXR(c.p+450)+3.5,v:c.prev,d:'R'})}}
+  // abre caminho à via da outra linha na bifurcação: tira casas e árvores de cima dela
+  for(let k=Math.floor(JSH/SEG);k<=Math.floor((JSH+JSHL)/SEG);k++){const o=jshOff(k*SEG);if(o===null)continue;
+    spr[k]=spr[k].filter(q=>{const x=q.x||0;return Math.abs(x)<4||Math.sign(x)!==Math.sign(o)||Math.abs(x)>Math.abs(o)+(q.w||20)/2+12})}
   for(const g of SIG){const k=Math.floor(g.p/SEG);if(k<TOTAL&&k>=0)spr[k].push({t:'sig',x:g.d==='R'?trackXR(g.p)+2.7:-2.7,g,d:g.d})}
 })();
 
@@ -1793,7 +1801,7 @@ function buildChunk(c){
   for(let i=i0;i<i1;i++){const p=i*SEG,j=i+1;
     if(p>BUFFER+3||p<BUFFER_R-3){}else{
     const offs=[0,...trk[i]];
-    for(const o of offs){const o2=o===0?0:segMatch(o,trk[j]);if(Math.abs(o)>40)continue;
+    for(const o of offs){const o2=o===0?0:segMatch(o,trk[j]);if(Math.abs(o)>60)continue;
       const tl=p/0.6,tl2=(p+SEG)/0.6,ao=tun[i]?0.25:1;
       mb.q(LP(i,o-1.6,0.18),LP(i,o+1.6,0.18),LP(j,o2+1.6,0.18),LP(j,o2-1.6,0.18),lc[i]?cc(96,98,102):[1,1,1],lc[i]?8:2,[0,tl,1,tl2],0,ao);
       mb.q(LP(i,o+1.6,0.18),LP(i,o+2.4,-0.4),LP(j,o2+2.4,-0.4),LP(j,o2+1.6,0.18),[1,1,1],3,[0,tl*0.3,0.3,tl2*0.3],0,ao);
