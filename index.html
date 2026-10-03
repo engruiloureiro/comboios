@@ -327,7 +327,11 @@ for(const s of STN){
 }
 // Paçô Vieira: o túnel (via única) acaba pouco antes do cais; a via de cruzamento só começa à saída do túnel
 PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
+// Caniços: a agulha fica antes da ponte de ferro
+{const cn=byNameE('Caniços');for(const e of cn.ex)e.b=cn.pb+12}
 const BUFFER_R=SB.pa-25;
+// entre a Trofa e Lousado a via estreita partilha a via da Linha do Minho: carris de bitola larga por fora dos de via métrica
+const DUAL={a:TRF.pa-160,b:byNameE('Lousado').pb+160};
 const DBL={from:0,to:4,a:SB.pa-160,b:SDH.pb+170};
 // no sentido da Trindade circula-se pela via da esquerda desse sentido, que é a segunda via (x=4)
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
@@ -337,11 +341,12 @@ const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
-const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:3,n:'Ponte sobre o rio Ave'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(37.52),b:km(37.66),t:3,n:'Ponte sobre o rio Ave (Caniços)'},{a:km(41.2),b:km(41.3),t:3,n:'Ponte sobre o rio Vizela'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
+const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(37.935),b:km(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
 const ZONES=[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
 const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])return z[2];return 'rural'};
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
-const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(28.1),side:1,x:14,w:26},{a:km(36.4),b:km(37.52),side:-1,x:16,w:28},{a:km(37.66),b:km(39.6),side:1,x:18,w:28},{a:km(40.7),b:km(41.2),side:-1,x:14,w:18},{a:km(41.3),b:km(42.1),side:1,x:14,w:18},{a:km(49.4),b:km(50.6),side:-1,x:16,w:18},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
+// no sentido do Porto o rio fica à esquerda (x>0) desde Vizela até à ponte de ferro antes da Trofa, onde passa para o outro lado
+const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(37.935),side:1,x:22,w:30},{a:km(38.075),b:km(40.9),side:1,x:18,w:28},{a:km(40.9),b:km(42.2),side:1,x:18,w:22},{a:km(42.2),b:km(50.4),side:1,x:20,w:24},{a:km(50.4),b:km(51.6),side:1,x:30,w:20},{a:km(51.6),b:km(53.0),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 
 const PROF=RAW.map(r=>[r[3],r[12]]).concat([[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
 const curve=new Float32Array(TOTAL), grade=new Float32Array(TOTAL), hy=new Float32Array(TOTAL+1), HDG=new Float32Array(TOTAL+1);
@@ -356,7 +361,7 @@ function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/60)}
 function branchOffs(p){return[]}
 function capAt(k){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
-  if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-37.59)<0.25)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
+  if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
   if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
 let LIMCH=[];
@@ -418,9 +423,10 @@ PN.sort((a,b)=>a.pos-b.pos);
 const SIG=[];
 function sigState(g){return'G'}
 /* comboios parados: automotora à espera do cruzamento em Paçô Vieira e reservas em Guimarães */
+function minho(n){const c=[{m:'bloco',len:13.4,ht:[1,0],bog:[2.6,10.8],bm:'bbog'}];for(let k=0;k<n;k++)c.push({m:'sfm',len:23.5,bog:[3.2,20.3],bm:'bbog'});return c}
 function paxTrain(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'coach',len:16.5,bog:[2.4,14.1]});return c}
 function freight(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'wag',len:8.2});return c}
-const PARKED=[{o:4,a:PV.pos+60,len:39.6,c:'u',lit:true},{o:11,a:GUI.pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:-5,a:SB.pa+14,len:39.6,c:'u',lit:false},{o:8.5,a:SB.pa+6,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+4,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+50,len:39.6,c:'u',lit:false},{o:11,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:39.6,c:'u',lit:false}];
+const PARKED=[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:4,a:PV.pos+60,len:39.6,c:'u',lit:true},{o:11,a:GUI.pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:-5,a:SB.pa+14,len:39.6,c:'u',lit:false},{o:8.5,a:SB.pa+6,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+4,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+50,len:39.6,c:'u',lit:false},{o:11,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:39.6,c:'u',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
 for(let p=OFF;p<END;p+=18)JOINTS.push(p+(rnd()-0.5)*0.4);
@@ -470,7 +476,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // conforme a terra: frentes de rua contínuas no Porto, blocos de habitação nos bairros, casas minhotas de granito e de
   // emigrante no Minho, milheirais, vinha, pinhais e eucaliptais, fábricas têxteis no vale do Ave
   // o Ave passa por baixo da ponte de Caniços
-  spr[Math.floor(km(37.59)/SEG)].push({t:'rivx',x:0});
+  spr[Math.floor(km(38.0)/SEG)].push({t:'rivx',x:0});spr[Math.floor(km(26.98)/SEG)].push({t:'rivx',x:0});
   // Cuca (curva) e Pereirinhas (entre duas fábricas): o espaço junto ao apeadeiro é das fábricas
   {const cu=byNameE('Cuca'),pe=byNameE('Pereirinhas');for(const s of[cu,pe])for(let q=Math.floor((s.pos-110)/SEG);q<=Math.floor((s.pos+90)/SEG);q++){MX[0][q]=-1;MX[1][q]=-1}
    const put2=(p,o)=>spr[clamp(Math.floor(p/SEG),0,TOTAL-1)].push(o);
@@ -503,12 +509,12 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   const locAt=p=>{const k=(p-OFF)/1000;for(const q of LOCS)if(k>=q[0]&&k<q[1])return q[2];return null};
   const LW={trindade:[['row',90],['church',4],['garden',6]],boavista:[['apt',30],['row',34],['garden',20],['ware',8],['church',3]],
     ramalde:[['apt',44],['bairro',16],['ware',16],['garden',12],['row',12]],shora:[['emig',30],['row',24],['apt',14],['garden',16],['ware',8]],
-    maia:[['ware',30],['factory',14],['emig',24],['corn',14],['woods',10]],agri:[['corn',34],['minho',18],['emig',12],['woods',22],['vine',10],['espig',6]],
-    trofa:[['row',34],['emig',22],['factory',18],['ware',10],['garden',10]],lousado:[['corn',30],['woods',26],['minho',16],['emig',14],['ware',8]],
+    maia:[['ware',30],['factory',14],['emig',24],['corn',14],['woods',10]],agri:[['capela',4],['ramada',8],['corn',34],['minho',18],['emig',12],['woods',22],['vine',10],['espig',6]],
+    trofa:[['row',34],['emig',22],['factory',18],['ware',10],['garden',10]],lousado:[['capela',4],['ramada',6],['corn',30],['woods',26],['minho',16],['emig',14],['ware',8]],
     tirso:[['row',44],['apt',14],['garden',20],['bras',8],['emig',10]],ave:[['factory',30],['bairro',22],['woods',24],['corn',10],['minho',8]],
-    aves:[['factory',26],['bairro',30],['row',18],['emig',14],['woods',10]],lordelo:[['emig',30],['factory',18],['bairro',14],['minho',14],['corn',12],['vine',8]],
-    vizela:[['row',38],['bras',12],['garden',20],['emig',16],['factory',8]],gmrsub:[['minho',26],['emig',26],['corn',16],['vine',14],['factory',6],['woods',10]],
-    serra:[['woods',50],['rocks',16],['minho',16],['espig',8],['corn',8]],fafe:[['bras',30],['row',26],['emig',22],['garden',14],['factory',6]]};
+    aves:[['factory',26],['bairro',30],['row',18],['emig',14],['woods',10]],lordelo:[['capela',3],['ramada',6],['emig',30],['factory',18],['bairro',14],['minho',14],['corn',12],['vine',8]],
+    vizela:[['row',38],['bras',12],['garden',20],['emig',16],['factory',8]],gmrsub:[['capela',4],['ramada',8],['minho',26],['emig',26],['corn',16],['vine',14],['factory',6],['woods',10]],
+    serra:[['capela',4],['woods',50],['rocks',16],['minho',16],['espig',8],['corn',8]],fafe:[['bras',30],['row',26],['emig',22],['garden',14],['factory',6]]};
   const LB={trindade:[['row',70],['apt',30]],boavista:[['apt',50],['row',30],['garden',20]],ramalde:[['apt',60],['bairro',20],['ware',20]],
     maia:[['ware',40],['factory',20],['emig',20],['corn',20]],lousado:[['woods',40],['corn',30],['minho',30]],ave:[['factory',36],['woods',40],['bairro',24]],
     aves:[['factory',44],['bairro',36],['woods',20]],serra:[['woods',80],['rocks',20]],fafe:[['bras',36],['row',30],['emig',34]],tirso:[['row',40],['apt',20],['woods',40]]};
@@ -530,7 +536,9 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
       case'bras':return{t:'bras',len:15,c:[[236,200,120],[180,210,220],[240,190,180],[200,220,170],[246,226,160]][Math.floor(rnd()*5)],off:4+rnd()*6,palm:true};
       case'bairro':return{t:'row',len:24+rnd()*24,f0:1,f1:1,tile:0,shop:0,s,h:3.4,w:16,c:[230,220,200],uni:true};
       case'rocks':return{t:'rock',len:6,s:1.2+rnd()*3,sd:s,off:3+rnd()*30};
-      case'espig':return{t:'espig',len:7,off:6+rnd()*20}}};
+      case'espig':return{t:'espig',len:7,off:6+rnd()*20};
+      case'capela':return{t:'capela',len:16,s,off:4+rnd()*14};
+      case'ramada':return{t:'ramada',len:14+rnd()*16,s,off:1+rnd()*4}}};
   for(const si of[0,1]){const side=si?-1+2:-1;const sd=si?1:-1;
     for(const back of[false,true]){let next=0;
       for(let k=0;k<TOTAL;k++){const p=k*SEG;if(p<next)continue;const z=zoneI[k];if(MX[si][k]<0){next=p+SEG;continue}
@@ -539,6 +547,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
         if(!ok){next=p+SEG;continue}
         const g=GAP[z]||[6,30],kc=clamp(k+Math.floor(n/2),0,TOTAL-1);
         it.x=sd*(mx+(back?(z==='porto'?24:28+rnd()*30):0)+(it.off||0.5));
+        if(!back&&(it.t==='row'||it.t==='apt')&&!it.uni&&rnd()<0.65){it.street=true;it.x+=sd*8.5}
         spr[kc].push(it);if(!back&&(it.t==='row'||it.t==='apt'||(it.t==='emig'&&rnd()<0.4))&&rnd()<0.6)spr[kc].push({t:'slamp',x:sd*(mx+0.2)});next=p+it.len+g[0]+rnd()*(g[1]-g[0])}}}
   // marcos de cada terra
   {const put=(p,o)=>{const k=clamp(Math.floor(p/SEG),0,TOTAL-1);spr[k].push(o)};
@@ -555,9 +564,9 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
    put(km(0)-260,{t:'pacos',x:-40});                                  // Paços do Concelho, no topo dos Aliados
    put(km(2.95),{t:'stadium',x:-130});                                // Estádio do Bessa
    put(km(29.3),{t:'mabor',x:-40});                                   // Mabor, Lousado
-   put(km(36.15),{t:'factory',x:-34,w:110,h:10,chim:true});put(km(36.3),{t:'factory',x:-70,w:60,h:12,chim:true}); // Fábrica de Santo Thyrso
+   put(km(36.15),{t:'factory',x:62,w:110,h:10,chim:true});put(km(36.3),{t:'factory',x:100,w:60,h:12,chim:true}); // Fábrica de Santo Thyrso
    put(km(35.6),{t:'hillchapel',x:-700});                             // Monte da Assunção
-   for(const[k0,x,w]of[[41.2,40,140],[41.45,95,90],[41.7,40,120],[41.9,90,80]])put(km(k0),{t:'factory',x,w,h:11,chim:true}); // Fábrica do Rio Vizela
+   for(const[k0,x,w]of[[41.2,46,140],[41.45,100,90],[41.7,46,120],[41.9,96,80]])put(km(k0),{t:'factory',x,w,h:11,chim:true}); // Fábrica do Rio Vizela
    put(km(52.9),{t:'pvelha',x:60})}                                   // Ponte Velha de Vizela                // Fafe, Igreja Nova
   // estações
   for(const s of STN){
@@ -644,7 +653,7 @@ function reset(startIdx,endIdx,rev,svc){
   {let last=p0;const dir=REV?1:-1;
    for(const X of STOPS){if(X===st||X===en||!X.ex.length||X.pos<LOU.pos+200)continue;// cada estação só tem cruzamento umas vezes: cerca de metade, menos se a anterior foi perto
      if(rnd()<0.5||(Math.abs(X.pos-last)<3500&&rnd()<0.6))continue;last=X.pos;
-     const kr=rnd(),fr=kr<0.25,px=!fr&&kr<0.55,cons=fr?freight(4+Math.floor(rnd()*4)):px?paxTrain(3+Math.floor(rnd()*2)):null,e=X.ex[0],len=cons?cons.reduce((s,q)=>s+q.len+0.6,0):rnd()<0.75?31:62,stopA=X===PV?(REV?e.b-65-len:e.a+65):REV?X.pos-8-len:X.pa+6,arrT=X.dep-150+Math.round(rnd()*330);
+     const kr=rnd(),mi=(X===TRF||X.n==='Lousado')&&rnd()<0.5,fr=!mi&&kr<0.25,px=!mi&&!fr&&kr<0.55,cons=mi?minho(3+Math.floor(rnd()*3)):fr?freight(4+Math.floor(rnd()*4)):px?paxTrain(3+Math.floor(rnd()*2)):null,e=X.ex[0],len=cons?cons.reduce((s,q)=>s+q.len+0.6,0):rnd()<0.75?31:62,stopA=X===PV?(REV?e.b-65-len:e.a+65):REV?X.pos-8-len:X.pa+6,arrT=X.dep-150+Math.round(rnd()*330);
      // nem sempre a nossa automotora fica na via principal: às vezes é ela que entra na via desviada
      const busy=PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a),weDiv=!busy&&X!==PV&&rnd()<0.45;if(weDiv){SIDE.push(e);X.divert=true}
      TRAINS.push({cross:X,e,stopA,arrT,len,cons,o:0,c:fr?'loco':'u',v:0,vmax:fr?9+rnd()*3:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:weDiv?(p=>p<LOU.pos?(REV?0:4):0):(p=>p<LOU.pos?(REV?0:4):(exOff(e,p)??0))})}}
@@ -1688,7 +1697,7 @@ function buildChunk(c){
       mb.q(LP(i,o-1.6,0.18),LP(i,o+1.6,0.18),LP(j,o2+1.6,0.18),LP(j,o2-1.6,0.18),lc[i]?cc(96,98,102):[1,1,1],lc[i]?8:2,[0,tl,1,tl2],0,ao);
       mb.q(LP(i,o+1.6,0.18),LP(i,o+2.4,-0.4),LP(j,o2+2.4,-0.4),LP(j,o2+1.6,0.18),[1,1,1],3,[0,tl*0.3,0.3,tl2*0.3],0,ao);
       mb.q(LP(i,o-2.4,-0.4),LP(i,o-1.6,0.18),LP(j,o2-1.6,0.18),LP(j,o2-2.4,-0.4),[1,1,1],3,[0,tl*0.3,0.3,tl2*0.3],0,ao);
-      for(const s of[-0.536,0.536]){const a=o+s,b=o2+s;
+      for(const s of(p>DUAL.a&&p<DUAL.b?[-0.536,0.536,-0.86,0.86]:[-0.536,0.536])){const a=o+s,b=o2+s;
         mb.q(LP(i,a-0.03,0.36),LP(i,a+0.03,0.36),LP(j,b+0.03,0.36),LP(j,b-0.03,0.36),cc(176,170,160),12,[0,0,0.1,1],0,ao);
         mb.q(LP(i,a+0.036,0.18),LP(i,a+0.036,0.36),LP(j,b+0.036,0.36),LP(j,b+0.036,0.18),cc(96,74,56),0,[0,0,1,1],0,ao);
         mb.q(LP(i,a-0.036,0.36),LP(i,a-0.036,0.18),LP(j,b-0.036,0.18),LP(j,b-0.036,0.36),cc(96,74,56),0,[0,0,1,1],0,ao)}
@@ -1968,8 +1977,26 @@ function obj3(mb,sp,i,L){
     else if(kind==='plane'){boxRF(mb,c,A.R,A.F,0.5,0.5,y,y+hh*0.5,cc(170,160,140),0);blob(mb,[c[0],y+hh*0.68,c[2]],hh*0.34,hh*0.3,hh*0.34,cc(98,128,66),rs&1023)}
     else{boxRF(mb,c,A.R,A.F,0.55,0.55,y,y+hh*0.42,cc(92,74,58),0);blob(mb,[c[0],y+hh*0.62,c[2]],hh*0.38,hh*0.32,hh*0.38,cc(70,100,54),rs&1023)}};
   const ROOF=()=>cc(176+r()*26,88+r()*18,60+r()*10);
+  const carM=(A,u,v,col)=>{const c0=add(A.c,add(mulv(A.F,u),mulv(A.n,-v)));boxRF(mb,c0,A.R,A.F,1.7,4.0,A.y+0.32,A.y+0.92,col,0);boxRF(mb,add(c0,mulv(A.F,-0.2)),A.R,A.F,1.55,2.1,A.y+0.92,A.y+1.38,cc(56,70,84),16,2,2);
+    for(const e of[-1.3,1.3])for(const s2 of[-0.8,0.8])cyl(mb,add(c0,add(mulv(A.F,e),mulv(A.R,s2))),A.y,A.y+0.58,0.3,0.3,6,cc(22,22,22),0)};
+  const street=len=>{const st=5;for(let u=-len/2;u<len/2-0.1;u+=st){const u2=Math.min(len/2,u+st),Q=(v0,v1,dy,col,l)=>{const a=at(u,-v0),b=at(u2,-v0),c2=at(u2,-v1),d2=at(u,-v1);
+      mb.q([a.c[0],a.y+dy,a.c[2]],[b.c[0],b.y+dy,b.c[2]],[c2.c[0],c2.y+dy,c2.c[2]],[d2.c[0],d2.y+dy,d2.c[2]],col,l,[0,0,1,1])};
+      Q(8.5,1.6,0.06,[0.86,0.86,0.86],8);Q(1.6,0,0.2,[1,1,1],14);Q(8.6,8.5,0.2,[1,1,1],14)}
+    const A0=at(0,0);for(let u=-len/2+3;u<len/2-3;u+=5.5)if(r()<0.45)carM(at(u,0),0,-2.6,cc(...[[196,40,36],[230,230,224],[40,60,110],[60,90,60],[200,170,60],[120,120,124],[150,40,90]][Math.floor(r()*7)]))};
   switch(sp.t){
+  case'capela':{// capela branca com sineira, cunhais de granito e dois ciprestes
+    const A=at(0,0),w=5,d=8,cc2=add(A.c,mulv(A.n,-d/2)),WH=[0.97,0.96,0.92],G=[0.86,0.84,0.8];boxRF(mb,cc2,A.F,A.R,w,d,A.y-0.6,A.y+4.6,WH,0);
+    for(const e of[-1,1])for(const q of[-1,1])boxRF(mb,add(add(cc2,mulv(A.F,e*w/2)),mulv(A.n,q*d/2)),A.F,A.R,0.4,0.4,A.y-0.6,A.y+4.6,G,13,1,1);
+    const P=(u,v,y)=>[cc2[0]+A.F[0]*u+A.n[0]*v,y,cc2[2]+A.F[2]*u+A.n[2]*v];for(const s of[-1,1])mb.q(P(-w/2-0.3,s*(d/2+0.3),A.y+4.5),P(w/2+0.3,s*(d/2+0.3),A.y+4.5),P(w/2+0.3,s*0.0,A.y+6.2),P(-w/2-0.3,s*0.0,A.y+6.2),ROOF(),5);
+    for(const s of[-1,1])mb.t(P(-w/2,s*d/2,A.y+4.6),P(w/2,s*d/2,A.y+4.6),P(0,s*d/2,A.y+6.2),A.n,A.n,A.n,WH,[0,0],[1,0],[0,1],0,0,1);
+    boxRF(mb,P(0,d/2-0.1,0),A.F,A.R,1.8,0.4,A.y+6.0,A.y+8.0,WH,0);boxRF(mb,P(0,d/2-0.1,0),A.F,A.R,0.12,0.42,A.y+8.0,A.y+8.8,G,13,1,1);boxRF(mb,P(0,d/2-0.1,0),A.F,A.R,0.6,0.42,A.y+8.4,A.y+8.52,G,13,1,1);
+    mb.q(P(-0.6,d/2+0.02,A.y),P(0.6,d/2+0.02,A.y),P(0.6,d/2+0.02,A.y+2.4),P(-0.6,d/2+0.02,A.y+2.4),cc(96,62,38),0);
+    for(const u of[-w/2-2.5,w/2+2.5]){const B=at(u,1.5);boxRF(mb,B.c,B.R,B.F,0.3,0.3,B.y,B.y+2,cc(90,70,54),0);blob(mb,[B.c[0],B.y+6,B.c[2]],0.9,5,0.9,cc(40,70,46),rs&255)}break}
+  case'ramada':{// vinha em ramada: esteios de granito e latada sobre o caminho
+    const n=Math.max(2,Math.round(sp.len/4));for(let q=0;q<=n;q++)for(const v of[0,4]){const A=at(-sp.len/2+q*sp.len/n,v);boxRF(mb,A.c,A.R,A.F,0.25,0.25,A.y,A.y+2.4,[0.84,0.82,0.78],13,1,1)}
+    const A=at(0,2);boxRF(mb,A.c,A.F,A.R,sp.len,4.4,A.y+2.35,A.y+2.6,cc(78,118,56),10,3,3);break}
   case'row':{// frente de rua contínua: casas estreitas de alturas e cores diferentes, rés-do-chão com portas e lojas
+    if(sp.street)street(sp.len);
     const uc=sp.uni?[[236,230,214],[226,214,190],[214,220,214]][Math.floor(r()*3)]:null;let u=-sp.len/2;while(u<sp.len/2-2){const w=Math.min(sp.len/2-u,sp.uni?5:4.6+r()*3),fl=sp.f0+Math.floor(r()*(sp.f1-sp.f0+1)),d=9+r()*4,hh=fl*3.4+0.7;
       const A=at(u+w/2,0),cc2=add(A.c,mulv(A.n,-d/2)),tile=r()<sp.tile;
       const col=uc?cc(...uc):tile?[[1,1,1],[0.8,0.95,0.86],[1,0.95,0.76],[0.88,0.9,1]][Math.floor(r()*4)]:(r()<0.12?[0.82,0.8,0.76]:cc(...[[236,226,206],[226,200,160],[214,176,140],[200,212,206],[236,236,230],[230,214,170],[196,170,150],[220,190,184],[186,200,214],[240,214,190]][Math.floor(r()*10)]));
@@ -2045,7 +2072,7 @@ function obj3(mb,sp,i,L){
     else{boxRF(mb,c,R,F,0.4,0.4,y0,y0+h*0.86,tk,0);blob(mb,[c[0],y0+h*0.8,c[2]],h*0.22,h*0.2,h*0.22,col,sdd)}break}
   case'house':{const w=sp.w,d=w*0.8,h=sp.h,col=cc(...sp.c);const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);
     boxRF(mb,cc2,F,R,w,d,y0-0.5,y0+h,col,4,12,12,-1);hipRoof(mb,cc2,F,R,w,d,y0+h,h*0.36,cc(200,110,80));break}
-  case'apt':{const w=sp.w,d=12,h=sp.fl*3,col=cc(...sp.c),cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);const yb=sp.y?hy[i]+sp.y:y0;
+  case'apt':{if(sp.street)street(sp.len);const w=sp.w,d=12,h=sp.fl*3,col=cc(...sp.c),cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);const yb=sp.y?hy[i]+sp.y:y0;
     boxRF(mb,cc2,F,R,w,d,yb-0.5,yb+h,col,4,12,12,-1,1,false,cc(150,146,140),6);if(sp.r)hipRoof(mb,cc2,F,R,w,d,yb+h,2.4,cc(200,110,80),0.3);
     else boxRF(mb,cc2,F,R,w+0.3,d+0.3,yb+h,yb+h+0.4,cc(170,166,160),6);
     if(sp.bal){const nn=mulv(R,-sd);for(let f=1;f<sp.fl;f++)boxRF(mb,add(cc2,mulv(nn,d/2+0.6)),F,R,w*0.86,1.2,yb+f*3-0.05,yb+f*3+0.12,cc(214,212,206),6);
@@ -2081,12 +2108,15 @@ function obj3(mb,sp,i,L){
     g.w3=[base[0]+n[0]*0.25,hy[i]+4.6,base[2]+n[2]*0.25];g.n3=n;break}
   case'pn':if(VINT){boxRF(mb,c,R,F,0.14,0.14,y0,y0+2.8,cc(236,236,236),0);const cx=[c[0],y0+2.6,c[2]];
     for(const s of[-1,1]){const a=add(cx,add(mulv(F,-0.6),[0,-0.4*s,0])),b=add(cx,add(mulv(F,0.6),[0,0.4*s,0]));mb.q(a,add(a,[0,0.16,0]),add(b,[0,0.16,0]),b,cc(236,236,236),0)}
-    for(let q=0;q<6;q++)boxRF(mb,add(c,mulv(R,sd*(0.3+q*0.7))),R,F,0.7,0.12,y0+1.0,y0+1.14,q%2?cc(240,240,236):cc(200,40,30),0);
+    // cancela fechada, paralela à via, a atravessar a estrada; poste com contrapeso na beira da estrada
+    boxRF(mb,add(c,mulv(F,4.4)),R,F,0.2,0.2,y0,y0+1.3,cc(60,60,60),0);boxRF(mb,add(c,mulv(F,4.0)),R,F,0.26,0.6,y0+1.0,y0+1.3,cc(40,40,40),0);
+    for(let q=0;q<7;q++)boxRF(mb,add(c,mulv(F,4.75+q*0.75)),R,F,0.12,0.75,y0+1.0,y0+1.14,q%2?cc(240,240,236):cc(200,40,30),0);
+    boxRF(mb,add(c,mulv(F,9.95)),R,F,0.12,0.12,y0,y0+1.0,cc(236,236,236),0);
     if(sd<0){const gh=add(c,add(mulv(R,-3.5),mulv(F,-5)));boxRF(mb,gh,R,F,3.2,3.6,y0-0.2,y0+2.8,cc(236,226,200),4,12,12,-1);hipRoof(mb,gh,R,F,3.2,3.6,y0+2.8,1.1,cc(190,104,74),0.25)}
     break}
   case'pnx':{boxRF(mb,c,R,F,0.14,0.14,y0,y0+3,cc(236,236,236),0);const cx=[c[0],y0+2.8,c[2]];
     for(const s of[-1,1]){const a=add(cx,add(mulv(F,-0.6),[0,-0.4*s,0])),b=add(cx,add(mulv(F,0.6),[0,0.4*s,0]));mb.q(a,add(a,[0,0.16,0]),add(b,[0,0.16,0]),b,cc(210,50,40),0)}
-    boxRF(mb,add(c,mulv(R,sd*2.2)),R,F,4.2,0.14,y0+0.95,y0+1.1,cc(220,40,30),0);sp.w3=[base[0],y0+1.9,base[2]];break}
+    boxRF(mb,add(c,mulv(F,7.3)),R,F,0.14,5.0,y0+0.95,y0+1.1,cc(220,40,30),0);sp.w3=[base[0],y0+1.9,base[2]];break}
   case'car':{const col=cc(...sp.c);boxRF(mb,c,R,F,4.2,1.8,y0+0.3,y0+0.95,col,0);boxRF(mb,c,R,F,2.4,1.7,y0+0.95,y0+1.45,cc(60,80,96),16,2,2);cyl(mb,add(c,mulv(R,1.3)),y0,y0+0.6,0.32,0.32,6,cc(20,20,20),0);cyl(mb,add(c,mulv(R,-1.3)),y0,y0+0.6,0.32,0.32,6,cc(20,20,20),0);break}
   case'board':{const y=hy[i]+sp.y;for(const s of[-1.4,1.4])boxRF(mb,add(c,mulv(F,s)),R,F,0.08,0.08,y,y+2.3,cc(80,84,88),0);
     plateQ(mb,[c[0],y+2.65,c[2]],fr,3.4,0.6,atBoard(sp.n),0,true);break}
@@ -2251,6 +2281,9 @@ function buildTrainMeshes(){
     for(const zc of motor?[-3.6,-8.6]:[-4.4,-9.4]){boxRF(mb,[0,0,zc],[1,0,0],[0,0,1],1.0,1.3,3.58,3.66,cc(96,99,102),11,0.4,0.4)}
     for(const zc of[-6.2,-11.4])cyl(mb,[0,0,zc],3.6,3.7,0.22,0.18,10,cc(80,82,84),0);
     for(let k=0;k<6;k++)mb.q([-hw+0.46,3.585,-1.6-k*2.2],[hw-0.46,3.585,-1.6-k*2.2],[hw-0.46,3.585,-1.64-k*2.2],[-hw+0.46,3.585,-1.64-k*2.2],cc(70,72,74),0);
+    // pala de sol por dentro do para-brisas e tubo de escape
+    fq(mb,-1.1,-0.46,2.72,2.84,cc(30,40,30),0,-0.04);
+    if(motor){cyl(mb,[-0.35,0,-CARL+1.0],3.86,4.16,0.07,0.07,8,cc(30,30,30),0)}
     // fuligem do escape no tejadilho
     {const zc=-CARL+1.5;mb.q([-0.7,3.885,zc+0.2],[0.7,3.885,zc+0.2],[0.7,3.885,zc+1.0],[-0.7,3.885,zc+1.0],cc(30,30,30),0)}
     // reservatórios de ar e caixa de baterias
@@ -2295,6 +2328,10 @@ function buildTrainMeshes(){
     // tampa inferior escura
     mb.q([-hw-0.02,0.37,z1],[hw+0.02,0.37,z1],[hw+0.02,0.37,0.1],[-hw-0.02,0.37,0.1],[0.02,0.02,0.02],0,0,0,0)};
   const bogie=mb=>{const FC=cc(50,50,48);
+    // amortecedores verticais, cepos de travão e cilindros de freio
+    for(const sx of[-1,1]){for(const z of[-0.55,0.55])limb(mb,[sx*0.86,0.45,z],[sx*0.86,0.85,z],0.07,0.07,cc(30,30,30),[0,0,1]);
+      for(const z of[-1.1,1.1]){const zz=z-Math.sign(z)*0.46;boxRF(mb,[sx*0.6,0,zz],[1,0,0],[0,0,1],0.1,0.14,0.2,0.62,cc(70,60,50),0)}
+      hcyl(mb,sx*0.45,0.66,-0.3,0.3,0.1,cc(56,56,54),0)}
     boxRF(mb,[0,0,0],[1,0,0],[0,0,1],1.5,0.5,0.52,0.72,FC,0);
     for(const sx of[-1,1]){boxRF(mb,[sx*0.74,0,0],[1,0,0],[0,0,1],0.14,3.0,0.5,0.66,FC,0);
       boxRF(mb,[sx*0.74,0,0],[1,0,0],[0,0,1],0.12,1.2,0.34,0.5,FC,0);
@@ -2397,12 +2434,41 @@ function buildTrainMeshes(){
     for(const s of[-1,1])limb(mb,[s*0.9,0.66,-3.2],[s*0.9,0.3,-Lc/2],0.04,0.04,DKc,[0,0,1]),limb(mb,[s*0.9,0.3,-Lc/2],[s*0.9,0.66,-Lc+3.2],0.04,0.04,DKc,[0,0,1]);
     boxRF(mb,[0,0,-Lc/2],[1,0,0],[0,0,1],1.4,1.4,0.3,0.66,cc(50,50,48),0);
     boxRF(mb,[0,0,0.05],[1,0,0],[0,0,1],0.4,0.3,0.75,1.0,cc(40,40,40),0);boxRF(mb,[0,0,-Lc-0.05],[1,0,0],[0,0,1],0.4,0.3,0.75,1.0,cc(40,40,40),0)};
-  TM={car:mk(mb=>car(mb,true),'car'),car2:mk(mb=>car(mb,false),'car2'),bog:mk(bogie,'bog'),bell:mk(bell,'bell'),int:mk(interior,'int'),loco:mk(loco,'loco'),wag:mk(wagon,'wag'),coach:mk(coach,'coach')};
+  // Linha do Minho (bitola larga): locomotiva diesel série 1400, laranja com friso branco, e carruagens Sorefame de inox canelado
+  const bloco=mb=>{const Lc=13.4,OR=cc(214,98,36),WS=cc(240,238,230),GLc=cc(40,46,54),hwb=1.45;
+    boxRF(mb,[0,0,-Lc/2],[1,0,0],[0,0,1],2.9,Lc-0.2,0.9,1.3,cc(40,40,40),0);
+    boxRF(mb,[0,0,-1.3],[1,0,0],[0,0,1],2.0,2.2,1.3,3.0,OR,12,1,1);
+    boxRF(mb,[0,0,-3.9],[1,0,0],[0,0,1],2.9,3.0,1.3,4.0,OR,12,1,1);boxRF(mb,[0,0,-3.9],[1,0,0],[0,0,1],3.0,3.1,4.0,4.12,cc(70,70,70),0);
+    boxRF(mb,[0,0,-9.0],[1,0,0],[0,0,1],2.0,8.4,1.3,3.4,OR,12,1,1);boxRF(mb,[0,0,-9.0],[1,0,0],[0,0,1],2.06,8.46,3.4,3.48,cc(80,80,80),0);
+    for(const s of[-1,1]){boxRF(mb,[s*1.46,0,-Lc/2],[1,0,0],[0,0,1],0.04,Lc-0.4,1.6,1.75,WS,0);
+      mb.q([s*1.46,2.6,-2.7],[s*1.46,2.6,-3.4],[s*1.46,3.6,-3.4],[s*1.46,3.6,-2.7],GLc,16);mb.q([s*1.46,2.6,-4.4],[s*1.46,2.6,-5.1],[s*1.46,3.6,-5.1],[s*1.46,3.6,-4.4],GLc,16);
+      for(let k=0;k<6;k++)mb.q([s*1.01,1.9,-5.8-k*1.2],[s*1.01,1.9,-6.6-k*1.2],[s*1.01,3.0,-6.6-k*1.2],[s*1.01,3.0,-5.8-k*1.2],cc(130,62,26),0);
+      limb(mb,[s*1.5,1.3,-0.2],[s*1.5,1.3,-Lc+0.2],0.04,0.04,WS,[0,0,1])}
+    for(const s of[-1,1])mb.q([s*0.25,2.7,-2.39],[s*1.3,2.7,-2.39],[s*1.3,3.6,-2.39],[s*0.25,3.6,-2.39],GLc,16);
+    for(const[x,y]of[[0,2.8],[-0.7,1.6],[0.7,1.6]])for(let q=0;q<12;q++){const a0=q/12*6.283,a1=(q+1)/12*6.283,r=0.12;mb.t([x,y,-0.19],[x+Math.cos(a0)*r,y+Math.sin(a0)*r,-0.19],[x+Math.cos(a1)*r,y+Math.sin(a1)*r,-0.19],[0,0,1],[0,0,1],[0,0,1],cc(236,234,214),[0,0],[1,0],[0,1],0,2,1)}
+    boxRF(mb,[0,0,-12.0],[1,0,0],[0,0,1],0.6,0.6,3.4,3.9,cc(40,40,40),0);
+    for(const z of[0.05,-Lc-0.05])for(const x of[-0.85,0.85])cyl(mb,[x,0,z],0.95,1.2,0.18,0.18,8,cc(40,40,40),0)};
+  const sfm=mb=>{const Lc=23.5,hwc=1.47,z0=-0.4,zE=-Lc+0.4,GLc=cc(255,255,255);
+    boxRF(mb,[0,0,-Lc/2],[1,0,0],[0,0,1],2.6,Lc-0.4,0.85,1.15,cc(40,40,40),0);
+    for(const s of[-1,1]){const Q=(za,zb,ya,yb,col,o,l,e)=>mb.q([s*(hwc+o),ya,za],[s*(hwc+o),ya,zb],[s*(hwc+o),yb,zb],[s*(hwc+o),yb,za],col,l||0,0,e||0);
+      Q(zE,z0,1.15,3.75,[1,1,1],0,12);Q(zE,z0,1.15,1.35,cc(150,154,158),0.005,0);
+      for(let k=0;k<11;k++){const zc=-3.0-k*1.6;Q(zc-0.68,zc+0.68,2.15,3.15,GLc,0.01,16,-0.5);
+        if(prand()<0.5){const cl=PCOL[Math.floor(prand()*PCOL.length)],sk=SKIN[Math.floor(prand()*SKIN.length)];Q(zc-0.2,zc+0.2,2.15,2.6,mulv(cl,0.6),0.012);Q(zc-0.1,zc+0.1,2.6,2.85,mulv(sk,0.7),0.013)}}
+      for(const zc of[-1.3,-Lc+1.3]){Q(zc-0.55,zc+0.55,1.0,3.4,cc(176,180,184),0.012,12);Q(zc-0.3,zc+0.3,2.3,3.1,GLc,0.016,16)}
+      plateQ(mb,[s*(hwc+0.02),1.8,-Lc/2],[s,0,0],0.9,0.55,ATL['cplogo'],0,false)}
+    for(const z of[z0,zE])mb.q([-hwc,1.15,z],[hwc,1.15,z],[hwc,3.75,z],[-hwc,3.75,z],cc(180,184,188),12);
+    const prf=[[hwc,3.75],[hwc-0.3,3.98],[hwc-0.8,4.1],[0,4.14]];for(const s of[-1,1])for(let k=0;k<3;k++){const a=prf[k],b=prf[k+1];mb.q([s*a[0],a[1],z0],[s*a[0],a[1],zE],[s*b[0],b[1],zE],[s*b[0],b[1],z0],cc(150,154,158),11,[0,0,6,1])}
+    boxRF(mb,[0,0,-Lc/2],[1,0,0],[0,0,1],1.8,3,0.5,0.85,cc(50,50,48),0);for(const z of[0.05,-Lc-0.05])boxRF(mb,[0,0,z],[1,0,0],[0,0,1],1.4,0.3,1.0,3.3,cc(40,40,40),0)};
+  const bbog=mb=>{const FC=cc(46,46,44);boxRF(mb,[0,0,0],[1,0,0],[0,0,1],2.2,0.6,0.55,0.8,FC,0);
+    for(const sx of[-1,1]){boxRF(mb,[sx*1.0,0,0],[1,0,0],[0,0,1],0.16,3.0,0.5,0.75,FC,0);for(const z of[-1.2,1.2])boxRF(mb,[sx*1.05,0,z],[1,0,0],[0,0,1],0.22,0.36,0.3,0.6,cc(60,60,58),0)}
+    for(const z of[-1.2,1.2])for(const x of[-0.83,0.83]){const n=12;for(let k=0;k<n;k++){const a0=k/n*6.283,a1=(k+1)/n*6.283,r=0.47,sx=Math.sign(x);
+      mb.q([x,0.47+Math.cos(a0)*r,z+Math.sin(a0)*r],[x,0.47+Math.cos(a1)*r,z+Math.sin(a1)*r],[x+sx*0.12,0.47+Math.cos(a1)*r,z+Math.sin(a1)*r],[x+sx*0.12,0.47+Math.cos(a0)*r,z+Math.sin(a0)*r],cc(70,66,62),0)}}};
+  TM={bloco:mk(bloco,'bloco'),sfm:mk(sfm,'sfm'),bbog:mk(bbog,'bbog'),car:mk(mb=>car(mb,true),'car'),car2:mk(mb=>car(mb,false),'car2'),bog:mk(bogie,'bog'),bell:mk(bell,'bell'),int:mk(interior,'int'),loco:mk(loco,'loco'),wag:mk(wagon,'wag'),coach:mk(coach,'coach')};
 }
 function mdl(A,F,eye){const R=norm(cross(F,[0,1,0])),U=cross(R,F);return new Float32Array([R[0],R[1],R[2],0,U[0],U[1],U[2],0,F[0],F[1],F[2],0,A[0]-eye[0],A[1]-eye[1],A[2]-eye[2],1])}
 function consistDraw(pf,sgn,xo,parts,eye,lit){let p=pf;
   for(const q of parts){const Bp=p-sgn*q.len,A=wp(p,xo(p),0.36),B=wp(Bp,xo(Bp),0.36),F=norm(sub(A,B));
-    drawM(TM[q.m],mdl(A,F,eye),q.ht&&lit?q.ht:[0,0]);if(q.bog)for(const d of q.bog)drawM(TM.bog,mdl(add(A,mulv(F,-d)),F,eye),[0,0]);p=Bp-sgn*0.6}}
+    drawM(TM[q.m],mdl(A,F,eye),q.ht&&lit?q.ht:[0,0]);if(q.bog)for(const d of q.bog)drawM(TM[q.bm||'bog'],mdl(add(A,mulv(F,-d)),F,eye),[0,0]);p=Bp-sgn*0.6}}
 // unidade dupla: a segunda unidade engata cabina com cabina (reboque à frente, motora atrás)
 function trainDraw(pf,sgn,xo,ht,eye,skipCab,nc){nc=nc||NCAR;
   const pts=[];for(let k=0;k<=nc;k++){const pp=pf-sgn*k*(CARL+0.4);pts.push(wp(pp,xo(pp),0.36))}
@@ -2422,7 +2488,7 @@ function lookDir(F,U){const z=mulv(norm(F),-1),x=norm(cross(U,z)),y=cross(z,x);r
 function m4mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s}return o}
 
 /* ---- dinâmicos: luzes dos sinais, PN, passageiros ---- */
-let PAXT=0,PAXBUSY=false,ALIGHT=[];
+let PAXT=0,PAXBUSY=false,ALIGHT=[],SMOKE=[],SMT=0,SMACC=0;
 function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   for(const g of SIG){if(!g.w3||Math.abs(g.p-centerP)>1600)continue;const st=g.d===DIRC?sigState(g):(g.k==='exit'?'R':'G');
     const cols={G:[0.15,1,0.45],Y:[1,0.72,0.1],R:[1,0.12,0.08]},pos={G:2,Y:1,R:0};
@@ -2452,6 +2518,14 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   for(const a of ALIGHT){if(a.done)continue;if(Math.abs(a.P[0]-eye[0])+Math.abs(a.P[2]-eye[2])>1400){a.done=true;continue}
     let walk=false;if(a.delay>0){a.delay-=pdt;if(S.atSt===a.st)busy=true;continue}if(!a.arr){walk=true;a.ph+=pdt*7;if(step2(a.P,a.T,1.3))a.arr=true}person(a.P,a.c,walk,a.ph)}
   PAXBUSY=busy;
+  // fumo do escape do motor diesel: mais escuro e denso com o motor em carga
+  {const tN=performance.now()/1000,sdt=Math.min(0.1,tN-(SMT||tN));SMT=tN;const ld=S.rpm||0;
+   if(running&&!paused){SMACC+=sdt*(1.5+ld*9);while(SMACC>1){SMACC-=1;const mots=[CARL-2.1];if(S.ncar>2)mots.push(TLEN(4)-(CARL-2.1));
+     for(const off of mots){const pp=S.pos-dir*off,w=wp(pp,trackX(pp),4.2);SMOKE.push({p:w,a:0,g:0.12+ld*0.25,v:[(Math.random()-0.5)*0.3,1.2+ld*1.5,(Math.random()-0.5)*0.3]})}}}
+   for(const q of SMOKE){q.a+=sdt;q.p[0]+=q.v[0]*sdt;q.p[1]+=q.v[1]*sdt;q.p[2]+=q.v[2]*sdt;q.v[1]*=1-0.6*sdt}
+   SMOKE=SMOKE.filter(q=>q.a<3.2);if(SMOKE.length>60)SMOKE.splice(0,SMOKE.length-60);
+   for(const q of SMOKE){const sz=0.25+q.a*0.55,k=1-q.a/3.2,col=[0.32+0.4*(1-q.g)+0.2*(1-k),0.32+0.4*(1-q.g)+0.2*(1-k),0.34+0.4*(1-q.g)+0.2*(1-k)];if(k*sz<0.05)continue;
+     blob(mb,[q.p[0]-eye[0],q.p[1],q.p[2]-eye[2]],sz,sz*0.8,sz,col,(q.a*10|0)+3)}}
   for(const s of STN){if(s.ty==='ap'||Math.abs(s.pos-centerP)>500)continue;const stp=REV?s.stopR-9:s.stopF+9,i=Math.floor(stp/SEG),r=s.pl[0],sd=Math.sign(r[0]);
     const w=PI(i,r[0]+sd*1.5,s.ph),Rv=RV(i),Fv=FV(i);const face=mulv(Rv,-sd),look=mulv(Fv,REV?-1:1);const fw=norm(add(mulv(face,0.8),mulv(look,0.6)));
     const at=S.atSt===s&&S.whT0?(performance.now()-S.whT0)/1000:-1;chefe(mb,[w[0]-eye[0],w[1],w[2]-eye[2]],fw,at)}
