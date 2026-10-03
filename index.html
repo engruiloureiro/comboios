@@ -80,7 +80,7 @@ canvas{display:block;width:100%;height:100%}
 .notch.t{color:#8fd27f}.notch.b{color:#f0a05a}.notch.e{color:#ff6b5e}.notch.on{color:#fff}
 #handle{position:absolute;right:8px;width:38px;height:16px;border-radius:4px;background:linear-gradient(#e2e6e8,#8b949a);
   box-shadow:0 2px 3px rgba(0,0,0,.6);transform:translateY(-50%);transition:top .06s}
-#btns{grid-column:1 / span 2;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+#btns{grid-column:1 / span 2;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 #bRev.on{background:#b5561c;color:#fff}
 .btn{border:0;border-radius:8px;background:#414a51;color:var(--ink);font:600 15px/1.05 'Barlow Condensed',Arial,sans-serif;
   box-shadow:0 3px 0 #181c1f;cursor:pointer;touch-action:manipulation;padding:0 4px}
@@ -148,14 +148,16 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <button class="btn" id="bVig">Homem-morto</button>
       <button class="btn" id="bWarp">Tempo ×1</button>
       <button class="btn" id="bRev" aria-pressed="false">Marcha: frente</button>
+      <button class="btn" id="bSw">Agulha</button>
     </div>
   </div>
 </div>
 
 <div class="ov" id="ovStart">
   <div class="panel">
-    <div class="azulejo">Porto-Trindade – Fafe<small>Linha de Guimarães, via métrica, outono de 1985</small></div>
-    <p>A antiga Linha de Guimarães em via estreita: 80,6 km desde a estação da Trindade, no Porto, pela Senhora da Hora, Maia e Trofa, pelo vale do Ave até Santo Tirso e Vizela, a Guimarães e, até 1986, a Fafe. Conduza uma automotora da série 9600, a diesel, pelos túneis e trincheiras do Porto, pelas terras da Maia e pelo vale industrial do Ave, a subir até Guimarães e depois a Paçô Vieira, o ponto mais alto.</p>
+    <div class="per" id="lineSel" role="radiogroup" aria-label="Linha"><span>Linha:</span><button data-l="guimaraes">Guimarães</button><button data-l="povoa">Póvoa e Famalicão</button></div>
+    <div class="azulejo" id="ttl">Porto-Trindade – Fafe<small>Linha de Guimarães, via métrica, outono de 1985</small></div>
+    <p id="intro">A antiga Linha de Guimarães em via estreita: 80,6 km desde a estação da Trindade, no Porto, pela Senhora da Hora, Maia e Trofa, pelo vale do Ave até Santo Tirso e Vizela, a Guimarães e, até 1986, a Fafe. Conduza uma automotora da série 9600, a diesel, pelos túneis e trincheiras do Porto, pelas terras da Maia e pelo vale industrial do Ave, a subir até Guimarães e depois a Paçô Vieira, o ponto mais alto.</p>
     <ul>
       <li><b>Manípulo</b> (arrastar, ou ↑ ↓): pontos de aceleração 1 a 5, 0, freio F1 a F5 e emergência. O motor diesel demora a subir de rotação e o freio a ar demora a apertar: antecipe.</li>
       <li>Não há CONVEL: respeite os limites. Entrar numa curva muito acima do limite faz descarrilar.</li>
@@ -225,6 +227,8 @@ const T=s=>{const[h,m]=s.split(':').map(Number);return h*3600+m*60};
 
 /* ================= LINHA (Porto-Trindade – Guimarães – Fafe, via métrica, 1985) ================= */
 const VINT=true;
+// duas linhas no mesmo jogo: Linha de Guimarães (por defeito) e Linha da Póvoa (#povoa); o mundo é construído para a escolhida
+const RP=location.hash==='#povoa',RG=!RP;
 const SEG=5, DRAW=220, CAM_H=2.95, DRV_X=-0.45, OFF=400;
 const km=k=>OFF+k*1000;
 // PK da Linha de Guimarães contados a partir de Porto-Trindade (Guimarães 59,385; Paçô Vieira 67,910; Fafe 80,585).
@@ -233,7 +237,7 @@ const km=k=>OFF+k*1000;
 // Coordenadas aproximadas; PK entre Porto e Guimarães estimados a partir da distância ao longo do traçado.
 const G0=59.385,kmG=k=>km(G0+k);
 // [nome, lat, lon, km, hora ida, hora volta, tipo, edifício, disposição, lado, comp. plataforma, altura, cota aprox., estilo]
-const RAW=[
+const RAWG=[
  ['Porto-Trindade',41.1525,-8.6094,0.00,'14:58','21:01','term',2,'VT',1,160,0.35,95,'v-trin'],
  ['Avenida de França',41.1588,-8.6262,1.75,'15:03','20:56','ap',0,'SR',1,70,0.3,100,'v-ap'],
  ['Francos',41.1655,-8.6385,3.20,'15:07','20:52','ap',0,'SL',-1,60,0.3,96,'v-ap'],
@@ -266,8 +270,31 @@ const RAW=[
  ['Cepães',41.438,-8.193,76.305,'17:36','18:20','est',1,'SX',1,90,0.35,262,'v-est1'],
  ['Fafe',41.4535,-8.1695,80.585,'17:44','18:13','term',2,'VFM',1,140,0.35,318,'v-fafe']
 ];
-const WPT=RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.45597,-8.26722,G0+5.77],[41.41949,-8.22899,G0+12.72],[41.4285,-8.2040,G0+15.40],[41.45231,-8.17224,G0+20.9]]).sort((a,b)=>a[2]-b[2]);
-const TOT_KM=80.585;
+// Linha do Porto à Póvoa e Famalicão (via métrica, 1875-1881), troço comum Trindade – Senhora da Hora; Famalicão – Lousado pela Linha do Minho em bitola mista
+const RAWP=RAWG.slice(0,6).map(r=>{const q=r.slice();q[4]=q[5]='00:00';return q}).concat([
+ ['Custóias',41.2017,-8.6450,7.80,'00:00','00:00','est',1,'SX',1,90,0.35,92,'v-est1'],
+ ['Esposade',41.2128,-8.6436,9.10,'00:00','00:00','ap',0,'SL',-1,60,0.3,86,'v-ap'],
+ ['Crestins',41.2235,-8.6448,10.30,'00:00','00:00','ap',0,'SR',1,60,0.3,80,'v-ap'],
+ ['Pedras Rubras',41.2340,-8.6550,11.60,'00:00','00:00','est',1,'SX',-1,100,0.35,74,'v-est'],
+ ['Lidador',41.2455,-8.6620,13.00,'00:00','00:00','ap',0,'SL',-1,60,0.3,66,'v-ap'],
+ ['Vilar do Pinheiro',41.2600,-8.6720,14.80,'00:00','00:00','est',1,'SX',1,90,0.35,58,'v-est1'],
+ ['Modivas',41.2770,-8.6880,17.10,'00:00','00:00','ap',0,'SR',1,60,0.3,44,'v-ap'],
+ ['Mindelo',41.3060,-8.7180,21.30,'00:00','00:00','est',1,'SX',-1,100,0.35,26,'v-est'],
+ ['Árvore',41.3290,-8.7240,24.00,'00:00','00:00','ap',0,'SL',-1,60,0.3,16,'v-ap'],
+ ['Azurara',41.3410,-8.7330,25.60,'00:00','00:00','ap',0,'SR',1,60,0.3,10,'v-ap'],
+ ['Vila do Conde',41.3530,-8.7420,27.10,'00:00','00:00','est',2,'VG',1,140,0.35,12,'v-est2'],
+ ['Póvoa de Varzim',41.3800,-8.7600,30.60,'00:00','00:00','est',2,'VG',-1,150,0.35,14,'v-fafe'],
+ ['Amorim',41.3920,-8.7400,33.20,'00:00','00:00','ap',0,'SL',-1,60,0.3,30,'v-ap'],
+ ['Laúndos',41.4050,-8.7130,36.30,'00:00','00:00','est',1,'SX',1,90,0.35,70,'v-est1'],
+ ['São Pedro de Rates',41.4130,-8.6720,40.60,'00:00','00:00','est',1,'SX',-1,90,0.35,95,'v-est'],
+ ['Fontaínhas',41.4170,-8.6280,44.80,'00:00','00:00','est',1,'SX',1,90,0.35,100,'v-est1'],
+ ['Gondifelos',41.4130,-8.5880,49.00,'00:00','00:00','ap',0,'SR',1,60,0.3,82,'v-ap'],
+ ['Louro',41.4080,-8.5470,53.00,'00:00','00:00','ap',0,'SL',-1,60,0.3,78,'v-ap'],
+ ['Famalicão',41.4080,-8.5200,56.00,'00:00','00:00','est',2,'VG',1,150,0.35,90,'v-fafe'],
+ ['Lousado',41.3505,-8.5190,62.50,'00:00','00:00','term',1,'SX',1,100,0.35,36,'v-est']]);
+const RAW=RP?RAWP:RAWG;
+const WPT=RP?RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.3640,-8.7520,28.8],[41.3880,-8.7520,32.0],[41.4110,-8.6930,38.4],[41.4170,-8.6500,42.7],[41.3800,-8.5180,59.2]]).sort((a,b)=>a[2]-b[2]):RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.45597,-8.26722,G0+5.77],[41.41949,-8.22899,G0+12.72],[41.4285,-8.2040,G0+15.40],[41.45231,-8.17224,G0+20.9]]).sort((a,b)=>a[2]-b[2]);
+const TOT_KM=RP?62.5:80.585;
 const PROJ=(la,lo)=>[(lo+8.23)*Math.cos(41.44*Math.PI/180)*111320,(la-41.44)*110574];
 const GEO=(function(){
   const P=WPT.map(r=>PROJ(r[0],r[1]));const n=P.length;const at=i=>P[clamp(i,0,n-1)];const spans=[];
@@ -284,11 +311,13 @@ let REV=false,DIRC='F';
 const STN=RAW.map((r,i)=>({n:r[0],i,k:r[3],pos:km(r[3]),depF:r[4]?T(r[4]):null,depR:r[5]?T(r[5]):null,dep:r[4]?T(r[4]):null,ty:r[6],big:r[7],lay:r[8],bside:r[9],plen:r[10],ph:r[11],el:r[12],sty:r[13]}));
 const DEPR=RAW.map(r=>r[5]);
 function byNameE(n){return STN.find(s=>s.n===n)}
-const SB=STN[0], GMR=STN[STN.length-1], PV=byNameE('Paçô Vieira'), GUI=byNameE('Guimarães'), TRF=byNameE('Trofa');
+// estações que só existem numa das linhas: nas outras ficam objetos fora da via
+const dumS=()=>({pos:-1e9,pa:-1e9,pb:-1e9,bc:-1e9,i:-1,k:-1e6,ex:[{a:-1e9,b:-1e9,from:0,to:4}],n:'—'});
+const SB=STN[0], GMR=STN[STN.length-1], PV=byNameE('Paçô Vieira')||dumS(), GUI=byNameE('Guimarães')||dumS(), TRF=byNameE('Trofa')||dumS(), FAM=byNameE('Famalicão')||dumS(), LSD=byNameE('Lousado');
 const DUM={pos:-1e9,pa:-1e9,pb:-1e9,k:-1e6,n:'—'};
 const SDH=byNameE('Senhora da Hora'),LOU={...DUM,pos:SDH.pos+74},TRO=DUM,ERM=DUM,VIZ=DUM,SFR=DUM,LEA=DUM,CAN=DUM,CPA=DUM,CTM=DUM;
 const byName=n=>STN.find(s=>s.n===n);
-const END=GMR.pos, BUFFER=END+30;
+const END=GMR.pos, BUFFER=END+(RP?280:30);
 const TOTAL=Math.ceil((END+700)/SEG);
 function headingAtKm(k){const sp=GEO.spans;let q=0;while(q<sp.length-1&&GEO.km[q+1]<k)q++;
   const f=clamp((k-GEO.km[q])/((GEO.km[q+1]-GEO.km[q])||1),0,1),s=sp[q],L=f*s.len;let j=1;while(j<s.cum.length-1&&s.cum[j]<L)j++;
@@ -328,10 +357,10 @@ for(const s of STN){
 // Paçô Vieira: o túnel (via única) acaba pouco antes do cais; a via de cruzamento só começa à saída do túnel
 PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
 // Caniços: a agulha fica antes da ponte de ferro
-{const cn=byNameE('Caniços');for(const e of cn.ex)e.b=cn.pb+12}
+{const cn=byNameE('Caniços');if(cn)for(const e of cn.ex)e.b=cn.pb+12}
 const BUFFER_R=SB.pa-25;
 // entre a Trofa e Lousado a via estreita partilha a via da Linha do Minho: carris de bitola larga por fora dos de via métrica
-const DUAL={a:TRF.pa-160,b:byNameE('Lousado').pb+160};
+const DUAL=RP?{a:FAM.pa-160,b:BUFFER+60}:{a:TRF.pa-160,b:LSD.pb+160};
 const DBL={from:0,to:4,a:SB.pa-160,b:SDH.pb+170};
 // no sentido da Trindade circula-se pela via da esquerda desse sentido, que é a segunda via (x=4)
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
@@ -340,15 +369,15 @@ let SIDE=[];
 const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
-const TUN=[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
-const BRIDGES=[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(37.935),b:km(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
-const ZONES=[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
+const TUN=RP?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
+const BRIDGES=RP?[{a:km(6.95),b:km(6.99),t:3,n:'Ponte sobre o rio Leça'},{a:km(26.25),b:km(26.37),t:2,n:'Ponte de ferro sobre o rio Ave (Vila do Conde)'},{a:km(54.4),b:km(54.43),t:3,n:'Ponte sobre o rio Este'}]:[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(37.935),b:km(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
+const ZONES=RP?[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,9.0,'urban'],[9.0,11.0,'mixed'],[11.0,17.0,'rural'],[17.0,20.6,'mixed'],[20.6,22.0,'urban'],[22.0,25.0,'rural'],[25.0,28.4,'city'],[28.4,31.6,'city'],[31.6,54.6,'rural'],[54.6,57.4,'urban'],[57.4,61.6,'mixed'],[61.6,999,'urban']]:[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
 const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])return z[2];return 'rural'};
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
 // no sentido do Porto o rio fica à esquerda (x>0) desde Vizela até à ponte de ferro antes da Trofa, onde passa para o outro lado
-const RIVER=[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(37.935),side:1,x:22,w:30},{a:km(38.075),b:km(40.9),side:1,x:18,w:28},{a:km(40.9),b:km(42.2),side:1,x:18,w:22},{a:km(42.2),b:km(50.4),side:1,x:20,w:24},{a:km(50.4),b:km(51.6),side:1,x:30,w:20},{a:km(51.6),b:km(53.0),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
+const RIVER=RP?[{a:km(26.0),b:km(26.25),side:1,x:30,w:60},{a:km(26.37),b:km(26.6),side:1,x:30,w:60}]:[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(37.935),side:1,x:22,w:30},{a:km(38.075),b:km(40.9),side:1,x:18,w:28},{a:km(40.9),b:km(42.2),side:1,x:18,w:22},{a:km(42.2),b:km(50.4),side:1,x:20,w:24},{a:km(50.4),b:km(51.6),side:1,x:30,w:20},{a:km(51.6),b:km(53.0),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 
-const PROF=RAW.map(r=>[r[3],r[12]]).concat([[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
+const PROF=RAW.map(r=>[r[3],r[12]]).concat(RP?[[0.55,78],[1.2,92],[26.31,7],[38.4,85],[42.7,104],[59.2,60]]:[[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
 const curve=new Float32Array(TOTAL), grade=new Float32Array(TOTAL), hy=new Float32Array(TOTAL+1), HDG=new Float32Array(TOTAL+1);
 const tun=new Uint8Array(TOTAL), shed=new Uint8Array(TOTAL), brg=new Uint8Array(TOTAL), lc=new Uint8Array(TOTAL), riv=new Int8Array(TOTAL);
 const bankL=new Float32Array(TOTAL), bankR=new Float32Array(TOTAL);
@@ -360,7 +389,9 @@ function stF(p){let d=1e9;for(const s of STN)d=Math.min(d,p<s.pa?s.pa-p:p>s.pb?p
 function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/60)}
 function branchOffs(p){return[]}
-function capAt(k){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
+function capAt(k){if(RP){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
+  if(Math.abs(k-26.31)<0.2)return 40;for(const q of[11.6,21.3,27.1,30.6,56.0])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<31)return 80;if(k<56)return 60;return 70}
+  if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
   if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
   if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
@@ -372,9 +403,9 @@ let LIMCH=[];
   for(let pass=0;pass<3;pass++){const c=HDG.slice();for(let i=0;i<=TOTAL;i++){let s=0,n=0;for(let j=-12;j<=12;j++){const q=i+j;if(q>=0&&q<=TOTAL){s+=c[q];n++}}HDG[i]=s/n}}
   // via métrica sinuosa: curvas em S sobrepostas ao traçado geral (descrição: traçado apertado e cheio de curvas)
   {let ph=0,i=0;while(i<=TOTAL){const lam=380+rnd()*520,A=(0.18+rnd()*0.22)*(rnd()<0.5?-1:1),n=Math.round(lam/SEG);
-    const sc=(i*SEG<km(42.5)?0.28:1)*(Math.abs(i*SEG-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
-  {const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
-  {const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
+    const sc=RP?(i*SEG<km(31)?0.3:0.8):(i*SEG<km(42.5)?0.28:1)*(Math.abs(i*SEG-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
+  if(RG){const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
+  if(RG){const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
   for(let i=0;i<TOTAL;i++){let c=(HDG[i+1]-HDG[i])*SEG;const m=SEG*SEG/140;curve[i]=clamp(c,-m,m)}
   for(let i=0;i<=TOTAL;i++){const p=i*SEG;let q=0;while(q<STN.length-2&&STN[q+1].pos<p)q++;
     const a=STN[q],b=STN[q+1];let e;
@@ -410,6 +441,9 @@ let LIMCH=[];
     if(p>km(0.78)&&p<km(1.55)&&!plat[k]){const hh=5.5*sstep((km(1.55)-p)/300);if(hh>0.6){wallL[k]={x:-3.6,h:hh,t:'g'};wallR[k]={x:3.6+Math.max(0,...trk[k]),h:hh,t:'g'}}}}
 })();
 const limitAt=p=>LIMA[clamp(Math.floor(p/50),0,LIMA.length-1)];
+// Linha da Póvoa: horário calculado a partir do tempo mínimo de marcha (14% de folga, 30 s nos apeadeiros, 1 min nas estações)
+if(RP){const sched=(list,t0,pf)=>{let c=t0;list[0][pf]=c;for(let k=1;k<list.length;k++){const p=list[k-1],q=list[k];c+=Math.ceil((runMin(pf==='depF'?p.stopF:p.stopR,pf==='depF'?q.stopF:q.stopR)*1.14+45)/60)*60;if(k<list.length-1)c+=q.ty==='ap'?30:60;q[pf]=c}};
+  sched(STN,T('17:20'),'depF');sched(STN.slice().reverse(),T('18:45'),'depR');for(const s of STN)s.dep=s.depF}
 function nextLimitR(p){const c=limitAt(p);for(let d=50;d<4000;d+=50){const l=limitAt(p-d);if(l!==c){const q=Math.ceil((p-d)/50)*50;return{v:l,d:p-q}}}return null}
 function nextLimit(p){const c=limitAt(p);for(let d=50;d<4000;d+=50){const l=limitAt(p+d);if(l!==c){let q=Math.floor((p+d)/50)*50;return{v:l,d:q-p}}}return null}
 const hdgAt=p=>{const i=clamp(Math.floor(p/SEG),0,TOTAL-1),f=p/SEG-i;return HDG[i]+(HDG[i+1]-HDG[i])*f};
@@ -419,14 +453,28 @@ const PN=[];
 for(let s=0;s<STN.length-1;s++){const a=STN[s].pb+250,b=STN[s+1].pa-250;for(let p=a+rnd()*500;p<b;p+=700+rnd()*900){
   if(inRange(BRIDGES,p)||inRange(TUN,p)||inRange(BRIDGES,p-450)||(p>PV.pos-500&&p<PV.pos)||p<km(6.6))continue;PN.push({pos:p,honk:false,done:false})}}
 PN.sort((a,b)=>a.pos-b.pos);
-/* sem sinais luminosos: a partida é dada pelo chefe da estação */
-const SIG=[];
-function sigState(g){return'G'}
+/* sinalização: bloco automático entre a Trindade e a Senhora da Hora (via dupla, muito tráfego) e sinais de entrada nas
+   estações de cruzamento da via única, que mostram amarelo quando o itinerário está feito para a via desviada (agulhas a 30 km/h) */
+const SIG=[],SIGB={F:[],R:[]};
+{const st=STN.filter(s=>s.pos<=SDH.pos+1);
+ const pf=[];for(const s of st)pf.push(s.pb+15);pf.push(DBL.b-60);
+ const pr=[];for(const s of st)if(s!==SB)pr.push(s.pa-15);pr.push(SB.pb+90);pr.push(DBL.b+120);
+ const fill=a=>{a.sort((x,y)=>x-y);const o=[];for(let k=0;k<a.length;k++){o.push(a[k]);if(k<a.length-1&&a[k+1]-a[k]>1100)o.push((a[k]+a[k+1])/2)}return o};
+ for(const p of fill(pf))if(p>SB.pos&&p<DBL.b)SIGB.F.push({p,d:'F',k:'blk'});
+ for(const p of fill(pr))if(p>SB.pos)SIGB.R.push({p,d:'R',k:'blk'});
+ SIGB.R.sort((a,b)=>b.p-a.p);SIG.push(...SIGB.F,...SIGB.R);
+ for(const s of STN){if(!s.ex.length||s===SB||s.pos<DBL.b+100||!(s.ex[0].a>0))continue;
+   SIG.push({p:s.ex[0].a-60,d:'F',k:'ent',st:s});if(s!==GMR)SIG.push({p:s.ex[0].b+60,d:'R',k:'ent',st:s})}}
+function sigState(g){if(g.k==='ent')return g.st.divert?'Y':'G';
+  const L=SIGB[g.d],ix=L.indexOf(g),n1=L[ix+1],n2=L[ix+2],F=g.d==='F';
+  const occ=(a,b)=>TRAINS.some(t=>t.lead&&t.d===g.d&&t.a<Math.max(a,b)&&t.a+t.len>Math.min(a,b));
+  const end=F?DBL.b+300:SB.pa-100;
+  if(occ(g.p,n1?n1.p:end))return'R';if(n1&&occ(n1.p,n2?n2.p:end))return'Y';return'G'}
 /* comboios parados: automotora à espera do cruzamento em Paçô Vieira e reservas em Guimarães */
 function minho(n){const c=[{m:'bloco',len:13.4,ht:[1,0],bog:[2.6,10.8],bm:'bbog'}];for(let k=0;k<n;k++)c.push({m:'sfm',len:23.5,bog:[3.2,20.3],bm:'bbog'});return c}
 function paxTrain(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'coach',len:16.5,bog:[2.4,14.1]});return c}
 function freight(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'wag',len:8.2});return c}
-const PARKED=[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:4,a:PV.pos+60,len:39.6,c:'u',lit:true},{o:11,a:GUI.pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:-5,a:SB.pa+14,len:39.6,c:'u',lit:false},{o:8.5,a:SB.pa+6,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+4,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+50,len:39.6,c:'u',lit:false},{o:11,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:39.6,c:'u',lit:false}];
+const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:4,a:byNameE('Póvoa de Varzim').pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:-5,a:SB.pa+14,len:39.6,c:'u',lit:false},{o:8.5,a:SB.pa+6,len:39.6,c:'u',lit:false},{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}]:[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:4,a:PV.pos+60,len:39.6,c:'u',lit:true},{o:11,a:GUI.pos-120,len:39.6,c:'u',lit:false},{o:-9.5,a:SB.pa+8,len:39.6,c:'u',lit:false},{o:-5,a:SB.pa+14,len:39.6,c:'u',lit:false},{o:8.5,a:SB.pa+6,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+4,len:39.6,c:'u',lit:false},{o:12.5,a:SB.pa+50,len:39.6,c:'u',lit:false},{o:11,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:39.6,c:'u',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
 for(let p=OFF;p<END;p+=18)JOINTS.push(p+(rnd()-0.5)*0.4);
@@ -469,16 +517,17 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
       if(riv[k]===side){const rv=inRange(RIVER,k*SEG);minX=Math.max(minX,rv.x+rv.w+3)}
       const yb=bk[side<0?0:1];MX[side<0?0:1][k]=minX;
       if(rnd()<0.012&&z!=='porto')spr[k].push({t:'pole',x:side*(minX+2+rnd()*6),y:yb});
-      if(z==='urban'&&(k*SEG)>kmG(18)&&rnd()<0.012)spr[k].push({t:'bras',x:side*(minX+10+rnd()*25),c:[[236,200,120],[180,210,220],[240,190,180],[200,220,170]][Math.floor(rnd()*4)]});
+      if(RG&&z==='urban'&&(k*SEG)>kmG(18)&&rnd()<0.012)spr[k].push({t:'bras',x:side*(minX+10+rnd()*25),c:[[236,200,120],[180,210,220],[240,190,180],[200,220,170]][Math.floor(rnd()*4)]});
     }
   }
   // casario, campos e matas: cada lado da via é preenchido em duas faixas (junto à via e mais atrás) com peças escolhidas
   // conforme a terra: frentes de rua contínuas no Porto, blocos de habitação nos bairros, casas minhotas de granito e de
   // emigrante no Minho, milheirais, vinha, pinhais e eucaliptais, fábricas têxteis no vale do Ave
   // o Ave passa por baixo da ponte de Caniços
-  spr[Math.floor(km(38.0)/SEG)].push({t:'rivx',x:0});spr[Math.floor(km(26.98)/SEG)].push({t:'rivx',x:0});
+  if(RG){spr[Math.floor(km(38.0)/SEG)].push({t:'rivx',x:0});spr[Math.floor(km(26.98)/SEG)].push({t:'rivx',x:0})}
+  else{spr[Math.floor(km(26.31)/SEG)].push({t:'rivx',x:0,w:260});spr[Math.floor(km(6.97)/SEG)].push({t:'rivx',x:0,w:30});spr[Math.floor(km(54.415)/SEG)].push({t:'rivx',x:0,w:30})}
   // Cuca (curva) e Pereirinhas (entre duas fábricas): o espaço junto ao apeadeiro é das fábricas
-  {const cu=byNameE('Cuca'),pe=byNameE('Pereirinhas');for(const s of[cu,pe])for(let q=Math.floor((s.pos-110)/SEG);q<=Math.floor((s.pos+90)/SEG);q++){MX[0][q]=-1;MX[1][q]=-1}
+  if(RG){const cu=byNameE('Cuca'),pe=byNameE('Pereirinhas');for(const s of[cu,pe])for(let q=Math.floor((s.pos-110)/SEG);q<=Math.floor((s.pos+90)/SEG);q++){MX[0][q]=-1;MX[1][q]=-1}
    const put2=(p,o)=>spr[clamp(Math.floor(p/SEG),0,TOTAL-1)].push(o);
    put2(cu.pos-25,{t:'factory',x:-6.5,w:48,h:8.5,chim:true});put2(cu.pos+40,{t:'ware',x:-12,w:26,h:7,c:[176,150,120]});
    put2(pe.pos-25,{t:'factory',x:-6.5,w:56,h:9,chim:true});put2(pe.pos-20,{t:'factory',x:7,w:44,h:8,chim:false})}
@@ -503,11 +552,19 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // industrial; Lousado dominada pela fábrica de pneus Mabor (1946); Santo Tirso com o mosteiro, a Fábrica de Santo
   // Thyrso no Ave e o Monte da Assunção; Vila das Aves com a enorme Fábrica do Rio Vizela (1845); Lordelo e Vizela com
   // fábricas têxteis e casario operário, Vizela termal com a Ponte Velha; Fafe com as casas de "brasileiros de torna-viagem")
-  const LOCS=[[0,1.6,'trindade'],[1.6,3.4,'boavista'],[3.4,6.4,'ramalde'],[6.4,8.6,'shora'],[8.6,16.2,'maia'],[16.2,24.4,'agri'],
+  // Linha da Póvoa (pesquisa: Custóias e Esposade suburbanos; Pedras Rubras com o aeroporto; Vilar do Pinheiro e Modivas agrícolas
+  // com pinhal; Mindelo e Árvore com dunas, pinhal e campos junto ao mar; Vila do Conde com o Mosteiro de Santa Clara e o aqueduto;
+  // Póvoa de Varzim cidade balnear com prédios altos e o casino; interior agrícola de Laúndos, Rates (igreja românica) e Fontaínhas;
+  // Famalicão com fábricas têxteis; Lousado com a Mabor)
+  const LOCSP=[[0,1.6,'trindade'],[1.6,3.4,'boavista'],[3.4,6.4,'ramalde'],[6.4,10.0,'custoias'],[10.0,13.6,'maia'],[13.6,18.0,'agri'],
+    [18.0,24.8,'coast'],[24.8,28.4,'vconde'],[28.4,31.8,'povoa'],[31.8,54.6,'agri'],[54.6,57.6,'famalicao'],[57.6,999,'lousado']];
+  const LOCS=RP?LOCSP:[[0,1.6,'trindade'],[1.6,3.4,'boavista'],[3.4,6.4,'ramalde'],[6.4,8.6,'shora'],[8.6,16.2,'maia'],[16.2,24.4,'agri'],
     [24.4,27.2,'trofa'],[27.2,31.2,'lousado'],[31.2,34.4,'agri'],[34.4,36.8,'tirso'],[36.8,40.6,'ave'],[40.6,43.4,'aves'],
     [43.4,52.4,'lordelo'],[52.4,54.4,'vizela'],[54.4,57.6,'gmrsub'],[G0+8.3,G0+18,'serra'],[G0+18,999,'fafe']];
   const locAt=p=>{const k=(p-OFF)/1000;for(const q of LOCS)if(k>=q[0]&&k<q[1])return q[2];return null};
-  const LW={trindade:[['row',90],['church',4],['garden',6]],boavista:[['apt',30],['row',34],['garden',20],['ware',8],['church',3]],
+  const LW={custoias:[['emig',30],['ware',18],['row',20],['garden',12],['corn',12],['capela',3]],coast:[['woods',38],['corn',22],['minho',10],['emig',16],['capela',4],['ramada',6]],
+    vconde:[['row',42],['apt',14],['garden',14],['emig',16],['church',4]],povoa:[['apt',42],['row',30],['garden',12],['emig',12]],famalicao:[['row',28],['factory',18],['emig',24],['apt',12],['garden',10]],
+    trindade:[['row',90],['church',4],['garden',6]],boavista:[['apt',30],['row',34],['garden',20],['ware',8],['church',3]],
     ramalde:[['apt',44],['bairro',16],['ware',16],['garden',12],['row',12]],shora:[['emig',30],['row',24],['apt',14],['garden',16],['ware',8]],
     maia:[['ware',30],['factory',14],['emig',24],['corn',14],['woods',10]],agri:[['capela',4],['ramada',8],['corn',34],['minho',18],['emig',12],['woods',22],['vine',10],['espig',6]],
     trofa:[['row',34],['emig',22],['factory',18],['ware',10],['garden',10]],lousado:[['capela',4],['ramada',6],['corn',30],['woods',26],['minho',16],['emig',14],['ware',8]],
@@ -518,7 +575,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   const LB={trindade:[['row',70],['apt',30]],boavista:[['apt',50],['row',30],['garden',20]],ramalde:[['apt',60],['bairro',20],['ware',20]],
     maia:[['ware',40],['factory',20],['emig',20],['corn',20]],lousado:[['woods',40],['corn',30],['minho',30]],ave:[['factory',36],['woods',40],['bairro',24]],
     aves:[['factory',44],['bairro',36],['woods',20]],serra:[['woods',80],['rocks',20]],fafe:[['bras',36],['row',30],['emig',34]],tirso:[['row',40],['apt',20],['woods',40]]};
-  const FL={trindade:[4,6],boavista:[3,5],tirso:[2,3],vizela:[2,3],fafe:[2,3],trofa:[2,3],aves:[1,2],porto:[3,5],porto2:[2,4],city:[2,4],urban:[2,3],valley:[1,2]};
+  const FL={vconde:[2,3],povoa:[4,9],famalicao:[2,4],coast:[1,2],custoias:[1,3],trindade:[4,6],boavista:[3,5],tirso:[2,3],vizela:[2,3],fafe:[2,3],trofa:[2,3],aves:[1,2],porto:[3,5],porto2:[2,4],city:[2,4],urban:[2,3],valley:[1,2]};
   const PALC=[[236,226,206],[226,200,160],[214,176,140],[200,212,206],[236,236,230],[230,214,170],[220,190,184],[186,200,214],[240,232,214]];
   const item=(ty,z,back)=>{const s=Math.floor(rnd()*1e9),fl=FL[z]||[1,2];
     switch(ty){
@@ -528,7 +585,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
       case'minho':return{t:'minho',len:11+rnd()*3,s,w:11,h:6.5,c:[196,188,176],off:2+rnd()*10};
       case'corn':return{t:'corn',len:20+rnd()*28,dep:12+rnd()*20,s,off:1+rnd()*4};
       case'vine':return{t:'vine',len:12+rnd()*14,w:10+rnd()*12,off:3+rnd()*10};
-      case'woods':return{t:'woods',len:18+rnd()*40,dep:10+rnd()*(back?40:22),s,sp:z==='penha'?'pine':z==='valley'?'oak':z==='porto2'||z==='city'||z==='urban'?'oak':'mix',off:2+rnd()*6};
+      case'woods':return{t:'woods',len:18+rnd()*40,dep:10+rnd()*(back?40:22),s,sp:z==='penha'||z==='coast'?'pine':z==='valley'?'oak':z==='porto2'||z==='city'||z==='urban'?'oak':'mix',off:2+rnd()*6};
       case'garden':return{t:'woods',len:10+rnd()*14,dep:8+rnd()*8,s,sp:z==='porto'||z==='city'?'park':'oak',wall:true,off:1};
       case'factory':return{t:'factory',len:30+rnd()*34,w:28+rnd()*30,white:z==='lousado'||z==='maia'&&rnd()<0.5,h:7+rnd()*3,chim:rnd()<0.6,off:6+rnd()*10};
       case'ware':return{t:'ware',len:24+rnd()*20,w:22+rnd()*18,h:7+rnd()*5,c:rnd()<0.5?[150,160,168]:[176,150,120],off:5+rnd()*10};
@@ -554,20 +611,30 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
    put(km(0.95),{t:'bigchurch',x:70,s:3,tw:true});                   // Igreja da Lapa
    put(km(2.3),{t:'column',x:-240});                                 // Rotunda da Boavista
    put(km(6.3),{t:'bigchurch',x:-70,s:5});                           // Senhora da Hora
-   put(km(12.0),{t:'bigchurch',x:80,s:7});                           // Maia
+   put(km(0)-60,{t:'bigchurch',x:-50,s:17,tw:false});                // Igreja da Trindade, ao lado da estação
+   put(km(0)-260,{t:'pacos',x:-40});                                  // Paços do Concelho, no topo dos Aliados
+   put(km(2.95),{t:'stadium',x:-130});                                // Estádio do Bessa
+   if(RP){put(km(11.9),{t:'airport',x:-480});                       // Aeroporto de Pedras Rubras
+     put(km(26.6),{t:'mosteiro',x:120});                               // Mosteiro de Santa Clara, sobre o Ave
+     for(let k0=27.5;k0<29.6;k0+=0.3)put(km(k0),{t:'aqueduto',x:70,len:300});                      // Aqueduto de Santa Clara, a caminho da Póvoa
+     put(km(27.3),{t:'bigchurch',x:-200,s:21,tw:true});              // Igreja Matriz de Vila do Conde
+     put(km(30.3),{t:'casino',x:-620});put(km(30.9),{t:'bigchurch',x:-170,s:23,tw:true}); // Póvoa: casino e matriz
+     put(km(40.4),{t:'romanica',x:90});                                 // Igreja românica de São Pedro de Rates
+     put(km(56.3),{t:'bigchurch',x:-120,s:25,tw:true});               // Famalicão
+     for(const k0 of[55.2,55.7,57.0])put(km(k0),{t:'factory',x:(k0*10|0)%2?46:-50,w:70,h:9,chim:true});
+     put(LSD.pos-400,{t:'mabor',x:60});
+     for(let k0=18.6;k0<31.6;k0+=0.3)put(km(k0),{t:'sea'})}
+   if(RG){put(km(12.0),{t:'bigchurch',x:80,s:7});                           // Maia
    put(km(25.0),{t:'bigchurch',x:130,s:9,tw:true});                  // Trofa, igreja matriz na encosta
    put(km(35.25),{t:'mosteiro',x:-80});                              // Mosteiro de Santo Tirso, junto ao Ave
    put(km(41.7),{t:'bigchurch',x:110,s:11});                         // Vila das Aves
    put(km(53.0),{t:'termas',x:-70});put(km(53.5),{t:'bigchurch',x:90,s:13,tw:true}); // Vizela: balneário e igreja
-   put(kmG(20.9),{t:'bigchurch',x:-90,s:15,tw:true});
-   put(km(0)-60,{t:'bigchurch',x:-50,s:17,tw:false});                // Igreja da Trindade, ao lado da estação
-   put(km(0)-260,{t:'pacos',x:-40});                                  // Paços do Concelho, no topo dos Aliados
-   put(km(2.95),{t:'stadium',x:-130});                                // Estádio do Bessa
-   put(km(29.3),{t:'mabor',x:-40});                                   // Mabor, Lousado
-   put(km(36.15),{t:'factory',x:62,w:110,h:10,chim:true});put(km(36.3),{t:'factory',x:100,w:60,h:12,chim:true}); // Fábrica de Santo Thyrso
-   put(km(35.6),{t:'hillchapel',x:-700});                             // Monte da Assunção
+   if(RG)put(kmG(20.9),{t:'bigchurch',x:-90,s:15,tw:true});
+   if(RG)put(km(29.3),{t:'mabor',x:-40});                                   // Mabor, Lousado
+   if(RG){put(km(36.15),{t:'factory',x:62,w:110,h:10,chim:true});put(km(36.3),{t:'factory',x:100,w:60,h:12,chim:true}); // Fábrica de Santo Thyrso
+   put(km(35.6),{t:'hillchapel',x:-700});}                             // Monte da Assunção
    for(const[k0,x,w]of[[41.2,46,140],[41.45,100,90],[41.7,46,120],[41.9,96,80]])put(km(k0),{t:'factory',x,w,h:11,chim:true}); // Fábrica do Rio Vizela
-   put(km(52.9),{t:'pvelha',x:60})}                                   // Ponte Velha de Vizela                // Fafe, Igreja Nova
+   put(km(52.9),{t:'pvelha',x:60})}}                                   // Ponte Velha de Vizela                // Fafe, Igreja Nova
   // estações
   for(const s of STN){
     const at=p=>spr[clamp(Math.floor(p/SEG),0,TOTAL-1)];
@@ -597,15 +664,20 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   const put=(p,o)=>{const k=clamp(Math.floor(p/SEG),0,TOTAL-1);spr[k].push(o)};
   spr[Math.floor(BUFFER/SEG)].push({t:'buffer',x:0},{t:'buffer',x:-4},{t:'buffer',x:-11});
   spr[Math.floor(BUFFER_R/SEG)+1].push({t:'buffer',x:0},{t:'buffer',x:4},{t:'buffer',x:-9.5});
-  put(GMR.pos-40,{t:'armazem',x:15,w:26});put(GUI.pos-60,{t:'armazem',x:15,w:22});put(TRF.pos-60,{t:'armazem',x:-14,w:24});put(byNameE('Santo Tirso').pos-40,{t:'armazem',x:15,w:20});
+  if(RG){put(GMR.pos-40,{t:'armazem',x:15,w:26});put(GUI.pos-60,{t:'armazem',x:15,w:22});put(TRF.pos-60,{t:'armazem',x:-14,w:24});put(byNameE('Santo Tirso').pos-40,{t:'armazem',x:15,w:20});
   put(PV.pos-20,{t:'wtank',x:-9});put(GUI.pos-25,{t:'wcol',x:5.4});put(GMR.pos-100,{t:'wtank',x:-11});put(GUI.pos+30,{t:'wtank',x:15});put(TRF.pos-30,{t:'wtank',x:-13});put(SB.pos-40,{t:'wcol',x:-5.4});
   for(let j=0;j<4;j++)put(kmG(15.6)+j*140,{t:'mill',x:1*(14+22+3+rnd()*4)});
-  put(kmG(15.3),{t:'mill',x:-(18+22+3)});
+  put(kmG(15.3),{t:'mill',x:-(18+22+3)})}
+  else{put(FAM.pos-60,{t:'armazem',x:15,w:26});put(byNameE('Póvoa de Varzim').pos-40,{t:'armazem',x:-15,w:24});put(byNameE('Póvoa de Varzim').pos+20,{t:'wtank',x:13});put(FAM.pos-30,{t:'wtank',x:-13});put(SB.pos-40,{t:'wcol',x:-5.4})}
   // palas dos cais da Trindade
   for(const x of[-2.5,6.25])for(const d of[30,90])put(SB.pos-d,{t:'canopy',x,len:56,w:x<0?1.3:0.8});
   put(SB.pos-4,{t:'lclock',x:-2.6,n:'1'});put(SB.pos-4,{t:'lclock',x:6.25,n:'2'});
   // fábricas têxteis do vale do Ave
-  for(const k0 of[36.9,37.5,38.6,39.3,41.6,42.9])put(km(k0),{t:'factory',x:(k0*7|0)%2?40:-44,w:40,h:8,chim:true});
+  if(RG)for(const k0 of[36.9,37.5,38.6,39.3,41.6,42.9])put(km(k0),{t:'factory',x:(k0*7|0)%2?70:-44,w:40,h:8,chim:true});
+  // placas E (estação) e A (apeadeiro) a 450 m de cada paragem, nos dois sentidos
+  for(const s of STN){const v=s.ty==='ap'?'A':'E';
+    if(s!==SB){const p=s.pa-450,k=Math.floor(p/SEG);if(k>0&&!tun[k]&&!brg[k])spr[k].push({t:'ea',x:-3.4,v,d:'F'})}
+    if(s!==GMR){const p=s.pb+450,k=Math.floor(p/SEG);if(k<TOTAL&&!tun[k]&&!brg[k])spr[k].push({t:'ea',x:trackXR(p)+3.4,v,d:'R'})}}
   // placas de velocidade
   for(const c of LIMCH){const k=Math.floor(c.p/SEG);if(k>=TOTAL)continue;
     spr[k].push({t:'lim',x:-3.5,v:c.v,d:'F'});spr[k].push({t:'lim',x:trackXR(c.p)+3.5,v:c.prev,d:'R'});
@@ -625,7 +697,7 @@ const SEMI={
  '15157':{'Porto São Bento':'09:20','Porto Campanhã':'09:25','Rio Tinto':'09:30','Ermesinde':'09:37','São Romão':'09:43','Trofa':'09:48','Santo Tirso':'09:55','Vila das Aves':'10:02','Lordelo':'10:11','Vizela':'10:17','Guimarães':'10:25'},
  '15154':{'Guimarães':'07:00','Vizela':'07:08','Lordelo':'07:18','Vila das Aves':'07:22','Santo Tirso':'07:30','Trofa':'07:37','São Romão':'07:43','Ermesinde':'07:49','Rio Tinto':'07:53','Porto Campanhã':'08:01','Porto São Bento':'08:05'}};
 let SHIFT=0,PERIOD='tarde';
-const routeShift=(i,rev)=>!rev&&i<GUI.i?2*3600:0;const PSH={dia:-5*3600,tarde:0,noite:4.5*3600};
+const routeShift=(i,rev)=>RG&&!rev&&i<GUI.i?2*3600:0;const PSH={dia:-5*3600,tarde:0,noite:4.5*3600};
 function reset(startIdx,endIdx,rev,svc){
   const nc=FORCE_NC||(UNITS===0?(Math.random()<0.4?4:2):UNITS*2);FORCE_NC=0;setStops(nc);
   REV=!!rev;DIRC=REV?'R':'F';
@@ -640,7 +712,7 @@ function reset(startIdx,endIdx,rev,svc){
   S={pos:p0,v:0,aCmd:0,notch:3,clock:st.dep-70,doors:false,dwell:0,atSt:st,departed:false,
      emerg:false,emWhy:'',vigT:60,vigOn:false,vigLeft:0,horn:false,warp:1,bgOff:0,
      sc:{acc:0,pun:0,pn:0,pen:0},maxPts:0,delay:null,finishT:-1,over:false,beepT:0,emUsed:false,
-     nextSpawn:st.dep+40,jI:0,bump:0,announced:null,prevPos:p0,startIdx,endSt:en,startSt:st,num:'9611',semi:false,ncar:nc};
+     nextSpawn:st.dep+40,leadT:st.dep-150,jI:0,bump:0,announced:null,prevPos:p0,startIdx,endSt:en,startSt:st,num:'9611',semi:false,ncar:nc};
   ALIGHT=[];for(const s of STN){s.alightDone=false;if(s.pax3)for(const px of s.pax3){px.in=false;px.board=undefined;px.cur=null}}
   for(const s of STN){s.served=!inRoute(s)||s===st;s.skipped=false;s.paxGone=s===st?0:(inRoute(s)?0:1)}
   const pEnd=REV?en.stopR:en.stopF;
@@ -893,14 +965,14 @@ function step(dt,dr){
 
   // embarque
   if(S.doors&&S.dwell>0){S.dwell-=dt;S.dwX=(S.dwX||0)+dt;if(S.dwell<=0.05&&PAXBUSY&&use3D&&S.dwX<30)S.dwell=0.05;if(S.atSt)S.atSt.paxGone=clamp(1-S.dwell/15,0,1);
-    if(S.dwell<=0){S.dwell=0;if(S.atSt===S.endSt)S.finishT=3;else toast('Embarque concluído. Feche as portas.','')}}
+    if(S.dwell<=0){S.dwell=0;if(S.atSt===S.endSt&&S.via)toast('Lousado: feche as portas, avance para lá da agulha ('+(RP?'para sul':'para a Trofa')+'), pare, mude a agulha (tecla G) e recue para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'),'');else if(S.atSt===S.endSt)S.finishT=3;else toast('Embarque concluído. Feche as portas.','')}}
 
   // comboios em sentido contrário (via dupla)
   if(S.pos<LOU.pos-(REV?800:1500)&&S.clock>S.nextSpawn&&!S.atSt){
     const pxr=rnd()<0.3,cons=pxr?paxTrain(3+Math.floor(rnd()*2)):null,len=cons?cons.reduce((s,q)=>s+q.len+0.6,0):rnd()<0.65?31:62,c='u',v=10+rnd()*5;
     if(!REV){const p0=S.pos+1500+rnd()*900;if(p0<LOU.pos)TRAINS.push({o:4,a:p0,len,cons,c,v,lit:true,mov:true,passed:false,dir:-1})}
     else{const p0=S.pos-1500-rnd()*900-len;if(p0>km(1.2))TRAINS.push({o:0,a:p0,len,cons,c,v,lit:true,mov:true,passed:false,dir:1})}
-    S.nextSpawn=S.clock+80+rnd()*140}
+    S.nextSpawn=S.clock+(S.pos<DBL.b+500?40+rnd()*70:80+rnd()*140)}
   for(const t of TRAINS){if(!t.cross)continue;const X=t.cross;
     if(t.st==='app'){const d=Math.max(0,t.arrT-S.clock)*t.vmax;t.a=t.stopA-t.dir*d;
       if(S.clock>=t.arrT){t.st='wait';t.a=t.stopA;if(S.atSt===X&&!S.departed){X.dep=Math.max(X.dep,S.clock+30);toast('Cruzamento em '+X.n+': a automotora contrária chegou. Partida às '+fHM(X.dep)+'.','good')}}}
@@ -909,14 +981,37 @@ function step(dt,dr){
     // colisão frontal se a automotora passar a estação de cruzamento antes de a outra chegar
     if(t.st==='app'){const gap=REV?S.pos-(t.a+t.len):t.a-S.pos;if(gap<4&&Math.abs(t.xo(REV?t.a+t.len:t.a)-trackX(REV?t.a+t.len:t.a))<1){gameOver('Colisão frontal com a automotora contrária: não esperou pelo cruzamento em '+X.n+'.');return}}}
   TRAINS=TRAINS.filter(t=>!t.cross||t.st!=='go'||Math.abs(t.a-S.pos)<2500);
-  for(const t of TRAINS){if(!t.mov)continue;t.a+=t.dir*t.v*dt;
+  // automotora à frente no mesmo sentido: para em todas as paragens da via dupla; obriga a respeitar o bloco automático
+  {const dir=REV?-1:1,inD=REV?(S.pos>DBL.a+900&&S.pos<DBL.b+2500):(S.pos<DBL.b-1300);
+   if(inD&&S.clock>S.leadT&&!TRAINS.some(t=>t.lead)){const fr=S.pos+dir*(1300+rnd()*700),a=dir>0?fr-31:fr;
+     if((dir>0?fr<DBL.b-300:fr>SB.pos+600&&fr<DBL.b))TRAINS.push({lead:true,mov:true,d:DIRC,dir,o:REV?4:0,len:31,a,v:0,dw:20+rnd()*20,c:'u',lit:true,passed:true});S.leadT=S.clock+240+rnd()*240}
+   for(const t of TRAINS){if(!t.lead)continue;const front=t.dir>0?t.a+t.len:t.a;
+     if(t.dw>0){t.dw-=dt;continue}
+     let sp=null;for(const s of STN){if(s.pos>DBL.b||s===SB&&t.dir>0)continue;const q=t.dir>0?s.bc+15.5:s.bc-15.5;if(q===t.lastQ)continue;if(t.dir>0?q>front+0.5:q<front-0.5){if(sp===null||Math.abs(q-front)<Math.abs(sp-front))sp=q}}
+     const dist=sp===null?1e9:Math.abs(sp-front),vm=Math.min(limitAt(front)/3.6*0.85,12),vb=Math.sqrt(2*0.45*Math.max(0,dist-0.5));
+     t.v=Math.max(0,Math.min(t.v+0.45*dt,vm,vb));t.a+=t.dir*t.v*dt;if(dist<1.2&&t.v<0.3){t.v=0;t.dw=22+rnd()*12;t.lastQ=sp}
+     const gap=t.dir>0?t.a-S.pos:S.pos-(t.a+t.len);if(gap<1.5&&gap>-40){gameOver('Colisão com a automotora da frente: não respeitou o sinal vermelho.');return}
+     if(t.dir>0?(front>DBL.b+200&&front-S.pos>700):(front<SB.pos+260))t.gone=true}
+   TRAINS=TRAINS.filter(t=>!t.gone)}
+  for(const t of TRAINS){if(!t.mov||t.lead)continue;t.a+=t.dir*t.v*dt;
     if(!t.passed&&(t.dir<0?t.a<S.pos+30:t.a+t.len>S.pos-30)){t.passed=true;whoosh()}}
-  TRAINS=TRAINS.filter(t=>t.cross||!t.mov||(t.dir<0?t.a+t.len>S.pos-100:t.a<S.pos+100));
+  TRAINS=TRAINS.filter(t=>t.cross||t.lead||!t.mov||(t.dir<0?t.a+t.len>S.pos-100:t.a<S.pos+100));
 
   // para-choques
   if(!REV&&S.pos>=BUFFER-1){if(kmh>6){gameOver('O comboio embateu no para-choques de Fafe a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER-1;S.v=0}
   if(REV&&S.pos<=BUFFER_R+1){if(kmh>6){gameOver('O comboio embateu no para-choques da Trindade a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER_R+1;S.v=0}
+  // recuo para a outra linha depois de mudar a agulha
+  if(S.swJ&&S.back&&(RP?S.pos<JSW-12:S.pos>JSW+12))xferLine();
 }
+// agulha do entroncamento de Lousado: na Linha da Póvoa fica a sul da estação, na de Guimarães do lado da Trofa
+const JSW=LSD?(RP?LSD.pb+40:LSD.pa-40):null;
+function swBtn(){if(!running||!S)return;if(!LSD){toast('Não há agulha de entroncamento nesta linha.','');return}
+  const past=RP?(!REV&&S.pos>JSW+S.ncar*15.6):(REV&&S.pos<JSW-S.ncar*15.6);
+  if(!past){toast('Agulha de Lousado: avance com a composição toda para lá da agulha ('+(RP?'para sul da estação':'do lado da Trofa')+') e pare.','');return}
+  if(S.v>0.05){toast('Pare antes de mudar a agulha.','');return}
+  S.swJ=!S.swJ;beep(500,.12,.12,'square');toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+'. Inverta a marcha (R) e recue.':'Agulha reposta para a linha direta.','good')}
+function xferLine(){const o={to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:RP?'Guimarães':'Porto-Trindade'};
+  try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;location.hash=o.to;location.reload()}
 
 function updRev(){const b=$('#bRev');if(!b)return;b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
 function revBtn(){if(!running||!S)return;if(S.v>0.05){toast('Pare a automotora antes de mudar o inversor.','');return}if(S.notch>6){toast('Ponha o manípulo em 0 ou travão antes de mudar o inversor.','');return}
@@ -1388,7 +1483,7 @@ function hud(dtR){
   $('#dLim').textContent=lim;
   const nl=REV?nextLimitR(S.pos):nextLimit(S.pos);$('#dNextLim').innerHTML=nl?'<b>'+nl.v+'</b> em '+(Math.round(nl.d/10)*10)+' m':'';
   {const pn=REV?PN.slice().reverse().find(q=>q.pos<S.pos):PN.find(q=>q.pos>S.pos),pd=pn?Math.abs(pn.pos-S.pos):1e9;$('#dSig').innerHTML=pd<1500?(pd<450&&!pn.honk?'<b style="color:#9a2a10">PN '+Math.round(pd)+' m, buzinar!</b>':'PN a <b>'+Math.round(pd)+' m</b>'):'Via livre'}
-  const g=null,gd=1e9;
+  let g=null,gd=1e9;for(const q of SIG){if(q.d!==DIRC)continue;const d=REV?S.pos-q.p:q.p-S.pos;if(d>0&&d<gd){gd=d;g=q}}
   if(g&&gd<1500){const st=sigState(g),c={G:'#3ce37a',Y:'#ffbe1e',R:'#ff3b2f'}[st];$('#dSig').innerHTML='Sinal <span class="sg" style="background:'+c+'"></span> <b>'+Math.round(gd)+' m</b>'}
   $('#dDelay').innerHTML=S.delay===null?'Pontual':Math.abs(S.delay)<31?'<b>À hora</b>':(S.delay>0?'Atraso ':'Adiantado ')+'<b>'+fDelay(S.delay)+'</b>';
   $('#dScore').textContent=total();
@@ -1438,13 +1533,16 @@ for(let i=0;i<TOTAL;i++){let lo=0,hi=0;for(const o of trk[i])if(Math.abs(o)<30){
   const p=i*SEG;let tp=0;for(const t of TUN){const d=p<t.a?t.a-p:p>t.b?p-t.b:0;tp=Math.max(tp,1-d/45)}TUNP[i]=clamp(tp,0,1);
   const b=inRange(BRIDGES,p);if(b){const m=(p-b.a)/(b.b-b.a);BRD[i]=b.t===4?8.5*clamp(Math.min(m,1-m)*8,0,1):(b.t===3?20:13)*Math.sin(Math.PI*clamp(m*1.1-0.05,0,1))}
   KAPPA[i]=(HDG[Math.min(TOTAL,i+20)]-HDG[Math.max(0,i-20)])/(40*SEG)}
+// faixa costeira entre Modivas e a Póvoa: o terreno desce até à praia a poente da via
+const COAST=i=>{if(!RP)return 0;const k=(i*SEG-OFF)/1000;return sstep((k-17.6)/1.5)*sstep((31.8-k)/1.0)};
 function terrH(i,o,wx,wz){i=clamp(i,0,TOTAL-1);const base=hy[i]-0.45,E=EDGE[i];
   const d=o<E[0]?E[0]-o:o>E[1]?o-E[1]:0;let h=base;const amp=AMP[zoneI[i]]||20;
   if(d>0){h+=amp*sstep(Math.min(1,d/150))*(fbm(wx*0.0042,wz*0.0042)*0.8+0.3);
     h+=sstep(Math.min(1,d/14))*fbm(wx*0.028,wz*0.028)*(amp>12?2.4:0.8);
-    if(d>420&&!(o<0&&i*SEG-GUI.pos<7600&&i*SEG-GUI.pos>-2000))h+=(fbm(wx*0.0011+7,wz*0.0011)*0.5+0.55)*110*sstep((d-420)/1100);
+    if(d>420&&!(o<0&&i*SEG-GUI.pos<7600&&i*SEG-GUI.pos>-2000)&&!(RP&&o<0&&COAST(i)>0))h+=(fbm(wx*0.0011+7,wz*0.0011)*0.5+0.55)*110*sstep((d-420)/1100);
     if(plat[i]&&d<30)h=base+(h-base)*sstep(d/30)}
   {const kk=(i*SEG-GUI.pos)/1000,pf=sstep((kk-0.9)/1.6)*sstep((7.6-kk)/1.4);if(pf>0&&d>0){if(o>0)h+=240*pf*sstep(Math.min(1,d/650));else{h=base+(h-base)*(1-0.8*pf)-75*pf*sstep(Math.min(1,d/450))}}}
+  if(RP&&o<0&&d>0){const cf=COAST(i);if(cf>0){const t2=sstep((d-260)/520);h=lerp(h,-1.8,t2*cf)}}
   if(TUNP[i]>0&&(tun[i]||d>0)){const cover=hy[i]+11+TUNP[i]*5;const w=tun[i]?1:sstep(1-Math.max(0,d-8)/60);h=Math.max(h,lerp(h,cover,TUNP[i]*w))}
   if(BRD[i]>0)h-=BRD[i]*(1-sstep(Math.max(0,d-4)/95));
   if(riv[i]){const R=inRange(RIVER,i*SEG),so=o*riv[i];if(so>R.x-6&&so<R.x+R.w+8){const e=Math.min(so-(R.x-6),R.x+R.w+8-so);h=Math.min(h,hy[i]-3.2+2.4*(1-sstep(e/7)))}}
@@ -1650,7 +1748,7 @@ function init3D(){
   atAlloc('cplogo',256,150,(x,w,h)=>{x.fillStyle='rgb(214,215,212)';x.fillRect(0,0,w,h);x.save();x.transform(1,0,-0.3,1,34,8);x.strokeStyle='#c8202a';x.lineWidth=24;x.lineCap='round';x.lineJoin='round';
     x.beginPath();x.moveTo(116,22);x.lineTo(66,22);x.arc(66,56,34,-Math.PI/2,Math.PI/2,true);x.lineTo(116,90);x.stroke();
     x.beginPath();x.moveTo(146,22);x.lineTo(176,22);x.arc(176,56,34,-Math.PI/2,Math.PI/2,false);x.lineTo(146,90);x.lineTo(146,132);x.stroke();x.restore()});
-  atTxt('S','S','#fff','#111',64,64,52);atTxt('mabor','MABOR','#1a3a8a','#f4f4f0',320,56,48);atTxt('ud','U.D.','#f4f4f0','#111',96,56,40);for(const n of['1','2'])atTxt('lin'+n,'LINHA '+n,'#f4f4f0','#111',160,48,34);atTxt('n9611','9611','#d63a28','#f4f4f0',128,40,30);atTxt('n9611s','9611','#2a2a2a','rgb(214,215,212)',128,36,26);atAlloc('clock',128,128,(x,w,h)=>{x.fillStyle='#f6f3ea';x.beginPath();x.arc(64,64,60,0,7);x.fill();x.strokeStyle='#222';x.lineWidth=5;x.stroke();for(let k=0;k<12;k++){const a=k/12*6.283;x.fillStyle='#222';x.fillRect(64+Math.sin(a)*48-2,64-Math.cos(a)*48-5,4,10)}x.lineWidth=6;x.beginPath();x.moveTo(64,64);x.lineTo(64+34,64-8);x.moveTo(64,64);x.lineTo(60,20);x.stroke()});atStop();atDest('GUIMARÃES');for(const s of STN)atDest(s.n.toUpperCase());atDest('PORTO S. BENTO');atDest('LOUSADO');atTxt('cp','CP','#f4c318','#1a1a1a',128,64,50);
+  atTxt('S','S','#fff','#111',64,64,52);atTxt('eaE','E','#f4f4f0','#111',64,64,54);atTxt('eaA','A','#f4f4f0','#111',64,64,54);atTxt('mabor','MABOR','#1a3a8a','#f4f4f0',320,56,48);atTxt('ud','U.D.','#f4f4f0','#111',96,56,40);for(const n of['1','2'])atTxt('lin'+n,'LINHA '+n,'#f4f4f0','#111',160,48,34);atTxt('n9611','9611','#d63a28','#f4f4f0',128,40,30);atTxt('n9611s','9611','#2a2a2a','rgb(214,215,212)',128,36,26);atAlloc('clock',128,128,(x,w,h)=>{x.fillStyle='#f6f3ea';x.beginPath();x.arc(64,64,60,0,7);x.fill();x.strokeStyle='#222';x.lineWidth=5;x.stroke();for(let k=0;k<12;k++){const a=k/12*6.283;x.fillStyle='#222';x.fillRect(64+Math.sin(a)*48-2,64-Math.cos(a)*48-5,4,10)}x.lineWidth=6;x.beginPath();x.moveTo(64,64);x.lineTo(64+34,64-8);x.moveTo(64,64);x.lineTo(60,20);x.stroke()});atStop();atDest('GUIMARÃES');for(const s of STN)atDest(s.n.toUpperCase());atDest('PORTO S. BENTO');atDest('LOUSADO');atTxt('cp','CP','#f4c318','#1a1a1a',128,64,50);
   ATEX=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,ATEX);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atC);gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
   if(an)gl.texParameterf(gl.TEXTURE_2D,an.TEXTURE_MAX_ANISOTROPY_EXT,4);
@@ -2098,9 +2196,9 @@ function obj3(mb,sp,i,L){
     const t=PI(i,sp.to,0),a=[c[0],hy[i]+6.1,c[2]],b=L([t[0],hy[i]+5.8,t[2]]);
     mb.q(a,add(a,[0,0.08,0]),add(b,[0,0.08,0]),b,cc(96,104,110),0);const a2=[c[0],hy[i]+7.2,c[2]],b2=[lerp(c[0],b[0],0.8),hy[i]+6.5,lerp(c[2],b[2],0.8)];mb.q(a2,add(a2,[0,0.05,0]),add(b2,[0,0.05,0]),b2,cc(96,104,110),0);
     boxRF(mb,[lerp(c[0],b[0],0.8),0,lerp(c[2],b[2],0.8)],R,F,0.15,0.15,hy[i]+5.9,hy[i]+6.5,cc(220,220,210),0);break}
-  case'lim':case'avis':case'silvo':case'pk':{const n=sp.d==='R'?F:mulv(F,-1),hgt=sp.t==='pk'?1.1:2.5,sz=sp.t==='pk'?0.4:0.9;
+  case'lim':case'avis':case'silvo':case'pk':case'ea':{const n=sp.d==='R'?F:mulv(F,-1),hgt=sp.t==='pk'?1.1:2.5,sz=sp.t==='pk'?0.4:0.9;
     boxRF(mb,c,R,F,0.1,0.1,y0,hy[i]+hgt,cc(120,120,120),0);
-    const uv=sp.t==='lim'?atLim(sp.v):sp.t==='avis'?atAvis(sp.v):sp.t==='silvo'?ATL['S']:ATL['pk'+sp.v];
+    const uv=sp.t==='ea'?ATL['ea'+sp.v]:sp.t==='lim'?atLim(sp.v):sp.t==='avis'?atAvis(sp.v):sp.t==='silvo'?ATL['S']:ATL['pk'+sp.v];
     if(uv)plateQ(mb,[c[0]+n[0]*0.06,hy[i]+hgt+sz/2,c[2]+n[2]*0.06],n,sz,sz,uv,0,false);break}
   case'sig':{const g=sp.g,n=g.d==='R'?F:mulv(F,-1);boxRF(mb,c,R,F,0.18,0.18,y0,hy[i]+4.6,cc(70,74,76),0);
     boxRF(mb,[c[0]+n[0]*0.05,0,c[2]+n[2]*0.05],R,F,0.6,0.35,hy[i]+4.6,hy[i]+6.1,cc(24,24,26),0);
@@ -2146,7 +2244,26 @@ function obj3(mb,sp,i,L){
     const nn=mulv(R,-sd),G=[0.84,0.82,0.78];boxRF(mb,add(c,mulv(nn,-30)),F,R,16,80,y0-2.6,y0-2.2,[1,1,1],9,0.06,0.06,0,1,false,cc(150,190,210),9);
     for(let q=-2;q<=2;q++){const b=add(c,add(mulv(nn,-30),mulv(F,q*7)));boxRF(mb,b,F,R,2,9,y0-3,y0+4,G,13,1,1)}
     boxRF(mb,add(c,mulv(nn,-30)),F,R,6,36,y0+4,y0+5.2,G,13,4,4);for(const s2 of[-1,1])boxRF(mb,add(add(c,mulv(nn,-30)),mulv(R,s2*2.8)),F,R,0.4,36,y0+5.2,y0+6.1,G,13,4,1);break}
-  case'rivx':{const yw=hy[i]-15.5;boxRF(mb,c,R,F,150,170,yw-0.4,yw,[1,1,1],9,0.06,0.06,0,1,false,cc(150,190,210),9);break}
+  case'sea':{// Atlântico a poente da via, com praia e rebentação
+    const i2=Math.min(TOTAL-1,i+60),P=(ii,o,y)=>{const w=PI(ii,o,0);return L([w[0],y,w[2]])};
+    mb.q(P(i,-760,0.35),P(i2,-760,0.35),P(i2,-6000,0.35),P(i,-6000,0.35),cc(86,128,150),9,[0,0,40,40]);
+    mb.q(P(i,-700,1.0),P(i2,-700,1.0),P(i2,-765,0.4),P(i,-765,0.4),cc(222,206,166),3,[0,0,6,1]);
+    mb.q(P(i,-764,0.42),P(i2,-764,0.42),P(i2,-790,0.42),P(i,-790,0.42),cc(236,240,240),0);break}
+  case'airport':{// Aeroporto de Pedras Rubras: aerogare baixa, torre de controlo e pista
+    const nn=mulv(R,-sd),cc2=add(c,mulv(nn,-40));boxRF(mb,cc2,F,R,120,30,y0-0.5,y0+9,cc(220,220,214),6,8,8,-0.6);boxRF(mb,add(cc2,mulv(nn,15.4)),F,R,110,0.2,y0+3,y0+8,cc(60,70,80),16,8,1);
+    const tc=add(cc2,add(mulv(F,70),mulv(nn,-5)));boxRF(mb,tc,F,R,4,4,y0-0.5,y0+28,cc(226,226,220),6);boxRF(mb,tc,F,R,8,8,y0+28,y0+32,cc(60,80,90),16,2,2);boxRF(mb,tc,F,R,9,9,y0+32,y0+33,cc(200,200,196),0);
+    const rw=add(cc2,mulv(nn,-160));boxRF(mb,rw,F,R,1600,45,y0-0.3,y0+0.05,[0.8,0.8,0.8],8,40,2);for(let k=-15;k<=15;k++)boxRF(mb,add(rw,mulv(F,k*50)),F,R,18,1,y0+0.05,y0+0.08,cc(240,240,236),0);break}
+  case'aqueduto':{// Aqueduto de Santa Clara: centenas de arcos de granito entre a Póvoa e Vila do Conde
+    const n=Math.round(sp.len/9),G=[0.86,0.84,0.8];for(let q=0;q<n;q++){const A=at(-sp.len/2+q*9,0),yy=A.y,hh=10+3*Math.sin(q*0.07);
+      boxRF(mb,A.c,A.F,A.R,1.8,2.4,yy-1,yy+hh,G,13,1,2);boxRF(mb,add(A.c,mulv(A.F,4.5)),A.F,A.R,7.2,2.4,yy+hh-2.2,yy+hh+1.2,G,13,2,1)}break}
+  case'casino':{// Casino da Póvoa, junto à praia
+    const nn=mulv(R,-sd),cc2=add(c,mulv(nn,-12));boxRF(mb,cc2,F,R,46,24,y0-0.5,y0+12,cc(246,240,226),18,6.6,13.6,-1);boxRF(mb,cc2,F,R,46.6,24.6,y0+12,y0+13,cc(206,196,176),6);
+    const tc=add(cc2,mulv(nn,10));boxRF(mb,tc,F,R,10,6,y0-0.5,y0+17,cc(246,240,226),6);cyl(mb,tc,y0+17,y0+21,4,0.8,12,cc(120,140,150),11);break}
+  case'romanica':{// Igreja românica de São Pedro de Rates: nave de granito, cabeceira mais baixa, portal de arquivoltas
+    const nn=mulv(R,-sd),cc2=add(c,mulv(nn,-14)),G=[0.82,0.78,0.72];boxRF(mb,cc2,F,R,11,24,y0-0.6,y0+9,G,13,4,4);hipRoof(mb,cc2,F,R,11,24,y0+9,2.6,cc(170,96,70),0.3);
+    const ab=add(cc2,mulv(nn,-15));boxRF(mb,ab,F,R,8,6,y0-0.6,y0+6.5,G,13,3,3);hipRoof(mb,ab,F,R,8,6,y0+6.5,1.8,cc(170,96,70),0.2);
+    const pf=add(cc2,mulv(nn,12.05)),P=(u,y)=>[pf[0]+F[0]*u,y,pf[2]+F[2]*u];for(let q=0;q<3;q++){const r0=1.4+q*0.35;mb.q(P(-r0,y0),P(r0,y0),P(r0,y0+3+q*0.3),P(-r0,y0+3+q*0.3),q===0?cc(60,44,32):G,q===0?0:13)}break}
+  case'rivx':{const yw=RP?Math.min(hy[i]-12,1.0):hy[i]-15.5;boxRF(mb,c,R,F,sp.w||150,170,yw-0.4,yw,[1,1,1],9,0.06,0.06,0,1,false,cc(150,190,210),9);break}
   case'slamp':{boxRF(mb,c,R,F,0.16,0.16,y0,y0+6.2,cc(64,66,68),0);const tip=add(c,mulv(fr,1.3));limb(mb,[c[0],y0+6.1,c[2]],[tip[0],y0+6.3,tip[2]],0.08,0.08,cc(64,66,68),F);
     boxRF(mb,tip,R,F,0.45,0.32,y0+5.95,y0+6.2,cc(255,226,160),0,0,0,0.95);boxRF(mb,tip,R,F,0.55,0.4,y0+6.2,y0+6.35,cc(50,52,54),0);break}
   case'lamp':if(VINT){const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.2,0.2,y,y+6.4,cc(176,174,168),6,2,2);boxRF(mb,c,R,F,0.3,0.3,y+6.4,y+6.55,cc(60,60,60),0);boxRF(mb,c,R,F,0.26,0.26,y+6.55,y+6.95,cc(255,238,196),0,0,0,0.9);boxRF(mb,c,R,F,0.36,0.36,y+6.95,y+7.05,cc(40,40,40),0);break}{const y=hy[i]+sp.y;boxRF(mb,c,R,F,0.1,0.1,y,y+4.8,cc(70,78,84),0);boxRF(mb,add(c,mulv(fr,0.4)),R,F,0.8,0.25,y+4.7,y+4.85,cc(70,78,84),0);
@@ -2493,9 +2610,9 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   for(const g of SIG){if(!g.w3||Math.abs(g.p-centerP)>1600)continue;const st=g.d===DIRC?sigState(g):(g.k==='exit'?'R':'G');
     const cols={G:[0.15,1,0.45],Y:[1,0.72,0.1],R:[1,0.12,0.08]},pos={G:2,Y:1,R:0};
     for(let k=0;k<3;k++){const on=pos[st]===k;const y=g.w3[1]+0.3+k*0.45,n=g.n3,r=[n[2],0,-n[0]];const c=[g.w3[0]-eye[0]+n[0]*0.02,y,g.w3[2]-eye[2]+n[2]*0.02];
-      const col=on?cols[st]:[0.12,0.12,0.12];const s=0.13;
+      const col=on?cols[st]:[0.12,0.12,0.12];const dd=Math.hypot(c[0],y-eye[1],c[2]),s=on?Math.max(0.15,dd*0.0032):0.13;
       mb.q([c[0]-r[0]*s,y-s,c[2]-r[2]*s],[c[0]+r[0]*s,y-s,c[2]+r[2]*s],[c[0]+r[0]*s,y+s,c[2]+r[2]*s],[c[0]-r[0]*s,y+s,c[2]-r[2]*s],col,0,0,on?1:0,1);
-      if(on){const s2=0.55;mb.q([c[0]-r[0]*s2+n[0]*0.03,y-s2,c[2]-r[2]*s2+n[2]*0.03],[c[0]+r[0]*s2+n[0]*0.03,y-s2,c[2]+r[2]*s2+n[2]*0.03],[c[0]+r[0]*s2+n[0]*0.03,y-s2+0.001,c[2]+r[2]*s2+n[2]*0.03],[c[0]-r[0]*s2+n[0]*0.03,y-s2+0.001,c[2]-r[2]*s2+n[2]*0.03],col,0,0,1,1)}}}
+    }}
   // passageiros: esperam no cais, caminham até à porta mais próxima e entram; os que chegam saem pelas portas e afastam-se
   const now=performance.now()/1000,pdt=Math.min(0.1,now-(PAXT||now));PAXT=now;let busy=false;const dir=REV?-1:1;
   const person=(P,col,walk,ph)=>{const c=[P[0]-eye[0],P[1],P[2]-eye[2]],sw=walk?Math.sin(ph)*0.18:0;
@@ -2655,7 +2772,7 @@ function render3D(dtR){
   tunMix+=((inTun?1:0)-tunMix)*0.05;
 }
 let LANDM=null;
-function buildLandmarks(){const g=fr3(GUI.pos);const mb=new MB();const ox=g.x,oz=g.z;
+function buildLandmarks(){const g=fr3(RG?GUI.pos:SB.pos);const mb=new MB();const ox=g.x,oz=g.z;
   // casario à volta de uma cidade (Guimarães e Porto), afastado da via
   const town=(cp,x0,z0,N,R0,R1,seed,tall,skipE)=>{let sd=seed;const rr=()=>{sd=(Math.imul(sd,1664525)+1013904223)>>>0;return sd/4294967296};
     const iA=Math.max(0,Math.floor((cp-3500)/SEG)),iB=Math.min(TOTAL-1,Math.floor((cp+3500)/SEG)),gc=fr3(cp);
@@ -2664,7 +2781,8 @@ function buildLandmarks(){const g=fr3(GUI.pos);const mb=new MB();const ox=g.x,oz
       const Rv=RV(bi),o=(wx-WX[bi])*Rv[0]+(wz-WZ[bi])*Rv[2];if(skipE&&skipE(o,bi))continue;
       const y=terrH(bi,o,wx,wz),w=8+rr()*14,d=8+rr()*10,h=rr()<tall?12+rr()*14:5+rr()*6;const R2=norm([Math.cos(ang*3),0,Math.sin(ang*3)]),F2=[-R2[2],0,R2[0]];
       boxRF(mb,[x,0,z],R2,F2,w,d,y-2,y+h,cc(...FAC[Math.floor(rr()*FAC.length)]),4,12,12,-1);hipRoof(mb,[x,0,z],R2,F2,w,d,y+h,h>11?2.2:1.8,cc(186,98,68),0.3)}};
-  town(GUI.pos,-150,-500,420,120,1300,4242,0.15,(o,bi)=>o>40&&(bi*SEG-GUI.pos)>1300);
+  if(RG)town(GUI.pos,-150,-500,420,120,1300,4242,0.15,(o,bi)=>o>40&&(bi*SEG-GUI.pos)>1300);
+  else{town(byNameE('Vila do Conde').pos,0,0,260,140,700,991,0.12,(o,bi)=>o<-300);town(byNameE('Póvoa de Varzim').pos,0,0,380,140,800,993,0.5,(o,bi)=>o<-420);town(FAM.pos,0,0,320,130,900,995,0.25,null)}
   town(SB.pos+800,0,0,700,110,1500,777,0.45,null);
   // Torre dos Clérigos e igreja, ~0,8 km a sul da Trindade
   {const t=fr3(SB.pos);const cx=t.x-436-ox,cz=t.z+752-oz,by=t.y+4,gr=[1,1,1];
@@ -2674,6 +2792,7 @@ function buildLandmarks(){const g=fr3(GUI.pos);const mb=new MB();const ox=g.x,oz
    boxRF(mb,[cx,0,cz+32],[1,0,0],[0,0,1],18,50,by-4,by+20,gr,13,5,5);hipRoof(mb,[cx,0,cz+32],[1,0,0],[0,0,1],18,50,by+20,5,cc(150,140,126),0.3);
    boxRF(mb,[cx,0,cz+57],[1,0,0],[0,0,1],20,2,by+20,by+30,gr,13,4,4)}
   // Castelo de Guimarães (~1,4 km a norte da estação) no monte
+  if(RG){
   const cx=350,cz=-1450,by=g.y+18;blob(mb,[cx,by-30,cz],110,34,110,cc(96,126,70),5);
   const st=[1,1,1];boxRF(mb,[cx,0,cz],[1,0,0],[0,0,1],44,34,by,by+9,st,13,6,6);
   for(let k=-5;k<=5;k++){boxRF(mb,[cx+k*4,0,cz-17],[1,0,0],[0,0,1],2,1.2,by+9,by+10.4,st,13)}
@@ -2684,6 +2803,7 @@ function buildLandmarks(){const g=fr3(GUI.pos);const mb=new MB();const ox=g.x,oz
   if(VINT){const ty=g.y+370;boxRF(mb,[2900,0,700],[1,0,0],[0,0,1],14,26,ty-8,ty+9,cc(236,232,222),6,20,20);hipRoof(mb,[2900,0,700],[1,0,0],[0,0,1],14,26,ty+9,4,cc(186,98,68));
     boxRF(mb,[2940,0,660],[1,0,0],[0,0,1],3,3,ty-6,ty+10,cc(200,196,186),13);boxRF(mb,[2940,0,660],[1,0,0],[0,0,1],1.4,1.4,ty+10,ty+15,cc(220,216,206),6);
     boxRF(mb,[2860,0,760],[1,0,0],[0,0,1],30,14,ty-8,ty+7,cc(240,226,196),4,12,12,-1);hipRoof(mb,[2860,0,760],[1,0,0],[0,0,1],30,14,ty+7,3,cc(186,98,68))}
+  }
   const u=upload(mb);u.ox=ox;u.oz=oz;LANDM=u}
 function setCam(m){camMode=m;sideCam=null;toast('Vista: '+CAMN[m],'');$('#bCam').textContent=m==='cab'?'🎥':'🚆'}
 
@@ -2707,7 +2827,7 @@ function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);if(use3
 function finish(){running=false;S.horn=false;
   const sc=S.sc,t=Math.max(0,total()),r=t/S.maxPts,stars=r>0.85?3:r>0.65?2:r>0.4?1:0;
   const rest=STOPS.filter(s=>s!==S.startSt),served=rest.filter(s=>s.served&&!s.skipped).length,tot=rest.length;
-  $('#endTitle').innerHTML=S.endSt.n+'<small>'+(S.endSt===GMR?'A Sala de Visitas do Minho':S.endSt===SB?'A Cidade Invicta':'Aqui nasceu Portugal')+'</small>';
+  $('#endTitle').innerHTML=S.endSt.n+'<small>'+({'Fafe':'A Sala de Visitas do Minho','Porto-Trindade':'A Cidade Invicta','Guimarães':'Aqui nasceu Portugal','Póvoa de Varzim':'A Póvoa dos pescadores','Vila do Conde':'Terra de rendas e naus','Famalicão':'Terra de Camilo','Lousado':'Entroncamento com a Linha do Minho'}[S.endSt.n]||'Linha '+(RP?'da Póvoa':'de Guimarães'))+'</small>';
   $('#endStars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
   $('#endTbl').innerHTML=`<tr><td>Paragens servidas</td><td>${served} de ${tot}</td></tr>
   <tr><td>Precisão de paragem</td><td>+${Math.round(sc.acc)}</td></tr><tr><td>Pontualidade</td><td>+${Math.round(sc.pun)}</td></tr>
@@ -2740,6 +2860,14 @@ function loadGame(){const o=readSave();if(!o)return;PERIOD=o.period||'tarde';upd
 $('#bLoad').onclick=loadGame;$('#bSave').onclick=saveGame;$('#bQS').onclick=saveGame;
 $('#bMenu').onclick=()=>{running=false;paused=false;$('#ovPause').hidden=true;refreshLoad();$('#ovStart').hidden=false};
 setInterval(()=>{if(running&&!paused&&S&&S.finishT<0)try{saveGame.silent=1;const t=toast;toast=()=>{};saveGame();toast=t}catch(e){}},45000);
+// menu conforme a linha escolhida
+document.querySelectorAll('#lineSel button').forEach(b=>{b.classList.toggle('on',(b.dataset.l==='povoa')===RP);b.onclick=()=>{if((b.dataset.l==='povoa')===RP)return;location.hash=b.dataset.l;location.reload()}});
+if(RP){$('#ttl').innerHTML='Porto-Trindade – Póvoa – Lousado<small>Linha da Póvoa e Famalicão, via métrica, outono de 1985</small>';
+  $('#intro').textContent='A Linha do Porto à Póvoa e Famalicão em via estreita: da Trindade pela Senhora da Hora, Custóias e Pedras Rubras, pelo pinhal e pelas dunas de Mindelo, sobre o Ave em Vila do Conde, à Póvoa de Varzim, e daí pelo interior agrícola de Laúndos, Rates e Fontaínhas até Famalicão, seguindo pela Linha do Minho, em bitola mista, até Lousado, onde entronca com a Linha de Guimarães (inversão de marcha).';
+  const sg=document.querySelector('#ovStart .startgrid');sg.innerHTML='';const col=['#a8431c','#7a3a1c','#c0601c','#8a4a1c','#94371a','#6a321a','#5a5f2a','#4a4f22'];
+  [['Porto-Trindade','Póvoa de Varzim'],['Póvoa de Varzim','Porto-Trindade'],['Póvoa de Varzim','Famalicão'],['Famalicão','Póvoa de Varzim'],['Porto-Trindade','Lousado'],['Lousado','Porto-Trindade'],['Porto-Trindade','Guimarães (via Lousado)']].forEach(([a,z],k)=>{
+    const b=document.createElement('button');b.className='cta';b.style.background=col[k];b.dataset.r=a+'>'+(z.includes('via')?'Lousado':z);if(z.includes('via'))b.dataset.via='G';b.innerHTML=a+' → '+z+'<small></small>';sg.append(b)})}
+else{const sg=document.querySelector('#ovStart .startgrid'),b=document.createElement('button');b.className='cta';b.style.background='#4a4f22';b.dataset.r='Guimarães>Lousado';b.dataset.via='P';b.innerHTML='Guimarães → Porto-Trindade (via Lousado e Póvoa)<small></small>';sg.append(b)}
 updPeriod();refreshLoad();
 /* ---- horário à medida ---- */
 // tempo mínimo de marcha entre duas posições, parando nas duas pontas (limites de velocidade, aceleração e travagem da automotora)
@@ -2766,8 +2894,8 @@ function custRender(){const P=custPlan();const el=$('#cList');el.innerHTML='';
  $('#cAll').onclick=()=>{for(const s of STN)CU.sel[s.i]=true;custRender()};$('#cEst').onclick=()=>{for(const s of STN)CU.sel[s.i]=s.ty!=='ap';custRender()};$('#cNone').onclick=()=>{for(const s of STN)CU.sel[s.i]=false;custRender()};
  $('#bCustom').onclick=()=>{$('#ovStart').hidden=true;$('#ovCustom').hidden=false;custRender()};$('#cBack').onclick=()=>{$('#ovCustom').hidden=true;$('#ovStart').hidden=false};
  $('#cGo').onclick=()=>{const P=custPlan();if(P.a===P.z)return;$('#ovCustom').hidden=true;start(P.a,P.z,P.rev,{t:P.t})}}
-document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i)});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
-$('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;
+document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i);S.via=b.dataset.via||null});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
+$('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;$('#bSw').onclick=swBtn;
 $('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.','');return}setCam(CAMS[(CAMS.indexOf(camMode)+1)%CAMS.length])};
 {let drag=null,pinch=null;const vw=$('#view');
  vw.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,id:e.pointerId}});
@@ -2788,13 +2916,21 @@ $('#bPause').onclick=()=>setPause(!paused);$('#bResume').onclick=()=>setPause(fa
 document.addEventListener('keydown',e=>{if(!S)return;const k=e.key.toLowerCase();
   if(k==='arrowup'||k==='w'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='s'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn()});
+  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='g')swBtn()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='h'||k===' ')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);
 reset(0,6,false);resize();
 if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);use3D=false;glc.style.display='none';const el=document.getElementById('err');el.style.display='block';el.textContent='3D indisponível, a usar gráficos simples: '+e.message}}else glc.style.display='none';setNotch(3,true);requestAnimationFrame(frame);
-window.__T={aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
+// chegada à outra linha depois da inversão em Lousado: continua o serviço, a hora e a pontuação
+{let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');sessionStorage.removeItem('xfer')}catch(e){}
+ if(o&&LSD){PERIOD=o.period||PERIOD;updPeriod();const z=byNameE(o.end)||STN[RP?0:STN.length-1],rev=z.i<LSD.i;
+  const route=STN.filter(s=>rev?s.i<=LSD.i&&s.i>=z.i:s.i>=LSD.i&&s.i<=z.i);if(rev)route.reverse();
+  FORCE_NC=o.ncar||2;setStops(FORCE_NC);const t={};let c=Math.ceil((o.clock+240)/60)*60;t[route[0].i]=c;
+  for(let k=1;k<route.length;k++){const p=route[k-1],q=route[k];c+=Math.ceil((runMin(rev?p.stopR:p.stopF,rev?q.stopR:q.stopF)*1.14+45)/60)*60;if(k<route.length-1)c+=q.ty==='ap'?30:60;t[q.i]=c}
+  FORCE_NC=o.ncar||2;start(LSD.i,z.i,rev,{t});S.sc=o.sc;S.maxPts+=o.maxPts||0;
+  setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
+window.__T={SIG:()=>SIG.map(g=>({p:Math.round(g.p),d:g.d,k:g.k,s:sigState(g)})),xfer:()=>xferLine(),sw:()=>swBtn(),aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
 })();
 </script>
 </body>
