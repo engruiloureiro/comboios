@@ -272,29 +272,32 @@ const RAWG=[
 ];
 // Linha do Porto à Póvoa e Famalicão (via métrica, 1875-1881), troço comum Trindade – Senhora da Hora; Famalicão – Lousado pela Linha do Minho em bitola mista
 const RAWP=RAWG.slice(0,6).map(r=>{const q=r.slice();q[4]=q[5]='00:00';return q}).concat([
- ['Custóias',41.2017,-8.6450,7.80,'00:00','00:00','est',1,'SX',1,90,0.35,92,'v-est1'],
- ['Esposade',41.2128,-8.6436,9.10,'00:00','00:00','ap',0,'SL',-1,60,0.3,86,'v-ap'],
- ['Crestins',41.2235,-8.6448,10.30,'00:00','00:00','ap',0,'SR',1,60,0.3,80,'v-ap'],
- ['Pedras Rubras',41.2340,-8.6550,11.60,'00:00','00:00','est',1,'SX',-1,100,0.35,74,'v-est'],
- ['Lidador',41.2455,-8.6620,13.00,'00:00','00:00','ap',0,'SL',-1,60,0.3,66,'v-ap'],
- ['Vilar do Pinheiro',41.2600,-8.6720,14.80,'00:00','00:00','est',1,'SX',1,90,0.35,58,'v-est1'],
- ['Modivas',41.2770,-8.6880,17.10,'00:00','00:00','ap',0,'SR',1,60,0.3,44,'v-ap'],
- ['Mindelo',41.3060,-8.7180,21.30,'00:00','00:00','est',1,'SX',-1,100,0.35,26,'v-est'],
- ['Árvore',41.3290,-8.7240,24.00,'00:00','00:00','ap',0,'SL',-1,60,0.3,16,'v-ap'],
- ['Azurara',41.3410,-8.7330,25.60,'00:00','00:00','ap',0,'SR',1,60,0.3,10,'v-ap'],
- ['Vila do Conde',41.3530,-8.7420,27.10,'00:00','00:00','est',2,'VG',1,140,0.35,12,'v-est2'],
- ['Póvoa de Varzim',41.3800,-8.7600,30.60,'00:00','00:00','est',2,'VG',-1,150,0.35,14,'v-fafe'],
- ['Amorim',41.3920,-8.7400,33.20,'00:00','00:00','ap',0,'SL',-1,60,0.3,30,'v-ap'],
- ['Laúndos',41.4050,-8.7130,36.30,'00:00','00:00','est',1,'SX',1,90,0.35,70,'v-est1'],
- ['São Pedro de Rates',41.4130,-8.6720,40.60,'00:00','00:00','est',1,'SX',-1,90,0.35,95,'v-est'],
- ['Fontaínhas',41.4170,-8.6280,44.80,'00:00','00:00','est',1,'SX',1,90,0.35,100,'v-est1'],
- ['Gondifelos',41.4130,-8.5880,49.00,'00:00','00:00','ap',0,'SR',1,60,0.3,82,'v-ap'],
- ['Louro',41.4080,-8.5470,53.00,'00:00','00:00','ap',0,'SL',-1,60,0.3,78,'v-ap'],
- ['Famalicão',41.4080,-8.5200,56.00,'00:00','00:00','est',2,'VG',1,150,0.35,90,'v-fafe'],
- ['Lousado',41.3505,-8.5190,62.50,'00:00','00:00','term',1,'SX',1,100,0.35,36,'v-est']]);
+ ['Custóias',41.2017,-8.6450,7.766,'00:00','00:00','ap',0,'SR',1,60,0.3,92,'v-gran'],
+ ['Crestins',41.2235,-8.6448,11.544,'00:00','00:00','ap',0,'SL',-1,60,0.3,80,'v-ap'],
+ ['Pedras Rubras',41.2340,-8.6550,13.165,'00:00','00:00','est',1,'SX',-1,100,0.35,74,'v-est'],
+ ['Vilar do Pinheiro',41.2600,-8.6720,16.27,'00:00','00:00','est',1,'SX',1,90,0.35,58,'v-est1'],
+ ['Modivas',41.2770,-8.6880,18.026,'00:00','00:00','est',1,'SX',-1,90,0.35,44,'v-est1'],
+ ['Vila Chã',41.2868,-8.6982,19.365,'00:00','00:00','ap',0,'SR',1,60,0.3,38,'v-ap'],
+ ['Mindelo',41.3060,-8.7180,21.973,'00:00','00:00','est',1,'SX',-1,100,0.35,26,'v-est'],
+ ['Azurara - Árvore',41.3358,-8.7291,25.065,'00:00','00:00','ap',0,'SL',-1,60,0.3,13,'v-gran'],
+ ['Vila do Conde',41.3530,-8.7420,26.951,'00:00','00:00','est',2,'VG',1,140,0.35,12,'v-est2'],
+ ['Póvoa de Varzim',41.3800,-8.7600,30.283,'00:00','00:00','est',2,'VG',-1,150,0.35,14,'v-fafe'],
+ ['Pisão',41.3898,-8.7466,33.05,'00:00','00:00','ap',0,'SR',1,60,0.3,26,'v-ap'],
+ ['Amorim',41.3920,-8.7400,33.984,'00:00','00:00','ap',0,'SL',-1,60,0.3,30,'v-gran'],
+ ['São Félix',41.4013,-8.7206,37.483,'00:00','00:00','ap',0,'SR',1,60,0.3,59,'v-ap'],
+ ['Laúndos',41.4050,-8.7130,38.85,'00:00','00:00','ap',0,'SL',-1,60,0.3,70,'v-gran'],
+ ['Rates',41.4130,-8.6720,43.85,'00:00','00:00','ap',0,'SR',1,60,0.3,95,'v-gran'],
+ ['Fontaínhas',41.4170,-8.6280,45.858,'00:00','00:00','est',1,'SX',1,90,0.35,100,'v-est1'],
+ ['Balazar',41.4158,-8.6159,47.249,'00:00','00:00','ap',0,'SL',-1,60,0.3,95,'v-ap'],
+ ['Gondifelos',41.4130,-8.5880,50.444,'00:00','00:00','ap',0,'SR',1,60,0.3,82,'v-gran'],
+ ['Cavalões',41.4108,-8.5704,52.677,'00:00','00:00','ap',0,'SL',-1,60,0.3,80,'v-ap'],
+ ['Outiz',41.4091,-8.5564,54.449,'00:00','00:00','ap',0,'SR',1,60,0.3,79,'v-gran'],
+ ['Barradas',41.4080,-8.5400,56.65,'00:00','00:00','ap',0,'SL',-1,60,0.3,81,'v-ap'],
+ ['Famalicão',41.4080,-8.5200,59.526,'00:00','00:00','est',2,'VG',1,150,0.35,90,'v-fafe'],
+ ['Lousado',41.3505,-8.5190,66.026,'00:00','00:00','term',1,'SX',1,100,0.35,36,'v-est']]);
 const RAW=RP?RAWP:RAWG;
-const WPT=RP?RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.3640,-8.7520,28.8],[41.3880,-8.7520,32.0],[41.4110,-8.6930,38.4],[41.4170,-8.6500,42.7],[41.3800,-8.5180,59.2]]).sort((a,b)=>a[2]-b[2]):RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.45597,-8.26722,G0+5.77],[41.41949,-8.22899,G0+12.72],[41.4285,-8.2040,G0+15.40],[41.45231,-8.17224,G0+20.9]]).sort((a,b)=>a[2]-b[2]);
-const TOT_KM=RP?62.5:80.585;
+const WPT=RP?RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.3640,-8.7520,28.569],[41.3880,-8.7520,32.276],[41.4110,-8.6930,41.292],[41.4170,-8.6500,44.854],[41.3800,-8.5180,62.726]]).sort((a,b)=>a[2]-b[2]):RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.45597,-8.26722,G0+5.77],[41.41949,-8.22899,G0+12.72],[41.4285,-8.2040,G0+15.40],[41.45231,-8.17224,G0+20.9]]).sort((a,b)=>a[2]-b[2]);
+const TOT_KM=RP?66.026:80.585;
 const PROJ=(la,lo)=>[(lo+8.23)*Math.cos(41.44*Math.PI/180)*111320,(la-41.44)*110574];
 const GEO=(function(){
   const P=WPT.map(r=>PROJ(r[0],r[1]));const n=P.length;const at=i=>P[clamp(i,0,n-1)];const spans=[];
@@ -370,14 +373,14 @@ const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=RP?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
-const BRIDGES=RP?[{a:km(6.95),b:km(6.99),t:3,n:'Ponte sobre o rio Leça'},{a:km(26.25),b:km(26.37),t:2,n:'Ponte de ferro sobre o rio Ave (Vila do Conde)'},{a:km(54.4),b:km(54.43),t:3,n:'Ponte sobre o rio Este'}]:[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(37.935),b:km(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
-const ZONES=RP?[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,9.0,'urban'],[9.0,11.0,'mixed'],[11.0,17.0,'rural'],[17.0,20.6,'mixed'],[20.6,22.0,'urban'],[22.0,25.0,'rural'],[25.0,28.4,'city'],[28.4,31.6,'city'],[31.6,54.6,'rural'],[54.6,57.4,'urban'],[57.4,61.6,'mixed'],[61.6,999,'urban']]:[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
+const BRIDGES=RP?[{a:km(6.933),b:km(6.972),t:3,n:'Ponte sobre o rio Leça'},{a:km(26.221),b:km(26.324),t:2,n:'Ponte de ferro sobre o rio Ave (Vila do Conde)'},{a:km(57.45),b:km(57.489),t:3,n:'Ponte sobre o rio Este'}]:[{a:km(10.3),b:km(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:km(26.9),b:km(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:km(31.6),b:km(31.64),t:1,n:'Passagem sobre a estrada'},{a:km(37.935),b:km(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:km(49.4),b:km(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'}];
+const ZONES=RP?[[0,2.7,'porto'],[2.7,5,'porto2'],[5,6.393,'urban'],[6.393,9.579,'urban'],[9.579,12.417,'mixed'],[12.417,17.95,'rural'],[17.95,21.315,'mixed'],[21.315,22.574,'urban'],[22.574,25.149,'rural'],[25.149,28.189,'city'],[28.189,31.706,'city'],[31.706,57.71,'rural'],[57.71,60.926,'urban'],[60.926,65.126,'mixed'],[65.126,999,'urban']]:[[0,2.7,'porto'],[2.7,5.0,'porto2'],[5.0,6.4,'urban'],[6.4,8.6,'urban'],[8.6,11.4,'mixed'],[11.4,13.0,'urban'],[13.0,16.2,'mixed'],[16.2,17.4,'urban'],[17.4,24.4,'rural'],[24.4,26.3,'urban'],[26.3,28.6,'valley'],[28.6,30.4,'mixed'],[30.4,34.6,'rural'],[34.6,36.6,'urban'],[36.6,43.2,'valley'],[43.2,52.5,'dense'],[52.5,54.0,'urban'],[54.0,57.6,'dense'],[57.6,G0+1.3,'city'],[G0+1.3,G0+4.9,'penha'],[G0+4.9,G0+8.3,'mixed'],[G0+8.3,G0+12.6,'dense'],[G0+12.6,G0+15.0,'rural'],[G0+15.0,G0+15.9,'valley'],[G0+15.9,G0+18.2,'rural'],[G0+18.2,G0+20.7,'mixed'],[G0+20.7,999,'urban']];
 const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])return z[2];return 'rural'};
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
 // no sentido do Porto o rio fica à esquerda (x>0) desde Vizela até à ponte de ferro antes da Trofa, onde passa para o outro lado
-const RIVER=RP?[{a:km(26.0),b:km(26.25),side:1,x:30,w:60},{a:km(26.37),b:km(26.6),side:1,x:30,w:60}]:[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(37.935),side:1,x:22,w:30},{a:km(38.075),b:km(40.9),side:1,x:18,w:28},{a:km(40.9),b:km(42.2),side:1,x:18,w:22},{a:km(42.2),b:km(50.4),side:1,x:20,w:24},{a:km(50.4),b:km(51.6),side:1,x:30,w:20},{a:km(51.6),b:km(53.0),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
+const RIVER=RP?[{a:km(26.007),b:km(26.221),side:1,x:30,w:60},{a:km(26.324),b:km(26.522),side:1,x:30,w:60}]:[{a:km(26.2),b:km(26.9),side:-1,x:16,w:26},{a:km(27.06),b:km(37.935),side:1,x:22,w:30},{a:km(38.075),b:km(40.9),side:1,x:18,w:28},{a:km(40.9),b:km(42.2),side:1,x:18,w:22},{a:km(42.2),b:km(50.4),side:1,x:20,w:24},{a:km(50.4),b:km(51.6),side:1,x:30,w:20},{a:km(51.6),b:km(53.0),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 
-const PROF=RAW.map(r=>[r[3],r[12]]).concat(RP?[[0.55,78],[1.2,92],[26.31,7],[38.4,85],[42.7,104],[59.2,60]]:[[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
+const PROF=RAW.map(r=>[r[3],r[12]]).concat(RP?[[0.55,78],[1.2,92],[26.273,7],[41.292,85],[44.854,104],[62.726,60]]:[[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]]).sort((a,b)=>a[0]-b[0]);
 const curve=new Float32Array(TOTAL), grade=new Float32Array(TOTAL), hy=new Float32Array(TOTAL+1), HDG=new Float32Array(TOTAL+1);
 const tun=new Uint8Array(TOTAL), shed=new Uint8Array(TOTAL), brg=new Uint8Array(TOTAL), lc=new Uint8Array(TOTAL), riv=new Int8Array(TOTAL);
 const bankL=new Float32Array(TOTAL), bankR=new Float32Array(TOTAL);
@@ -390,7 +393,7 @@ function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/60)}
 function branchOffs(p){return[]}
 function capAt(k){if(RP){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
-  if(Math.abs(k-26.31)<0.2)return 40;for(const q of[11.6,21.3,27.1,30.6,56.0])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<31)return 80;if(k<56)return 60;return 70}
+  if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526)return 60;return 70}
   if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
   if(Math.abs(k-6.05)<0.35)return 40;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
   if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
@@ -403,7 +406,7 @@ let LIMCH=[];
   for(let pass=0;pass<3;pass++){const c=HDG.slice();for(let i=0;i<=TOTAL;i++){let s=0,n=0;for(let j=-12;j<=12;j++){const q=i+j;if(q>=0&&q<=TOTAL){s+=c[q];n++}}HDG[i]=s/n}}
   // via métrica sinuosa: curvas em S sobrepostas ao traçado geral (descrição: traçado apertado e cheio de curvas)
   {let ph=0,i=0;while(i<=TOTAL){const lam=380+rnd()*520,A=(0.18+rnd()*0.22)*(rnd()<0.5?-1:1),n=Math.round(lam/SEG);
-    const sc=RP?(i*SEG<km(31)?0.3:0.8):(i*SEG<km(42.5)?0.28:1)*(Math.abs(i*SEG-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
+    const sc=RP?(i*SEG<km(30.852)?0.3:0.8):(i*SEG<km(42.5)?0.28:1)*(Math.abs(i*SEG-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
   if(RG){const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
   if(RG){const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
   for(let i=0;i<TOTAL;i++){let c=(HDG[i+1]-HDG[i])*SEG;const m=SEG*SEG/140;curve[i]=clamp(c,-m,m)}
@@ -525,7 +528,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // emigrante no Minho, milheirais, vinha, pinhais e eucaliptais, fábricas têxteis no vale do Ave
   // o Ave passa por baixo da ponte de Caniços
   if(RG){spr[Math.floor(km(38.0)/SEG)].push({t:'rivx',x:0});spr[Math.floor(km(26.98)/SEG)].push({t:'rivx',x:0})}
-  else{spr[Math.floor(km(26.31)/SEG)].push({t:'rivx',x:0,w:260});spr[Math.floor(km(6.97)/SEG)].push({t:'rivx',x:0,w:30});spr[Math.floor(km(54.415)/SEG)].push({t:'rivx',x:0,w:30})}
+  else{spr[Math.floor(km(26.273)/SEG)].push({t:'rivx',x:0,w:260});spr[Math.floor(km(6.97)/SEG)].push({t:'rivx',x:0,w:30});spr[Math.floor(km(57.47)/SEG)].push({t:'rivx',x:0,w:30})}
   // Cuca (curva) e Pereirinhas (entre duas fábricas): o espaço junto ao apeadeiro é das fábricas
   if(RG){const cu=byNameE('Cuca'),pe=byNameE('Pereirinhas');for(const s of[cu,pe])for(let q=Math.floor((s.pos-110)/SEG);q<=Math.floor((s.pos+90)/SEG);q++){MX[0][q]=-1;MX[1][q]=-1}
    const put2=(p,o)=>spr[clamp(Math.floor(p/SEG),0,TOTAL-1)].push(o);
@@ -552,12 +555,12 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // industrial; Lousado dominada pela fábrica de pneus Mabor (1946); Santo Tirso com o mosteiro, a Fábrica de Santo
   // Thyrso no Ave e o Monte da Assunção; Vila das Aves com a enorme Fábrica do Rio Vizela (1845); Lordelo e Vizela com
   // fábricas têxteis e casario operário, Vizela termal com a Ponte Velha; Fafe com as casas de "brasileiros de torna-viagem")
-  // Linha da Póvoa (pesquisa: Custóias e Esposade suburbanos; Pedras Rubras com o aeroporto; Vilar do Pinheiro e Modivas agrícolas
+  // Linha da Póvoa (pesquisa: Custóias e Crestins suburbanos; Pedras Rubras com o aeroporto; Vilar do Pinheiro e Modivas agrícolas
   // com pinhal; Mindelo e Árvore com dunas, pinhal e campos junto ao mar; Vila do Conde com o Mosteiro de Santa Clara e o aqueduto;
   // Póvoa de Varzim cidade balnear com prédios altos e o casino; interior agrícola de Laúndos, Rates (igreja românica) e Fontaínhas;
   // Famalicão com fábricas têxteis; Lousado com a Mabor)
-  const LOCSP=[[0,1.6,'trindade'],[1.6,3.4,'boavista'],[3.4,6.4,'ramalde'],[6.4,10.0,'custoias'],[10.0,13.6,'maia'],[13.6,18.0,'agri'],
-    [18.0,24.8,'coast'],[24.8,28.4,'vconde'],[28.4,31.8,'povoa'],[31.8,54.6,'agri'],[54.6,57.6,'famalicao'],[57.6,999,'lousado']];
+  const LOCSP=[[0,1.6,'trindade'],[1.6,3.4,'boavista'],[3.4,6.393,'ramalde'],[6.393,11.091,'custoias'],[11.091,15.106,'maia'],[15.106,18.872,'agri'],
+    [18.872,24.977,'coast'],[24.977,28.189,'vconde'],[28.189,31.991,'povoa'],[31.991,57.71,'agri'],[57.71,61.126,'famalicao'],[61.126,999,'lousado']];
   const LOCS=RP?LOCSP:[[0,1.6,'trindade'],[1.6,3.4,'boavista'],[3.4,6.4,'ramalde'],[6.4,8.6,'shora'],[8.6,16.2,'maia'],[16.2,24.4,'agri'],
     [24.4,27.2,'trofa'],[27.2,31.2,'lousado'],[31.2,34.4,'agri'],[34.4,36.8,'tirso'],[36.8,40.6,'ave'],[40.6,43.4,'aves'],
     [43.4,52.4,'lordelo'],[52.4,54.4,'vizela'],[54.4,57.6,'gmrsub'],[G0+8.3,G0+18,'serra'],[G0+18,999,'fafe']];
@@ -614,16 +617,16 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
    put(km(0)-60,{t:'bigchurch',x:-50,s:17,tw:false});                // Igreja da Trindade, ao lado da estação
    put(km(0)-260,{t:'pacos',x:-40});                                  // Paços do Concelho, no topo dos Aliados
    put(km(2.95),{t:'stadium',x:-130});                                // Estádio do Bessa
-   if(RP){put(km(11.9),{t:'airport',x:-480});                       // Aeroporto de Pedras Rubras
-     put(km(26.6),{t:'mosteiro',x:120});                               // Mosteiro de Santa Clara, sobre o Ave
-     for(let k0=27.5;k0<29.6;k0+=0.3)put(km(k0),{t:'aqueduto',x:70,len:300});                      // Aqueduto de Santa Clara, a caminho da Póvoa
-     put(km(27.3),{t:'bigchurch',x:-200,s:21,tw:true});              // Igreja Matriz de Vila do Conde
-     put(km(30.3),{t:'casino',x:-620});put(km(30.9),{t:'bigchurch',x:-170,s:23,tw:true}); // Póvoa: casino e matriz
-     put(km(40.4),{t:'romanica',x:90});                                 // Igreja românica de São Pedro de Rates
-     put(km(56.3),{t:'bigchurch',x:-120,s:25,tw:true});               // Famalicão
-     for(const k0 of[55.2,55.7,57.0])put(km(k0),{t:'factory',x:(k0*10|0)%2?46:-50,w:70,h:9,chim:true});
+   if(RP){put(km(13.456),{t:'airport',x:-480});                       // Aeroporto de Pedras Rubras
+     put(km(26.522),{t:'mosteiro',x:120});                               // Mosteiro de Santa Clara, sobre o Ave
+     for(let k0=27.332;k0<29.331;k0+=0.3)put(km(k0),{t:'aqueduto',x:70,len:300});                      // Aqueduto de Santa Clara, a caminho da Póvoa
+     put(km(27.141),{t:'bigchurch',x:-200,s:21,tw:true});              // Igreja Matriz de Vila do Conde
+     put(km(29.997),{t:'casino',x:-620});put(km(30.71),{t:'bigchurch',x:-170,s:23,tw:true}); // Póvoa: casino e matriz
+     put(km(43.617),{t:'romanica',x:90});                                 // Igreja românica de São Pedro de Rates
+     put(km(59.826),{t:'bigchurch',x:-120,s:25,tw:true});               // Famalicão
+     for(const k0 of[58.488,59.137,60.526])put(km(k0),{t:'factory',x:(k0*10|0)%2?46:-50,w:70,h:9,chim:true});
      put(LSD.pos-400,{t:'mabor',x:60});
-     for(let k0=18.6;k0<31.6;k0+=0.3)put(km(k0),{t:'sea'})}
+     for(let k0=19.436;k0<31.706;k0+=0.3)put(km(k0),{t:'sea'})}
    if(RG){put(km(12.0),{t:'bigchurch',x:80,s:7});                           // Maia
    put(km(25.0),{t:'bigchurch',x:130,s:9,tw:true});                  // Trofa, igreja matriz na encosta
    put(km(35.25),{t:'mosteiro',x:-80});                              // Mosteiro de Santo Tirso, junto ao Ave
@@ -1534,7 +1537,7 @@ for(let i=0;i<TOTAL;i++){let lo=0,hi=0;for(const o of trk[i])if(Math.abs(o)<30){
   const b=inRange(BRIDGES,p);if(b){const m=(p-b.a)/(b.b-b.a);BRD[i]=b.t===4?8.5*clamp(Math.min(m,1-m)*8,0,1):(b.t===3?20:13)*Math.sin(Math.PI*clamp(m*1.1-0.05,0,1))}
   KAPPA[i]=(HDG[Math.min(TOTAL,i+20)]-HDG[Math.max(0,i-20)])/(40*SEG)}
 // faixa costeira entre Modivas e a Póvoa: o terreno desce até à praia a poente da via
-const COAST=i=>{if(!RP)return 0;const k=(i*SEG-OFF)/1000;return sstep((k-17.6)/1.5)*sstep((31.8-k)/1.0)};
+const COAST=i=>{if(!RP)return 0;const k=(i*SEG-OFF)/1000;return sstep((k-18.496)/1.5)*sstep((31.991-k)/1.0)};
 function terrH(i,o,wx,wz){i=clamp(i,0,TOTAL-1);const base=hy[i]-0.45,E=EDGE[i];
   const d=o<E[0]?E[0]-o:o>E[1]?o-E[1]:0;let h=base;const amp=AMP[zoneI[i]]||20;
   if(d>0){h+=amp*sstep(Math.min(1,d/150))*(fbm(wx*0.0042,wz*0.0042)*0.8+0.3);
