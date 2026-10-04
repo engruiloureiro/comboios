@@ -2622,7 +2622,9 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
     const cols={G:[0.15,1,0.45],Y:[1,0.72,0.1],R:[1,0.12,0.08]},pos={G:2,Y:1,R:0};
     for(let k=0;k<3;k++){const on=pos[st]===k;const y=g.w3[1]+0.3+k*0.45,n=g.n3,r=[n[2],0,-n[0]];const c=[g.w3[0]-eye[0]+n[0]*0.02,y,g.w3[2]-eye[2]+n[2]*0.02];
       const col=on?cols[st]:[0.12,0.12,0.12];const dd=Math.hypot(c[0],y-eye[1],c[2]),s=on?Math.max(0.15,dd*0.0032):0.13;
-      mb.q([c[0]-r[0]*s,y-s,c[2]-r[2]*s],[c[0]+r[0]*s,y-s,c[2]+r[2]*s],[c[0]+r[0]*s,y+s,c[2]+r[2]*s],[c[0]-r[0]*s,y+s,c[2]-r[2]*s],col,0,0,on?1:0,1);
+      // lâmpada redonda: disco de 18 sectores
+      const P=a=>[c[0]+r[0]*Math.cos(a)*s,y+Math.sin(a)*s,c[2]+r[2]*Math.cos(a)*s],NS=18;
+      for(let q=0;q<NS;q++){const a0=q/NS*6.2832,a1=(q+1)/NS*6.2832;mb.q([c[0],y,c[2]],P(a0),P(a1),P(a1),col,0,0,on?1:0,1)}
     }}
   // passageiros: esperam no cais, caminham até à porta mais próxima e entram; os que chegam saem pelas portas e afastam-se
   const now=performance.now()/1000,pdt=Math.min(0.1,now-(PAXT||now));PAXT=now;let busy=false;const dir=REV?-1:1;
