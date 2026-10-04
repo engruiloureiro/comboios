@@ -397,7 +397,7 @@ function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/60)}
 function branchOffs(p){return[]}
 function capAt(k){if(RP){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
-  if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526)return 60;return 70}
+  if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526){for(const[a0,b0]of[[30.85,31.8],[37.2,37.7],[43.4,44.3],[46.4,47.4],[50.1,50.8],[52.3,53.0],[54.1,54.8],[58.4,59.2]])if(k>=a0&&k<b0)return 30;return 50}return 70}
   if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
   if(Math.abs(k-6.05)<0.35)return 40;if(k>=6.4&&k<6.75)return 30;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
   if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>TOT_KM-0.8)return 30;return 60}
@@ -840,6 +840,12 @@ function bogies(gain){if(!AC||muted||S.v<0.5)return;const t0=AC.currentTime;
   const ax0=[1.8,4.0,11.1,13.3,17.3,19.5,26.6,28.8],ax=S.ncar>2?ax0.concat(ax0.map(d=>d+31)):ax0;
   const sp=Math.min(1.7,0.4+S.v/11),lp=camMode==='cab'||camMode==='salao'?['lowpass',1100+S.v*70]:null;
   ax.forEach((d,i)=>oneShot(A.clicks[(i+(Math.random()*3|0))%3],gain*sp*(i%2?0.85:1)*(0.9+Math.random()*0.2)*Math.exp(-d/30),t0+d/S.v,0.94+Math.random()*0.12,lp))}
+// buzina da automotora que se cruza connosco: amostra da buzina, um pouco mais grave e abafada pela distância
+let HONKS=0;
+function otherHorn(d){HONKS++;if(!AC||muted||!A.hornB)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=A.hornB;s.playbackRate.value=0.93+rnd()*0.08;
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=Math.max(900,4200-d*9);const g=AC.createGain(),L=0.9+rnd()*1.1,v=0.5*Math.min(1,90/Math.max(40,d));
+  g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(v,t+0.06);g.gain.setValueAtTime(v,t+L);g.gain.exponentialRampToValueAtTime(0.001,t+L+0.35);
+  s.connect(f);f.connect(g);g.connect(A.bus);g.connect(A.rev);s.start(t);s.stop(t+L+0.4)}
 function whoosh(){if(!AC||muted)return;const s=AC.createBufferSource();s.buffer=A.nb;const f=AC.createBiquadFilter();f.type='bandpass';f.Q.value=0.7;
   const g=AC.createGain(),t=AC.currentTime;f.frequency.setValueAtTime(1600,t);f.frequency.exponentialRampToValueAtTime(350,t+2.2);
   g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(0.9,t+0.25);g.gain.exponentialRampToValueAtTime(0.25,t+1.2);g.gain.exponentialRampToValueAtTime(0.001,t+2.6);
@@ -1007,6 +1013,9 @@ function step(dt,dr){
   for(const t of TRAINS){if(!t.mov||t.lead)continue;t.a+=t.dir*t.v*dt;
     if(!t.passed&&(t.dir<0?t.a<S.pos+30:t.a+t.len>S.pos-30)){t.passed=true;whoosh()}}
   TRAINS=TRAINS.filter(t=>t.cross||t.lead||!t.mov||(t.dir<0?t.a+t.len>S.pos-100:t.a<S.pos+100));
+  // cerca de metade das automotoras que se cruzam connosco buzinam ao aproximar-se
+  for(const t of TRAINS){if(t.lead||t.honked)continue;if(t.cross?t.st==='wait':!t.mov)continue;if(t.dir!==(REV?1:-1))continue;
+    const d=Math.abs((t.dir<0?t.a:t.a+t.len)-S.pos);if(d>320)continue;if(t.hk===undefined)t.hk=rnd()<0.5;if(t.hk&&d<260){t.honked=true;otherHorn(d)}}
 
   // para-choques
   if(!REV&&S.pos>=BUFFER-1){if(kmh>6){gameOver('O comboio embateu no para-choques de Fafe a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER-1;S.v=0}
@@ -2941,7 +2950,7 @@ if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);use3D=fals
   for(let k=1;k<route.length;k++){const p=route[k-1],q=route[k];c+=Math.ceil((runMin(rev?p.stopR:p.stopF,rev?q.stopR:q.stopF)*1.14+45)/60)*60;if(k<route.length-1)c+=q.ty==='ap'?30:60;t[q.i]=c}
   FORCE_NC=o.ncar||2;start(LSD.i,z.i,rev,{t});S.sc=o.sc;S.maxPts+=o.maxPts||0;
   setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
-window.__T={SIG:()=>SIG.map(g=>({p:Math.round(g.p),d:g.d,k:g.k,s:sigState(g)})),xfer:()=>xferLine(),sw:()=>swBtn(),aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
+window.__T={get HONKS(){return HONKS},SIG:()=>SIG.map(g=>({p:Math.round(g.p),d:g.d,k:g.k,s:sigState(g)})),xfer:()=>xferLine(),sw:()=>swBtn(),aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
 })();
 </script>
 </body>
