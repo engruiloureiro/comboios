@@ -2436,8 +2436,6 @@ function buildTrainMeshes(){
     for(const sg of[-1,1]){
       for(const[dx,r,red]of[[0.92,0.1,0],[0.68,0.085,1]]){const cx=sg*dx;disc(mb,cx,1.48,0,r,red?cc(170,40,34):cc(236,234,214),0.024,red?3:2);disc(mb,cx,1.48,r,r+0.028,BR,0.022)}
       for(let k=0;k<3;k++){const y=1.7+k*0.06;fq(mb,sg*0.62,sg*0.98,y,y+0.025,cc(96,20,20),0,0.012)}}
-    // caixa de destino iluminada por cima do para-brisas do maquinista
-    {const dv=ATL['d:'+TDEST]||ATL['d:GUIMARÃES'];fq(mb,-1.0,-0.42,2.94,3.14,DK,0,0.012);fq(mb,-0.98,-0.44,2.96,3.12,[1,1,1],-1,0.016,[dv.u1,dv.v1,dv.u0,dv.v0],0.8)}
     // pegas verticais e estribos de acesso à frente
     for(const sg of[-1,1]){const x=sg*0.42;limb(mb,[x,1.35,zAt(1.35)+0.06],[x,2.0,zAt(2.0)+0.06],0.03,0.03,cc(196,198,200),[0,0,1]);
       boxRF(mb,[sg*0.6,0,0.2],[1,0,0],[0,0,1],0.36,0.2,0.8,0.84,cc(150,150,146),12,1,1)}
