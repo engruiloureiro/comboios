@@ -1,0 +1,181 @@
+{
+ "fonte": "CP_9600_RW (Train Simulator), Tiago Miranda / Gonçalo Redondo, licença BSD-3",
+ "veiculo": {
+  "comprimento": 18.906,
+  "largura": 2.7,
+  "altura": 3.79,
+  "massa_t": 40,
+  "pivo_engate": 9.393,
+  "ponto_receptor": 9.513,
+  "bogie_frente_y": 6.059,
+  "bogie_tras_y": -6.519,
+  "raio_roda": 0.399,
+  "coef_arrasto": 7.2,
+  "atrito_rolamento": 0.0015,
+  "atrito_seco": 0.5,
+  "atrito_molhado": 0.25
+ },
+ "motor": {
+  "potencia_max_kW": 550,
+  "potencia_carril_kW": 525,
+  "forca_max_kN": 62,
+  "forca_continua_kN": 30,
+  "vel_max_kmh": 70,
+  "rpm_ralenti": 200,
+  "rpm_max": 1500,
+  "rpm_variacao_max_s": 100,
+  "esforco_vs_velocidade": [
+   [
+    0,
+    500
+   ],
+   [
+    10,
+    336
+   ],
+   [
+    20,
+    336
+   ],
+   [
+    30,
+    290
+   ],
+   [
+    35,
+    250
+   ],
+   [
+    40,
+    210
+   ],
+   [
+    45,
+    170
+   ],
+   [
+    50,
+    140
+   ],
+   [
+    55,
+    110
+   ],
+   [
+    60,
+    90
+   ],
+   [
+    65,
+    70
+   ],
+   [
+    70,
+    60
+   ],
+   [
+    75,
+    50
+   ]
+  ]
+ },
+ "travao": {
+  "taxa_aplicacao_psi_s": 10,
+  "taxa_alivio_psi_s": 5,
+  "pressao_cilindro_forca_max_psi": 70,
+  "pressao_cilindro_max_psi": 90,
+  "emergencia_taxa": 55
+ },
+ "som_motor": {
+  "ralenti_picos_rpm": [
+   200,
+   385,
+   570,
+   755,
+   940,
+   1125,
+   1310
+  ],
+  "subidas_rpm": [
+   292,
+   477,
+   662,
+   847,
+   1032,
+   1217
+  ],
+  "descidas_rpm": [
+   1217,
+   1032,
+   847,
+   662,
+   477,
+   292
+  ]
+ },
+ "som_bogies": {
+  "rumble_baixo_ms": [
+   1.4,
+   12
+  ],
+  "rumble_medio_ms": [
+   11.5,
+   30.5
+  ],
+  "flange_vel": [
+   [
+    0,
+    0
+   ],
+   [
+    14,
+    0.5
+   ],
+   [
+    100,
+    1
+   ]
+  ],
+  "flange_curvatura": [
+   [
+    0,
+    0
+   ],
+   [
+    0.005,
+    1
+   ]
+  ]
+ },
+ "luzes": {
+  "farois": [
+   [
+    0.957,
+    1.467,
+    9.328
+   ],
+   [
+    -0.951,
+    1.467,
+    9.328
+   ],
+   [
+    0.003,
+    3.43,
+    9.027
+   ]
+  ],
+  "farolins": [
+   [
+    0.675,
+    1.467,
+    9.315
+   ],
+   [
+    -0.67,
+    1.467,
+    9.315
+   ]
+  ]
+ }
+}
