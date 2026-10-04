@@ -228,7 +228,11 @@ const T=s=>{const[h,m]=s.split(':').map(Number);return h*3600+m*60};
 /* ================= LINHA (Porto-Trindade – Guimarães – Fafe, via métrica, 1985) ================= */
 const VINT=true;
 // duas linhas no mesmo jogo: Linha de Guimarães (por defeito) e Linha da Póvoa (#povoa); o mundo é construído para a escolhida
-const RP=location.hash==='#povoa',RG=!RP;
+// linha escolhida: guardada no armazenamento local (nos telemóveis, abrir o ficheiro com '#' no endereço pode falhar)
+function setLine(l){let ok=false;try{localStorage.setItem('gf-line',l);ok=localStorage.getItem('gf-line')===l}catch(e){}
+  if(!ok){try{sessionStorage.setItem('gf-line',l);ok=true}catch(e){}}if(!ok)location.hash=l;location.reload()}
+const LINE=(()=>{let v=null;try{v=localStorage.getItem('gf-line')}catch(e){}if(!v)try{v=sessionStorage.getItem('gf-line')}catch(e){}return v||(location.hash==='#povoa'?'povoa':'guimaraes')})();
+const RP=LINE==='povoa',RG=!RP;
 const SEG=5, DRAW=220, CAM_H=2.95, DRV_X=-0.45, OFF=400;
 const km=k=>OFF+k*1000;
 // PK da Linha de Guimarães contados a partir de Porto-Trindade (Guimarães 59,385; Paçô Vieira 67,910; Fafe 80,585).
@@ -1037,7 +1041,7 @@ function swBtn(){if(!running||!S)return;if(!LSD){toast('Não há agulha de entro
   if(S.v>0.05){toast('Pare antes de mudar a agulha.','');return}
   S.swJ=!S.swJ;beep(500,.12,.12,'square');toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+'. Inverta a marcha (R) e recue.':'Agulha reposta para a linha direta.','good')}
 function xferLine(){const o={to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:RP?'Guimarães':'Porto-Trindade'};
-  try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;location.hash=o.to;location.reload()}
+  try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;setLine(o.to)}
 
 function updRev(){const b=$('#bRev');if(!b)return;b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
 function revBtn(){if(!running||!S)return;if(S.v>0.05){toast('Pare a automotora antes de mudar o inversor.','');return}if(S.notch>6){toast('Ponha o manípulo em 0 ou travão antes de mudar o inversor.','');return}
@@ -2949,7 +2953,7 @@ $('#bLoad').onclick=loadGame;$('#bSave').onclick=saveGame;$('#bQS').onclick=save
 $('#bMenu').onclick=()=>{running=false;paused=false;$('#ovPause').hidden=true;refreshLoad();$('#ovStart').hidden=false};
 setInterval(()=>{if(running&&!paused&&S&&S.finishT<0)try{saveGame.silent=1;const t=toast;toast=()=>{};saveGame();toast=t}catch(e){}},45000);
 // menu conforme a linha escolhida
-document.querySelectorAll('#lineSel button').forEach(b=>{b.classList.toggle('on',(b.dataset.l==='povoa')===RP);b.onclick=()=>{if((b.dataset.l==='povoa')===RP)return;location.hash=b.dataset.l;location.reload()}});
+document.querySelectorAll('#lineSel button').forEach(b=>{b.classList.toggle('on',(b.dataset.l==='povoa')===RP);b.onclick=()=>{if((b.dataset.l==='povoa')===RP)return;setLine(b.dataset.l)}});
 if(RP){$('#ttl').innerHTML='Porto-Trindade – Póvoa – Lousado<small>Linha da Póvoa e Famalicão, via métrica, outono de 1985</small>';
   $('#intro').textContent='A Linha do Porto à Póvoa e Famalicão em via estreita: da Trindade pela Senhora da Hora, Custóias e Pedras Rubras, pelo pinhal e pelas dunas de Mindelo, sobre o Ave em Vila do Conde, à Póvoa de Varzim, e daí pelo interior agrícola de Laundos, Rates e Fontainhas até Famalicão, seguindo pela Linha do Minho, em bitola mista, até Lousado, onde entronca com a Linha de Guimarães (inversão de marcha).';
   const sg=document.querySelector('#ovStart .startgrid');sg.innerHTML='';const col=['#a8431c','#7a3a1c','#c0601c','#8a4a1c','#94371a','#6a321a','#5a5f2a','#4a4f22'];
