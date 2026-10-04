@@ -292,7 +292,7 @@ const RAWP=RAWG.slice(0,6).map(r=>{const q=r.slice();q[4]=q[5]='00:00';return q}
  ['Cavalões',41.4108,-8.5704,52.677,'00:00','00:00','ap',0,'SL',-1,60,0.3,80,'v-ap'],
  ['Outiz',41.4091,-8.5564,54.449,'00:00','00:00','ap',0,'SR',1,60,0.3,79,'v-ramal'],
  ['Barradas',41.4080,-8.5400,56.65,'00:00','00:00','ap',0,'SL',-1,60,0.3,81,'v-ap'],
- ['Famalicão',41.4080,-8.5200,59.526,'00:00','00:00','est',2,'VG',1,150,0.35,90,'v-fafe'],
+ ['Famalicão',41.4080,-8.5200,59.526,'00:00','00:00','est',2,'VG',1,150,0.35,90,'v-fam'],
  ['Lousado',41.3505,-8.5190,66.026,'00:00','00:00','term',1,'SX',1,100,0.35,36,'v-est']]);
 const RAW=RP?RAWP:RAWG;
 const WPT=RP?RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.3640,-8.7520,28.569],[41.3880,-8.7520,32.276],[41.4110,-8.6930,41.292],[41.4170,-8.6500,44.854],[41.3800,-8.5180,62.726]]).sort((a,b)=>a[2]-b[2]):RAW.map(r=>[r[1],r[2],r[3]]).concat([[41.45597,-8.26722,G0+5.77],[41.41949,-8.22899,G0+12.72],[41.4285,-8.2040,G0+15.40],[41.45231,-8.17224,G0+20.9]]).sort((a,b)=>a[2]-b[2]);
@@ -328,7 +328,7 @@ function xyAtKm(k){const sp=GEO.spans;let q=0;while(q<sp.length-1&&GEO.km[q+1]<k
   const f=clamp((k-GEO.km[q])/((GEO.km[q+1]-GEO.km[q])||1),0,1),s=sp[q],L=f*s.len;let j=1;while(j<s.cum.length-1&&s.cum[j]<L)j++;return s.pts[j]}
 const CASTLE=PROJ(41.4479,-8.2903),PENHA=PROJ(41.4262,-8.2646);
 const bearing=(from,to)=>Math.atan2(to[0]-from[0],to[1]-from[1]);
-const BPOS={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-ramal':-38,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-sdh':-60,'v-can':-50,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30};
+const BPOS={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-ramal':-38,'v-fam':-70,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-sdh':-60,'v-can':-50,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30};
 // composição: 1 = unidade simples (2 caixas), 2 = unidade dupla (4 caixas), 0 = ao acaso
 let UNITS=1,FORCE_NC=0;const TLEN=nc=>nc*(CARL+0.4)-0.4;
 function setStops(nc){const h=TLEN(nc)/2;for(const s of STN){s.stopF=s.bc+h;s.stopR=s.bc-h}}
@@ -632,6 +632,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
      put(km(59.826),{t:'bigchurch',x:-120,s:25,tw:true});               // Famalicão
      for(const k0 of[58.488,59.137,60.526])put(km(k0),{t:'factory',x:(k0*10|0)%2?46:-50,w:70,h:9,chim:true});
      put(LSD.pos-400,{t:'mabor',x:60});
+     put(LSD.bc-28,{t:'canopy',x:4.6,len:14,w:2.0,col:[196,40,34]});               // Lousado: abrigo de cobertura vermelha no cais da via estreita
      for(let k0=19.436;k0<31.706;k0+=0.3)put(km(k0),{t:'sea'})}
    if(RG){put(km(12.0),{t:'bigchurch',x:80,s:7});                           // Maia
    put(km(25.0),{t:'bigchurch',x:130,s:9,tw:true});                  // Trofa, igreja matriz na encosta
@@ -1969,6 +1970,38 @@ function vStationPV(mb,cc2,F,R,n,yb,nm){const w=13,d=6.5,H=4.3,WH=cc(214,212,204
 }
 // Caniços: dois pisos cor de creme com cunhais de granito, portas altas com painéis de azulejo entre elas, relógio de braço;
 // na ponta, corpo baixo com terraço de balaustrada no primeiro andar, escada exterior e alpendre sobre a porta de cima; nome grande na empena
+// Famalicão (foto): corpo de dois pisos caiado com barra de azulejo azul e branco, rés-do-chão com arcada,
+// telhado de quatro águas e chaminé; ala baixa de duas águas com a empena virada à via, óculo e o nome; bandeira no topo
+function vStationFam(mb,cc2,F,R,n,yb,nm){const w=13,d=9,H=7.4,WH=cc(240,238,232),GR2=cc(196,192,182),RF=cc(150,96,72),AZ=cc(150,172,206),DKc=cc(40,40,44),GLc=cc(40,46,54);
+  const fp=(u,y,out,dd)=>{dd=dd===undefined?d:dd;return[cc2[0]+n[0]*(dd/2+out)+F[0]*u,y,cc2[2]+n[2]*(dd/2+out)+F[2]*u]};
+  const Q=(u0,u1,y0,y1,col,out,l,dd)=>mb.q(fp(u0,y0,out,dd),fp(u1,y0,out,dd),fp(u1,y1,out,dd),fp(u0,y1,out,dd),col,l||0);
+  boxRF(mb,cc2,F,R,w,d,yb-0.4,yb+H,WH,6,3,3,-1);boxRF(mb,cc2,F,R,w+0.06,d+0.06,yb-0.4,yb+1.3,AZ,15,2,2,0,1,true);
+  for(const e of[-1,1])for(const q of[-1,1])boxRF(mb,add(add(cc2,mulv(F,e*w/2)),mulv(n,q*d/2)),F,R,0.5,0.5,yb-0.4,yb+H,GR2,13,1,1);
+  boxRF(mb,cc2,F,R,w+0.3,d+0.3,yb+3.7,yb+3.85,GR2,13,2,2);boxRF(mb,cc2,F,R,w+0.4,d+0.4,yb+H-0.2,yb+H,GR2,13);
+  hipRoof(mb,cc2,F,R,w,d,yb+H,2.4,RF,0.6);
+  {const ch=add(add(cc2,mulv(F,-w*0.3)),mulv(n,-d*0.15));boxRF(mb,ch,F,R,0.8,0.8,yb+H,yb+H+3.2,WH,6,1,1);boxRF(mb,ch,F,R,1.0,1.0,yb+H+3.2,yb+H+3.4,GR2,13,1,1)}
+  {const fl=add(add(cc2,mulv(F,w*0.2)),[0,0,0]);cyl(mb,fl,yb+H+2,yb+H+6,0.05,0.05,6,cc(200,200,200),0);
+   const t=[fl[0]+F[0]*0.05,yb+H+5.9,fl[2]+F[2]*0.05];mb.q(t,add(t,mulv(F,1.6)),add(add(t,mulv(F,1.6)),[0,-0.5,0]),add(t,[0,-0.5,0]),cc(30,110,50),0);
+   mb.q(add(add(t,mulv(F,0.65)),[0,0,0]),add(t,mulv(F,1.6)),add(add(t,mulv(F,1.6)),[0,-1.0,0]),add(add(t,mulv(F,0.65)),[0,-1.0,0]),cc(200,30,30),0)}
+  // arcada do rés-do-chão: arcos escuros com moldura de granito
+  for(let k=0;k<4;k++){const u=-w/2+1.9+k*(w-3.8)/3;Q(u-0.8,u+0.8,yb,yb+3.1,GR2,0.03,13);Q(u-0.62,u+0.62,yb,yb+2.4,DKc,0.05);
+    const c0=fp(u,yb+2.4,0.05);for(let q=0;q<8;q++){const a0=q/8*Math.PI,a1=(q+1)/8*Math.PI,P=a=>fp(u+Math.cos(a)*0.62,yb+2.4+Math.sin(a)*0.55,0.05);mb.t(c0,P(a0),P(a1),n,n,n,DKc,[0,0],[1,0],[0,1],0,0,1)}
+    Q(u-0.5,u+0.5,yb+4.4,yb+6.4,GR2,0.03,13);Q(u-0.38,u+0.38,yb+4.5,yb+6.3,GLc,0.05,16);Q(u-0.38,u+0.38,yb+5.5,yb+5.56,WH,0.06)}
+  plateQ(mb,fp(w*0.05,yb+3.25,0.07),n,0.6,0.6,ATL['clock'],0,false);
+  // ala baixa com empena virada para a via
+  const aw=7,ad=d-1,ah=3.8,ac=add(add(cc2,mulv(F,-(w/2+aw/2))),mulv(n,0.5)),E=mulv(F,-1);
+  boxRF(mb,ac,F,R,aw,ad,yb-0.4,yb+ah,WH,6,2,2,-1);boxRF(mb,ac,F,R,aw+0.06,ad+0.06,yb-0.4,yb+1.3,AZ,15,2,2,0,1,true);
+  {const P=(u,v,y)=>[ac[0]+F[0]*u+n[0]*v,y,ac[2]+F[2]*u+n[2]*v],hu=aw/2+0.3,hv=ad/2+0.4,yr=yb+ah,yt=yr+1.9;
+   for(const sv of[-1,1])mb.q(P(-hu,sv*hv,yr),P(hu,sv*hv,yr),P(hu,0,yt),P(-hu,0,yt),RF,5,[0,0,aw/3,1]);
+   for(const su of[-1,1]){const a=P(su*aw/2,-ad/2,yr),b=P(su*aw/2,ad/2,yr),c=P(su*aw/2,0,yt-0.15);const nn=mulv(F,su);mb.t(a,b,c,nn,nn,nn,WH,[0,0],[1,0],[0.5,1],6,0,1)}
+   const ge=P(-aw/2-0.03,0,0);const pn=ATL['pn:'+nm];if(pn)plateQ(mb,[ge[0],yb+ah-0.6,ge[2]],E,3.2,0.6,pn,0,false);
+   const oc=[ge[0]+E[0]*0.01,yb+ah+0.65,ge[2]+E[2]*0.01];for(let q=0;q<12;q++){const a0=q/12*6.283,a1=(q+1)/12*6.283,rr=[n[0],0,n[2]],PP=(a,r)=>[oc[0]+rr[0]*Math.cos(a)*r,oc[1]+Math.sin(a)*r,oc[2]+rr[2]*Math.cos(a)*r];
+     mb.t(oc,PP(a0,0.32),PP(a1,0.32),E,E,E,DKc,[0,0],[1,0],[0,1],0,0,1);mb.q(PP(a0,0.32),PP(a1,0.32),PP(a1,0.42),PP(a0,0.42),GR2,0)}
+   for(let k=0;k<2;k++){const u=-1.6+k*3.2;const p0=[ac[0]+F[0]*u+n[0]*(ad/2+0.04),0,ac[2]+F[2]*u+n[2]*(ad/2+0.04)];
+     mb.q([p0[0]-F[0]*0.6,yb,p0[2]-F[2]*0.6],[p0[0]+F[0]*0.6,yb,p0[2]+F[2]*0.6],[p0[0]+F[0]*0.6,yb+2.6,p0[2]+F[2]*0.6],[p0[0]-F[0]*0.6,yb+2.6,p0[2]-F[2]*0.6],DKc,0)}}
+  // bancos amarelos no cais
+  for(const u of[-w*0.3,w*0.1])boxRF(mb,fp(u,0,1.4),F,R,1.8,0.5,yb+0.4,yb+0.5,cc(230,200,40),0)
+}
 function vStationCan(mb,cc2,F,R,n,yb,nm){const w=12,d=8,H=7.2,CR=cc(232,222,190),GRN=[0.86,0.84,0.8],RF=cc(186,98,66),GLc=cc(36,42,48),DR=cc(40,70,62);
   const fp=(u,y,out,dd)=>{dd=dd===undefined?d:dd;return[cc2[0]+n[0]*(dd/2+out)+F[0]*u,y,cc2[2]+n[2]*(dd/2+out)+F[2]*u]};
   const Q=(u0,u1,y0,y1,col,out,l,dd)=>mb.q(fp(u0,y0,out,dd),fp(u1,y0,out,dd),fp(u1,y1,out,dd),fp(u0,y1,out,dd),col,l||0);
@@ -1997,7 +2030,7 @@ function vStationCan(mb,cc2,F,R,n,yb,nm){const w=12,d=8,H=7.2,CR=cc(232,222,190)
   const pn=ATL['pn:'+nm];if(pn){for(const e of[-1,1]){const en=mulv(F,e),c0=add(cc2,mulv(F,e*(w/2+0.05)));plateQ(mb,[c0[0],yb+H-0.7,c0[2]],en,4.0,0.7,pn,0,false)}
     plateQ(mb,fp(-w/2+1.3,yb+3.95,0.06),n,1.4,0.26,pn,0,false)}
 }
-function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n,yb,nm);return}if(st==='v-can'){vStationCan(mb,cc2,F,R,n,yb,nm);return}if(st==='v-maia'||st==='v-gran'||st==='v-ara'||st==='v-lord'){vStation2(mb,st,cc2,F,R,n,yb,nm);return}
+function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n,yb,nm);return}if(st==='v-can'){vStationCan(mb,cc2,F,R,n,yb,nm);return}if(st==='v-fam'){vStationFam(mb,cc2,F,R,n,yb,nm);return}if(st==='v-maia'||st==='v-gran'||st==='v-ara'||st==='v-lord'){vStation2(mb,st,cc2,F,R,n,yb,nm);return}
   const cfg={'v-ramal':[nm==='Fontainhas'?15:12.5,6.5,1],'v-ap':[7.5,5,1],'v-est1':[10,6.5,1],'v-est':[13,8,1],'v-est2':[9,8,2],'v-fafe':[20,10,2],'v-st':[22,10,1],'v-sdh':[16,8.5,1],'v-can':[12,8,2],'v-gmr':[24,11,2],'v-trin':[38,13,3]}[st];const w=cfg[0],d=cfg[1],fl=cfg[2],H=fl*3.5+0.4;const pink=st==='v-gmr',fafe=nm==='Fafe',ram=st==='v-ramal';
   const WH=pink?cc(218,160,148):cc(238,236,228),OC=pink?cc(196,140,130):ram?cc(176,168,148):cc(132,142,152),GRn=cc(184,178,166),SH=cc(52,92,62),DR=ram?(nm==='Fontainhas'?cc(150,42,34):cc(46,88,70)):cc(96,62,40),GL=cc(40,48,56);
   boxRF(mb,cc2,F,R,w,d,yb,yb+H,WH,6,3,3);
@@ -2045,7 +2078,7 @@ function vStation(mb,st,cc2,F,R,n,yb,nm){if(st==='v-pv'){vStationPV(mb,cc2,F,R,n
 }
 function bldg3(mb,sp,i,base,R,F,sd,L){
   const st=sp.sty,yb=hy[i]-0.25,n=mulv(R,-sd);
-  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-ramal':6.5,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-st':10,'v-sdh':8.5,'v-can':8,'v-gmr':11,'v-trin':13,'v-maia':8,'v-gran':7.5,'v-ara':6.5,'v-lord':7,'v-pv':6.5}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
+  if(st&&st.startsWith('v-')){const d={'v-ap':5,'v-ramal':6.5,'v-fam':9,'v-est1':6.5,'v-est':8,'v-est2':8,'v-fafe':10,'v-st':10,'v-sdh':8.5,'v-can':8,'v-gmr':11,'v-trin':13,'v-maia':8,'v-gran':7.5,'v-ara':6.5,'v-lord':7,'v-pv':6.5}[st];const cc2=L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);vStation(mb,st,cc2,F,R,n,yb+0.3,sp.n);return}
   const C0=(d)=>L([base[0]+R[0]*sd*d/2,0,base[2]+R[2]*sd*d/2]);
   const front=(cc2,d,y)=>[cc2[0]+n[0]*(d/2+0.06),y,cc2[2]+n[2]*(d/2+0.06)];
   const gr=cc(196,188,172),cream=cc(238,224,194),white=cc(246,244,238);
@@ -2325,8 +2358,8 @@ function obj3(mb,sp,i,L){
     boxRF(mb,cc2,F,R,w+0.05,d+0.05,y-0.4,y+h,[1,1,1],15,2,2,0,1,true);boxRF(mb,cc2,F,R,w-0.2,d-0.2,y+1.2,y+h,cc(...sp.c),4,12,12,-1,1,true);hipRoof(mb,cc2,F,R,w,d,y+h,2.4,cc(190,104,74),0.5);
     boxRF(mb,add(cc2,mulv(R,-sd*(d/2+2))),F,R,w+6,0.4,y-0.3,y+1.6,cc(236,232,222),6,2,2);
     if(sp.palm){const pc=add(cc2,add(mulv(R,-sd*(d/2+1)),mulv(F,w/2+1.5)));cyl(mb,pc,y,y+9,0.25,0.18,8,cc(120,100,76),0);for(let k=0;k<9;k++){const a=k/9*6.283,tip=[pc[0]+Math.cos(a)*2.8,y+8,pc[2]+Math.sin(a)*2.8];limb(mb,[pc[0],y+9,pc[2]],tip,0.55,0.06,cc(70,110,52),[0,1,0])}}break}
-  case'canopy':{const y=hy[i]+0.35;boxRF(mb,c,R,F,sp.w+0.6,sp.len,y+3.3,y+3.45,cc(150,160,168),0);boxRF(mb,c,R,F,sp.w+0.64,sp.len+0.04,y+3.15,y+3.3,cc(60,90,140),0);
-    for(let u=-sp.len/2+2;u<sp.len/2;u+=7)boxRF(mb,add(c,mulv(F,u)),R,F,0.18,0.18,y,y+3.3,cc(80,86,92),0);break}
+  case'canopy':{const y=hy[i]+0.35;boxRF(mb,c,R,F,sp.w+0.6,sp.len,y+3.3,y+3.45,cc(150,160,168),0);boxRF(mb,c,R,F,sp.w+0.64,sp.len+0.04,y+3.15,y+3.3,sp.col?cc(...sp.col):cc(60,90,140),0);
+    for(let u=-sp.len/2+2;u<sp.len/2;u+=7)boxRF(mb,add(c,mulv(F,u)),R,F,0.18,0.18,y,y+3.3,sp.col?cc(...sp.col):cc(80,86,92),0);break}
   case'lclock':{const y=hy[i]+0.35;boxRF(mb,c,R,F,0.12,0.12,y,y+2.9,cc(40,40,40),0);plateQ(mb,[c[0],y+2.95,c[2]],fr,0.5,0.5,ATL['clock'],0,true);
     plateQ(mb,[c[0],y+2.4,c[2]],fr,0.9,0.28,atTxt('lin'+sp.n,'LINHA '+sp.n,'#f4f4f0','#111',160,48,34),0,true);break}
   case'kiosk':{const y=hy[i]+sp.y;boxRF(mb,c,R,F,1.8,3.2,y,y+2.5,cc(150,190,205),16,2,2,0.03);boxRF(mb,c,R,F,2.1,3.5,y+2.5,y+2.7,cc(60,70,80),0);break}
@@ -2345,12 +2378,13 @@ const CARL=15.1,TW=2.70,NCAR=2;let TM=null;
 const PCOL=[[0.75,0.22,0.17],[0.18,0.36,0.62],[0.3,0.3,0.32],[0.55,0.45,0.3],[0.2,0.45,0.3],[0.62,0.6,0.56],[0.45,0.2,0.4],[0.12,0.14,0.2],[0.7,0.55,0.2]],SKIN=[[0.86,0.68,0.54],[0.78,0.6,0.46],[0.66,0.48,0.36],[0.9,0.74,0.6]];
 let prs=4242;const prand=()=>{prs=(Math.imul(prs,1664525)+1013904223)>>>0;return prs/4294967296};
 let TDEST='GUIMARÃES';
+let LIVB=false;
 function buildTrainMeshes(){
   const RD=cc(198,32,38),LG=cc(214,215,212),DG=cc(200,202,202),GR=cc(122,125,128),SK=cc(66,76,90),FR=cc(208,210,212),GL=cc(255,255,255),DK=cc(32,32,34),BR=cc(196,170,104),hw=TW/2,z1=-CARL+0.3;
   // secção transversal (meia largura, altura), recuo da frente a cada altura e chanfro dos cantos
   const PR=[[hw,0.85],[hw,1.2],[hw,1.84],[hw,2.02],[hw,2.95],[hw,3.2],[hw-0.12,3.44],[hw-0.45,3.58],[0,3.62]];
   const ZF=[0,0,0,0,-0.12,-0.2,-0.34,-0.56,-0.78],CH=PR.map(p=>0.2*p[0]/hw);
-  const sideCol=k=>k<2?LG:k<6?RD:GR,frontCol=k=>k<1?SK:RD;
+  const WT=cc(240,240,234),sideCol=k=>LIVB?(k<2?RD:k<6?WT:GR):(k<2?LG:k<6?RD:GR),frontCol=k=>k<1?SK:LIVB?(k<2?RD:WT):RD;
   const zAt=y=>{for(let k=0;k<PR.length-1;k++)if(y<=PR[k+1][1])return ZF[k]+(ZF[k+1]-ZF[k])*clamp((y-PR[k][1])/(PR[k+1][1]-PR[k][1]),0,1);return ZF[ZF.length-1]};
   // quad no costado (x=s*(hw+o)) e na frente (segue a inclinação do para-brisas)
   const sq=(mb,s,za,zb,ya,yb,col,l,o,uv,e)=>{const x=s*(hw+o);mb.q([x,ya,za],[x,ya,zb],[x,yb,zb],[x,yb,za],col,l,uv,e)};
@@ -2449,7 +2483,11 @@ function buildTrainMeshes(){
      for(const sg of[-1,1])mb.q(P(sg*xw,0.85,0),P(sg*hw,0.85,-CH[0]),P(sg*hw*0.9,0.3,-0.3),P(sg*xw*0.8,0.3,0.14),cc(84,94,108),0);
      mb.q(P(-xw*0.8,0.3,0.14),P(xw*0.8,0.3,0.14),P(xw*0.8,0.28,-0.3),P(-xw*0.8,0.28,-0.3),cc(40,40,40),0)}
     // porta de intercomunicação central e para-brisas com borracha escura
-    fq(mb,-0.33,0.33,1.22,3.05,cc(60,16,18),0,0.006);fq(mb,-0.305,0.305,1.245,3.02,RD,0,0.01);
+    fq(mb,-0.33,0.33,1.22,3.05,LIVB?cc(150,150,146):cc(60,16,18),0,0.006);fq(mb,-0.305,0.305,1.245,3.02,LIVB?WT:RD,0,0.01);
+    // pintura branca e vermelha: faixas brancas oblíquas na parte vermelha da frente e no início do costado
+    if(LIVB){for(const sg of[-1,1])for(let k=0;k<3;k++){const x0=sg*(0.22+k*0.25),dx=sg*0.11,y0=0.88,y1=1.82,sl=sg*0.22;
+        mb.q([x0,y0,0.016],[x0+dx,y0,0.016],[x0+dx+sl,y1,0.016],[x0+sl,y1,0.016],WT,0)}
+      for(const s of[-1,1])for(let k=0;k<3;k++){const z0=-0.15-k*0.32,x=s*(hw+0.012);mb.q([x,0.88,z0],[x,0.88,z0-0.13],[x,1.82,z0-0.13-0.3],[x,1.82,z0-0.3],WT,0)}}
     fq(mb,-0.22,0.22,2.08,2.86,DK,0,0.012);fq(mb,-0.19,0.19,2.11,2.83,GL,16,0.016,[0,1,1,0]);
     fq(mb,0.2,0.26,1.6,1.66,cc(60,60,60),0,0.014);
     for(const sg of[-1,1]){const xa=sg*0.44,xb=sg*(hw-CH[4]-0.07);fq(mb,Math.min(xa,xb)-0.03,Math.max(xa,xb)+0.03,2.05,2.9,DK,0,0.008);
@@ -2614,20 +2652,21 @@ function buildTrainMeshes(){
     for(const sx of[-1,1]){boxRF(mb,[sx*1.0,0,0],[1,0,0],[0,0,1],0.16,3.0,0.5,0.75,FC,0);for(const z of[-1.2,1.2])boxRF(mb,[sx*1.05,0,z],[1,0,0],[0,0,1],0.22,0.36,0.3,0.6,cc(60,60,58),0)}
     for(const z of[-1.2,1.2])for(const x of[-0.83,0.83]){const n=12;for(let k=0;k<n;k++){const a0=k/n*6.283,a1=(k+1)/n*6.283,r=0.47,sx=Math.sign(x);
       mb.q([x,0.47+Math.cos(a0)*r,z+Math.sin(a0)*r],[x,0.47+Math.cos(a1)*r,z+Math.sin(a1)*r],[x+sx*0.12,0.47+Math.cos(a1)*r,z+Math.sin(a1)*r],[x+sx*0.12,0.47+Math.cos(a0)*r,z+Math.sin(a0)*r],cc(70,66,62),0)}}};
-  TM={bloco:mk(bloco,'bloco'),sfm:mk(sfm,'sfm'),bbog:mk(bbog,'bbog'),car:mk(mb=>car(mb,true),'car'),car2:mk(mb=>car(mb,false),'car2'),bog:mk(bogie,'bog'),bell:mk(bell,'bell'),int:mk(interior,'int'),loco:mk(loco,'loco'),wag:mk(wagon,'wag'),coach:mk(coach,'coach')};
+  LIVB=true;const carB=mk(mb=>car(mb,true),'carB'),car2B=mk(mb=>car(mb,false),'car2B');LIVB=false;
+  TM={carB,car2B,bloco:mk(bloco,'bloco'),sfm:mk(sfm,'sfm'),bbog:mk(bbog,'bbog'),car:mk(mb=>car(mb,true),'car'),car2:mk(mb=>car(mb,false),'car2'),bog:mk(bogie,'bog'),bell:mk(bell,'bell'),int:mk(interior,'int'),loco:mk(loco,'loco'),wag:mk(wagon,'wag'),coach:mk(coach,'coach')};
 }
 function mdl(A,F,eye){const R=norm(cross(F,[0,1,0])),U=cross(R,F);return new Float32Array([R[0],R[1],R[2],0,U[0],U[1],U[2],0,F[0],F[1],F[2],0,A[0]-eye[0],A[1]-eye[1],A[2]-eye[2],1])}
 function consistDraw(pf,sgn,xo,parts,eye,lit){let p=pf;
   for(const q of parts){const Bp=p-sgn*q.len,A=wp(p,xo(p),0.36),B=wp(Bp,xo(Bp),0.36),F=norm(sub(A,B));
     drawM(TM[q.m],mdl(A,F,eye),q.ht&&lit?q.ht:[0,0]);if(q.bog)for(const d of q.bog)drawM(TM[q.bm||'bog'],mdl(add(A,mulv(F,-d)),F,eye),[0,0]);p=Bp-sgn*0.6}}
 // unidade dupla: a segunda unidade engata cabina com cabina (reboque à frente, motora atrás)
-function trainDraw(pf,sgn,xo,ht,eye,skipCab,nc){nc=nc||NCAR;
+function trainDraw(pf,sgn,xo,ht,eye,skipCab,nc,lb){nc=nc||NCAR;const CA=lb?TM.carB:TM.car,CB=lb?TM.car2B:TM.car2;
   const pts=[];for(let k=0;k<=nc;k++){const pp=pf-sgn*k*(CARL+0.4);pts.push(wp(pp,xo(pp),0.36))}
   for(let k=0;k<nc;k++){const A=pts[k],B=pts[k+1],F=norm(sub(A,B)),u2=k>=2,j=k%2,last=k===nc-1,first=k===0;
     const lf=first?[ht[0],ht[1]]:[0,0],lr=last?[ht[2],ht[3]]:[0,0];
-    if(first){if(skipCab==='int')drawM(TM.int,mdl(A,F,eye),[0,0]);else if(!skipCab)drawM(TM.car,mdl(A,F,eye),lf)}
-    else if(!u2)drawM(TM.car2,mdl(B,mulv(F,-1),eye),lr);
-    else if(j===0)drawM(TM.car2,mdl(A,F,eye),[0,0]);else drawM(TM.car,mdl(B,mulv(F,-1),eye),lr);
+    if(first){if(skipCab==='int')drawM(TM.int,mdl(A,F,eye),[0,0]);else if(!skipCab)drawM(CA,mdl(A,F,eye),lf)}
+    else if(!u2)drawM(CB,mdl(B,mulv(F,-1),eye),lr);
+    else if(j===0)drawM(CB,mdl(A,F,eye),[0,0]);else drawM(CA,mdl(B,mulv(F,-1),eye),lr);
     for(const d of[2.9,CARL-2.9]){drawM(TM.bog,mdl(add(A,mulv(F,-d)),F,eye),[0,0])}}
   for(let u=1;u<nc;u+=2){const g=norm(sub(pts[u-1],pts[u+1]));drawM(TM.bell,mdl(add(pts[u],mulv(g,0.2)),g,eye),[0,0])}
   return pts}
@@ -2793,12 +2832,12 @@ function render3D(dtR){
   if(DYN.n){gl.bindVertexArray(DYN.vao);gl.drawArrays(gl.TRIANGLES,0,DYN.n)}
   // comboios
   const lights=dark>0.2||true;
-  trainDraw(S.pos,dir,trackX,[1,0,0,1],eyeY,camMode==='cab'||(camMode==='salao'?'int':false),S.ncar);
+  trainDraw(S.pos,dir,trackX,[1,0,0,1],eyeY,camMode==='cab'||(camMode==='salao'?'int':false),S.ncar,S.livB);
   for(const t of TRAINS){if(Math.abs(t.a-S.pos)>1800)continue;const lit=t.lit;
     if(t.cons){const fwd=t.dir?t.dir>0:true;consistDraw(t.dir?(fwd?t.a+t.len:t.a):t.a+t.len,t.dir?(fwd?1:-1):1,t.xo||(()=>t.o),t.cons,eyeY,t.lit)}
-    else if(t.cross){const fwd=t.dir>0;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.len>40?4:2)}
-    else if(t.mov){const fwd=t.dir>0;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false,t.len>40?4:2)}
-    else trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false)}
+    else if(t.cross){const fwd=t.dir>0;if(t.lb===undefined)t.lb=rnd()<0.5;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.len>40?4:2,t.lb)}
+    else if(t.mov){const fwd=t.dir>0;if(t.lb===undefined)t.lb=rnd()<0.5;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false,t.len>40?4:2,t.lb)}
+    else{if(t.lb===undefined)t.lb=rnd()<0.5;trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false,undefined,t.lb)}}
   gl.bindVertexArray(null);
   // sobreposição
   ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);const dpr=cv.width/W;ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -2856,7 +2895,7 @@ function frame(now){
   if(use3D)render3D(dtR);else render();hud(dtR);audioUpdate(dtR);
   requestAnimationFrame(frame);
 }
-function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);if(use3D){TDEST=S.endSt.n.toUpperCase();prs=4242;buildTrainMeshes()}S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
+function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.livB=Math.random()<0.5;if(use3D){TDEST=S.endSt.n.toUpperCase();prs=4242;buildTrainMeshes()}S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
   running=true;paused=false;$('#bWarp').textContent='Tempo ×1';
   const st=STN[idx];toast((S.ncar>2?'Unidade dupla 9600 (4 caixas)':'Automotora 9600')+' para '+S.endSt.n+'. Partida de '+st.n+' às '+fHM(st.dep)+'. Arranque depois do apito do chefe da estação.','');
   setTimeout(()=>say((S.semi?'Comboio semirrápido com destino a ':'Comboio urbano com destino a ')+S.endSt.n+(S.semi?', com paragem em '+STOPS.slice(1,-1).map(x=>x.n.replace('Porto ','')).join(', '):'')+'. Partida às '+fHM(st.dep).replace(':',' e ')+'.'),900)}
