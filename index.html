@@ -625,7 +625,11 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
    put(km(2.95),{t:'stadium',x:-130});                                // Estádio do Bessa
    if(RP){put(km(13.456),{t:'airport',x:-480});                       // Aeroporto de Pedras Rubras
      put(km(26.522),{t:'mosteiro',x:120});                               // Mosteiro de Santa Clara, sobre o Ave
-     for(let k0=27.332;k0<29.331;k0+=0.3)put(km(k0),{t:'aqueduto',x:70,len:300});                      // Aqueduto de Santa Clara, a caminho da Póvoa
+     {const vc=byNameE('Vila do Conde'),a0=km(26.35),b0=vc.pa;
+      // campo lavrado entre a via e o aqueduto, sem casario
+      for(let k=Math.floor(a0/SEG);k<=Math.floor(b0/SEG);k++)spr[k]=spr[k].filter(q=>!(q.x>5&&q.x<110&&!/^(sig|pn|pnu|ea|lim|avis|silvo|tpole|pk|lamp)$/.test(q.t)));
+      for(let p0=a0+70;p0<b0-50;p0+=120)put(p0,{t:'aqueduto',x:62,len:120});
+      for(let p0=a0+60;p0<b0-40;p0+=60)put(p0,{t:'lavrado',x:9,len:58,dep:46})} // Aqueduto de Santa Clara, ao lado da via antes da estação de Vila do Conde
      put(km(27.141),{t:'bigchurch',x:-200,s:21,tw:true});              // Igreja Matriz de Vila do Conde
      put(km(29.997),{t:'casino',x:-620});put(km(30.71),{t:'bigchurch',x:-170,s:23,tw:true}); // Póvoa: casino e matriz
      put(km(43.617),{t:'romanica',x:90});                                 // Igreja românica de São Pedro de Rates
@@ -2193,6 +2197,10 @@ function obj3(mb,sp,i,L){
     fq(A,vu+vw*0.25,0.03,1.0,A.y+3.4,A.y+5.6,cc(92,60,38),0);fq(A,-w*0.3,0.03,1.1,A.y+0.1,A.y+2.2,cc(80,54,34),0);
     if(r()<0.5){const fc=add(cc2,mulv(A.n,d/2+5));boxRF(mb,fc,A.F,A.R,w+8,0.5,A.y-0.3,A.y+1.0,[0.84,0.82,0.78],13,2,2)}
     break}
+  case'lavrado':{// campo lavrado (terra castanha) com faixa de erva junto ao muro da via
+    const A=at(0,sp.dep/2);boxRF(mb,A.c,A.F,A.R,sp.len,sp.dep,A.y-0.3,A.y+0.12,cc(150,120,92),21,4,3);
+    const B=at(0,3);boxRF(mb,B.c,B.F,B.R,sp.len,5,B.y-0.3,B.y+0.16,cc(120,160,80),21,4,1);
+    const M=at(0,0.4);boxRF(mb,M.c,M.F,M.R,sp.len,0.7,M.y-0.3,M.y+0.8,[0.62,0.58,0.52],13,4,1);break}
   case'corn':{// milheiral (outono: canas a secar) com muro baixo de pedra
     const A=at(0,sp.dep/2),gold=r()<0.6;boxRF(mb,A.c,A.F,A.R,sp.len,sp.dep,A.y-0.3,A.y+2.1,gold?cc(236,214,150):cc(170,200,120),21,3,2.2,0,1,false,gold?cc(176,150,84):cc(110,140,70),10);
     if(r()<0.6){const B=at(0,-0.6);boxRF(mb,B.c,B.F,B.R,sp.len,0.5,B.y-0.3,B.y+0.9,[0.84,0.82,0.78],13,2,2)}break}
@@ -2314,9 +2322,14 @@ function obj3(mb,sp,i,L){
     const nn=mulv(R,-sd),cc2=add(c,mulv(nn,-40));boxRF(mb,cc2,F,R,120,30,y0-0.5,y0+9,cc(220,220,214),6,8,8,-0.6);boxRF(mb,add(cc2,mulv(nn,15.4)),F,R,110,0.2,y0+3,y0+8,cc(60,70,80),16,8,1);
     const tc=add(cc2,add(mulv(F,70),mulv(nn,-5)));boxRF(mb,tc,F,R,4,4,y0-0.5,y0+28,cc(226,226,220),6);boxRF(mb,tc,F,R,8,8,y0+28,y0+32,cc(60,80,90),16,2,2);boxRF(mb,tc,F,R,9,9,y0+32,y0+33,cc(200,200,196),0);
     const rw=add(cc2,mulv(nn,-160));boxRF(mb,rw,F,R,1600,45,y0-0.3,y0+0.05,[0.8,0.8,0.8],8,40,2);for(let k=-15;k<=15;k++)boxRF(mb,add(rw,mulv(F,k*50)),F,R,18,1,y0+0.05,y0+0.08,cc(240,240,236),0);break}
-  case'aqueduto':{// Aqueduto de Santa Clara: centenas de arcos de granito entre a Póvoa e Vila do Conde
-    const n=Math.round(sp.len/9),G=[0.86,0.84,0.8];for(let q=0;q<n;q++){const A=at(-sp.len/2+q*9,0),yy=A.y,hh=10+3*Math.sin(q*0.07);
-      boxRF(mb,A.c,A.F,A.R,1.8,2.4,yy-1,yy+hh,G,13,1,2);boxRF(mb,add(A.c,mulv(A.F,4.5)),A.F,A.R,7.2,2.4,yy+hh-2.2,yy+hh+1.2,G,13,2,1)}break}
+  case'aqueduto':{// Aqueduto de Santa Clara (foto): arcos de volta perfeita, altos e estreitos, de granito, com pilares delgados
+    const SP=5.0,n=Math.round(sp.len/SP),G=[0.8,0.78,0.72],r=1.7;
+    for(let q=0;q<n;q++){const u=-sp.len/2+q*SP,A=at(u,0),yy=A.y,hh=12.5+1.2*Math.sin((u+i*SEG)*0.004),ys=yy+hh-1.4-r,yd=yy+hh-0.9;
+      boxRF(mb,A.c,A.F,A.R,1.6,1.7,yy-1,yy+hh,G,13,1,2);
+      boxRF(mb,add(A.c,mulv(A.F,SP/2)),A.F,A.R,SP,1.7,yd,yy+hh+0.5,G,13,2,1);
+      // tímpanos acima do arco, em faixas verticais que seguem a volta
+      for(let k=0;k<6;k++){const xa=-r+k*(2*r/6),xb=xa+2*r/6,xm=(xa+xb)/2,ya=ys+Math.sqrt(Math.max(0,r*r-xm*xm));
+        boxRF(mb,add(A.c,mulv(A.F,SP/2+xm)),A.F,A.R,xb-xa+0.02,1.7,ya,yd,G,13,0.4,1)}}break}
   case'casino':{// Casino da Póvoa, junto à praia
     const nn=mulv(R,-sd),cc2=add(c,mulv(nn,-12));boxRF(mb,cc2,F,R,46,24,y0-0.5,y0+12,cc(246,240,226),18,6.6,13.6,-1);boxRF(mb,cc2,F,R,46.6,24.6,y0+12,y0+13,cc(206,196,176),6);
     const tc=add(cc2,mulv(nn,10));boxRF(mb,tc,F,R,10,6,y0-0.5,y0+17,cc(246,240,226),6);cyl(mb,tc,y0+17,y0+21,4,0.8,12,cc(120,140,150),11);break}
@@ -2857,7 +2870,7 @@ function buildLandmarks(){const g=fr3(RG?GUI.pos:SB.pos);const mb=new MB();const
       const y=terrH(bi,o,wx,wz),w=8+rr()*14,d=8+rr()*10,h=rr()<tall?12+rr()*14:5+rr()*6;const R2=norm([Math.cos(ang*3),0,Math.sin(ang*3)]),F2=[-R2[2],0,R2[0]];
       boxRF(mb,[x,0,z],R2,F2,w,d,y-2,y+h,cc(...FAC[Math.floor(rr()*FAC.length)]),4,12,12,-1);hipRoof(mb,[x,0,z],R2,F2,w,d,y+h,h>11?2.2:1.8,cc(186,98,68),0.3)}};
   if(RG)town(GUI.pos,-150,-500,420,120,1300,4242,0.15,(o,bi)=>o>40&&(bi*SEG-GUI.pos)>1300);
-  else{town(byNameE('Vila do Conde').pos,0,0,260,140,700,991,0.12,(o,bi)=>o<-300);town(byNameE('Póvoa de Varzim').pos,0,0,380,140,800,993,0.5,(o,bi)=>o<-420);town(FAM.pos,0,0,320,130,900,995,0.25,null)}
+  else{town(byNameE('Vila do Conde').pos,0,0,260,140,700,991,0.12,(o,bi)=>o<-300||(o>0&&o<110&&bi*SEG>km(26.35)&&bi*SEG<byNameE('Vila do Conde').pa));town(byNameE('Póvoa de Varzim').pos,0,0,380,140,800,993,0.5,(o,bi)=>o<-420);town(FAM.pos,0,0,320,130,900,995,0.25,null)}
   town(SB.pos+800,0,0,700,110,1500,777,0.45,null);
   // Torre dos Clérigos e igreja, ~0,8 km a sul da Trindade
   {const t=fr3(SB.pos);const cx=t.x-436-ox,cz=t.z+752-oz,by=t.y+4,gr=[1,1,1];
@@ -2964,7 +2977,7 @@ function custRender(){const P=custPlan();const el=$('#cList');el.innerHTML='';
     const cb=document.createElement('input');cb.type='checkbox';cb.checked=end||!!CU.sel[s.i];cb.disabled=end;cb.onchange=()=>{CU.sel[s.i]=cb.checked;custRender()};
     lb.append(cb,document.createTextNode(s.n+(s.ty==='ap'?' (apeadeiro)':'')));const b=document.createElement('b');b.textContent=P.t[s.i]!==undefined?fHM(P.t[s.i]):'—';lb.append(b);el.append(lb)});
   const d=P.t[P.z]-P.t[P.a];$('#cSum').textContent=(P.stops.length-2)+' paragens intermédias, chegada às '+fHM(P.t[P.z])+' ('+(d>=3600?Math.floor(d/3600)+' h '+fmt2(Math.round(d/60)%60):Math.round(d/60)+' min')+').'}
-{const f=$('#cFrom'),z=$('#cTo');for(const s of STN){f.add(new Option(s.n,s.i));z.add(new Option(s.n,s.i))}f.value=0;z.value=GUI.i;CU.sel={};for(const s of STN)CU.sel[s.i]=true;
+{const f=$('#cFrom'),z=$('#cTo');for(const s of STN){f.add(new Option(s.n,s.i));z.add(new Option(s.n,s.i))}f.value=0;z.value=RP?byNameE('Póvoa de Varzim').i:GUI.i;CU.sel={};for(const s of STN)CU.sel[s.i]=true;
  for(const e of[f,z,$('#cTime')])e.onchange=custRender;$('#cTime').oninput=custRender;
  $('#cAll').onclick=()=>{for(const s of STN)CU.sel[s.i]=true;custRender()};$('#cEst').onclick=()=>{for(const s of STN)CU.sel[s.i]=s.ty!=='ap';custRender()};$('#cNone').onclick=()=>{for(const s of STN)CU.sel[s.i]=false;custRender()};
  $('#bCustom').onclick=()=>{$('#ovStart').hidden=true;$('#ovCustom').hidden=false;custRender()};$('#cBack').onclick=()=>{$('#ovCustom').hidden=true;$('#ovStart').hidden=false};
