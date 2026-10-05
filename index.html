@@ -1164,10 +1164,10 @@ function step(dt,dr){
 // agulha do entroncamento de Lousado: na Linha da Póvoa fica a sul da estação, na de Guimarães do lado da Trofa
 const JSW=LSD?(RP?LSD.pos+260:LSD.pos-480):null;
 function swBtn(){if(!running||!S)return;if(!LSD){toast('Não há agulha de entroncamento nesta linha.','');return}
-  const past=RP?(!REV&&S.pos>JSW+S.ncar*15.6):(REV&&S.pos<JSW-S.ncar*15.6);
+  const past=RP?(!REV&&S.pos>JSW+TLEN(S.ncar)):(REV&&S.pos<JSW-TLEN(S.ncar));
   if(!past){toast('Agulha de Lousado: avance com a composição toda para lá da agulha ('+(RP?'para sul da estação':'do lado da Trofa')+') e pare.','');return}
   if(S.v>0.05){toast('Pare antes de mudar a agulha.','');return}
-  S.swJ=!S.swJ;beep(500,.12,.12,'square');toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+'. Inverta a marcha (R) e recue.':'Agulha reposta para a linha direta.','good')}
+  S.swJ=!S.swJ;S.swT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+'. Inverta a marcha (R) e recue.':'Agulha reposta para a linha direta.','good')}
 function xferLine(){const o={to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:RP?'Guimarães':'Porto-Trindade'};
   try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;setLine(o.to)}
 
@@ -1914,6 +1914,8 @@ function init3D(){
   atAlloc('cplogoB',256,150,(x,w,h)=>{x.fillStyle='rgb(206,30,36)';x.fillRect(0,0,w,h);x.strokeStyle='#121212';x.lineWidth=25;x.lineCap='round';x.lineJoin='round';
     x.beginPath();x.moveTo(120,26);x.lineTo(74,26);x.arc(74,62,36,-Math.PI/2,Math.PI/2,true);x.lineTo(120,98);x.stroke();
     x.beginPath();x.moveTo(150,26);x.lineTo(184,26);x.arc(184,62,36,-Math.PI/2,Math.PI/2,false);x.lineTo(150,98);x.moveTo(150,26);x.lineTo(150,134);x.stroke()});
+  atAlloc('swD',128,96,(x,w,h)=>{x.fillStyle='#f4f4f0';x.fillRect(0,0,w,h);x.fillStyle='#111';x.fillRect(w/2-10,8,20,h-16)});
+  atAlloc('swV',128,96,(x,w,h)=>{x.fillStyle='#f2c21b';x.fillRect(0,0,w,h);x.strokeStyle='#111';x.lineWidth=14;x.beginPath();x.moveTo(20,h-15);x.lineTo(w-28,22);x.stroke();x.fillStyle='#111';x.beginPath();x.moveTo(w-12,10);x.lineTo(w-52,18);x.lineTo(w-22,46);x.fill()});
   atTxt('uddP','UDD 9611','#f2c21b','#161616',200,44,30);
   atTxt('S','S','#fff','#111',64,64,52);atTxt('eaE','E','#f4f4f0','#111',64,64,54);atTxt('eaA','A','#f4f4f0','#111',64,64,54);atTxt('mabor','MABOR','#1a3a8a','#f4f4f0',320,56,48);atTxt('wtPV','PÓVOA','#111','#d6d8d6',300,64,52);atTxt('ud','U.D.','#f4f4f0','#111',96,56,40);for(const n of['1','2'])atTxt('lin'+n,'LINHA '+n,'#f4f4f0','#111',160,48,34);atTxt('n9611','9611','#d63a28','#f4f4f0',128,40,30);atTxt('n9611s','9611','#2a2a2a','rgb(214,215,212)',128,36,26);atAlloc('clock',128,128,(x,w,h)=>{x.fillStyle='#f6f3ea';x.beginPath();x.arc(64,64,60,0,7);x.fill();x.strokeStyle='#222';x.lineWidth=5;x.stroke();for(let k=0;k<12;k++){const a=k/12*6.283;x.fillStyle='#222';x.fillRect(64+Math.sin(a)*48-2,64-Math.cos(a)*48-5,4,10)}x.lineWidth=6;x.beginPath();x.moveTo(64,64);x.lineTo(64+34,64-8);x.moveTo(64,64);x.lineTo(60,20);x.stroke()});atStop();atDest('GUIMARÃES');for(const s of STN)atDest(s.n.toUpperCase());atDest('PORTO S. BENTO');atDest('LOUSADO');atTxt('cp','CP','#f4c318','#1a1a1a',128,64,50);
   ATEX=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,ATEX);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atC);gl.generateMipmap(gl.TEXTURE_2D);
@@ -3046,6 +3048,28 @@ function m4mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0
 /* ---- dinâmicos: luzes dos sinais, PN, passageiros ---- */
 let PAXT=0,PAXBUSY=false,ALIGHT=[],SMOKE=[],SMT=0,SMACC=0;
 function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
+  // agulha de Lousado: agulhas (lanças) que se deslocam e indicador de posição no chão, ao lado do aparelho de manobra
+  if(LSD&&Math.abs(JSW-centerP)<700){const dB=RG?1:-1,tg=S&&S.swJ?1:0;S.swA=S.swA===undefined?tg:S.swA;
+    const ts=S.swT?clamp((t-S.swT)/2.2,0,1):1;S.swA=tg?ts:1-ts;const a=S.swA;
+    const W=(p,x,y)=>{const i=clamp(Math.floor(p/SEG),0,TOTAL-1),f=p/SEG-i,A=PI(i,x,y),B=PI(i+1,x,y);return[A[0]+(B[0]-A[0])*f-eye[0],A[1]+(B[1]-A[1])*f,A[2]+(B[2]-A[2])*f-eye[2]]};
+    const bar=(p0,p1,x0,x1,y0,h,w,col)=>{const a0=W(p0,x0-w/2,y0),b0=W(p0,x0+w/2,y0),a1=W(p1,x1-w/2,y0),b1=W(p1,x1+w/2,y0);
+      mb.q(a0,b0,b1,a1,col,0);mb.q([a0[0],a0[1]+h,a0[2]],[b0[0],b0[1]+h,b0[2]],[b1[0],b1[1]+h,b1[2]],[a1[0],a1[1]+h,a1[2]],col,12);
+      mb.q(a0,a1,[a1[0],a1[1]+h,a1[2]],[a0[0],a0[1]+h,a0[2]],col,0);mb.q(b1,b0,[b0[0],b0[1]+h,b0[2]],[b1[0],b1[1]+h,b1[2]],col,0)};
+    const RC=cc(176,170,160),L=11;
+    // lanças: a da esquerda encosta ao carril de fora em via direta; na desviada encosta a da direita
+    const gap=0.11;const xl=-0.536+0.05+gap*a,xr=0.536-0.05-gap*(1-a);
+    bar(JSW,JSW+dB*L,xl,-0.536+0.04,0.18,0.18,0.07,RC);bar(JSW,JSW+dB*L,xr,0.536-0.04,0.18,0.18,0.07,RC);
+    // tirante e aparelho de manobra
+    bar(JSW-dB*0.4,JSW-dB*0.25,-2.4,0.6,0.18,0.08,0.15,cc(60,60,58));
+    const bx=W(JSW-dB*1,-2.9,0);boxRF(mb,[bx[0],0,bx[2]],[1,0,0],[0,0,1],0.6,1.0,bx[1]+0.18,bx[1]+0.75,cc(70,74,78),0);
+    // indicador no chão: poste com placa que roda 90º (branca com barra preta = direta; amarela com seta = desviada)
+    const ip=W(JSW-dB*2,-3.4,0),ang=a*Math.PI/2,Fd=FV(clamp(Math.floor(JSW/SEG),0,TOTAL-1)),Rd=[Fd[2],0,-Fd[0]];
+    boxRF(mb,[ip[0],0,ip[2]],[1,0,0],[0,0,1],0.08,0.08,ip[1],ip[1]+1.5,cc(40,40,40),0);
+    const n=norm(add(mulv(Rd,Math.cos(ang)),mulv(Fd,Math.sin(ang)*dB))),yC=ip[1]+1.75;
+    const plate=(nn,uv)=>{const c=add([ip[0],yC,ip[2]],mulv(nn,0.03));plateQ(mb,c,nn,0.6,0.45,uv,0.4,false)};
+    plate(n,ATL.swV);plate(mulv(n,-1),ATL.swV);const n2=[n[2],0,-n[0]];plate(n2,ATL.swD);plate(mulv(n2,-1),ATL.swD);
+    // lanterna da agulha, acesa à noite (branca na direta, amarela na desviada)
+    const lc=a>0.5?[1,0.8,0.2]:[1,1,0.95];boxRF(mb,[ip[0],0,ip[2]],[1,0,0],[0,0,1],0.16,0.16,yC+0.3,yC+0.5,lc,0,0,0,1)}
   for(const g of SIG){if(!g.w3||Math.abs(g.p-centerP)>1600)continue;const st=g.d===DIRC?sigState(g):(g.k==='exit'?'R':'G');
     const cols={G:[0.15,1,0.45],Y:[1,0.72,0.1],R:[1,0.12,0.08]},pos={G:2,Y:1,R:0};
     for(let k=0;k<3;k++){const on=pos[st]===k;const y=g.w3[1]+0.3+k*0.45,n=g.n3,r=[n[2],0,-n[0]];const c=[g.w3[0]-eye[0]+n[0]*0.02,y,g.w3[2]-eye[2]+n[2]*0.02];
