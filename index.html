@@ -1190,7 +1190,10 @@ function swBtn(){if(!running||!S)return;
   if(S.v>0.05){S.swJ=!S.swJ;toast('Pare antes de mudar a agulha.','');return}
   toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Inverta a marcha (R) e recue.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, inverta a marcha (R) e recue.'):'Agulha reposta para a linha direta.','good')}
 function xferLine(x){const fw=!!(x&&x.fw);const o={sh:x&&x.sh,fw,lsd:LSD&&LSD.pos,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(fw?'Póvoa de Varzim':RP?'Guimarães':'Porto-Trindade')};
-  try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;setLine(o.to)}
+  try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;
+  // liberta o 3D e o som antes de recarregar, para a página nova os conseguir obter (sobretudo nos telemóveis)
+  try{const x=gl&&gl.getExtension('WEBGL_lose_context');if(x)x.loseContext()}catch(e){}try{if(AC&&AC.state!=='closed')AC.close().catch(()=>{})}catch(e){}
+  setLine(o.to)}
 
 function updRev(){const b=$('#bRev');if(!b)return;b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
 function revBtn(){if(!running||!S)return;if(S.v>0.05){toast('Pare a automotora antes de mudar o inversor.','');return}if(S.notch>6){toast('Ponha o manípulo em 0 ou travão antes de mudar o inversor.','');return}
@@ -1687,6 +1690,10 @@ function hud(dtR){
 /* ================= 3D (WebGL2) ================= */
 const glc=$('#gl');let gl=null;
 try{gl=glc.getContext('webgl2',{antialias:true,powerPreference:'high-performance'})}catch(e){gl=null}
+// depois da mudança de linha a página recarrega: se o 3D ainda não estiver livre, tenta outra vez em vez de cair nos gráficos simples
+let RETRY=false;
+function glRetry(){try{if(sessionStorage.getItem('xfer')&&+(sessionStorage.getItem('glRetry')||0)<3){sessionStorage.setItem('glRetry',+(sessionStorage.getItem('glRetry')||0)+1);RETRY=true;setTimeout(()=>location.reload(),900);return true}}catch(e){}return false}
+if(!gl)glRetry();else try{sessionStorage.removeItem('glRetry')}catch(e){}
 const G3=!!gl;
 let camMode='cab';const orbit={yaw:0.55,pitch:0.22,dist:38};let sideCam=null;
 const CAMS=['cab','salao','chase','side','top'],CAMN={cab:'Cabina',salao:'Salão de passageiros',chase:'Exterior',side:'Junto à via',top:'Aérea'};
@@ -3419,9 +3426,11 @@ document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='h'||k=
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);
 reset(0,6,false);resize();
-if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);use3D=false;glc.style.display='none';const el=document.getElementById('err');el.style.display='block';el.textContent='3D indisponível, a usar gráficos simples: '+e.message}}else glc.style.display='none';setNotch(3,true);requestAnimationFrame(frame);
+if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);if(glRetry())throw e;use3D=false;glc.style.display='none';const el=document.getElementById('err');el.style.display='block';el.textContent='3D indisponível, a usar gráficos simples: '+e.message}}else glc.style.display='none';setNotch(3,true);requestAnimationFrame(frame);
 // chegada à outra linha depois da inversão em Lousado: continua o serviço, a hora e a pontuação
-{let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');sessionStorage.removeItem('xfer')}catch(e){}
+// o som só arranca com um toque: retoma-o ao primeiro toque ou tecla depois da mudança de linha
+['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,()=>{if(AC&&AC.state!=='running'&&AC.resume)AC.resume();else if(!AC&&running)audioInit()},{passive:true,capture:true}));
+if(!RETRY){let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');sessionStorage.removeItem('xfer')}catch(e){}
  if(o&&o.sh){PERIOD=o.period||PERIOD;updPeriod();const t={};t[0]=o.clock;FORCE_NC=o.ncar||2;start(0,STN.length-1,false,{t,free:true});
    S.free=o.free;S.pos=S.prevPos=o.pos;S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;S.sc=o.sc;S.maxPts=o.maxPts||0;S.endSt=STN[STN.length-1];
    for(const st of STN)st.served=true;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;setNotch&&setNotch(o.notch,true);
