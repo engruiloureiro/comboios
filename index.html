@@ -399,7 +399,7 @@ if(LSD){const P=LSD.pos,Rc=300;
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
 // via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
 let SIDE=[];
-const trackX=p=>{for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
+const trackX=p=>{if(S&&S.divJ&&p>JSW)return XTR[0].f(p);if(S&&S.divH&&p>JSH)return jshOff(p);for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=RP?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
@@ -1165,20 +1165,31 @@ function step(dt,dr){
   if(REV&&S.pos<=BUFFER_R+1){if(kmh>6){gameOver('O comboio embateu no para-choques da Trindade a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER_R+1;S.v=0}
   // recuo para a outra linha depois de mudar a agulha
   if(S.swJ&&S.back&&(RP?S.pos<JSW-12:S.pos>JSW+12))xferLine();
-  if(S.swH&&!REV&&!S.back&&S.prevPos<JSH+15&&S.pos>=JSH+15)xferLine({sh:true});
+  // via desviada em marcha à frente: a composição segue a curva da agulha e passa para a outra linha
+  if(LSD&&RG&&S.swJ&&!REV&&!S.back&&S.prevPos<JSW&&S.pos>=JSW)S.divJ=true;
+  if(S.divJ&&S.pos<JSW-1)S.divJ=false;
+  if(S.divJ&&S.pos>=JSW+200)xferLine({fw:true});
+  if(S.swH&&!REV&&!S.back&&S.prevPos<JSH&&S.pos>=JSH)S.divH=true;
+  if(S.divH&&S.pos<JSH-1)S.divH=false;
+  if(S.divH&&S.pos>=JSH+200)xferLine({sh:true});
 }
 // agulha do entroncamento de Lousado: na Linha da Póvoa fica a sul da estação, na de Guimarães do lado da Trofa
 const JSW=LSD?(RP?LSD.pos+260:LSD.pos-480):null;
 function swBtn(){if(!running||!S)return;
+  if(S.divJ||S.divH){toast('Não se muda a agulha com o comboio em cima dela.','');return}
   if(Math.abs(S.pos-JSH)<1500&&(!LSD||Math.abs(S.pos-JSH)<Math.abs(S.pos-JSW))){if(S.v>0.05&&Math.abs(S.pos-JSH)<60){toast('Não se muda a agulha com o comboio em cima dela.','');return}
     S.swH=!S.swH;S.swHT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);
     toast('Agulha da Senhora da Hora: '+(S.swH?'via desviada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa'):'via direta ('+(RP?'Linha da Póvoa':'Linha de Guimarães')+')')+'.','good');return}
   if(!LSD){toast('Não há agulha de entroncamento perto.','');return}
   const past=RP?(!REV&&S.pos>JSW+TLEN(S.ncar)):(REV&&S.pos<JSW-TLEN(S.ncar));
   if(Math.abs(S.pos-JSW)>1500){toast('A agulha de Lousado fica a '+Math.round(Math.abs(S.pos-JSW))+' m.','');return}
-  if(S.v>0.05){toast('Pare antes de mudar a agulha.','');return}
-  S.swJ=!S.swJ;S.swT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Inverta a marcha (R) e recue.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, inverta a marcha (R) e recue.'):'Agulha reposta para a linha direta.','good')}
-function xferLine(x){const o={sh:x&&x.sh,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(RP?'Guimarães':'Porto-Trindade')};
+  if(S.v>0.05&&Math.abs(S.pos-JSW)<60){toast('Não se muda a agulha com o comboio em cima dela.','');return}
+  const fw=RG&&!REV&&S.pos<JSW;
+  S.swJ=!S.swJ;S.swT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);
+  if(fw){toast(S.swJ?'Agulha de Lousado mudada para a Linha da Póvoa: siga em frente, a automotora toma a via desviada para Famalicão.':'Agulha reposta para a linha direta (Guimarães).','good');return}
+  if(S.v>0.05){S.swJ=!S.swJ;toast('Pare antes de mudar a agulha.','');return}
+  toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Inverta a marcha (R) e recue.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, inverta a marcha (R) e recue.'):'Agulha reposta para a linha direta.','good')}
+function xferLine(x){const fw=!!(x&&x.fw);const o={sh:x&&x.sh,fw,lsd:LSD&&LSD.pos,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(fw?'Póvoa de Varzim':RP?'Guimarães':'Porto-Trindade')};
   try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;setLine(o.to)}
 
 function updRev(){const b=$('#bRev');if(!b)return;b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
@@ -3417,10 +3428,13 @@ if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);use3D=fals
    setTimeout(()=>toast('Senhora da Hora: entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+'.','good'),1500)}
  else if(o&&LSD){PERIOD=o.period||PERIOD;updPeriod();const z=byNameE(o.end)||STN[RP?0:STN.length-1],rev=z.i<LSD.i;
   const route=STN.filter(s=>rev?s.i<=LSD.i&&s.i>=z.i:s.i>=LSD.i&&s.i<=z.i);if(rev)route.reverse();
-  FORCE_NC=o.ncar||2;setStops(FORCE_NC);const t={};let c=Math.ceil((o.clock+240)/60)*60;t[route[0].i]=c;
+  FORCE_NC=o.ncar||2;setStops(FORCE_NC);const t={};let c=o.fw?Math.round(o.clock):Math.ceil((o.clock+240)/60)*60;t[route[0].i]=c;
   for(let k=1;k<route.length;k++){const p=route[k-1],q=route[k];c+=Math.ceil((runMin(rev?p.stopR:p.stopF,rev?q.stopR:q.stopF)*1.14+45)/60)*60;if(k<route.length-1)c+=q.ty==='ap'?30:60;t[q.i]=c}
   FORCE_NC=o.ncar||2;start(LSD.i,z.i,rev,o.free?{t:{[LSD.i]:t[LSD.i]},free:true}:{t});S.free=o.free;S.back=false;updRev();S.sc=o.sc;S.maxPts+=o.maxPts||0;
-  setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Marcha em frente; partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
+  if(o.fw){S.pos=S.prevPos=LSD.pos+(o.lsd-o.pos);S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;LSD.served=true;
+   S.jI=0;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;setNotch&&setNotch(o.notch,true);
+   setTimeout(()=>toast('Lousado: entrou pela agulha na Linha da Póvoa, a caminho de Famalicão.','good'),1500)}
+  else setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Marcha em frente; partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
 window.__T={runMin:(a,b)=>runMin(a,b),get CP(){return CP},get HONKS(){return HONKS},SIG:()=>SIG.map(g=>({p:Math.round(g.p),d:g.d,k:g.k,s:sigState(g)})),xfer:()=>xferLine(),sw:()=>swBtn(),aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
 })();
 </script>
