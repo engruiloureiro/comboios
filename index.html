@@ -194,6 +194,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <div id="cList" role="group" aria-label="Paragens intermédias"></div>
     <p id="cSum" style="font-size:14px;color:#aab;margin:6px 0 0"></p>
     <button class="cta" id="cGo">Partir</button>
+    <button class="cta alt" id="cFree">Marcha sem serviço<small>Parte da estação de partida escolhida; sem paragens nem horário. O destino escolhe-se nas agulhas da Senhora da Hora e de Lousado (botão Agulha)</small></button>
     <button class="cta alt" id="cBack">Voltar ao menu</button>
   </div>
 </div>
@@ -1164,19 +1165,25 @@ function step(dt,dr){
   if(REV&&S.pos<=BUFFER_R+1){if(kmh>6){gameOver('O comboio embateu no para-choques da Trindade a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER_R+1;S.v=0}
   // recuo para a outra linha depois de mudar a agulha
   if(S.swJ&&S.back&&(RP?S.pos<JSW-12:S.pos>JSW+12))xferLine();
+  if(S.swH&&!REV&&!S.back&&S.prevPos<JSH+15&&S.pos>=JSH+15)xferLine({sh:true});
 }
 // agulha do entroncamento de Lousado: na Linha da Póvoa fica a sul da estação, na de Guimarães do lado da Trofa
 const JSW=LSD?(RP?LSD.pos+260:LSD.pos-480):null;
-function swBtn(){if(!running||!S)return;if(!LSD){toast('Não há agulha de entroncamento nesta linha.','');return}
+function swBtn(){if(!running||!S)return;
+  if(Math.abs(S.pos-JSH)<1500&&(!LSD||Math.abs(S.pos-JSH)<Math.abs(S.pos-JSW))){if(S.v>0.05&&Math.abs(S.pos-JSH)<60){toast('Não se muda a agulha com o comboio em cima dela.','');return}
+    S.swH=!S.swH;S.swHT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);
+    toast('Agulha da Senhora da Hora: '+(S.swH?'via desviada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa'):'via direta ('+(RP?'Linha da Póvoa':'Linha de Guimarães')+')')+'.','good');return}
+  if(!LSD){toast('Não há agulha de entroncamento perto.','');return}
   const past=RP?(!REV&&S.pos>JSW+TLEN(S.ncar)):(REV&&S.pos<JSW-TLEN(S.ncar));
   if(Math.abs(S.pos-JSW)>1500){toast('A agulha de Lousado fica a '+Math.round(Math.abs(S.pos-JSW))+' m.','');return}
   if(S.v>0.05){toast('Pare antes de mudar a agulha.','');return}
   S.swJ=!S.swJ;S.swT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Inverta a marcha (R) e recue.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, inverta a marcha (R) e recue.'):'Agulha reposta para a linha direta.','good')}
-function xferLine(){const o={to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(RP?'Guimarães':'Porto-Trindade')};
+function xferLine(x){const o={sh:x&&x.sh,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(RP?'Guimarães':'Porto-Trindade')};
   try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;setLine(o.to)}
 
 function updRev(){const b=$('#bRev');if(!b)return;b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
 function revBtn(){if(!running||!S)return;if(S.v>0.05){toast('Pare a automotora antes de mudar o inversor.','');return}if(S.notch>6){toast('Ponha o manípulo em 0 ou travão antes de mudar o inversor.','');return}
+  if(S.free&&(Math.abs(S.pos-BUFFER)<300||Math.abs(S.pos-BUFFER_R)<300||Math.abs(S.pos-GMR.pos)<300)){const d=REV?-1:1;REV=!REV;DIRC=REV?'R':'F';S.pos=S.prevPos=S.pos-d*TLEN(S.ncar);S.back=false;updRev();beep(300,.08,.1,'square');toast('Mudou de cabina: segue agora para '+(REV?'o Porto':'o outro extremo')+'.','good');return}
   S.back=!S.back;updRev();beep(300,.08,.1,'square');toast(S.back?'Inversor em marcha atrás. Limite de 30 km/h.':'Inversor em marcha à frente.','')}
 function doorBtn(){
   if(!running)return;
@@ -3053,8 +3060,7 @@ function m4mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0
 let PAXT=0,PAXBUSY=false,ALIGHT=[],SMOKE=[],SMT=0,SMACC=0;
 function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   // agulha de Lousado: agulhas (lanças) que se deslocam e indicador de posição no chão, ao lado do aparelho de manobra
-  if(LSD&&Math.abs(JSW-centerP)<700){const dB=RG?1:-1,tg=S&&S.swJ?1:0;S.swA=S.swA===undefined?tg:S.swA;
-    const ts=S.swT?clamp((t-S.swT)/2.2,0,1):1;S.swA=tg?ts:1-ts;const a=S.swA;
+  const swDraw=(JSW,dB,on,T0)=>{const ts=T0?clamp((t-T0)/2.2,0,1):1,a=on?ts:1-ts;
     const W=(p,x,y)=>{const i=clamp(Math.floor(p/SEG),0,TOTAL-1),f=p/SEG-i,A=PI(i,x,y),B=PI(i+1,x,y);return[A[0]+(B[0]-A[0])*f-eye[0],A[1]+(B[1]-A[1])*f,A[2]+(B[2]-A[2])*f-eye[2]]};
     const bar=(p0,p1,x0,x1,y0,h,w,col)=>{const a0=W(p0,x0-w/2,y0),b0=W(p0,x0+w/2,y0),a1=W(p1,x1-w/2,y0),b1=W(p1,x1+w/2,y0);
       mb.q(a0,b0,b1,a1,col,0);mb.q([a0[0],a0[1]+h,a0[2]],[b0[0],b0[1]+h,b0[2]],[b1[0],b1[1]+h,b1[2]],[a1[0],a1[1]+h,a1[2]],col,12);
@@ -3073,7 +3079,9 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
     const plate=(nn,uv)=>{const c=add([ip[0],yC,ip[2]],mulv(nn,0.03));plateQ(mb,c,nn,0.6,0.45,uv,0.4,false)};
     plate(n,ATL.swV);plate(mulv(n,-1),ATL.swV);const n2=[n[2],0,-n[0]];plate(n2,ATL.swD);plate(mulv(n2,-1),ATL.swD);
     // lanterna da agulha, acesa à noite (branca na direta, amarela na desviada)
-    const lc=a>0.5?[1,0.8,0.2]:[1,1,0.95];boxRF(mb,[ip[0],0,ip[2]],[1,0,0],[0,0,1],0.16,0.16,yC+0.3,yC+0.5,lc,0,0,0,1)}
+    const lc=a>0.5?[1,0.8,0.2]:[1,1,0.95];boxRF(mb,[ip[0],0,ip[2]],[1,0,0],[0,0,1],0.16,0.16,yC+0.3,yC+0.5,lc,0,0,0,1)};
+  if(LSD&&Math.abs(JSW-centerP)<700)swDraw(JSW,RG?1:-1,S&&S.swJ,S&&S.swT);
+  if(Math.abs(JSH-centerP)<700)swDraw(JSH,1,S&&S.swH,S&&S.swHT);
   for(const g of SIG){if(!g.w3||Math.abs(g.p-centerP)>1600)continue;const st=g.d===DIRC?sigState(g):(g.k==='exit'?'R':'G');
     const cols={G:[0.15,1,0.45],Y:[1,0.72,0.1],R:[1,0.12,0.08]},pos={G:2,Y:1,R:0};
     for(let k=0;k<3;k++){const on=pos[st]===k;const y=g.w3[1]+0.3+k*0.45,n=g.n3,r=[n[2],0,-n[0]];const c=[g.w3[0]-eye[0]+n[0]*0.02,y,g.w3[2]-eye[2]+n[2]*0.02];
@@ -3370,6 +3378,8 @@ function custRender(){const P=custPlan();const el=$('#cList');el.innerHTML='';
  for(const e of[f,z,$('#cTime')])e.onchange=custRender;$('#cTime').oninput=custRender;
  $('#cAll').onclick=()=>{for(const s of STN)CU.sel[s.i]=true;custRender()};$('#cEst').onclick=()=>{for(const s of STN)CU.sel[s.i]=s.ty!=='ap';custRender()};$('#cNone').onclick=()=>{for(const s of STN)CU.sel[s.i]=false;custRender()};
  $('#bCustom').onclick=()=>{$('#ovStart').hidden=true;$('#ovCustom').hidden=false;custRender()};$('#cBack').onclick=()=>{$('#ovCustom').hidden=true;$('#ovStart').hidden=false};
+ $('#cFree').onclick=()=>{const a=+$('#cFrom').value,[h,m]=($('#cTime').value||'17:00').split(':').map(Number),t={};t[a]=h*3600+m*60;
+   const rev=a===STN.length-1;$('#ovCustom').hidden=true;start(a,rev?0:STN.length-1,rev,{t,free:true});S.free=true;toast('Marcha sem serviço: sem paragens. Agulhas: Senhora da Hora (Póvoa/Guimarães) e Lousado. Nos topos da linha, parado, R muda de cabina.','good')};
  $('#cGo').onclick=()=>{const P=custPlan();if(P.a===P.z)return;$('#ovCustom').hidden=true;start(P.a,P.z,P.rev,{t:P.t})}}
 document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i);S.via=b.dataset.via||null;S.viaEnd=b.dataset.end||null});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
 $('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;$('#bSw').onclick=swBtn;
@@ -3401,11 +3411,15 @@ reset(0,6,false);resize();
 if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);use3D=false;glc.style.display='none';const el=document.getElementById('err');el.style.display='block';el.textContent='3D indisponível, a usar gráficos simples: '+e.message}}else glc.style.display='none';setNotch(3,true);requestAnimationFrame(frame);
 // chegada à outra linha depois da inversão em Lousado: continua o serviço, a hora e a pontuação
 {let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');sessionStorage.removeItem('xfer')}catch(e){}
- if(o&&LSD){PERIOD=o.period||PERIOD;updPeriod();const z=byNameE(o.end)||STN[RP?0:STN.length-1],rev=z.i<LSD.i;
+ if(o&&o.sh){PERIOD=o.period||PERIOD;updPeriod();const t={};t[0]=o.clock;FORCE_NC=o.ncar||2;start(0,STN.length-1,false,{t,free:true});
+   S.free=o.free;S.pos=S.prevPos=o.pos;S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;S.sc=o.sc;S.maxPts=o.maxPts||0;S.endSt=STN[STN.length-1];
+   for(const st of STN)st.served=true;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;setNotch&&setNotch(o.notch,true);
+   setTimeout(()=>toast('Senhora da Hora: entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+'.','good'),1500)}
+ else if(o&&LSD){PERIOD=o.period||PERIOD;updPeriod();const z=byNameE(o.end)||STN[RP?0:STN.length-1],rev=z.i<LSD.i;
   const route=STN.filter(s=>rev?s.i<=LSD.i&&s.i>=z.i:s.i>=LSD.i&&s.i<=z.i);if(rev)route.reverse();
   FORCE_NC=o.ncar||2;setStops(FORCE_NC);const t={};let c=Math.ceil((o.clock+240)/60)*60;t[route[0].i]=c;
   for(let k=1;k<route.length;k++){const p=route[k-1],q=route[k];c+=Math.ceil((runMin(rev?p.stopR:p.stopF,rev?q.stopR:q.stopF)*1.14+45)/60)*60;if(k<route.length-1)c+=q.ty==='ap'?30:60;t[q.i]=c}
-  FORCE_NC=o.ncar||2;start(LSD.i,z.i,rev,{t});S.back=false;updRev();S.sc=o.sc;S.maxPts+=o.maxPts||0;
+  FORCE_NC=o.ncar||2;start(LSD.i,z.i,rev,o.free?{t:{[LSD.i]:t[LSD.i]},free:true}:{t});S.free=o.free;S.back=false;updRev();S.sc=o.sc;S.maxPts+=o.maxPts||0;
   setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Marcha em frente; partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
 window.__T={runMin:(a,b)=>runMin(a,b),get CP(){return CP},get HONKS(){return HONKS},SIG:()=>SIG.map(g=>({p:Math.round(g.p),d:g.d,k:g.k,s:sigState(g)})),xfer:()=>xferLine(),sw:()=>swBtn(),aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
 })();
