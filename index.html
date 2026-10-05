@@ -2930,7 +2930,7 @@ function consistDraw(pf,sgn,xo,parts,eye,lit){let p=pf;
     drawM(TM[q.m],mdl(A,F,eye),q.ht&&lit?q.ht:[0,0]);if(q.bog)for(const d of q.bog)drawM(TM[q.bm||'bog'],mdl(add(A,mulv(F,-d)),F,eye),[0,0]);p=Bp-sgn*0.6}}
 // unidade dupla: a segunda unidade engata cabina com cabina (reboque à frente, motora atrás)
 function trainDraw(pf,sgn,xo,ht,eye,skipCab,nc,lb,od){nc=nc||NCAR;
-  if(CP.ok){const P=wp(pf,xo(pf),0);if(Math.hypot(P[0]-eye[0],P[2]-eye[2])<650){const pts=[];
+  if(CP.ok){const P=wp(pf,xo(pf),0);if(true){const pts=[];
     for(let k=0;k<nc;k++){const pc=pf-sgn*(k*CSP+CSP/2),rev=k%2?-1:1,first=k===0,last=k===nc-1;
       const h=first?[ht[0],ht[1]]:last?[ht[2],ht[3]]:[0,0];
       cpVehicle(pc,sgn,rev,xo,h,eye,lb,od&&(rev>0?od:[od[1],od[0]]),first&&skipCab===true);pts.push(wp(pc,xo(pc),CPH))}
@@ -3011,7 +3011,7 @@ function doorMats(id,f){const D=CP.AN[id],n=D.frames,fi=clamp(f,0,1)*(n-1),i0=Ma
 // matriz de modelo do motor (colunas R,U,F; a reflexão é a mesma de mdl) composta com uma matriz local
 function mdlM(A,F,eye,Lm){const B=mdl(A,F,eye);return Lm?new Float32Array(m4c(Array.from(B),Lm)):B}
 const CPGL=[];  // vidros a desenhar no fim, com transparência
-function cpDraw(prims,M,ht,livB){gl.uniformMatrix4fv(UL.uM,false,M);gl.uniform2f(UL.uHT,ht[0],ht[1]);
+function cpDraw(prims,M,ht,livB){livB=false;gl.uniformMatrix4fv(UL.uM,false,M);gl.uniform2f(UL.uHT,ht[0],ht[1]);
   for(const p of prims){if(p.glass){CPGL.push([p,M]);continue}
     gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,livB&&CP.livB&&p.tex===CP.livB.from?CP.livB.tex:CP.TX[p.tex]);
     gl.bindVertexArray(p.vao);gl.drawElements(gl.TRIANGLES,p.n,gl.UNSIGNED_INT,0)}}
@@ -3206,9 +3206,9 @@ function render3D(dtR){
   trainDraw(S.pos,dir,trackX,[1,0,0,1],eyeY,(camMode==='cab'&&!CP.ok)||(camMode==='salao'?'int':false),S.ncar,S.livB,window.__OD||cpDoorState());
   for(const t of TRAINS){if(Math.abs(t.a-S.pos)>1800)continue;const lit=t.lit;
     if(t.cons){const fwd=t.dir?t.dir>0:true;consistDraw(t.dir?(fwd?t.a+t.len:t.a):t.a+t.len,t.dir?(fwd?1:-1):1,t.xo||(()=>t.o),t.cons,eyeY,t.lit)}
-    else if(t.cross){const fwd=t.dir>0;if(t.lb===undefined)t.lb=true;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.len>50?4:2,t.lb)}
-    else if(t.mov){const fwd=t.dir>0;if(t.lb===undefined)t.lb=true;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false,t.len>50?4:2,t.lb)}
-    else{if(t.lb===undefined)t.lb=true;trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false,undefined,t.lb)}}
+    else if(t.cross){const fwd=t.dir>0;t.lb=false;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.len>50?4:2,t.lb)}
+    else if(t.mov){const fwd=t.dir>0;t.lb=false;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false,t.len>50?4:2,t.lb)}
+    else{t.lb=false;trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false,undefined,t.lb)}}
   cpGlass();
   gl.bindVertexArray(null);
   // sobreposição
@@ -3267,7 +3267,7 @@ function frame(now){
   if(use3D)render3D(dtR);else render();hud(dtR);audioUpdate(dtR);
   requestAnimationFrame(frame);
 }
-function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.livB=true;if(use3D){TDEST=S.endSt.n.toUpperCase();prs=4242;buildTrainMeshes()}S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
+function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.livB=false;if(use3D){TDEST=S.endSt.n.toUpperCase();prs=4242;buildTrainMeshes()}S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
   running=true;paused=false;$('#bWarp').textContent='Tempo ×1';
   const st=STN[idx];toast((S.ncar>2?'Unidade dupla 9600 (4 caixas)':'Automotora 9600')+' para '+S.endSt.n+'. Partida de '+st.n+' às '+fHM(st.dep)+'. Arranque depois do apito do chefe da estação.','');
   setTimeout(()=>say((S.semi?'Comboio semirrápido com destino a ':'Comboio urbano com destino a ')+S.endSt.n+(S.semi?', com paragem em '+STOPS.slice(1,-1).map(x=>x.n.replace('Porto ','')).join(', '):'')+'. Partida às '+fHM(st.dep).replace(':',' e ')+'.'),900)}
