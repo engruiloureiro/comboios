@@ -916,7 +916,7 @@ function bogies(gain){if(!AC||muted||S.v<0.5)return;const t0=AC.currentTime;
   ax.forEach((d,i)=>oneShot(A.clicks[(i+(Math.random()*3|0))%3],gain*sp*(i%2?0.85:1)*(0.9+Math.random()*0.2)*Math.exp(-d/30),t0+d/S.v,0.94+Math.random()*0.12,lp))}
 // buzina da automotora que se cruza connosco: amostra da buzina, um pouco mais grave e abafada pela distância
 let HONKS=0;
-function otherHorn(d){HONKS++;if(!AC||muted||!A.hornB)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=A.cp?A.cp.horn:A.hornB;s.playbackRate.value=0.93+rnd()*0.08;
+function otherHorn(d){HONKS++;if(!AC||muted||!A.hornB)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=A.cp?A.cp[['horn_hi','horn_lo','horn'][Math.floor(rnd()*3)]]:A.hornB;s.playbackRate.value=0.93+rnd()*0.08;
   const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=Math.max(900,4200-d*9);const g=AC.createGain(),L=0.9+rnd()*1.1,v=0.5*Math.min(1,90/Math.max(40,d));
   g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(v,t+0.06);g.gain.setValueAtTime(v,t+L);g.gain.exponentialRampToValueAtTime(0.001,t+L+0.35);
   s.connect(f);f.connect(g);g.connect(A.bus);g.connect(A.rev);s.start(t);s.stop(t+L+0.4)}
@@ -1026,7 +1026,7 @@ function audioUpdate(dtR){
   if(S.horn&&!S.hornT0)S.hornT0=performance.now();if(!S.horn)S.hornT0=0;const hd=S.hornT0?(performance.now()-S.hornT0)/1000:0;
   if(hd>0&&hd<0.12)for(const[o,f0]of A.hO)o.frequency.setTargetAtTime(f0*(0.965+hd*0.3),t,.02);else if(hd>=0.12)for(const[o,f0]of A.hO)o.frequency.setTargetAtTime(f0,t,.03);
   if(A.hornB){A.hH.gain.value=0;A.hL.gain.value=0;
-    if(S.horn&&on&&!A.hs){const s=AC.createBufferSource();s.buffer=A.hornB;s.loop=true;if(A.cpOK){s.loopStart=0.25;s.loopEnd=s.buffer.duration-0.05}else{s.loopStart=0.7;s.loopEnd=1.7}const g=AC.createGain();g.gain.value=0.75;s.connect(g);g.connect(A.bus);g.connect(A.rev);s.start();A.hs=[s,g]}
+    if(S.horn&&on&&!A.hs){const s=AC.createBufferSource();s.buffer=A.cp?A.cp[S.hornK||'horn_hi']:A.hornB;s.loop=true;if(A.cpOK){s.loopStart=S.hornK==='horn'?1.2:0.25;s.loopEnd=s.buffer.duration-0.05}else{s.loopStart=0.7;s.loopEnd=1.7}const g=AC.createGain();g.gain.value=0.75;s.connect(g);g.connect(A.bus);g.connect(A.rev);s.start();A.hs=[s,g]}
     if(A.hs&&(!S.horn||!on)){const[s,g]=A.hs;g.gain.setTargetAtTime(0,t,0.05);s.stop(t+0.4);A.hs=null}}
   else A.hg.gain.setTargetAtTime(S.horn&&on?0.13:0,t,hd<0.1?0.04:0.03);A.hH.gain.setTargetAtTime(hd<0.9?1:0,t,.02);A.hL.gain.setTargetAtTime(hd>=0.9?0.8:0,t,.02);
   if(A.cpOK)cpAudioUpd(dtA,on,inside);
@@ -3354,7 +3354,7 @@ $('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.'
 $('#bVig').onclick=()=>{if(!running)return;if(S.vigOn)beep(990,.08,.08);S.vigOn=false;S.vigT=50+rnd()*40};
 $('#bWarp').onclick=()=>{if(!S)return;S.warp=S.warp===1?2:S.warp===2?4:S.warp===4?8:1;$('#bWarp').textContent='Tempo ×'+S.warp};
 const hb=$('#bHorn');
-const hornOn=e=>{if(e)e.preventDefault();if(S&&running){S.horn=true;hb.classList.add('down')}};
+const hornOn=(e,k)=>{if(e)e.preventDefault();if(S&&running){S.hornK=k||'horn_hi';S.horn=true;hb.classList.add('down')}};
 const hornOff=()=>{if(S)S.horn=false;hb.classList.remove('down')};
 hb.addEventListener('pointerdown',hornOn);['pointerup','pointerleave','pointercancel'].forEach(ev=>hb.addEventListener(ev,hornOff));
 $('#bMute').onclick=()=>{muted=!muted;$('#bMute').textContent=muted?'🔇':'🔊';if(muted&&'speechSynthesis' in window)speechSynthesis.cancel();audioInit()};
@@ -3363,8 +3363,8 @@ $('#bPause').onclick=()=>setPause(!paused);$('#bResume').onclick=()=>setPause(fa
 document.addEventListener('keydown',e=>{if(!S)return;const k=e.key.toLowerCase();
   if(k==='arrowup'||k==='w'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='s'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='g')swBtn()});
-document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='h'||k===' ')hornOff()});
+  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='j')hornOn(e,'horn_lo');else if(k==='k')hornOn(e,'horn');else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='g')swBtn()});
+document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='h'||k===' '||k==='j'||k==='k')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);
 reset(0,6,false);resize();
