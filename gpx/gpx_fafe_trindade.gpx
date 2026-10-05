@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"
+     creator="ChatGPT - reconstrução histórica de referência"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>Fafe - Porto-Trindade (histórico)</name>
+    <desc>Reconstrução GPX de referência do eixo histórico Fafe–Porto-Trindade, baseada nas coordenadas documentadas de estações e apeadeiros. Os segmentos entre interfaces são linhas de ligação e NÃO representam ainda, curva a curva, a geometria exata da antiga via.</desc>
+    <time>2026-10-05T09:37:08.235035Z</time>
+  </metadata>
+  <wpt lat="41.4546694000" lon="-8.1710694000">
+    <name>Fafe</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4373028000" lon="-8.2037500000">
+    <name>Cepães</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4142889000" lon="-8.2202194000">
+    <name>Fareja</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4390639000" lon="-8.2475611000">
+    <name>Paçô Vieira</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4511694000" lon="-8.2608389000">
+    <name>Penha</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4566500000" lon="-8.2664900000">
+    <name>Aldão-São Torcato</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4352917000" lon="-8.2950583000">
+    <name>Guimarães</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4215700000" lon="-8.3008200000">
+    <name>Covas</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4031400000" lon="-8.3195300000">
+    <name>Nespereira</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3791400000" lon="-8.3124000000">
+    <name>Vizela</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3774100000" lon="-8.3241100000">
+    <name>Pereirinhas</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3764700000" lon="-8.3418800000">
+    <name>Cuca</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3655300000" lon="-8.3635500000">
+    <name>Lordelo</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3679000000" lon="-8.3824900000">
+    <name>Atainde</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3646900000" lon="-8.3881400000">
+    <name>Giesteira</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3575300000" lon="-8.4061300000">
+    <name>Vila das Aves</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3635222000" lon="-8.4379722000">
+    <name>Caniços</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3506800000" lon="-8.4730600000">
+    <name>Santo Tirso</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3509100000" lon="-8.5266300000">
+    <name>Lousado</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3395100000" lon="-8.5542000000">
+    <name>Trofa</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3228300000" lon="-8.5693200000">
+    <name>Bougado</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3063417000" lon="-8.5861806000">
+    <name>Alvarelhos</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2964900000" lon="-8.6005300000">
+    <name>Muro</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2627389000" lon="-8.6169972000">
+    <name>Castêlo da Maia</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2515639000" lon="-8.6276694000">
+    <name>Mandim</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2329600000" lon="-8.6344400000">
+    <name>Maia</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2168600000" lon="-8.6410300000">
+    <name>Araújo</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2133194000" lon="-8.6408167000">
+    <name>Esposado</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1870300000" lon="-8.6543900000">
+    <name>Senhora da Hora</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1775500000" lon="-8.6468278000">
+    <name>Circunvalação</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1730333000" lon="-8.6418611000">
+    <name>Ramalde</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1658528000" lon="-8.6367750000">
+    <name>Francos</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1590600000" lon="-8.6293800000">
+    <name>Porto-Boavista</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1607028000" lon="-8.6288694000">
+    <name>Avenida da França</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1514167000" lon="-8.6089667000">
+    <name>Porto-Trindade</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <rte>
+    <name>Fafe - Porto-Trindade (histórico)</name>
+    <rtept lat="41.4546694000" lon="-8.1710694000"><name>Fafe</name></rtept>
+    <rtept lat="41.4373028000" lon="-8.2037500000"><name>Cepães</name></rtept>
+    <rtept lat="41.4142889000" lon="-8.2202194000"><name>Fareja</name></rtept>
+    <rtept lat="41.4390639000" lon="-8.2475611000"><name>Paçô Vieira</name></rtept>
+    <rtept lat="41.4511694000" lon="-8.2608389000"><name>Penha</name></rtept>
+    <rtept lat="41.4566500000" lon="-8.2664900000"><name>Aldão-São Torcato</name></rtept>
+    <rtept lat="41.4352917000" lon="-8.2950583000"><name>Guimarães</name></rtept>
+    <rtept lat="41.4215700000" lon="-8.3008200000"><name>Covas</name></rtept>
+    <rtept lat="41.4031400000" lon="-8.3195300000"><name>Nespereira</name></rtept>
+    <rtept lat="41.3791400000" lon="-8.3124000000"><name>Vizela</name></rtept>
+    <rtept lat="41.3774100000" lon="-8.3241100000"><name>Pereirinhas</name></rtept>
+    <rtept lat="41.3764700000" lon="-8.3418800000"><name>Cuca</name></rtept>
+    <rtept lat="41.3655300000" lon="-8.3635500000"><name>Lordelo</name></rtept>
+    <rtept lat="41.3679000000" lon="-8.3824900000"><name>Atainde</name></rtept>
+    <rtept lat="41.3646900000" lon="-8.3881400000"><name>Giesteira</name></rtept>
+    <rtept lat="41.3575300000" lon="-8.4061300000"><name>Vila das Aves</name></rtept>
+    <rtept lat="41.3635222000" lon="-8.4379722000"><name>Caniços</name></rtept>
+    <rtept lat="41.3506800000" lon="-8.4730600000"><name>Santo Tirso</name></rtept>
+    <rtept lat="41.3509100000" lon="-8.5266300000"><name>Lousado</name></rtept>
+    <rtept lat="41.3395100000" lon="-8.5542000000"><name>Trofa</name></rtept>
+    <rtept lat="41.3228300000" lon="-8.5693200000"><name>Bougado</name></rtept>
+    <rtept lat="41.3063417000" lon="-8.5861806000"><name>Alvarelhos</name></rtept>
+    <rtept lat="41.2964900000" lon="-8.6005300000"><name>Muro</name></rtept>
+    <rtept lat="41.2627389000" lon="-8.6169972000"><name>Castêlo da Maia</name></rtept>
+    <rtept lat="41.2515639000" lon="-8.6276694000"><name>Mandim</name></rtept>
+    <rtept lat="41.2329600000" lon="-8.6344400000"><name>Maia</name></rtept>
+    <rtept lat="41.2168600000" lon="-8.6410300000"><name>Araújo</name></rtept>
+    <rtept lat="41.2133194000" lon="-8.6408167000"><name>Esposado</name></rtept>
+    <rtept lat="41.1870300000" lon="-8.6543900000"><name>Senhora da Hora</name></rtept>
+    <rtept lat="41.1775500000" lon="-8.6468278000"><name>Circunvalação</name></rtept>
+    <rtept lat="41.1730333000" lon="-8.6418611000"><name>Ramalde</name></rtept>
+    <rtept lat="41.1658528000" lon="-8.6367750000"><name>Francos</name></rtept>
+    <rtept lat="41.1590600000" lon="-8.6293800000"><name>Porto-Boavista</name></rtept>
+    <rtept lat="41.1607028000" lon="-8.6288694000"><name>Avenida da França</name></rtept>
+    <rtept lat="41.1514167000" lon="-8.6089667000"><name>Porto-Trindade</name></rtept>
+  </rte>
+  <trk>
+    <name>Fafe - Porto-Trindade (histórico)</name>
+    <type>Linha ferroviária histórica - referência</type>
+    <trkseg>
+      <trkpt lat="41.4546694000" lon="-8.1710694000"><name>Fafe</name></trkpt>
+      <trkpt lat="41.4373028000" lon="-8.2037500000"><name>Cepães</name></trkpt>
+      <trkpt lat="41.4142889000" lon="-8.2202194000"><name>Fareja</name></trkpt>
+      <trkpt lat="41.4390639000" lon="-8.2475611000"><name>Paçô Vieira</name></trkpt>
+      <trkpt lat="41.4511694000" lon="-8.2608389000"><name>Penha</name></trkpt>
+      <trkpt lat="41.4566500000" lon="-8.2664900000"><name>Aldão-São Torcato</name></trkpt>
+      <trkpt lat="41.4352917000" lon="-8.2950583000"><name>Guimarães</name></trkpt>
+      <trkpt lat="41.4215700000" lon="-8.3008200000"><name>Covas</name></trkpt>
+      <trkpt lat="41.4031400000" lon="-8.3195300000"><name>Nespereira</name></trkpt>
+      <trkpt lat="41.3791400000" lon="-8.3124000000"><name>Vizela</name></trkpt>
+      <trkpt lat="41.3774100000" lon="-8.3241100000"><name>Pereirinhas</name></trkpt>
+      <trkpt lat="41.3764700000" lon="-8.3418800000"><name>Cuca</name></trkpt>
+      <trkpt lat="41.3655300000" lon="-8.3635500000"><name>Lordelo</name></trkpt>
+      <trkpt lat="41.3679000000" lon="-8.3824900000"><name>Atainde</name></trkpt>
+      <trkpt lat="41.3646900000" lon="-8.3881400000"><name>Giesteira</name></trkpt>
+      <trkpt lat="41.3575300000" lon="-8.4061300000"><name>Vila das Aves</name></trkpt>
+      <trkpt lat="41.3635222000" lon="-8.4379722000"><name>Caniços</name></trkpt>
+      <trkpt lat="41.3506800000" lon="-8.4730600000"><name>Santo Tirso</name></trkpt>
+      <trkpt lat="41.3509100000" lon="-8.5266300000"><name>Lousado</name></trkpt>
+      <trkpt lat="41.3395100000" lon="-8.5542000000"><name>Trofa</name></trkpt>
+      <trkpt lat="41.3228300000" lon="-8.5693200000"><name>Bougado</name></trkpt>
+      <trkpt lat="41.3063417000" lon="-8.5861806000"><name>Alvarelhos</name></trkpt>
+      <trkpt lat="41.2964900000" lon="-8.6005300000"><name>Muro</name></trkpt>
+      <trkpt lat="41.2627389000" lon="-8.6169972000"><name>Castêlo da Maia</name></trkpt>
+      <trkpt lat="41.2515639000" lon="-8.6276694000"><name>Mandim</name></trkpt>
+      <trkpt lat="41.2329600000" lon="-8.6344400000"><name>Maia</name></trkpt>
+      <trkpt lat="41.2168600000" lon="-8.6410300000"><name>Araújo</name></trkpt>
+      <trkpt lat="41.2133194000" lon="-8.6408167000"><name>Esposado</name></trkpt>
+      <trkpt lat="41.1870300000" lon="-8.6543900000"><name>Senhora da Hora</name></trkpt>
+      <trkpt lat="41.1775500000" lon="-8.6468278000"><name>Circunvalação</name></trkpt>
+      <trkpt lat="41.1730333000" lon="-8.6418611000"><name>Ramalde</name></trkpt>
+      <trkpt lat="41.1658528000" lon="-8.6367750000"><name>Francos</name></trkpt>
+      <trkpt lat="41.1590600000" lon="-8.6293800000"><name>Porto-Boavista</name></trkpt>
+      <trkpt lat="41.1607028000" lon="-8.6288694000"><name>Avenida da França</name></trkpt>
+      <trkpt lat="41.1514167000" lon="-8.6089667000"><name>Porto-Trindade</name></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

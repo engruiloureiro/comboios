@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"
+     creator="ChatGPT - reconstrução histórica de referência"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>Porto-Trindade - Póvoa - Famalicão (histórico)</name>
+    <desc>Reconstrução GPX de referência do eixo histórico Porto-Trindade–Póvoa de Varzim–Famalicão, baseada nas coordenadas documentadas de estações e apeadeiros. Os segmentos entre interfaces são linhas de ligação e NÃO representam ainda, curva a curva, a geometria exata da antiga via.</desc>
+    <time>2026-10-05T09:37:08.235461Z</time>
+  </metadata>
+  <wpt lat="41.1514167000" lon="-8.6089667000">
+    <name>Porto-Trindade</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1607028000" lon="-8.6288694000">
+    <name>Avenida da França</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1590600000" lon="-8.6293800000">
+    <name>Porto-Boavista</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1658528000" lon="-8.6367750000">
+    <name>Francos</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1730333000" lon="-8.6418611000">
+    <name>Ramalde</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1775500000" lon="-8.6468278000">
+    <name>Circunvalação</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.1870300000" lon="-8.6543900000">
+    <name>Senhora da Hora</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2009611111" lon="-8.6553361111">
+    <name>Custóias</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2122000000" lon="-8.6549527778">
+    <name>Santa Cruz</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2331888889" lon="-8.6566666667">
+    <name>Crestins</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2471472222" lon="-8.6622638889">
+    <name>Pedras Rubras</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2706222222" lon="-8.6798611111">
+    <name>Vilar do Pinheiro</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2832222222" lon="-8.6919305556">
+    <name>Modivas</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.2941805556" lon="-8.6995777778">
+    <name>Vila Chã</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3148833333" lon="-8.7140333333">
+    <name>Mindelo</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3401000000" lon="-8.7254055556">
+    <name>Azurara-Árvore</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3536972222" lon="-8.7354916667">
+    <name>Vila do Conde</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.3779400000" lon="-8.7583200000">
+    <name>Póvoa de Varzim</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4002250000" lon="-8.7446222222">
+    <name>Pisão</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4067833333" lon="-8.7421583333">
+    <name>Amorim</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4379222222" lon="-8.7281416667">
+    <name>São Félix</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4471305556" lon="-8.7223916667">
+    <name>Laundos</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4230555556" lon="-8.6735472222">
+    <name>Rates</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4153972222" lon="-8.6513888889">
+    <name>Fontainhas</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4106722222" lon="-8.6361027778">
+    <name>Balazar</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4196444444" lon="-8.6044666667">
+    <name>Gondifelos</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4199666667" lon="-8.5783916667">
+    <name>Cavalões</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4170194444" lon="-8.5605805556">
+    <name>Outiz</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4207805556" lon="-8.5358916667">
+    <name>Barradas</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <wpt lat="41.4054400000" lon="-8.5294000000">
+    <name>Famalicão</name>
+    <type>Interface ferroviária histórica</type>
+  </wpt>
+  <rte>
+    <name>Porto-Trindade - Póvoa - Famalicão (histórico)</name>
+    <rtept lat="41.1514167000" lon="-8.6089667000"><name>Porto-Trindade</name></rtept>
+    <rtept lat="41.1607028000" lon="-8.6288694000"><name>Avenida da França</name></rtept>
+    <rtept lat="41.1590600000" lon="-8.6293800000"><name>Porto-Boavista</name></rtept>
+    <rtept lat="41.1658528000" lon="-8.6367750000"><name>Francos</name></rtept>
+    <rtept lat="41.1730333000" lon="-8.6418611000"><name>Ramalde</name></rtept>
+    <rtept lat="41.1775500000" lon="-8.6468278000"><name>Circunvalação</name></rtept>
+    <rtept lat="41.1870300000" lon="-8.6543900000"><name>Senhora da Hora</name></rtept>
+    <rtept lat="41.2009611111" lon="-8.6553361111"><name>Custóias</name></rtept>
+    <rtept lat="41.2122000000" lon="-8.6549527778"><name>Santa Cruz</name></rtept>
+    <rtept lat="41.2331888889" lon="-8.6566666667"><name>Crestins</name></rtept>
+    <rtept lat="41.2471472222" lon="-8.6622638889"><name>Pedras Rubras</name></rtept>
+    <rtept lat="41.2706222222" lon="-8.6798611111"><name>Vilar do Pinheiro</name></rtept>
+    <rtept lat="41.2832222222" lon="-8.6919305556"><name>Modivas</name></rtept>
+    <rtept lat="41.2941805556" lon="-8.6995777778"><name>Vila Chã</name></rtept>
+    <rtept lat="41.3148833333" lon="-8.7140333333"><name>Mindelo</name></rtept>
+    <rtept lat="41.3401000000" lon="-8.7254055556"><name>Azurara-Árvore</name></rtept>
+    <rtept lat="41.3536972222" lon="-8.7354916667"><name>Vila do Conde</name></rtept>
+    <rtept lat="41.3779400000" lon="-8.7583200000"><name>Póvoa de Varzim</name></rtept>
+    <rtept lat="41.4002250000" lon="-8.7446222222"><name>Pisão</name></rtept>
+    <rtept lat="41.4067833333" lon="-8.7421583333"><name>Amorim</name></rtept>
+    <rtept lat="41.4379222222" lon="-8.7281416667"><name>São Félix</name></rtept>
+    <rtept lat="41.4471305556" lon="-8.7223916667"><name>Laundos</name></rtept>
+    <rtept lat="41.4230555556" lon="-8.6735472222"><name>Rates</name></rtept>
+    <rtept lat="41.4153972222" lon="-8.6513888889"><name>Fontainhas</name></rtept>
+    <rtept lat="41.4106722222" lon="-8.6361027778"><name>Balazar</name></rtept>
+    <rtept lat="41.4196444444" lon="-8.6044666667"><name>Gondifelos</name></rtept>
+    <rtept lat="41.4199666667" lon="-8.5783916667"><name>Cavalões</name></rtept>
+    <rtept lat="41.4170194444" lon="-8.5605805556"><name>Outiz</name></rtept>
+    <rtept lat="41.4207805556" lon="-8.5358916667"><name>Barradas</name></rtept>
+    <rtept lat="41.4054400000" lon="-8.5294000000"><name>Famalicão</name></rtept>
+  </rte>
+  <trk>
+    <name>Porto-Trindade - Póvoa - Famalicão (histórico)</name>
+    <type>Linha ferroviária histórica - referência</type>
+    <trkseg>
+      <trkpt lat="41.1514167000" lon="-8.6089667000"><name>Porto-Trindade</name></trkpt>
+      <trkpt lat="41.1607028000" lon="-8.6288694000"><name>Avenida da França</name></trkpt>
+      <trkpt lat="41.1590600000" lon="-8.6293800000"><name>Porto-Boavista</name></trkpt>
+      <trkpt lat="41.1658528000" lon="-8.6367750000"><name>Francos</name></trkpt>
+      <trkpt lat="41.1730333000" lon="-8.6418611000"><name>Ramalde</name></trkpt>
+      <trkpt lat="41.1775500000" lon="-8.6468278000"><name>Circunvalação</name></trkpt>
+      <trkpt lat="41.1870300000" lon="-8.6543900000"><name>Senhora da Hora</name></trkpt>
+      <trkpt lat="41.2009611111" lon="-8.6553361111"><name>Custóias</name></trkpt>
+      <trkpt lat="41.2122000000" lon="-8.6549527778"><name>Santa Cruz</name></trkpt>
+      <trkpt lat="41.2331888889" lon="-8.6566666667"><name>Crestins</name></trkpt>
+      <trkpt lat="41.2471472222" lon="-8.6622638889"><name>Pedras Rubras</name></trkpt>
+      <trkpt lat="41.2706222222" lon="-8.6798611111"><name>Vilar do Pinheiro</name></trkpt>
+      <trkpt lat="41.2832222222" lon="-8.6919305556"><name>Modivas</name></trkpt>
+      <trkpt lat="41.2941805556" lon="-8.6995777778"><name>Vila Chã</name></trkpt>
+      <trkpt lat="41.3148833333" lon="-8.7140333333"><name>Mindelo</name></trkpt>
+      <trkpt lat="41.3401000000" lon="-8.7254055556"><name>Azurara-Árvore</name></trkpt>
+      <trkpt lat="41.3536972222" lon="-8.7354916667"><name>Vila do Conde</name></trkpt>
+      <trkpt lat="41.3779400000" lon="-8.7583200000"><name>Póvoa de Varzim</name></trkpt>
+      <trkpt lat="41.4002250000" lon="-8.7446222222"><name>Pisão</name></trkpt>
+      <trkpt lat="41.4067833333" lon="-8.7421583333"><name>Amorim</name></trkpt>
+      <trkpt lat="41.4379222222" lon="-8.7281416667"><name>São Félix</name></trkpt>
+      <trkpt lat="41.4471305556" lon="-8.7223916667"><name>Laundos</name></trkpt>
+      <trkpt lat="41.4230555556" lon="-8.6735472222"><name>Rates</name></trkpt>
+      <trkpt lat="41.4153972222" lon="-8.6513888889"><name>Fontainhas</name></trkpt>
+      <trkpt lat="41.4106722222" lon="-8.6361027778"><name>Balazar</name></trkpt>
+      <trkpt lat="41.4196444444" lon="-8.6044666667"><name>Gondifelos</name></trkpt>
+      <trkpt lat="41.4199666667" lon="-8.5783916667"><name>Cavalões</name></trkpt>
+      <trkpt lat="41.4170194444" lon="-8.5605805556"><name>Outiz</name></trkpt>
+      <trkpt lat="41.4207805556" lon="-8.5358916667"><name>Barradas</name></trkpt>
+      <trkpt lat="41.4054400000" lon="-8.5294000000"><name>Famalicão</name></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
