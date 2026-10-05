@@ -2970,7 +2970,9 @@ async function loadCP(){
       const D=x.getImageData(0,0,c.width,c.height),d=D.data;
       for(let k=0;k<d.length;k+=4){const r=d[k],g=d[k+1],b=d[k+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);
         if(r>120&&r-g>60&&r-b>60){const l=r/185;d[k]=Math.min(255,241*l);d[k+1]=Math.min(255,234*l);d[k+2]=Math.min(255,214*l)}        // vermelho -> creme
-        else if(mx>140&&mx-mn<26){const l=mx/190;d[k]=Math.min(255,196*l);d[k+1]=Math.min(255,30*l);d[k+2]=Math.min(255,38*l)}}      // cinzento -> vermelho
+        else if(mx>140&&mx-mn<26){const l=mx/190;d[k]=Math.min(255,222*l);d[k+1]=Math.min(255,32*l);d[k+2]=Math.min(255,38*l)}}      // cinzento -> vermelho
+      // logótipo cp a preto (na textura original é vermelho sobre o cinzento, logo passou a creme)
+      {const W=c.width,sc=W/2000;for(let y=Math.round(1150*sc);y<Math.round(1215*sc);y++)for(let xx=Math.round(195*sc);xx<Math.round(295*sc);xx++){const k=(y*W+xx)*4;if(d[k+1]>150){d[k]=d[k+1]=d[k+2]=24}}}
       x.putImageData(D,0,0);CP.livB={from:mi,tex:mk(c)}}}
     const texOf=p=>{const m=G.materials[p.material];return m.pbrMetallicRoughness.baseColorTexture.index};
     const isGlass=p=>/Glass/.test(G.materials[p.material].name),glow=p=>/Glow/.test(G.materials[p.material].name);
@@ -3204,9 +3206,9 @@ function render3D(dtR){
   trainDraw(S.pos,dir,trackX,[1,0,0,1],eyeY,(camMode==='cab'&&!CP.ok)||(camMode==='salao'?'int':false),S.ncar,S.livB,window.__OD||cpDoorState());
   for(const t of TRAINS){if(Math.abs(t.a-S.pos)>1800)continue;const lit=t.lit;
     if(t.cons){const fwd=t.dir?t.dir>0:true;consistDraw(t.dir?(fwd?t.a+t.len:t.a):t.a+t.len,t.dir?(fwd?1:-1):1,t.xo||(()=>t.o),t.cons,eyeY,t.lit)}
-    else if(t.cross){const fwd=t.dir>0;if(t.lb===undefined)t.lb=rnd()<0.5;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.len>50?4:2,t.lb)}
-    else if(t.mov){const fwd=t.dir>0;if(t.lb===undefined)t.lb=rnd()<0.5;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false,t.len>50?4:2,t.lb)}
-    else{if(t.lb===undefined)t.lb=rnd()<0.5;trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false,undefined,t.lb)}}
+    else if(t.cross){const fwd=t.dir>0;if(t.lb===undefined)t.lb=true;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.len>50?4:2,t.lb)}
+    else if(t.mov){const fwd=t.dir>0;if(t.lb===undefined)t.lb=true;trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false,t.len>50?4:2,t.lb)}
+    else{if(t.lb===undefined)t.lb=true;trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false,undefined,t.lb)}}
   cpGlass();
   gl.bindVertexArray(null);
   // sobreposição
@@ -3265,7 +3267,7 @@ function frame(now){
   if(use3D)render3D(dtR);else render();hud(dtR);audioUpdate(dtR);
   requestAnimationFrame(frame);
 }
-function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.livB=Math.random()<0.5;if(use3D){TDEST=S.endSt.n.toUpperCase();prs=4242;buildTrainMeshes()}S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
+function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.livB=true;if(use3D){TDEST=S.endSt.n.toUpperCase();prs=4242;buildTrainMeshes()}S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
   running=true;paused=false;$('#bWarp').textContent='Tempo ×1';
   const st=STN[idx];toast((S.ncar>2?'Unidade dupla 9600 (4 caixas)':'Automotora 9600')+' para '+S.endSt.n+'. Partida de '+st.n+' às '+fHM(st.dep)+'. Arranque depois do apito do chefe da estação.','');
   setTimeout(()=>say((S.semi?'Comboio semirrápido com destino a ':'Comboio urbano com destino a ')+S.endSt.n+(S.semi?', com paragem em '+STOPS.slice(1,-1).map(x=>x.n.replace('Porto ','')).join(', '):'')+'. Partida às '+fHM(st.dep).replace(':',' e ')+'.'),900)}
