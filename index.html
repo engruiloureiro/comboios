@@ -2930,7 +2930,8 @@ function consistDraw(pf,sgn,xo,parts,eye,lit){let p=pf;
     drawM(TM[q.m],mdl(A,F,eye),q.ht&&lit?q.ht:[0,0]);if(q.bog)for(const d of q.bog)drawM(TM[q.bm||'bog'],mdl(add(A,mulv(F,-d)),F,eye),[0,0]);p=Bp-sgn*0.6}}
 // unidade dupla: a segunda unidade engata cabina com cabina (reboque à frente, motora atrás)
 function trainDraw(pf,sgn,xo,ht,eye,skipCab,nc,lb,od){nc=nc||NCAR;
-  if(CP.ok){const P=wp(pf,xo(pf),0);if(true){const pts=[];
+  if(!CP.ok)return[];   // só o modelo do pacote CP_9600_RW; enquanto não carrega, não se desenha nada
+  {const P=wp(pf,xo(pf),0);if(true){const pts=[];
     for(let k=0;k<nc;k++){const pc=pf-sgn*(k*CSP+CSP/2),rev=k%2?-1:1,first=k===0,last=k===nc-1;
       const h=first?[ht[0],ht[1]]:last?[ht[2],ht[3]]:[0,0];
       cpVehicle(pc,sgn,rev,xo,h,eye,lb,od&&(rev>0?od:[od[1],od[0]]),first&&skipCab===true);pts.push(wp(pc,xo(pc),CPH))}
