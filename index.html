@@ -170,6 +170,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <div class="per" id="uniSel" role="radiogroup" aria-label="Composição"><span>Composição:</span><button data-u="1" class="on">Simples</button><button data-u="2">Dupla</button><button data-u="0">Ao acaso</button></div>
     <div class="per" id="perSel" role="radiogroup" aria-label="Hora da viagem"><span>Hora da viagem:</span><button data-p="dia">Dia</button><button data-p="tarde" class="on">Fim de tarde</button><button data-p="noite">Noite</button></div>
     <button class="cta" id="bLoad" hidden style="background:#4d5a3a">Continuar o jogo guardado<small id="loadInfo"></small></button>
+    <button class="cta" id="bLoadF" style="background:#3f4d5a">Abrir jogo guardado em ficheiro<small>Escolha o ficheiro .json que guardou</small></button><input type="file" id="fLoad" accept=".json,application/json" hidden>
     <div class="startgrid">
     <button class="cta" id="bStart4" style="background:#a8431c" data-r="Porto-Trindade>Guimarães">Porto-Trindade → Guimarães<small></small></button>
     <button class="cta" id="bStart5" style="background:#7a3a1c" data-r="Guimarães>Porto-Trindade">Guimarães → Porto-Trindade<small></small></button>
@@ -199,7 +200,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
   </div>
 </div>
 <div class="ov" id="ovPause" hidden>
-  <div class="panel"><div class="azulejo">Em pausa</div><button class="cta" id="bResume">Continuar</button><button class="cta alt" id="bSave">Guardar o jogo<small id="saveInfo">Guarda neste aparelho e continua mais tarde</small></button><button class="cta alt" id="bMenu">Sair para o menu</button></div>
+  <div class="panel"><div class="azulejo">Em pausa</div><button class="cta" id="bResume">Continuar</button><button class="cta alt" id="bSave">Guardar o jogo<small id="saveInfo">Guarda neste aparelho e continua mais tarde</small></button><button class="cta alt" id="bSaveF">Guardar em ficheiro<small>Descarrega um ficheiro .json com o ponto onde está</small></button><button class="cta alt" id="bMenu">Sair para o menu</button></div>
 </div>
 <div class="ov" id="ovEnd" hidden>
   <div class="panel">
@@ -3347,20 +3348,42 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
   document.querySelectorAll('#perSel button').forEach(b=>{b.classList.toggle('on',b.dataset.p===PERIOD);b.setAttribute('aria-checked',b.dataset.p===PERIOD)})}
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 document.querySelectorAll('#uniSel button').forEach(b=>b.onclick=()=>{UNITS=+b.dataset.u;document.querySelectorAll('#uniSel button').forEach(q=>q.classList.toggle('on',q===b));setStops(UNITS===2?4:2);if(!$('#ovCustom').hidden)custRender()});
-function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
-  const o={v:1,ns:STN.length,ncar:S.ncar,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
+function saveObj(){return{v:1,line:LINE,free:!!S.free,via:S.via||null,viaEnd:S.viaEnd||null,swJ:!!S.swJ,swH:!!S.swH,ns:STN.length,ncar:S.ncar,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
     s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
-    st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])};
+    st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])}}
+function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
+  const o=saveObj();
   try{localStorage.setItem(SAVEK,JSON.stringify(o));toast('Jogo guardado às '+fHMS(S.clock)+' (hora do jogo).','good');refreshLoad()}catch(e){toast('Não foi possível guardar neste navegador.','bad')}}
 function readSave(){try{const r=localStorage.getItem(SAVEK);const o=r?JSON.parse(r):null;
   // jogos guardados antes de a lista de estações mudar deixam de ser válidos
-  if(o&&(o.ns!==STN.length||!STN[o.start]||!STN[o.end])){localStorage.removeItem(SAVEK);return null}return o}catch(e){return null}}
+  if(o&&o.line&&o.line!==LINE)return o;
+  if(o&&!saveOK(o)){localStorage.removeItem(SAVEK);return null}return o}catch(e){return null}}
+function saveOK(o){return o&&o.s&&o.ns===STN.length&&!!STN[o.start]&&!!STN[o.end]}
 function refreshLoad(){const o=readSave(),b=$('#bLoad');if(!o){b.hidden=true;return}b.hidden=false;
-  const a=STN[o.start].n,z=STN[o.end].n;$('#loadInfo').textContent=a+' → '+z+', guardado a '+new Date(o.t).toLocaleString('pt-PT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
-function loadGame(){const o=readSave();if(!o)return;PERIOD=o.period||'tarde';updPeriod();FORCE_NC=o.ncar||2;start(o.start,o.end,o.rev,o.cust||undefined);
+  const a=o.line&&o.line!==LINE?(o.line==='povoa'?'Linha da Póvoa':'Linha de Guimarães'):STN[o.start].n,z=o.line&&o.line!==LINE?'':STN[o.end].n;$('#loadInfo').textContent=a+' → '+z+', guardado a '+new Date(o.t).toLocaleString('pt-PT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+function loadGame(){applySave(readSave())}
+// retoma um jogo guardado; se for da outra linha, muda de linha e retoma depois de recarregar
+function applySave(o){if(!o)return;
+  if(o.line&&o.line!==LINE){try{sessionStorage.setItem('pendingLoad',JSON.stringify(o))}catch(e){}running=false;setLine(o.line);return}
+  if(!saveOK(o)){toast('Este jogo guardado já não é compatível com esta versão do jogo.','bad');return}
+  PERIOD=o.period||'tarde';updPeriod();FORCE_NC=o.ncar||2;start(o.start,o.end,o.rev,o.cust||undefined);
   Object.assign(S,o.s);S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
   o.st.forEach((q,k)=>{STN[k].served=!!q[0];STN[k].skipped=!!q[1];STN[k].paxGone=q[2]});o.pn.forEach((q,k)=>{if(PN[k]){PN[k].done=!!q[0];PN[k].honk=!!q[1]}});
+  S.free=!!o.free;S.via=o.via||null;S.viaEnd=o.viaEnd||null;S.swJ=!!o.swJ;S.swH=!!o.swH;S.divJ=S.divH=false;
   setNotch(S.notch,true);updRev();$('#bWarp').textContent='Tempo ×'+S.warp;$('#card').hidden=true;buildStrip();toast('Jogo retomado em '+fHMS(S.clock)+'.','good')}
+// guardar e abrir em ficheiro .json
+let DLNS=null;try{if(window.claude&&claude.use)claude.use('downloads').then(n=>{DLNS=n}).catch(()=>{})}catch(e){}
+function saveFile(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
+  const o=saveObj(),txt=JSON.stringify(o,null,1),nm='comboio-'+STN[o.start].n+'-'+STN[o.end].n+'-'+fHM(S.clock).replace(':','h')+'.json';
+  const fn=nm.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9.\-]+/g,'-');
+  try{localStorage.setItem(SAVEK,txt)}catch(e){}
+  // na página do claude.ai o descarregamento passa pela confirmação do próprio site
+  if(DLNS){DLNS.save({filename:fn,data:txt}).then(()=>toast('Ficheiro '+fn+' guardado.','good')).catch(e=>toast(e&&e.code==='declined'?'Ficheiro não guardado.':'Não foi possível guardar o ficheiro aqui.',''));return}
+  try{const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=fn;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+    toast('Ficheiro '+fn+' guardado (pasta de transferências).','good')}catch(e){toast('Não foi possível criar o ficheiro neste navegador.','bad')}}
+$('#bSaveF').onclick=saveFile;$('#bLoadF').onclick=()=>$('#fLoad').click();
+$('#fLoad').onchange=e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
+  r.onload=()=>{let o=null;try{o=JSON.parse(r.result)}catch(err){}if(!o||!o.s||o.start===undefined){toast('Este ficheiro não é um jogo guardado.','bad');return}audioInit();applySave(o)};r.readAsText(f)};
 $('#bLoad').onclick=loadGame;$('#bSave').onclick=saveGame;$('#bQS').onclick=saveGame;
 $('#bMenu').onclick=()=>{running=false;paused=false;$('#ovPause').hidden=true;refreshLoad();$('#ovStart').hidden=false};
 setInterval(()=>{if(running&&!paused&&S&&S.finishT<0)try{saveGame.silent=1;const t=toast;toast=()=>{};saveGame();toast=t}catch(e){}},45000);
@@ -3432,6 +3455,8 @@ if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);if(glRetry
 // chegada à outra linha depois da inversão em Lousado: continua o serviço, a hora e a pontuação
 // o som só arranca com um toque: retoma-o ao primeiro toque ou tecla depois da mudança de linha
 ['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,()=>{if(AC&&AC.state!=='running'&&AC.resume)AC.resume();else if(!AC&&running)audioInit()},{passive:true,capture:true}));
+if(!RETRY){let pl=null;try{pl=JSON.parse(sessionStorage.getItem('pendingLoad')||'null');sessionStorage.removeItem('pendingLoad')}catch(e){}
+ if(pl&&(!pl.line||pl.line===LINE))setTimeout(()=>{applySave(pl);if(AC&&AC.state!=='running')toast('Jogo retomado. Toque no ecrã para ligar o som.','')},0)}
 if(!RETRY){let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');sessionStorage.removeItem('xfer')}catch(e){}
  if(o&&o.sh){PERIOD=o.period||PERIOD;updPeriod();const t={};t[0]=o.clock;FORCE_NC=o.ncar||2;start(0,STN.length-1,false,{t,free:true});
    S.free=o.free;S.pos=S.prevPos=o.pos;S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;S.sc=o.sc;S.maxPts=o.maxPts||0;S.endSt=STN[STN.length-1];
