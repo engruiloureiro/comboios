@@ -3463,6 +3463,10 @@ const TTS=[
  ['3110','P','Póvoa de Varzim','Porto-Trindade','09:00'],['3112','P','Famalicão','Porto-Trindade','10:15'],['3114','P','Póvoa de Varzim','Porto-Trindade','11:30'],['3116','P','Póvoa de Varzim','Porto-Trindade','12:45'],
  ['3118','P','Póvoa de Varzim','Porto-Trindade','14:00'],['3120','P','Famalicão','Porto-Trindade','15:15'],['3122','P','Póvoa de Varzim','Porto-Trindade','16:30'],['3124','P','Póvoa de Varzim','Porto-Trindade','17:40'],
  ['3126','P','Póvoa de Varzim','Porto-Trindade','18:50'],['3128','P','Póvoa de Varzim','Porto-Trindade','20:15'],['3130','P','Póvoa de Varzim','Porto-Trindade','21:45'],
+ ['2201','G','Guimarães','Fafe','07:50'],['2203','G','Guimarães','Fafe','11:15'],['2205','G','Guimarães','Fafe','14:20'],['2207','G','Guimarães','Fafe','18:40'],
+ ['2202','G','Fafe','Guimarães','06:30'],['2204','G','Fafe','Guimarães','09:00'],['2206','G','Fafe','Guimarães','13:10'],['2208','G','Fafe','Guimarães','17:20'],
+ ['3201','P','Póvoa de Varzim','Famalicão','07:15'],['3203','P','Póvoa de Varzim','Famalicão','12:30'],['3205','P','Póvoa de Varzim','Famalicão','18:00'],
+ ['3202','P','Famalicão','Póvoa de Varzim','06:15'],['3204','P','Famalicão','Póvoa de Varzim','10:00'],['3206','P','Famalicão','Póvoa de Varzim','15:00'],
  ['4101','X','Guimarães','Póvoa de Varzim','07:05'],['4103','X','Guimarães','Póvoa de Varzim','16:20'],['4102','X','Póvoa de Varzim','Guimarães','09:40'],['4104','X','Póvoa de Varzim','Guimarães','18:30']];
 const TTLSD=9*60;// inversão de marcha e mudança de agulha em Lousado
 // horário de um comboio num troço de uma linha: {estação: hora de partida (chegada no destino)}
@@ -3476,14 +3480,18 @@ function ttPlan(x){const t0=T(x[4]);
 const TTV=[
  {id:'G',tab:'Linha de Guimarães',sec:[
   {h:'Porto-Trindade → Guimarães e Fafe',f:x=>x[1]==='G'&&x[2]==='Porto-Trindade',c:['Porto-Trindade','Senhora da Hora','Trofa','Lousado','Santo Tirso','Vizela','Guimarães','Fafe']},
-  {h:'Fafe e Guimarães → Porto-Trindade',f:x=>x[1]==='G'&&x[3]==='Porto-Trindade',c:['Fafe','Guimarães','Vizela','Santo Tirso','Lousado','Trofa','Senhora da Hora','Porto-Trindade']}]},
+  {h:'Fafe e Guimarães → Porto-Trindade',f:x=>x[1]==='G'&&x[3]==='Porto-Trindade',c:['Fafe','Guimarães','Vizela','Santo Tirso','Lousado','Trofa','Senhora da Hora','Porto-Trindade']},
+  {h:'Guimarães → Fafe',f:x=>x[1]==='G'&&x[2]==='Guimarães',c:['Guimarães','Aldão - S. Torcato','Penha','Paçô Vieira','Fareja','Cepães','Fafe']},
+  {h:'Fafe → Guimarães',f:x=>x[1]==='G'&&x[2]==='Fafe'&&x[3]==='Guimarães',c:['Fafe','Cepães','Fareja','Paçô Vieira','Penha','Aldão - S. Torcato','Guimarães']}]},
  {id:'P',tab:'Linha da Póvoa',sec:[
   {h:'Porto-Trindade → Póvoa e Famalicão',f:x=>x[1]==='P'&&x[2]==='Porto-Trindade',c:['Porto-Trindade','Senhora da Hora','Pedras Rubras','Mindelo','Vila do Conde','Póvoa de Varzim','Fontainhas','Famalicão']},
-  {h:'Famalicão e Póvoa → Porto-Trindade',f:x=>x[1]==='P'&&x[3]==='Porto-Trindade',c:['Famalicão','Fontainhas','Póvoa de Varzim','Vila do Conde','Mindelo','Pedras Rubras','Senhora da Hora','Porto-Trindade']}]},
+  {h:'Famalicão e Póvoa → Porto-Trindade',f:x=>x[1]==='P'&&x[3]==='Porto-Trindade',c:['Famalicão','Fontainhas','Póvoa de Varzim','Vila do Conde','Mindelo','Pedras Rubras','Senhora da Hora','Porto-Trindade']},
+  {h:'Póvoa → Famalicão',f:x=>x[1]==='P'&&x[2]==='Póvoa de Varzim'&&x[3]==='Famalicão',c:['Póvoa de Varzim','Amorim','Laundos','Rates','Fontainhas','Gondifelos','Famalicão']},
+  {h:'Famalicão → Póvoa',f:x=>x[1]==='P'&&x[2]==='Famalicão'&&x[3]==='Póvoa de Varzim',c:['Famalicão','Gondifelos','Fontainhas','Rates','Laundos','Amorim','Póvoa de Varzim']}]},
  {id:'X',tab:'Guimarães ↔ Póvoa',sec:[
   {h:'Guimarães → Lousado → Famalicão → Póvoa',f:x=>x[1]==='X'&&x[2]==='Guimarães',c:['Guimarães','Vizela','Santo Tirso','Lousado','Lousado·p','Famalicão','Fontainhas','Póvoa de Varzim']},
   {h:'Póvoa → Famalicão → Lousado → Guimarães',f:x=>x[1]==='X'&&x[2]==='Póvoa de Varzim',c:['Póvoa de Varzim','Fontainhas','Famalicão','Lousado','Lousado·p','Santo Tirso','Vizela','Guimarães']}]}];
-const TTSH={'Porto-Trindade':'Porto<br>Trindade','Senhora da Hora':'Sr.ª da<br>Hora','Póvoa de Varzim':'Póvoa de<br>Varzim','Pedras Rubras':'Pedras<br>Rubras','Vila do Conde':'Vila do<br>Conde','Santo Tirso':'Santo<br>Tirso','Lousado':'Lousado<br>chegada','Lousado·p':'Lousado<br>partida'};
+const TTSH={'Porto-Trindade':'Porto<br>Trindade','Senhora da Hora':'Sr.ª da<br>Hora','Póvoa de Varzim':'Póvoa de<br>Varzim','Pedras Rubras':'Pedras<br>Rubras','Vila do Conde':'Vila do<br>Conde','Santo Tirso':'Santo<br>Tirso','Aldão - S. Torcato':'Aldão<br>S. Torcato','Paçô Vieira':'Paçô<br>Vieira','Lousado':'Lousado<br>chegada','Lousado·p':'Lousado<br>partida'};
 let ttTab=RP?'P':'G';
 function ttRender(){const tabs=$('#ttTabs'),body=$('#ttBody');tabs.innerHTML='';body.innerHTML='';
   for(const v of TTV){const b=document.createElement('button');b.textContent=v.tab;b.className=v.id===ttTab?'on':'';b.setAttribute('role','tab');b.setAttribute('aria-selected',v.id===ttTab);b.onclick=()=>{ttTab=v.id;ttRender()};tabs.append(b)}
