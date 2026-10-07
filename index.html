@@ -199,7 +199,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <div class="azulejo">Horário de 1985<small>Via estreita do Porto · toque num comboio para o conduzir</small></div>
     <div class="tttab" id="ttTabs" role="tablist"></div>
     <div id="ttBody"></div>
-    <p style="font-size:13px;color:#aab;margin:4px 0 10px">Horas de partida em cada estação (chegada no destino). Os comboios param em todas as estações e apeadeiros, exceto Alvarelhos. Nos comboios Guimarães ↔ Póvoa, a inversão de marcha faz-se em Lousado.</p>
+    <p style="font-size:13px;color:#aab;margin:4px 0 10px">Horas de partida em cada estação (chegada no destino). Os comboios param em todas as estações e apeadeiros, exceto Alvarelhos; os semidiretos só param nas estações. Nos comboios Guimarães ↔ Póvoa, a inversão de marcha faz-se em Lousado.</p>
     <button class="cta alt" id="ttBack">Voltar ao menu</button>
   </div>
 </div>
@@ -3447,12 +3447,14 @@ function custRender(){const P=custPlan();const el=$('#cList');el.innerHTML='';
 /* ---- horário de 1985 ---- */
 // tempos de marcha com paragem em todas as estações (calculados com runMin, como no horário à medida): [estação, chegada, partida] em segundos
 const TTO={"guimaraes":{"F":[["Porto-Trindade",0,0],["Avenida de França",300,330],["Francos",570,600],["Ramalde",780,810],["Circunvalação",990,1020],["Senhora da Hora",1260,1320],["Araújo",1620,1650],["Maia",2010,2070],["Mandim",2370,2400],["Castêlo da Maia",2640,2700],["Muro",3000,3060],["Bougado",3360,3390],["Trofa",3690,3750],["Lousado",4170,4230],["Santo Tirso",4710,4770],["Caniços",5070,5130],["Vila das Aves - Negrelos",5490,5550],["Giesteira",5910,5940],["Lordelo",6300,6360],["Cuca",6660,6690],["Pereirinhas",6990,7020],["Vizela",7320,7380],["Nespereira",7800,7830],["Covas",8070,8100],["Guimarães",8400,8460],["Aldão - S. Torcato",9000,9030],["Penha",9330,9360],["Paçô Vieira",9660,9720],["Fareja",10260,10290],["Cepães",10710,10770],["Fafe",11310,11310]],"R":[["Fafe",0,0],["Cepães",540,600],["Fareja",1020,1050],["Paçô Vieira",1590,1650],["Penha",1950,1980],["Aldão - S. Torcato",2280,2310],["Guimarães",2850,2910],["Covas",3210,3240],["Nespereira",3480,3510],["Vizela",3930,3990],["Pereirinhas",4290,4320],["Cuca",4620,4650],["Lordelo",4950,5010],["Giesteira",5370,5400],["Vila das Aves - Negrelos",5760,5820],["Caniços",6180,6240],["Santo Tirso",6540,6600],["Lousado",7080,7140],["Trofa",7560,7620],["Bougado",7860,7890],["Muro",8190,8250],["Castêlo da Maia",8550,8610],["Mandim",8850,8880],["Maia",9180,9240],["Araújo",9600,9630],["Senhora da Hora",9930,9990],["Circunvalação",10170,10200],["Ramalde",10380,10410],["Francos",10590,10620],["Avenida de França",10860,10890],["Porto-Trindade",11190,11190]]},"povoa":{"F":[["Porto-Trindade",0,0],["Avenida de França",300,330],["Francos",570,600],["Ramalde",780,810],["Circunvalação",990,1020],["Senhora da Hora",1260,1320],["Custóias",1560,1590],["Crestins",1950,1980],["Pedras Rubras",2220,2280],["Vilar do Pinheiro",2580,2640],["Modivas",2880,2940],["Vila Chã",3120,3150],["Mindelo",3450,3510],["Azurara - Árvore",3810,3840],["Vila do Conde",4140,4200],["Póvoa de Varzim",4560,4620],["Amorim",5160,5190],["São Félix",5610,5640],["Laundos",5880,5910],["Rates",6450,6480],["Fontainhas",6780,6840],["Balazar",7140,7170],["Gondifelos",7590,7620],["Cavalões",7980,8010],["Outiz",8310,8340],["Barradas",8640,8670],["Famalicão",9090,9150],["Lousado",9750,9750]],"R":[["Lousado",0,0],["Famalicão",600,660],["Barradas",1080,1110],["Outiz",1410,1440],["Cavalões",1740,1770],["Gondifelos",2130,2160],["Balazar",2580,2610],["Fontainhas",2850,2910],["Rates",3210,3240],["Laundos",3780,3810],["São Félix",4050,4080],["Amorim",4500,4530],["Póvoa de Varzim",5070,5130],["Vila do Conde",5490,5550],["Azurara - Árvore",5850,5880],["Mindelo",6180,6240],["Vila Chã",6540,6570],["Modivas",6750,6810],["Vilar do Pinheiro",7050,7110],["Pedras Rubras",7410,7470],["Crestins",7710,7740],["Custóias",8100,8130],["Senhora da Hora",8370,8430],["Circunvalação",8610,8640],["Ramalde",8820,8850],["Francos",9030,9060],["Avenida de França",9300,9330],["Porto-Trindade",9630,9630]]}};
-// [número, linha, origem, destino, hora de partida]
+// semidiretos: só param nas estações entre a Trindade e Guimarães (não param nos apeadeiros)
+const TTOS={"F":[["Porto-Trindade",0,0],["Senhora da Hora",600,660],["Maia",1200,1260],["Castêlo da Maia",1620,1680],["Muro",1980,2040],["Trofa",2460,2520],["Lousado",2940,3000],["Santo Tirso",3480,3540],["Caniços",3840,3900],["Vila das Aves - Negrelos",4260,4320],["Lordelo",4920,4980],["Vizela",5640,5700],["Guimarães",6420,6420]],"R":[["Guimarães",0,0],["Vizela",720,780],["Lordelo",1440,1500],["Vila das Aves - Negrelos",2100,2160],["Caniços",2520,2580],["Santo Tirso",2880,2940],["Lousado",3420,3480],["Trofa",3900,3960],["Muro",4380,4440],["Castêlo da Maia",4740,4800],["Maia",5160,5220],["Senhora da Hora",5760,5820],["Porto-Trindade",6420,6420]]};
+// [número, linha, origem, destino, hora de partida, 'S' = semidireto]
 const TTS=[
- ['2101','G','Porto-Trindade','Fafe','06:10'],['2103','G','Porto-Trindade','Guimarães','07:25'],['2105','G','Porto-Trindade','Fafe','08:40'],['2107','G','Porto-Trindade','Guimarães','10:20'],
+ ['2101','G','Porto-Trindade','Fafe','06:10'],['2103','G','Porto-Trindade','Guimarães','07:25','S'],['2105','G','Porto-Trindade','Fafe','08:40'],['2107','G','Porto-Trindade','Guimarães','10:20'],
  ['2109','G','Porto-Trindade','Fafe','12:05'],['2111','G','Porto-Trindade','Guimarães','13:35'],['2113','G','Porto-Trindade','Guimarães','15:10'],['2115','G','Porto-Trindade','Fafe','16:45'],
  ['2117','G','Porto-Trindade','Guimarães','17:50'],['2119','G','Porto-Trindade','Fafe','19:15'],['2121','G','Porto-Trindade','Guimarães','21:00'],
- ['2102','G','Fafe','Porto-Trindade','05:30'],['2104','G','Guimarães','Porto-Trindade','06:35'],['2106','G','Fafe','Porto-Trindade','07:55'],['2108','G','Guimarães','Porto-Trindade','09:40'],
+ ['2102','G','Fafe','Porto-Trindade','05:30'],['2104','G','Guimarães','Porto-Trindade','06:35','S'],['2106','G','Fafe','Porto-Trindade','07:55'],['2108','G','Guimarães','Porto-Trindade','09:40'],
  ['2110','G','Fafe','Porto-Trindade','11:20'],['2112','G','Guimarães','Porto-Trindade','13:05'],['2114','G','Fafe','Porto-Trindade','14:50'],['2116','G','Guimarães','Porto-Trindade','16:30'],
  ['2118','G','Fafe','Porto-Trindade','18:05'],['2120','G','Guimarães','Porto-Trindade','19:35'],['2122','G','Fafe','Porto-Trindade','20:50'],
  ['3101','P','Porto-Trindade','Póvoa de Varzim','06:00'],['3103','P','Porto-Trindade','Póvoa de Varzim','06:50'],['3105','P','Porto-Trindade','Famalicão','07:35'],['3107','P','Porto-Trindade','Póvoa de Varzim','08:20'],
@@ -3470,10 +3472,10 @@ const TTS=[
  ['4101','X','Guimarães','Póvoa de Varzim','07:05'],['4103','X','Guimarães','Póvoa de Varzim','16:20'],['4102','X','Póvoa de Varzim','Guimarães','09:40'],['4104','X','Póvoa de Varzim','Guimarães','18:30']];
 const TTLSD=9*60;// inversão de marcha e mudança de agulha em Lousado
 // horário de um comboio num troço de uma linha: {estação: hora de partida (chegada no destino)}
-function ttLeg(line,a,z,t0){for(const dir of['F','R']){const L=TTO[line][dir],ia=L.findIndex(r=>r[0]===a),iz=L.findIndex(r=>r[0]===z);if(ia<0||iz<0||iz<=ia)continue;
+function ttLeg(line,a,z,t0,sd){for(const dir of['F','R']){const L=(sd?TTOS:TTO[line])[dir],ia=L.findIndex(r=>r[0]===a),iz=L.findIndex(r=>r[0]===z);if(ia<0||iz<0||iz<=ia)continue;
   const o={},b=L[ia][2];for(let k=ia;k<=iz;k++)o[L[k][0]]=t0+(k===iz?L[k][1]:L[k][2])-b;return{t:o,rev:dir==='R'}}return null}
 function ttPlan(x){const t0=T(x[4]);
-  if(x[1]!=='X'){const line=x[1]==='G'?'guimaraes':'povoa',g=ttLeg(line,x[2],x[3],t0);return{legs:[{line,a:x[2],z:x[3],...g}],all:g.t}}
+  if(x[1]!=='X'){const line=x[1]==='G'?'guimaraes':'povoa',g=ttLeg(line,x[2],x[3],t0,x[5]==='S');return{legs:[{line,a:x[2],z:x[3],...g}],all:g.t}}
   const fromG=x[2]==='Guimarães',l1=fromG?'guimaraes':'povoa',l2=fromG?'povoa':'guimaraes',g1=ttLeg(l1,x[2],'Lousado',t0),g2=ttLeg(l2,'Lousado',x[3],g1.t['Lousado']+TTLSD);
   const all={...g2.t,...g1.t};all['Lousado·p']=g2.t['Lousado'];
   return{legs:[{line:l1,a:x[2],z:'Lousado',...g1},{line:l2,a:'Lousado',z:x[3],...g2}],all}}
@@ -3498,9 +3500,9 @@ function ttRender(){const tabs=$('#ttTabs'),body=$('#ttBody');tabs.innerHTML='';
   const v=TTV.find(q=>q.id===ttTab);
   for(const sc of v.sec){const h=document.createElement('div');h.className='tth';h.textContent=sc.h;body.append(h);
     const w=document.createElement('div');w.className='ttw';const tb=document.createElement('table');tb.className='tt';
-    let hh='<tr><th>Comboio</th>'+sc.c.map(c=>'<th>'+(TTSH[c]||c)+'</th>').join('')+'<th></th></tr>';
+    let hh='<tr><th>Comboio</th>'+sc.c.map(c=>'<th>'+(c==='Lousado'&&!sc.c.includes('Lousado·p')?c:(TTSH[c]||c))+'</th>').join('')+'<th></th></tr>';
     const rows=TTS.filter(sc.f).sort((a,b)=>T(a[4])-T(b[4]));
-    for(const x of rows){const P=ttPlan(x);hh+='<tr data-n="'+x[0]+'"><td class="n">'+x[0]+'</td>'+sc.c.map(c=>{const t=P.all[c];return t===undefined?'<td class="x">|</td>':'<td'+(c===x[3]||c===x[2]?' class="e"':'')+'>'+fHM(t)+'</td>'}).join('')+'<td><button data-n="'+x[0]+'" aria-label="Conduzir o comboio '+x[0]+'">▶</button></td></tr>'}
+    for(const x of rows){const P=ttPlan(x);hh+='<tr data-n="'+x[0]+'"><td class="n">'+x[0]+(x[5]==='S'?'<br><small style="color:#9cd;font-weight:500">semidireto</small>':'')+'</td>'+sc.c.map(c=>{const t=P.all[c];return t===undefined?'<td class="x">|</td>':'<td'+(c===x[3]||c===x[2]?' class="e"':'')+'>'+fHM(t)+'</td>'}).join('')+'<td><button data-n="'+x[0]+'" aria-label="Conduzir o comboio '+x[0]+'">▶</button></td></tr>'}
     tb.innerHTML=hh;w.append(tb);body.append(w)}
   body.querySelectorAll('tr[data-n]').forEach(r=>r.onclick=()=>ttStart(r.dataset.n))}
 // conduz um comboio do horário; se for da outra linha, muda de linha e arranca depois de recarregar
@@ -3509,7 +3511,7 @@ function ttStart(n){const x=TTS.find(q=>q[0]===n);if(!x)return;const P=ttPlan(x)
   const a=byNameE(g.a),z=byNameE(g.z),t={};for(const k in g.t){const s=byNameE(k);if(s&&!s.nostop)t[s.i]=g.t[k]}
   $('#ovTT').hidden=true;start(a.i,z.i,g.rev,{t});S.ttn=n;
   if(x[1]==='X'){S.via=x[2]==='Guimarães'?'P':'G';S.viaEnd=x[3]}
-  toast('Comboio '+n+': '+x[2]+' → '+x[3]+', partida às '+fHM(t[a.i])+'.'+(x[1]==='X'?' Em Lousado inverte a marcha pela agulha (Z) para seguir para '+x[3]+'.':''),'good')}
+  toast('Comboio '+n+(x[5]==='S'?' (semidireto: não para nos apeadeiros)':'')+': '+x[2]+' → '+x[3]+', partida às '+fHM(t[a.i])+'.'+(x[1]==='X'?' Em Lousado inverte a marcha pela agulha (Z) para seguir para '+x[3]+'.':''),'good')}
 $('#bTT').onclick=()=>{$('#ovStart').hidden=true;$('#ovTT').hidden=false;ttRender()};$('#ttBack').onclick=()=>{$('#ovTT').hidden=true;$('#ovStart').hidden=false};
 if(!RETRY){let n=null;try{n=sessionStorage.getItem('pendingTT');sessionStorage.removeItem('pendingTT')}catch(e){}if(n)setTimeout(()=>ttStart(n),0)}
 document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i);S.via=b.dataset.via||null;S.viaEnd=b.dataset.end||null});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
