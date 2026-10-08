@@ -173,7 +173,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <li>Não há CONVEL: respeite os limites. Entrar numa curva muito acima do limite faz descarrilar.</li>
       <li>Nas estações, espere o apito do <b>chefe</b> para partir. Nos apeadeiros, parta à hora.</li>
       <li>Buzine antes de cada <b>passagem de nível</b> (o painel mostra a distância). Carregue em <b>Homem-morto</b> quando piscar.</li>
-      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: E portas, H buzina, Q homem-morto, P pausa, R inversor, Z agulha.</li>
+      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: E portas, H buzina, Q homem-morto, P pausa, R inversor, Z agulha, T tempo acelerado.</li>
       <li><b>Cruzamentos</b>: na via única as automotoras cruzam-se nas estações. Se a contrária ainda não chegou, o chefe não dá a partida: espere. Partir antes é falta grave e pode acabar em colisão.</li>
       <li><b>Marcha atrás</b> (botão Marcha ou R): com a automotora parada e o manípulo em 0 ou travão, mude o inversor para recuar, por exemplo depois de passar a placa de paragem. Em marcha atrás o limite é 30 km/h.</li>
     </ul>
@@ -3536,7 +3536,7 @@ $('#bPause').onclick=()=>setPause(!paused);$('#bResume').onclick=()=>setPause(fa
 document.addEventListener('keydown',e=>{if(!S)return;const k=e.key.toLowerCase();
   if(k==='arrowup'||k==='w'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='s'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='j')hornOn(e,'horn_lo');else if(k==='k')hornOn(e,'horn');else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn()});
+  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='h'||k===' ')hornOn(e);else if(k==='j')hornOn(e,'horn_lo');else if(k==='k')hornOn(e,'horn');else if(k==='q')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='h'||k===' '||k==='j'||k==='k')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);
