@@ -1155,7 +1155,7 @@ function step(dt,dr){
 
   // embarque
   if(S.doors&&S.dwell>0){S.dwell-=dt;S.dwX=(S.dwX||0)+dt;if(S.dwell<=0.05&&PAXBUSY&&use3D&&S.dwX<30)S.dwell=0.05;if(S.atSt)S.atSt.paxGone=clamp(1-S.dwell/15,0,1);
-    if(S.dwell<=0){S.dwell=0;if(S.atSt===S.endSt&&S.via)toast('Lousado: feche as portas, avance para lá da agulha ('+(RP?'para sul':'para a Trofa')+'), pare, mude a agulha (tecla Z) e recue para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'),'');else if(S.atSt===S.endSt)S.finishT=3;else toast('Embarque concluído. Feche as portas.','')}}
+    if(S.dwell<=0){S.dwell=0;if(S.atSt===S.endSt&&S.via)toast('Lousado: feche as portas, avance com a composição toda para lá da agulha ('+(RP?'para sul':'para a Trofa')+'), pare, mude a agulha (tecla Z), carregue em Troca de cabine e siga em frente para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'),'');else if(S.atSt===S.endSt)S.finishT=3;else toast('Embarque concluído. Feche as portas.','')}}
 
   // comboios em sentido contrário (via dupla)
   if(S.pos<LOU.pos-(REV?800:1500)&&S.clock>S.nextSpawn&&!S.atSt){
@@ -1195,6 +1195,9 @@ function step(dt,dr){
   if(REV&&S.pos<=BUFFER_R+1){if(kmh>6){gameOver('O comboio embateu no para-choques da Trindade a '+Math.round(kmh)+' km/h.');return}S.pos=BUFFER_R+1;S.v=0}
   // recuo para a outra linha depois de mudar a agulha
   if(S.swJ&&S.back&&(RP?S.pos<JSW-12:S.pos>JSW+12))xferLine();
+  // depois da troca de cabine em Lousado: na Linha da Póvoa segue em frente pela agulha para a de Guimarães
+  if(LSD&&RP&&S.swJ&&REV&&!S.back&&S.prevPos>=JSW-12&&S.pos<JSW-12)xferLine();
+  {const c=cabSwapOK();if(c!==!!S.cabOK){S.cabOK=c;updRev()}}
   // via desviada em marcha à frente: a composição segue a curva da agulha e passa para a outra linha
   if(LSD&&RG&&S.swJ&&!REV&&!S.back&&S.prevPos<JSW&&S.pos>=JSW)S.divJ=true;
   if(S.divJ&&S.pos<JSW-1)S.divJ=false;
@@ -1218,15 +1221,21 @@ function swBtn(){if(!running||!S)return;
   S.swJ=!S.swJ;S.swT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);
   if(fw){toast(S.swJ?'Agulha de Lousado mudada para a Linha da Póvoa: siga em frente, a automotora toma a via desviada para Famalicão.':'Agulha reposta para a linha direta (Guimarães).','good');return}
   if(S.v>0.05){S.swJ=!S.swJ;toast('Pare antes de mudar a agulha.','');return}
-  toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Inverta a marcha (R) e recue.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, inverta a marcha (R) e recue.'):'Agulha reposta para a linha direta.','good')}
+  toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Carregue em Troca de cabine e siga em frente.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, carregue em Troca de cabine e siga em frente.'):'Agulha reposta para a linha direta.','good')}
 function xferLine(x){const fw=!!(x&&x.fw);const o={sh:x&&x.sh,fw,lsd:LSD&&LSD.pos,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(fw?'Póvoa de Varzim':RP?'Guimarães':'Porto-Trindade')};
   try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;
   // liberta o 3D e o som antes de recarregar, para a página nova os conseguir obter (sobretudo nos telemóveis)
   try{const x=gl&&gl.getExtension('WEBGL_lose_context');if(x)x.loseContext()}catch(e){}try{if(AC&&AC.state!=='closed')AC.close().catch(()=>{})}catch(e){}
   setLine(o.to)}
 
-function updRev(){const b=$('#bRev');if(!b)return;b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
+// troca de cabine em Lousado: parado, com a composição toda para lá da agulha, do lado onde se inverte o sentido
+function cabSwapOK(){return !!(LSD&&S&&running&&!S.back&&Math.abs(S.v)<0.05&&Math.abs(S.pos-JSW)<1500&&(RP?(!REV&&S.pos>JSW+TLEN(S.ncar)):(REV&&S.pos<JSW-TLEN(S.ncar))))}
+function cabSwap(){const d=REV?-1:1;REV=!REV;DIRC=REV?'R':'F';S.pos=S.prevPos=S.pos-d*TLEN(S.ncar);S.back=false;S.cabOK=false;S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
+  while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;while(S.jI>0&&JOINTS[S.jI-1]>S.pos)S.jI--;updRev();beep(300,.08,.1,'square');
+  toast('Cabina trocada. '+(S.swJ?'Siga em frente: a agulha leva-o para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'):'A agulha está na via direta: mude-a (Z) para seguir para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.')),'good')}
+function updRev(){const b=$('#bRev');if(!b)return;if(S&&S.cabOK){b.textContent='Troca de cabine';b.classList.add('on');b.setAttribute('aria-pressed','false');return}b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
 function revBtn(){if(!running||!S)return;if(S.v>0.05){toast('Pare a automotora antes de mudar o inversor.','');return}if(S.notch>6){toast('Ponha o manípulo em 0 ou travão antes de mudar o inversor.','');return}
+  if(cabSwapOK()){cabSwap();return}
   if(S.free&&(Math.abs(S.pos-BUFFER)<300||Math.abs(S.pos-BUFFER_R)<300||Math.abs(S.pos-GMR.pos)<300)){const d=REV?-1:1;REV=!REV;DIRC=REV?'R':'F';S.pos=S.prevPos=S.pos-d*TLEN(S.ncar);S.back=false;updRev();beep(300,.08,.1,'square');toast('Mudou de cabina: segue agora para '+(REV?'o Porto':'o outro extremo')+'.','good');return}
   S.back=!S.back;updRev();beep(300,.08,.1,'square');toast(S.back?'Inversor em marcha atrás. Limite de 30 km/h.':'Inversor em marcha à frente.','')}
 function doorBtn(){
