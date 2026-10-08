@@ -319,7 +319,7 @@ const RAWP=RAWG.slice(0,6).map(r=>{const q=r.slice();q[4]=q[5]='00:00';return q}
  ['Cavalões',41.4108,-8.5704,52.677,'00:00','00:00','ap',0,'SL',-1,60,0.3,80,'v-ap'],
  ['Outiz',41.4091,-8.5564,54.449,'00:00','00:00','ap',0,'SR',1,60,0.3,79,'v-ramal'],
  ['Barradas',41.4080,-8.5400,56.65,'00:00','00:00','ap',0,'SL',-1,60,0.3,81,'v-ap'],
- ['Famalicão',41.4080,-8.5200,59.526,'00:00','00:00','est',2,'VG',1,150,0.35,90,'v-fam'],
+ ['Famalicão',41.4080,-8.5200,59.526,'00:00','00:00','est',2,'FAM',-1,150,0.35,90,'v-fam'],
  ['Lousado',41.3505,-8.5190,66.026,'00:00','00:00','term',1,'LSDP',-1,160,0.35,36,'v-lsd']]);
 const RAW=RP?RAWP:RAWG;
 // geometria: coordenadas das interfaces dos GPX de referência (gpx/), por estação; entre elas a via é uma curva suave
@@ -370,6 +370,8 @@ const LAY={
  SL:{pl:[[-1.8,-4.6]],ex:[]},
  SR:{pl:[[1.8,4.6]],ex:[]},
  DB:{pl:[[-1.8,-4.6],[5.8,8.6]],ex:[]},
+ // Famalicão: do lado do edifício as duas vias largas do Minho (cais do edifício e cais central), do outro lado as duas vias estreitas
+ FAM:{pl:[[-1.8,-6.2],[-14.3,-19.0],[5.8,8.6]],ex:[[0,4]]},
  LSDG:{pl:[[1.8,6.0],[-1.8,-12.2],[-15.8,-21.2]],ex:[[0,-14]]},
  LSDP:{pl:[[-1.8,-7.2],[-10.8,-21.2],[-24.8,-29.0]],ex:[]},
 };
@@ -397,7 +399,7 @@ if(LSD){LSD.bc=LPC+(RP?-12:12);LSD.bx=RP?-12.5:-3.5;
   if(RG){const e=LSD.ex[0];e.a=LSD.pos-300;e.b=LSD.pos+120;e.tl=100}}
 const BUFFER_R=SB.pa-25;
 // entre a Trofa e Lousado a via estreita partilha a via da Linha do Minho: carris de bitola larga por fora dos de via métrica
-const DUAL=RP?{a:FAM.pa-160,b:BUFFER+60}:{a:TRF.pa-160,b:LSD.pos-480};
+const DUAL=RP?{a:FAM.pb+260,b:BUFFER+60}:{a:TRF.pa-160,b:LSD.pos-480};
 // bifurcação da Senhora da Hora: ~500 m a norte da estação, agulha para a direita para a Linha de Guimarães; em frente segue a da Póvoa
 const JSH=SDH.pos+500,JSHR=800,JSHL=400;
 const DBL={from:0,to:4,a:SB.pa-160,b:JSH-60};
@@ -416,6 +418,11 @@ if(LSD){const P=LSD.pos,Rc=300;
     XTR.push({a:P-300,b:P+240,m:true,f:p=>p<P+150?4*sstep((p-(P-300))/90):4*(1-sstep((p-(P+150))/90))});
     XTR.push({a:E-240,b:W+160,m:false,f:g(-9,160)});
     XTR.push({a:E-240,b:W+220,m:false,f:g(-23,220)})}}
+// Famalicão: as duas vias largas da Linha do Minho passam do lado do edifício; a poente afastam-se para norte e a nascente
+// juntam-se à nossa (bitola mista até Lousado)
+if(RP&&FAM){const a=FAM.pa-60,b=FAM.pb+40,R=420,W=p=>p<a?(a-p)*(a-p)/(2*R):0;
+  XTR.push({a:a-520,b:b+220,m:true,br:true,f:p=>p>b?-8*(1-sstep((p-b)/220)):-8-W(p)});
+  XTR.push({a:a-520,b:b+150,m:true,br:true,f:p=>p>b?-12.5+4.5*sstep((p-b)/150):-12.5-W(p)})}
 // no sentido da Trindade circula-se pela via da esquerda desse sentido, que é a segunda via (x=4)
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
 // via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
@@ -2034,7 +2041,7 @@ function buildChunk(c){
         mb.q(LQ(ia,o-2.4,-0.4),LQ(ia,o-1.6,0.18),LQ(ib,o2-1.6,0.18),LQ(ib,o2-2.4,-0.4),[1,1,1],3,[0,tl*0.3,0.3,tl2*0.3])}
       else{// junto da nossa via: só as travessas que sobram, sem balastro por cima do nosso
         mb.q(LQ(ia,o-1.3,0.2),LQ(ia,o+1.3,0.2),LQ(ib,o2+1.3,0.2),LQ(ib,o2-1.3,0.2),cc(96,74,56),0,[0,0,1,1])}
-      for(const sg of X.m?[-0.536,0.536,-0.86,0.86]:[-0.536,0.536]){const a=o+sg,b=o2+sg;
+      for(const sg of X.br?[-0.86,0.86]:X.m?[-0.536,0.536,-0.86,0.86]:[-0.536,0.536]){const a=o+sg,b=o2+sg;
         mb.q(LQ(ia,a-0.03,0.36),LQ(ia,a+0.03,0.36),LQ(ib,b+0.03,0.36),LQ(ib,b-0.03,0.36),cc(176,170,160),12,[0,0,0.1,1]);
         mb.q(LQ(ia,a+0.036,0.18),LQ(ia,a+0.036,0.36),LQ(ib,b+0.036,0.36),LQ(ib,b+0.036,0.18),cc(96,74,56),0,[0,0,1,1]);
         mb.q(LQ(ia,a-0.036,0.36),LQ(ia,a-0.036,0.18),LQ(ib,b-0.036,0.18),LQ(ib,b-0.036,0.36),cc(96,74,56),0,[0,0,1,1])}}
