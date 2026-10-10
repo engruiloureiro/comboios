@@ -425,6 +425,8 @@ if(LSD){const P=LSD.pos,Rc=300;
 if(RP&&FAM){const a=FAM.pa-60,b=FAM.pb+40,R=420,W=p=>p<a?(a-p)*(a-p)/(2*R):0;
   XTR.push({a:a-520,b:b+220,m:true,br:true,f:p=>p>b?-8*(1-sstep((p-b)/220)):-8-W(p)});
   XTR.push({a:a-520,b:b+150,m:true,br:true,f:p=>p>b?-12.5+4.5*sstep((p-b)/150):-12.5-W(p)})}
+// Guimarães: via de cais do armazém de mercadorias, do lado do edifício, que acaba num batente junto ao anexo
+if(RG&&GUI){const a=GUI.bc+22.3,m=GUI.bc+70,b=GUI.bc+185;XTR.push({a,b,m:false,f:p=>p<m?-8.8:-8.8*(1-sstep((p-m)/(b-m)))})}
 // no sentido da Trindade circula-se pela via da esquerda desse sentido, que é a segunda via (x=4)
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
 // via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
@@ -2327,7 +2329,7 @@ function vStationGmr(mb,cc2,F,R,n,yb,nm){
     for(const sg of[-1,1])fq(at(c0,N,t+sg*(r+0.16),0.06),N,0.16,y0,ys,CR,13)};
   arch(L(u2+w2/2,o2),F,0,2.6,1.6);arch(L(u2,o2+d2/2),n,0,2.4,1.5);
   // armazém de mercadorias
-  const u3=u2+w2/2+2.5+10,o3=d/2-4.6,w3=20,d3=9.2,h3=4.7;
+  const u3=u2+w2/2+2.5+10,o3=d/2-4.6-2.8,w3=20,d3=9.2,h3=4.7;
   boxRF(mb,L(u3,o3),F,R,w3,d3,yb,yb+h3,cc(178,180,178),6,3,3);boxRF(mb,L(u3,o3),F,R,w3+0.1,d3+0.1,yb,yb+0.8,cc(130,128,124),13,2,2,0,1,true);
   {const yr=yb+h3,hh=1.5,f=d3/2+3.0,bk=d3/2+0.5,ex=0.6,a=L(u3-w3/2-ex,o3+f,yr-0.35),b=L(u3+w3/2+ex,o3+f,yr-0.35),c=L(u3+w3/2+ex,o3,yr+hh),dd=L(u3-w3/2-ex,o3,yr+hh);
    qN(a,b,c,dd,RF,5,[0,0,w3/3,3],add(n,UP));qN(L(u3+w3/2+ex,o3-bk,yr),L(u3-w3/2-ex,o3-bk,yr),dd,c,RF,5,[0,0,w3/3,2],add(mulv(n,-1),UP));
@@ -2338,6 +2340,13 @@ function vStationGmr(mb,cc2,F,R,n,yb,nm){
      fq(at(c,n,0,0.06),n,1.8,yb+3.45,yb+3.6,cc(50,50,50))}
    const ce=L(u3+w3/2,o3);fq(at(ce,F,0,0.04),F,1.3,yb+0.35,yb+3.3,cc(168,52,42));
    const lm=at(cf,n,(-9)*Math.sign(dot(Tof(n),F)||1),0.3);boxRF(mb,[lm[0],0,lm[2]],F,R,0.25,0.25,yb+3.6,yb+3.85,cc(255,236,190),0,0,0,0.6)}
+  // batente da via de cais do armazém: travessa pintada com riscas vermelhas e brancas em V, sobre pernas de ferro
+  {const ub=22.3,ob=d/2+1.0,ph2=yb-0.15,c=L(ub,ob),T=n,N=F,y0=ph2+0.55,y1=ph2+1.0,hw=1.15;
+   for(const v of[-1,1])for(const k of[0,1]){limb(mb,add(L(ub-(k?1.2:0.05),ob+v*0.55),[0,ph2+0.15,0]),add(L(ub,ob+v*0.55),[0,y0+0.1,0]),0.09,0.09,cc(36,34,32),n)}
+   boxRF(mb,c,F,R,0.22,2*hw,y0-0.02,y1+0.02,cc(40,38,36),0,1,1);
+   const S=8;for(let q=0;q<S;q++){const t0=-hw+q*2*hw/S,t1=t0+2*hw/S,col=q%2?cc(240,240,236):cc(200,42,36);const P=(t,y)=>[c[0]+T[0]*t+N[0]*0.12,y,c[2]+T[2]*t+N[2]*0.12],k0=(Math.abs(t0)<1e-6?0:0),sk=0.22*(t0<0?-1:1);
+     // faixas inclinadas que formam um V ao centro
+     const a=P(t0+sk,y0),b=P(t1+sk,y0),cc3=P(t1-sk,y1),dd=P(t0-sk,y1);mb.q(a,b,cc3,dd,col,0);mb.q(b,a,dd,cc3,col,0)}}
   // carrinho de bagagens com caixotes no cais, junto ao armazém
   {const ph2=yb+0.3,c=L(u3-w3/2+4.2,d/2+2.4);boxRF(mb,c,F,R,2.0,1.1,ph2+0.35,ph2+0.5,cc(150,40,34),0,1,1);for(const a of[-0.8,0.8])for(const b of[-0.45,0.45])cyl(mb,add(c,add(mulv(F,a),mulv(n,b))),ph2,ph2+0.35,0.17,0.17,8,cc(150,40,34),0);
     limb(mb,add(c,add(mulv(F,1.0),[0,ph2+0.5,0])),add(c,add(mulv(F,1.25),[0,ph2+1.25,0])),0.05,0.05,cc(150,40,34),n);
