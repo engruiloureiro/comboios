@@ -361,7 +361,7 @@ const RAWP=RAWG.slice(0,6).map(r=>{const q=r.slice();q[4]=q[5]='00:00';return q}
  ['Mindelo',41.3060,-8.7180,21.973,'00:00','00:00','est',1,'SX',-1,100,0.35,26,'v-est'],
  ['Azurara - Árvore',41.3358,-8.7291,25.065,'00:00','00:00','ap',0,'SL',-1,60,0.3,13,'v-gran'],
  ['Vila do Conde',41.3530,-8.7420,26.951,'00:00','00:00','est',2,'VG',1,140,0.35,12,'v-est2'],
- ['Póvoa de Varzim',41.3800,-8.7600,30.283,'00:00','00:00','est',2,'VG',-1,150,0.35,14,'v-fafe'],
+ ['Póvoa de Varzim',41.3800,-8.7600,30.283,'00:00','00:00','est',2,'PVV',-1,150,0.35,14,'v-fafe'],
  ['Amorim',41.3920,-8.7400,33.984,'00:00','00:00','ap',0,'SL',-1,60,0.3,30,'v-ramal'],
  ['São Félix',41.4013,-8.7206,37.483,'00:00','00:00','ap',0,'SR',1,60,0.3,59,'v-ap'],
  ['Laundos',41.4050,-8.7130,38.85,'00:00','00:00','ap',0,'SL',-1,60,0.3,70,'v-ramal'],
@@ -377,7 +377,8 @@ const RAWP=RAWG.slice(0,6).map(r=>{const q=r.slice();q[4]=q[5]='00:00';return q}
 const RAW=RP?RAWP:RAWG;
 // geometria: coordenadas das interfaces dos GPX de referência (gpx/), por estação; entre elas a via é uma curva suave
 const GPXC={"Porto-Trindade":[41.1514167,-8.6089667],"Avenida de França":[41.1607028,-8.6288694],"Francos":[41.1658528,-8.636775],"Ramalde":[41.1730333,-8.6418611],"Circunvalação":[41.17755,-8.6468278],"Senhora da Hora":[41.18703,-8.65439],"Araújo":[41.21686,-8.64103],"Maia":[41.23296,-8.63444],"Mandim":[41.2515639,-8.6276694],"Castêlo da Maia":[41.2627389,-8.6169972],"Muro":[41.29649,-8.60053],"Bougado":[41.32283,-8.56932],"Trofa":[41.33951,-8.5542],"Lousado":[41.35091,-8.52663],"Santo Tirso":[41.35068,-8.47306],"Caniços":[41.3635222,-8.4379722],"Vila das Aves - Negrelos":[41.35753,-8.40613],"Giesteira":[41.36469,-8.38814],"Lordelo":[41.36553,-8.36355],"Cuca":[41.37647,-8.34188],"Pereirinhas":[41.37741,-8.32411],"Vizela":[41.37914,-8.3124],"Nespereira":[41.40314,-8.31953],"Covas":[41.42157,-8.30082],"Guimarães":[41.4352917,-8.2950583],"Aldão - S. Torcato":[41.45665,-8.26649],"Penha":[41.4511694,-8.2608389],"Paçô Vieira":[41.4390639,-8.2475611],"Fareja":[41.4142889,-8.2202194],"Cepães":[41.4373028,-8.20375],"Fafe":[41.4546694,-8.1710694],"Custóias":[41.2009611,-8.6553361],"Crestins":[41.2331889,-8.6566667],"Pedras Rubras":[41.2471472,-8.6622639],"Vilar do Pinheiro":[41.2706222,-8.6798611],"Modivas":[41.2832222,-8.6919306],"Vila Chã":[41.2941806,-8.6995778],"Mindelo":[41.3148833,-8.7140333],"Azurara - Árvore":[41.3401,-8.7254056],"Vila do Conde":[41.3536972,-8.7354917],"Póvoa de Varzim":[41.37794,-8.75832],"Amorim":[41.4067833,-8.7421583],"São Félix":[41.4379222,-8.7281417],"Laundos":[41.4471306,-8.7223917],"Rates":[41.4230556,-8.6735472],"Fontainhas":[41.4153972,-8.6513889],"Balazar":[41.4106722,-8.6361028],"Gondifelos":[41.4196444,-8.6044667],"Cavalões":[41.4199667,-8.5783917],"Outiz":[41.4170194,-8.5605806],"Barradas":[41.4207806,-8.5358917],"Famalicão":[41.40544,-8.5294]};
-const WPT=RAW.map(r=>{const g=GPXC[r[0]];return[g?g[0]:r[1],g?g[1]:r[2],r[3]]}).concat(RP?[[41.3800,-8.5180,62.726]]:[]).sort((a,b)=>a[2]-b[2]);
+// Póvoa de Varzim: a via atravessa a estação a direito e, logo a seguir, faz uma curva apertada à direita (raio ~90 m) onde fica o cais de Famalicão
+const WPT=RAW.map(r=>{const g=GPXC[r[0]];return[g?g[0]:r[1],g?g[1]:r[2],r[3]]}).concat(RP?[[41.3800,-8.5180,62.726],[41.3764659,-8.7569341,30.083],[41.3790460,-8.7593600,30.433],[41.3792279,-8.7594889,30.456],[41.3794287,-8.7595529,30.479],[41.3796352,-8.7595479,30.502],[41.3798340,-8.7594744,30.525],[41.3815002,-8.7585430,30.725]]:[]).sort((a,b)=>a[2]-b[2]);
 const TOT_KM=RP?66.026:80.585;
 const PROJ=(la,lo)=>[(lo+8.23)*Math.cos(41.44*Math.PI/180)*111320,(la-41.44)*110574];
 const GEO=(function(){
@@ -427,6 +428,8 @@ const LAY={
  FAM:{pl:[[-1.8,-6.2],[-14.3,-19.0],[5.8,8.6]],ex:[[0,4]]},
  // Guimarães: cais do edifício, cais central largo (com a pala azul) e mais duas vias para nascente
  GMR:{pl:[[-1.8,-7.0,-200,46],[1.8,7.0]],ex:[[0,8.8],[0,13.3]]},
+ // Póvoa de Varzim (planta dos anos 70): só o cais do edifício (comboios do Porto); as outras três vias ficam a sul
+ PVV:{pl:[[-1.8,-6.5]],ex:[[0,4],[0,8.5],[0,13]]},
  LSDG:{pl:[[1.8,6.0],[-1.8,-12.2],[-15.8,-21.2]],ex:[[0,-14]]},
  LSDP:{pl:[[-1.8,-7.2],[-10.8,-21.2],[-24.8,-29.0]],ex:[]},
 };
@@ -446,6 +449,12 @@ for(const s of STN){
 }
 // Paçô Vieira: o túnel (via única) acaba pouco antes do cais; a via de cruzamento só começa à saída do túnel
 PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
+// Póvoa de Varzim: o cais de e para Famalicão fica fora do recinto, na curva apertada à saída da estação, com um abrigo
+// caiado com as palavras POVOA DE VARZIM. Os comboios do Porto que acabam ou começam na Póvoa usam o cais do edifício;
+// os que vêm de Famalicão ou para lá seguem param no cais da curva
+const PVA=RP?byNameE('Póvoa de Varzim'):null;
+const PVF=PVA?{n:PVA.n,i:PVA.i,ty:'est',big:0,sty:'pvf',pos:PVA.pos+185,bc:PVA.pos+185,pa:PVA.pos+148,pb:PVA.pos+222,pl:[[-1.8,-6.0]],ph:0.3,bside:-1,ex:[],cano:null,tiles:false,conc:false,pvf:true}:null;
+if(PVA)PVA.bc0=PVA.bc;
 // Caniços: a agulha fica antes da ponte de ferro
 {const cn=byNameE('Caniços');if(cn)for(const e of cn.ex)e.b=cn.pb+12}
 // Lousado (planta dos anos 80): passagem de peões a meio dos cais; o edifício, pequeno, fica no cais-ilha logo a nascente dela
@@ -508,7 +517,7 @@ function stF(p){let d=1e9;for(const s of STN)d=Math.min(d,p<s.pa?s.pa-p:p>s.pb?p
 function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/(e.tl||60))}
 function branchOffs(p){return[]}
-function capAt(k){if(RP){if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
+function capAt(k){if(RP){if(k>30.40&&k<30.57)return 25;if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
   if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526){for(const[a0,b0]of[[30.85,31.8],[37.2,37.7],[43.4,44.3],[46.4,47.4],[50.1,50.8],[52.3,53.0],[54.1,54.8],[58.4,59.2]])if(k>=a0&&k<b0)return 30;return 50}return 70}
   if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
   if(Math.abs(k-6.05)<0.35)return 40;if(k>=6.4&&k<6.75)return 30;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
@@ -525,6 +534,9 @@ let LIMCH=[];
     const sc=RP?(i*SEG<km(30.852)?0.3:0.35):(i*SEG<km(42.5)?0.28:1)*(Math.abs(i*SEG-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
   if(RG){const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
   if(RG){const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
+  // Póvoa: a estação é a direito e a curva para Famalicão é apertada (raio ~90 m, entre 150 e 250 m depois do edifício)
+  if(RP&&PVA){const P0=PVA.pos,ia=Math.floor((P0+60)/SEG),ib=Math.floor((P0+420)/SEG),h0=HDG[ia],h1=HDG[ib],c0=P0+150,c1=P0+250;
+    for(let i=ia;i<=ib;i++){const t=clamp((i*SEG-c0)/(c1-c0),0,1);HDG[i]=h0+(h1-h0)*(0.75*t+0.25*sstep(t))}}
   for(let i=0;i<TOTAL;i++){let c=(HDG[i+1]-HDG[i])*SEG;const m=SEG*SEG/140;curve[i]=clamp(c,-m,m)}
   for(let i=0;i<=TOTAL;i++){const p=i*SEG;let q=0;while(q<STN.length-2&&STN[q+1].pos<p)q++;
     const a=STN[q],b=STN[q+1];let e;
@@ -545,6 +557,7 @@ let LIMCH=[];
     tun[i]=inRange(TUN,p)?1:0;brg[i]=(inRange(BRIDGES,p)||{t:0}).t;shed[i]=0;
     const rv=inRange(RIVER,p);riv[i]=rv?rv.side:0;
     for(const s of STN)if(p>=s.pa&&p<=s.pb){plat[i]=s;break}
+    if(PVF&&!plat[i]&&p>=PVF.pa&&p<=PVF.pb)plat[i]=PVF;
     const r=[];{const v=exOff(DBL,p);if(v!==null&&Math.abs(v)>0.25)r.push(v)}{const v=jshOff(p);if(v!==null&&Math.abs(v)>0.25)r.push(v)}for(const s of STN){if(p<s.pa-400||p>s.pb+400)continue;for(const e of s.ex){const v=exOff(e,p);if(v!==null&&Math.abs(v-e.from)>0.25)r.push(v)}}
     trk[i]=r;const xr=[];for(const X of XTR){if(p<X.a||p>X.b)continue;const v=X.f(p);if(Math.abs(v)>0.3&&Math.abs(v)<70)xr.push(v)}trkX[i]=xr}
   for(let k=0;k<TOTAL;k++){const p=k*SEG,z=zoneI[k];
@@ -586,7 +599,7 @@ const SIG=[],SIGB={F:[],R:[]};
  SIGB.R.sort((a,b)=>b.p-a.p);SIG.push(...SIGB.F,...SIGB.R);
  SIG.push({p:JSH-90,d:'F',k:'jn'});           // sinal da bifurcação: amarelo para a agulha desviada de Guimarães
  for(const s of STN){if(!s.ex.length||s===SB||s.pos<DBL.b+100||!(s.ex[0].a>0))continue;
-   SIG.push({p:s.ex[0].a-60,d:'F',k:'ent',st:s});if(s!==GMR)SIG.push({p:s.ex[0].b+60,d:'R',k:'ent',st:s})}}
+   SIG.push({p:s.ex[0].a-60,d:'F',k:'ent',st:s});if(s!==GMR)SIG.push({p:s===PVA?PVF.pb+45:s.ex[0].b+60,d:'R',k:'ent',st:s})}}
 function sigState(g){if(g.k==='ent')return g.st.divert?'Y':'G';if(g.k==='jn')return RG?'Y':'G';
   const L=SIGB[g.d],ix=L.indexOf(g),n1=L[ix+1],n2=L[ix+2],F=g.d==='F';
   const occ=(a,b)=>TRAINS.some(t=>t.lead&&t.d===g.d&&t.a<Math.max(a,b)&&t.a+t.len>Math.min(a,b));
@@ -850,7 +863,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   put(PV.pos-20,{t:'wtank',x:-9});put(GUI.bc+29,{t:'wcol',x:2.9});put(GMR.pos-100,{t:'wtank',x:-11});put(TRF.pos-30,{t:'wtank',x:-13});put(SB.pos-40,{t:'wcol',x:-5.4});
   for(let j=0;j<4;j++)put(kmG(15.6)+j*140,{t:'mill',x:1*(14+22+3+rnd()*4)});
   put(kmG(15.3),{t:'mill',x:-(18+22+3)})}
-  else{put(FAM.pos-60,{t:'armazem',x:15,w:26});put(byNameE('Póvoa de Varzim').pos-40,{t:'armazem',x:-15,w:24});put(byNameE('Póvoa de Varzim').pos+20,{t:'wtank',x:13,lbl:'wtPV'});put(byNameE('Póvoa de Varzim').pos+70,{t:'wcol',x:-5.4});put(byNameE('Póvoa de Varzim').pos+150,{t:'cabana',x:-9});put(FAM.pos-30,{t:'wtank',x:-13});put(SB.pos-40,{t:'wcol',x:-5.4})}
+  else{put(FAM.pos-60,{t:'armazem',x:15,w:26});put(byNameE('Póvoa de Varzim').pos-40,{t:'armazem',x:-15,w:24});put(byNameE('Póvoa de Varzim').pos+20,{t:'wtank',x:13,lbl:'wtPV'});put(byNameE('Póvoa de Varzim').pos+70,{t:'wcol',x:-5.4});put(PVF.bc,{t:'pvfam',x:-6.4});put(PVF.bc+8,{t:'campo',x:17,w:70,d:16,k:'prado'});put(PVF.bc+8,{t:'couves',x:17,w:60,d:13});for(let u=-36;u<=44;u+=10)put(PVF.bc+u,{t:'muro',x:8.5,len:10.4,h:1.2});put(FAM.pos-30,{t:'wtank',x:-13});put(SB.pos-40,{t:'wcol',x:-5.4})}
   // palas dos cais da Trindade
   for(const x of[-2.5,6.25])for(const d of[30,90])put(SB.pos-d,{t:'canopy',x,len:56,w:x<0?1.3:0.8});
   put(SB.pos-4,{t:'lclock',x:-2.6,n:'1'});put(SB.pos-4,{t:'lclock',x:6.25,n:'2'});
@@ -1089,6 +1102,8 @@ const SEMI={
 let SHIFT=0,PERIOD='tarde';
 const routeShift=(i,rev)=>RG&&!rev&&i<GUI.i?2*3600:0;const PSH={dia:-5*3600,tarde:0,noite:4.5*3600};
 function reset(startIdx,endIdx,rev,svc){
+  // Póvoa: comboios de/para Famalicão param no cais da curva; os do Porto no cais do edifício
+  if(PVA){const lo=Math.min(startIdx,endIdx),hi=Math.max(startIdx,endIdx),nb=(PVA.i>=lo&&hi>PVA.i)?PVF.bc:PVA.bc0;if(nb!==PVA.bc){PVA.bc=nb;PVA.pvfNow=nb!==PVA.bc0;if(typeof use3D!=='undefined'&&use3D)try{preparePax()}catch(e){}}}
   const nc=FORCE_NC||(UNITS===0?(Math.random()<0.4?4:2):UNITS*2);FORCE_NC=0;setStops(nc);
   REV=!!rev;DIRC=REV?'R':'F';
   const cust=svc&&typeof svc==='object'?svc:null;
@@ -2307,6 +2322,9 @@ function init3D(){
     for(let u=18;u<w;u+=46){x.beginPath();x.arc(u,h-14,9,Math.PI,0);x.stroke();x.beginPath();x.arc(u+23,14,9,0,Math.PI);x.stroke()}
     if(nm){x.fillStyle='#f4f6fa';x.fillRect(w*0.2,16,w*0.6,h-32);x.fillStyle='#1f4e9c';fitText(x,nm.toUpperCase(),w*0.56,h*0.5,'700','"Cormorant Garamond",Georgia,serif');x.textAlign='center';x.textBaseline='middle';x.fillText(nm.toUpperCase(),w/2,h/2+3)}};
   atAlloc('az:',512,80,(x,w,h)=>azF(x,w,h,''));
+  // letreiro pintado na cal do abrigo do cais de Famalicão (Póvoa de Varzim)
+  atAlloc('pvfT',512,300,(x,w,h)=>{x.fillStyle='rgb(240,238,230)';x.fillRect(0,0,w,h);x.fillStyle='#1c1a18';x.textAlign='center';x.textBaseline='middle';
+    const f='"Times New Roman",Georgia,serif';fitText(x,'POVOA',w*0.9,118,'700',f);x.fillText('POVOA',w/2,62);fitText(x,'DE',w*0.3,60,'700',f);x.fillText('DE',w/2,140);fitText(x,'VARZIM',w*0.92,118,'700',f);x.fillText('VARZIM',w/2,228)});
   for(const s of STN){if(s.sty==='v-maia'||s.sty==='v-ara')atAlloc('az:'+s.n,640,80,(x,w,h)=>azF(x,w,h,s.n));atBoard(s.n);atAlloc('pn:'+s.n,560,100,(x,w,h)=>{const pk=s.sty==='v-gmr';x.fillStyle=pk?'rgb(194,86,74)':'rgb(238,236,228)';x.fillRect(0,0,w,h);x.fillStyle='#2a2522';fitText(x,s.n.toUpperCase(),w-20,72,'700','"Barlow Condensed",Arial,sans-serif');x.textAlign='center';x.textBaseline='middle';x.fillText(s.n.toUpperCase(),w/2,h/2+4)})}
   for(const c of LIMCH){atLim(c.v);atLim(c.prev);atAvis(c.v);atAvis(c.prev)}
   for(let k=0;k<90;k++)atTxt('pk'+k,String(k),'#f2f2ee','#111',64,64,46);
@@ -3140,6 +3158,43 @@ function obj3(mb,sp,i,L){
   case'wtank':{const y=gy();cyl(mb,c,y,y+5,1.6,1.6,12,cc(170,162,150),13);cyl(mb,c,y+5,y+7.4,2.2,2.2,14,sp.lbl?cc(150,152,150):cc(70,72,70),11);cyl(mb,c,y+7.4,y+7.7,2.3,0.2,14,cc(60,60,60),0);
     if(sp.lbl&&ATL[sp.lbl]){const ft=faceTrack(i,sp.x);plateQ(mb,add([c[0],y+6.5,c[2]],mulv(ft,2.25)),ft,3.2,0.7,ATL[sp.lbl],0,false)}
     const cr=add(c,mulv(faceTrack(i,sp.x),3.5));boxRF(mb,cr,R,F,0.35,0.35,y,y+3.2,cc(50,54,52),0);boxRF(mb,add(cr,mulv(faceTrack(i,sp.x),1.1)),R,F,2.2,0.2,y+3.0,y+3.25,cc(50,54,52),0);break}
+  case'pvfam':{// Póvoa: abrigo caiado do cais de Famalicão com as palavras POVOA DE VARZIM e, atrás, o casarão antigo de óculo na empena
+    const y=hy[i]+0.05,n=fr,o=(u,v)=>add(c,add(mulv(F,u),mulv(n,v))),WHc=cc(240,238,230),GRc=cc(150,148,142),TL=cc(168,82,58),DK=cc(34,32,30);
+    const w=6.6,d=4.2,h=3.5,cA=o(0,-d/2);boxRF(mb,cA,F,R,w,d,y,y+h,WHc,6,2,2);boxRF(mb,cA,F,R,w+0.06,d+0.06,y,y+0.45,cc(200,196,186),13,1,1,0,1,true);
+    boxRF(mb,cA,F,R,w+0.16,d+0.16,y+h,y+h+0.22,cc(226,224,216),13,1,1);
+    {const a=add(o(-w/2-0.2,0.15),[0,y+h+0.05,0]),b=add(o(w/2+0.2,0.15),[0,y+h+0.05,0]),bb=add(o(w/2+0.2,-d-0.3),[0,y+h+0.75,0]),aa=add(o(-w/2-0.2,-d-0.3),[0,y+h+0.75,0]);
+     if(dot(nrm(a,b,aa),[0,1,0])<0)mb.q(b,a,aa,bb,TL,5,[0,0,2,1]);else mb.q(a,b,bb,aa,TL,5,[0,0,2,1])}
+    const T=ATL['pvfT'],toS=mulv(F,-1);
+    if(T){const e=add(o(-w/2-0.04,-d/2),[0,y+h-0.95,0]);plateQ(mb,e,toS,3.3,1.9,T,0,false);plateQ(mb,add(o(0.6,0.04),[0,y+h-0.9,0]),n,3.0,1.75,T,0,false)}
+    // porta e janela com molduras de cantaria cinzenta
+    {const p0=o(-1.9,0.03),Tn=cross([0,1,0],n);const fq=(cc0,hw,y0,y1,col)=>{const A=[cc0[0]-Tn[0]*hw,y0,cc0[2]-Tn[2]*hw],B=[cc0[0]+Tn[0]*hw,y0,cc0[2]+Tn[2]*hw];mb.q(A,B,[B[0],y1,B[2]],[A[0],y1,A[2]],col,0)};
+     fq(add(p0,mulv(n,0.01)),0.62,y+0.02,y+2.25,GRc);fq(add(p0,mulv(n,0.03)),0.48,y+0.02,y+2.1,DK);
+     const p1=o(2.2,0.03);fq(add(p1,mulv(n,0.01)),0.55,y+0.95,y+2.2,GRc);fq(add(p1,mulv(n,0.03)),0.42,y+1.05,y+2.08,cc(52,62,70))}
+    {const e2=add(o(-w/2-0.03,-d*0.7),[0,0,0]),Tn=cross([0,1,0],toS);const fq=(cc0,hw,y0,y1,col)=>{const A=[cc0[0]-Tn[0]*hw,y0,cc0[2]-Tn[2]*hw],B=[cc0[0]+Tn[0]*hw,y0,cc0[2]+Tn[2]*hw];mb.q(A,B,[B[0],y1,B[2]],[A[0],y1,A[2]],col,0)};
+     fq(add(e2,mulv(toS,0.01)),0.55,y+0.3,y+1.35,GRc);fq(add(e2,mulv(toS,0.03)),0.42,y+0.4,y+1.25,DK)}
+    // casarão antigo atrás: dois pisos, reboco gasto, empena virada à estação com óculo e janela de arco
+    {const w2=8.5,d2=7,h2=5.6,cB=o(1.2,-d-d2/2-0.3),BG=cc(214,210,198);boxRF(mb,cB,F,R,w2,d2,y,y+h2,BG,13,3,3);
+     const ap=add(add(cB,mulv(F,0)),[0,y+h2,0]),ph=2.4;
+     for(const e of[-1,1]){const N=mulv(F,e),A=add(o(1.2+e*w2/2,-d-0.3),[0,y+h2,0]),B=add(o(1.2+e*w2/2,-d-0.3-d2),[0,y+h2,0]),Cc=add(o(1.2+e*w2/2,-d-0.3-d2/2),[0,y+h2+ph,0]);
+       mb.t(A,B,Cc,N,N,N,BG,[0,0],[1,0],[0.5,1],0,0,1);mb.t(B,A,Cc,mulv(N,-1),mulv(N,-1),mulv(N,-1),BG,[0,0],[1,0],[0.5,1],0,0,1)}
+     {const a=add(o(1.2-w2/2-0.3,-d-0.3+0.4),[0,y+h2-0.15,0]),b=add(o(1.2+w2/2+0.3,-d-0.3+0.4),[0,y+h2-0.15,0]),r1=add(o(1.2+w2/2+0.3,-d-0.3-d2/2),[0,y+h2+ph,0]),r0=add(o(1.2-w2/2-0.3,-d-0.3-d2/2),[0,y+h2+ph,0]);
+      const a2=add(o(1.2+w2/2+0.3,-d-0.3-d2-0.4),[0,y+h2-0.15,0]),b2=add(o(1.2-w2/2-0.3,-d-0.3-d2-0.4),[0,y+h2-0.15,0]);
+      for(const[q0,q1,q2,q3]of[[a,b,r1,r0],[a2,b2,r0,r1]]){if(dot(nrm(q0,q1,q3),[0,1,0])<0)mb.q(q1,q0,q3,q2,TL,5,[0,0,3,1.2]);else mb.q(q0,q1,q2,q3,TL,5,[0,0,3,1.2])}}
+     const ge=add(o(1.2-w2/2-0.05,-d-0.3-d2/2),[0,0,0]),Tg=cross([0,1,0],toS);
+     {const oc=[ge[0],y+h2+0.95,ge[2]];for(let q=0;q<14;q++){const a0=q/14*6.283,a1=(q+1)/14*6.283,r=0.38,P2=(a,rad)=>[oc[0]+Tg[0]*Math.cos(a)*rad,oc[1]+Math.sin(a)*rad,oc[2]+Tg[2]*Math.cos(a)*rad];
+       mb.t(oc,P2(a0,r),P2(a1,r),toS,toS,toS,DK,[0,0],[1,0],[0,1],0,0,1);mb.q(P2(a0,r),P2(a1,r),P2(a1,r+0.14),P2(a0,r+0.14),GRc,0)}}
+     {const fq=(t,hw,y0,y1,col,off)=>{const cc0=add(ge,add(mulv(Tg,t),mulv(toS,off)));const A=[cc0[0]-Tg[0]*hw,y0,cc0[2]-Tg[2]*hw],B=[cc0[0]+Tg[0]*hw,y0,cc0[2]+Tg[2]*hw];mb.q(A,B,[B[0],y1,B[2]],[A[0],y1,A[2]],col,0)};
+      fq(0,0.7,y+2.6,y+4.2,GRc,0.02);fq(0,0.55,y+2.7,y+4.1,cc(52,58,64),0.04);for(let q=0;q<8;q++){const a0=q/8*Math.PI,a1=(q+1)/8*Math.PI,cc0=add(ge,mulv(toS,0.04)),yy=y+4.1,r=0.55;
+        const P2=(a,rr)=>[cc0[0]+Tg[0]*Math.cos(a)*rr,yy+Math.sin(a)*rr,cc0[2]+Tg[2]*Math.cos(a)*rr];mb.t([cc0[0],yy,cc0[2]],P2(a1,r),P2(a0,r),toS,toS,toS,cc(52,58,64),[0,0],[1,0],[0,1],0,0,1);mb.q(P2(a1,r),P2(a0,r),P2(a0,r+0.15),P2(a1,r+0.15),GRc,0)}
+      fq(-2.4,0.5,y+0.6,y+1.9,cc(52,58,64),0.03);fq(2.4,0.5,y+0.6,y+1.9,cc(52,58,64),0.03)}}
+    // poste telegráfico e candeeiro do cais
+    boxRF(mb,o(3.6,1.2),F,R,0.16,0.16,y+0.3,y+4.2,cc(52,50,46),0,1,1);boxRF(mb,o(3.6,1.2),F,R,0.3,0.3,y+4.2,y+4.55,cc(255,236,190),0,0,0,0.6);
+    break}
+  case'couves':{// horta de couves no lado de dentro da curva
+    const nr=Math.max(2,Math.round(sp.d/0.9)),nc=Math.max(2,Math.round(sp.w/1.0));
+    for(let a=0;a<nc;a++)for(let b=0;b<nr;b++){const u=-sp.w/2+(a+0.5)*sp.w/nc,xx=sp.x-sp.d/2+(b+0.5)*sp.d/nr,ii=clamp(i+Math.round(u/SEG),0,TOTAL-1),bp=PI(ii,xx,0),yy=terrH(ii,xx,bp[0],bp[2]);
+      if(h2(a*7+b,i)<0.12)continue;const P=L([bp[0]+(h2(a,b)-0.5)*0.3,0,bp[2]+(h2(b,a)-0.5)*0.3]);blob(mb,[P[0],yy+0.28,P[2]],0.34,0.26,0.34,cc(70+(a*13+b*7)%20,118+(a*5+b*11)%26,84),a*31+b)}
+    break}
   case'cabana':{const y=gy(),ft=faceTrack(i,sp.x);boxRF(mb,c,F,R,3.0,2.4,y,y+2.3,cc(196,170,120),0);hipRoof(mb,c,F,R,3.0,2.4,y+2.3,0.8,cc(200,50,38),0.25);
     boxRF(mb,add(c,mulv(ft,1.22)),F,R,0.9,0.05,y,y+1.9,cc(120,90,58),0);break}
   case'pnu':{// passagem de nível sem guarda: cruz de Santo André (branca com orla vermelha) num poste
