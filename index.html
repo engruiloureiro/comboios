@@ -453,8 +453,8 @@ PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
 // caiado com as palavras POVOA DE VARZIM. Os comboios do Porto que acabam ou começam na Póvoa usam o cais do edifício;
 // os que vêm de Famalicão ou para lá seguem param no cais da curva
 const PVA=RP?byNameE('Póvoa de Varzim'):null;
-const PVF=PVA?{n:PVA.n,i:PVA.i,ty:'est',big:0,sty:'pvf',pos:PVA.pos+185,bc:PVA.pos+185,pa:PVA.pos+148,pb:PVA.pos+222,pl:[[-1.8,-6.0]],ph:0.3,bside:-1,ex:[],cano:null,tiles:false,conc:false,pvf:true}:null;
-if(PVA)PVA.bc0=PVA.bc;
+const PVF=PVA?{n:PVA.n,i:PVA.i,ty:'est',big:0,sty:'pvf',pos:PVA.pos+85,bc:PVA.pos+85,pa:PVA.pos+50,pb:PVA.pos+122,pl:[[-1.8,-6.0]],ph:0.3,bside:-1,ex:[],cano:null,tiles:false,conc:false,pvf:true}:null;
+if(PVA){PVA.bc0=PVA.bc;for(const e of PVA.ex)e.b=PVA.pos+30}
 // Caniços: a agulha fica antes da ponte de ferro
 {const cn=byNameE('Caniços');if(cn)for(const e of cn.ex)e.b=cn.pb+12}
 // Lousado (planta dos anos 80): passagem de peões a meio dos cais; o edifício, pequeno, fica no cais-ilha logo a nascente dela
@@ -517,7 +517,7 @@ function stF(p){let d=1e9;for(const s of STN)d=Math.min(d,p<s.pa?s.pa-p:p>s.pb?p
 function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/(e.tl||60))}
 function branchOffs(p){return[]}
-function capAt(k){if(RP){if(k>30.40&&k<30.57)return 25;if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
+function capAt(k){if(RP){if(k>30.30&&k<30.48)return 25;if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
   if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526){for(const[a0,b0]of[[30.85,31.8],[37.2,37.7],[43.4,44.3],[46.4,47.4],[50.1,50.8],[52.3,53.0],[54.1,54.8],[58.4,59.2]])if(k>=a0&&k<b0)return 30;return 50}return 70}
   if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
   if(Math.abs(k-6.05)<0.35)return 40;if(k>=6.4&&k<6.75)return 30;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
@@ -534,8 +534,8 @@ let LIMCH=[];
     const sc=RP?(i*SEG<km(30.852)?0.3:0.35):(i*SEG<km(42.5)?0.28:1)*(Math.abs(i*SEG-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
   if(RG){const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
   if(RG){const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
-  // Póvoa: a estação é a direito e a curva para Famalicão é apertada (raio ~90 m, entre 150 e 250 m depois do edifício)
-  if(RP&&PVA){const P0=PVA.pos,ia=Math.floor((P0+60)/SEG),ib=Math.floor((P0+420)/SEG),h0=HDG[ia],h1=HDG[ib],c0=P0+150,c1=P0+250;
+  // Póvoa: a estação é a direito e a curva para Famalicão é apertada (raio ~95 m), logo a seguir ao fim do cais do edifício
+  if(RP&&PVA){const P0=PVA.pos,ia=Math.floor((P0-20)/SEG),ib=Math.floor((P0+420)/SEG),h0=HDG[ia],h1=HDG[ib],c0=P0+45,c1=P0+150;
     for(let i=ia;i<=ib;i++){const t=clamp((i*SEG-c0)/(c1-c0),0,1);HDG[i]=h0+(h1-h0)*(0.75*t+0.25*sstep(t))}}
   for(let i=0;i<TOTAL;i++){let c=(HDG[i+1]-HDG[i])*SEG;const m=SEG*SEG/140;curve[i]=clamp(c,-m,m)}
   for(let i=0;i<=TOTAL;i++){const p=i*SEG;let q=0;while(q<STN.length-2&&STN[q+1].pos<p)q++;
@@ -637,7 +637,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     if(tun[k]||shed[k]||lc[k]||lc[k+1]||(k>0&&lc[k-1]))continue;
     if(k%200===0&&p>OFF)spr[k].push({t:'pk',x:-3.6,v:((p-OFF)/1000).toFixed(0)});
     // passagens superiores rodoviárias
-    if(p>=nextOver&&(z==='city'||z==='urban'||z==='porto'||z==='porto2'||z==='mixed'||z==='ind')&&!pl&&!brg[k]&&stF(p)>0.2){
+    if(p>=nextOver&&!(PVA&&p>PVA.pos-400&&p<PVA.pos+700)&&(z==='city'||z==='urban'||z==='porto'||z==='porto2'||z==='mixed'||z==='ind')&&!pl&&!brg[k]&&stF(p)>0.2){
       spr[k].push({t:'over',x:0,w:dbl?44:36,c:dbl?2:0});nextOver=p+500+rnd()*900;OVK.push(k);
     }
     if(brg[k]){continue}
