@@ -1291,13 +1291,20 @@ function airHiss(dur,vol,fc,q){if(!AC||muted)return;const s2=AC.createBufferSour
   f.frequency.setValueAtTime(fc||1800,t);f.frequency.exponentialRampToValueAtTime((fc||1800)*0.7,t+dur);
   s2.connect(f);f.connect(f2);f2.connect(g);g.connect(A.bus);g.connect(A.rev);s2.start(t,Math.random()*2);s2.stop(t+dur+0.1)}
 // apito do chefe da estação: gravação enviada pelo utilizador (apito_chefe.wav, mono 24 kHz); o sintetizado fica de reserva
-let WHB=null,WHL=false;
-function whistleLoad(){if(WHL||!AC)return;const el=document.getElementById('apitowav');if(!el)return;WHL=true;
+let WHB=null,WHL=false,WHP=null;
+function whistleLoad(){if(WHB||WHP)return WHP;const el=document.getElementById('apitowav');if(!el)return null;
   try{const bin=atob(el.textContent.trim()),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-    AC.decodeAudioData(u.buffer).then(b=>{WHB=b}).catch(()=>{WHL=false})}catch(e){WHL=false}}
+    const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext,dc=AC||(OC?new OC(1,1,24000):null);if(!dc)return null;
+    WHP=new Promise((res,rej)=>{const p=dc.decodeAudioData(u.buffer,res,rej);if(p&&p.catch)p.catch(rej)}).then(b=>{WHB=b;WHL=true;return b}).catch(()=>{WHP=null;return null});
+  }catch(e){WHP=null}return WHP}
+try{whistleLoad()}catch(e){}
 window.__whb=()=>WHB?WHB.duration:0;
-function whistle(){if(!AC||muted)return;whistleLoad();
-  if(WHB){const s=AC.createBufferSource(),g=AC.createGain();s.buffer=WHB;g.gain.value=0.42;s.connect(g);g.connect(A.bus);if(A.rev){const r=AC.createGain();r.gain.value=0.12;g.connect(r);r.connect(A.rev)}s.start();return}
+function whistle(){if(!AC||muted)return;
+  if(!WHB){const p=whistleLoad();if(p){p.then(b=>{if(b&&!muted){if(AC.state!=='running')AC.resume();whPlay(b)}});return}}
+  if(WHB){whPlay(WHB);return}
+  whSynth()}
+function whPlay(b){const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;g.gain.value=0.42;s.connect(g);g.connect(A.bus);if(A.rev){const r=AC.createGain();r.gain.value=0.12;g.connect(r);r.connect(A.rev)}s.start()}
+function whSynth(){if(!AC)return;
   const t=AC.currentTime;for(let k=0;k<2;k++){const o=AC.createOscillator(),g=AC.createGain(),l=AC.createOscillator(),lg=AC.createGain();o.frequency.value=2750;l.frequency.value=28;lg.gain.value=160;l.connect(lg);lg.connect(o.frequency);g.gain.setValueAtTime(0.0001,t+k*0.55);g.gain.linearRampToValueAtTime(0.09,t+k*0.55+0.03);g.gain.setValueAtTime(0.09,t+k*0.55+(k?0.7:0.35));g.gain.exponentialRampToValueAtTime(0.001,t+k*0.55+(k?0.8:0.42));o.connect(g);g.connect(A.bus);o.start(t+k*0.55);l.start(t+k*0.55);o.stop(t+k*0.55+0.9);l.stop(t+k*0.55+0.9)}}
 function doorCloseSnd(){if(!AC)return;setTimeout(()=>{hiss(.5,.2);beep(70,.25,.3,'sine')},1750)}
 let voice=null;
