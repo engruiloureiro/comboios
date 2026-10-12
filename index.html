@@ -239,7 +239,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <div class="azulejo">Horário de 1985<small>Via estreita do Porto · toque num comboio para o conduzir</small></div>
     <div class="tttab" id="ttTabs" role="tablist"></div>
     <div id="ttBody"></div>
-    <p style="font-size:13px;color:#aab;margin:4px 0 10px">Horas de partida em cada estação (chegada no destino). Os comboios param em todas as estações e apeadeiros, exceto Alvarelhos; os semidiretos só param nas estações. Nos comboios Guimarães ↔ Póvoa, a inversão de marcha faz-se em Lousado.</p>
+    <p style="font-size:13px;color:#aab;margin:4px 0 10px">Horas de partida em cada estação (chegada no destino). Os comboios param em todas as estações e apeadeiros, exceto Alvarelhos; os semidiretos só param nas estações. Os comboios Guimarães ↔ Póvoa passam pela concordância de Lousado, sem inverter a marcha: mude a agulha (Z) ao aproximar-se.</p>
     <button class="cta alt" id="ttBack">Voltar ao menu</button>
   </div>
 </div>
@@ -514,7 +514,7 @@ if(PVG)for(const T of PVG.tracks){const X={a:T.s0,b:T.end,m:false,pv:T,f:p=>p<=P
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
 // via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
 let SIDE=[];
-const trackX=p=>{if(S&&S.pvT&&PVG&&p>PVG.tracks[0].s0&&p<PVG.sC+260){const T=PVG.tracks[0];return p<=PVG.sC?T.n*sstep((p-T.s0)/T.l):T.n}if(S&&S.divJ&&p>JSW)return XTR[0].f(p);if(S&&S.divH&&p>JSH)return jshOff(p);for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
+const trackX=p=>{if(S&&S.divC){const v=jcOff(p);if(v!==null)return v}if(S&&S.pvT&&PVG&&p>PVG.tracks[0].s0&&p<PVG.sC+260){const T=PVG.tracks[0];return p<=PVG.sC?T.n*sstep((p-T.s0)/T.l):T.n}if(S&&S.divJ&&p>JSW)return XTR[0].f(p);if(S&&S.divH&&p>JSH)return jshOff(p);for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=RP?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
@@ -1532,6 +1532,11 @@ function step(dt,dr){
   if(LSD&&RP&&S.swJ&&REV&&!S.back&&S.prevPos>=JSW-12&&S.pos<JSW-12)xferLine();
   {const c=cabSwapOK();if(c!==!!S.cabOK){S.cabOK=c;updRev()}}
   // via desviada em marcha à frente: a composição segue a curva da agulha e passa para a outra linha
+  // concordância: em frente pela agulha desviada e passagem para a outra linha
+  if(LSD&&S.swC&&!S.back&&(RP?!REV&&S.prevPos<JCN&&S.pos>=JCN:REV&&S.prevPos>JCN&&S.pos<=JCN))S.divC=true;
+  if(S.divC&&(RP?S.pos<JCN-1:S.pos>JCN+1))S.divC=false;
+  if(S.divC&&(RP?S.pos>=JCN+JCL:S.pos<=JCN-JCL))xferLine({ch:true});
+  if(LSD&&S.via&&!S.swC&&!S.jcWarn&&Math.abs(S.pos-JCN)<700&&(RP?!REV&&S.pos<JCN:REV&&S.pos>JCN)){S.jcWarn=true;toast('Concordância de Lousado a '+Math.round(Math.abs(S.pos-JCN))+' m: mude a agulha (Z) para seguir para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'),'')}
   if(LSD&&RG&&S.swJ&&!REV&&!S.back&&S.prevPos<JSW&&S.pos>=JSW)S.divJ=true;
   if(S.divJ&&S.pos<JSW-1)S.divJ=false;
   if(S.divJ&&S.pos>=JSW+200)xferLine({fw:true});
@@ -1541,7 +1546,15 @@ function step(dt,dr){
 }
 // agulha do entroncamento de Lousado: na Linha da Póvoa fica a sul da estação, na de Guimarães do lado da Trofa
 const JSW=LSD?(RP?LSD.pos+260:LSD.pos-480):null;
+// concordância de Lousado (diagrama da C.F.G.): liga a Linha do Minho (lado de Famalicão) à de Guimarães a nascente da estação,
+// com cais e abrigo próprios; os comboios Famalicão ↔ Guimarães passam por ela sem inverter a marcha
+const JCN=LSD?(RP?LSD.pos-320:LSD.pos+260):null,JCR=260,JCL=170;
+function jcOff(p){if(!LSD)return null;const d=RP?p-JCN:JCN-p;if(d<=0||d>JCL+30)return null;return -d*d/(2*JCR)}
+if(LSD)XTR.push(RP?{a:JCN,b:JCN+JCL+30,m:false,f:p=>jcOff(p)??0}:{a:JCN-JCL-30,b:JCN,m:false,f:p=>jcOff(p)??0});
 function swBtn(){if(!running||!S)return;
+  if(LSD&&Math.abs(S.pos-JCN)<900&&Math.abs(S.pos-JCN)<Math.abs(S.pos-JSW)&&(RP?!REV&&S.pos<JCN:REV&&S.pos>JCN)){if(S.divC){toast('Não se muda a agulha com o comboio em cima dela.','');return}
+    S.swC=!S.swC;S.swCT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);
+    toast(S.swC?'Agulha da concordância de Lousado: siga em frente para a '+(RP?'Linha de Guimarães.':'Linha do Minho, a caminho de Famalicão.'):'Agulha reposta para a linha direta (estação de Lousado).','good');return}
   if(S.divJ||S.divH){toast('Não se muda a agulha com o comboio em cima dela.','');return}
   if(Math.abs(S.pos-JSH)<1500&&(!LSD||Math.abs(S.pos-JSH)<Math.abs(S.pos-JSW))){if(S.v>0.05&&Math.abs(S.pos-JSH)<60){toast('Não se muda a agulha com o comboio em cima dela.','');return}
     S.swH=!S.swH;S.swHT=performance.now()/1000;beep(500,.12,.12,'square');setTimeout(()=>beep(180,.5,.1,'sawtooth'),120);
@@ -1555,7 +1568,7 @@ function swBtn(){if(!running||!S)return;
   if(fw){toast(S.swJ?'Agulha de Lousado mudada para a Linha da Póvoa: siga em frente, a automotora toma a via desviada para Famalicão.':'Agulha reposta para a linha direta (Guimarães).','good');return}
   if(S.v>0.05){S.swJ=!S.swJ;toast('Pare antes de mudar a agulha.','');return}
   toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Carregue em Troca de cabine e siga em frente.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, carregue em Troca de cabine e siga em frente.'):'Agulha reposta para a linha direta.','good')}
-function xferLine(x){const fw=!!(x&&x.fw);const o={sh:x&&x.sh,fw,lsd:LSD&&LSD.pos,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(fw?'Póvoa de Varzim':RP?'Guimarães':'Porto-Trindade')};
+function xferLine(x){const fw=!!(x&&x.fw),ch=!!(x&&x.ch);const o={sh:x&&x.sh,fw,ch,lsd:LSD&&LSD.pos,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(fw?'Póvoa de Varzim':ch?(RP?'Guimarães':'Póvoa de Varzim'):RP?'Guimarães':'Porto-Trindade')};
   try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;
   // liberta o 3D e o som antes de recarregar, para a página nova os conseguir obter (sobretudo nos telemóveis)
   try{const x=gl&&gl.getExtension('WEBGL_lose_context');if(x)x.loseContext()}catch(e){}try{if(AC&&AC.state!=='closed')AC.close().catch(()=>{})}catch(e){}
@@ -3833,6 +3846,7 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
     // lanterna da agulha, acesa à noite (branca na direta, amarela na desviada)
     const lc=a>0.5?[1,0.8,0.2]:[1,1,0.95];boxRF(mb,[ip[0],0,ip[2]],[1,0,0],[0,0,1],0.16,0.16,yC+0.3,yC+0.5,lc,0,0,0,1)};
   if(LSD&&Math.abs(JSW-centerP)<700)swDraw(JSW,RG?1:-1,S&&S.swJ,S&&S.swT);
+  if(LSD&&Math.abs(JCN-centerP)<700)swDraw(JCN,RP?1:-1,S&&S.swC,S&&S.swCT);
   if(Math.abs(JSH-centerP)<700)swDraw(JSH,1,S&&S.swH,S&&S.swHT);
   for(const g of SIG){if(!g.w3||Math.abs(g.p-centerP)>1600)continue;const st=g.d===DIRC?sigState(g):(g.k==='exit'?'R':'G');
      if(g.sema&&SIGMECH){
@@ -4264,7 +4278,7 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
   document.querySelectorAll('#perSel button').forEach(b=>{b.classList.toggle('on',b.dataset.p===PERIOD);b.setAttribute('aria-checked',b.dataset.p===PERIOD)})}
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 document.querySelectorAll('#uniSel button').forEach(b=>b.onclick=()=>{UNITS=+b.dataset.u;document.querySelectorAll('#uniSel button').forEach(q=>q.classList.toggle('on',q===b));setStops(UNITS===2?4:2);if(!$('#ovCustom').hidden)custRender()});
-function saveObj(){return{v:1,line:LINE,free:!!S.free,via:S.via||null,viaEnd:S.viaEnd||null,swJ:!!S.swJ,swH:!!S.swH,ns:STN.length,ncar:S.ncar,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
+function saveObj(){return{v:1,line:LINE,free:!!S.free,via:S.via||null,viaEnd:S.viaEnd||null,swJ:!!S.swJ,swH:!!S.swH,swC:!!S.swC,ns:STN.length,ncar:S.ncar,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
     s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
     onboard:ONBOARD.map(p=>({...p,c:p.c.slice()})),paxTaken:STN.map(s=>({taken:(s.pax3||[]).map(p=>!!p.in),alighted:!!s.alightDone})),
     st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])}}
@@ -4287,7 +4301,7 @@ function applySave(o){if(!o)return;
   Object.assign(S,o.s);ONBOARD=Array.isArray(o.onboard)?o.onboard.filter(p=>p&&Number.isFinite(p.d)&&Number.isFinite(p.x)&&Array.isArray(p.c)).slice(0,272):[];S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
   o.st.forEach((q,k)=>{STN[k].served=!!q[0];STN[k].skipped=!!q[1];STN[k].paxGone=q[2]});o.pn.forEach((q,k)=>{if(PN[k]){PN[k].done=!!q[0];PN[k].honk=!!q[1]}});
   if(Array.isArray(o.paxTaken))o.paxTaken.forEach((q,i)=>{const st=STN[i];if(!st||!q)return;st.alightDone=!!q.alighted;(st.pax3||[]).forEach((p,j)=>{p.in=!!(q.taken&&q.taken[j])})});
-  S.free=!!o.free;S.via=o.via||null;S.viaEnd=o.viaEnd||null;S.swJ=!!o.swJ;S.swH=!!o.swH;S.divJ=S.divH=false;
+  S.free=!!o.free;S.via=o.via||null;S.viaEnd=o.viaEnd||null;S.swJ=!!o.swJ;S.swH=!!o.swH;S.swC=!!o.swC;S.divJ=S.divH=S.divC=false;
   setNotch(S.notch,true);updRev();$('#bWarp').textContent='Tempo ×'+S.warp;$('#card').hidden=true;buildStrip();toast('Jogo retomado em '+fHMS(S.clock)+'.','good')}
 // guardar e abrir em ficheiro .json
 let DLNS=null;try{if(window.claude&&claude.use)claude.use('downloads').then(n=>{DLNS=n}).catch(()=>{})}catch(e){}
@@ -4368,7 +4382,7 @@ const TTS=[
  ['3201','P','Póvoa de Varzim','Famalicão','07:15'],['3203','P','Póvoa de Varzim','Famalicão','12:30'],['3205','P','Póvoa de Varzim','Famalicão','18:00'],
  ['3202','P','Famalicão','Póvoa de Varzim','06:15'],['3204','P','Famalicão','Póvoa de Varzim','10:00'],['3206','P','Famalicão','Póvoa de Varzim','15:00'],
  ['4101','X','Guimarães','Póvoa de Varzim','07:05'],['4103','X','Guimarães','Póvoa de Varzim','16:20'],['4102','X','Póvoa de Varzim','Guimarães','09:40'],['4104','X','Póvoa de Varzim','Guimarães','18:30']];
-const TTLSD=9*60;// inversão de marcha e mudança de agulha em Lousado
+const TTLSD=60;// paragem no cais da concordância de Lousado (sem inversão de marcha)
 // horário de um comboio num troço de uma linha: {estação: hora de partida (chegada no destino)}
 function ttLeg(line,a,z,t0,sd){for(const dir of['F','R']){const L=(sd?TTOS:TTO[line])[dir],ia=L.findIndex(r=>r[0]===a),iz=L.findIndex(r=>r[0]===z);if(ia<0||iz<0||iz<=ia)continue;
   const o={},b=L[ia][2];for(let k=ia;k<=iz;k++)o[L[k][0]]=t0+(k===iz?L[k][1]:L[k][2])-b;return{t:o,rev:dir==='R'}}return null}
@@ -4409,7 +4423,7 @@ function ttStart(n){const x=TTS.find(q=>q[0]===n);if(!x)return;const P=ttPlan(x)
   const a=byNameE(g.a),z=byNameE(g.z),t={};for(const k in g.t){const s=byNameE(k);if(s&&!s.nostop)t[s.i]=g.t[k]}
   $('#ovTT').hidden=true;start(a.i,z.i,g.rev,{t});S.ttn=n;
   if(x[1]==='X'){S.via=x[2]==='Guimarães'?'P':'G';S.viaEnd=x[3]}
-  toast('Comboio '+n+(x[5]==='S'?' (semidireto: não para nos apeadeiros)':'')+': '+x[2]+' → '+x[3]+', partida às '+fHM(t[a.i])+'.'+(x[1]==='X'?' Em Lousado inverte a marcha pela agulha (Z) para seguir para '+x[3]+'.':''),'good')}
+  toast('Comboio '+n+(x[5]==='S'?' (semidireto: não para nos apeadeiros)':'')+': '+x[2]+' → '+x[3]+', partida às '+fHM(t[a.i])+'.'+(x[1]==='X'?' Na concordância de Lousado mude a agulha (Z) e siga em frente para '+x[3]+'.':''),'good')}
 $('#bTT').onclick=()=>{$('#ovStart').hidden=true;$('#ovTT').hidden=false;ttRender()};$('#ttBack').onclick=()=>{$('#ovTT').hidden=true;$('#ovStart').hidden=false};
 if(!RETRY){let n=null;try{n=sessionStorage.getItem('pendingTT');sessionStorage.removeItem('pendingTT')}catch(e){}if(n)setTimeout(()=>ttStart(n),0)}
 document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i);S.via=b.dataset.via||null;S.viaEnd=b.dataset.end||null});$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
@@ -4455,9 +4469,9 @@ if(!RETRY){let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');s
   FORCE_NC=o.ncar||2;setStops(FORCE_NC);const t={};let c=o.fw?Math.round(o.clock):Math.ceil((o.clock+240)/60)*60;t[route[0].i]=c;
   for(let k=1;k<route.length;k++){const p=route[k-1],q=route[k];c+=Math.ceil((runMin(rev?p.stopR:p.stopF,rev?q.stopR:q.stopF)*1.14+45)/60)*60;if(k<route.length-1)c+=q.ty==='ap'?30:60;t[q.i]=c}
   FORCE_NC=o.ncar||2;start(LSD.i,z.i,rev,o.free?{t:{[LSD.i]:t[LSD.i]},free:true}:{t});S.free=o.free;S.back=false;updRev();S.sc=o.sc;S.maxPts+=o.maxPts||0;
-  if(o.fw){S.pos=S.prevPos=LSD.pos+(o.lsd-o.pos);S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;LSD.served=true;
+  if(o.fw||o.ch){S.pos=S.prevPos=o.ch?JCN+(RP?-1:1)*(JCL-o.pos+0):LSD.pos+(o.lsd-o.pos);if(o.ch)S.pos=S.prevPos=JCN+(RP?-60:60);S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;LSD.served=true;
    S.jI=0;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;setNotch&&setNotch(o.notch,true);
-   setTimeout(()=>toast('Lousado: entrou pela agulha na Linha da Póvoa, a caminho de Famalicão.','good'),1500)}
+   setTimeout(()=>toast(o.ch?'Concordância de Lousado: seguiu para a '+(RP?'Linha do Minho, a caminho de Famalicão.':'Linha de Guimarães.'):'Lousado: entrou pela agulha na Linha da Póvoa, a caminho de Famalicão.','good'),1500)}
   else setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Marcha em frente; partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
 window.__HIST={regions:HIST_REGIONS,audit:HIST_AUDIT,counts:()=>spr.reduce((a,row)=>{for(const o of row)if(o.hist)a[o.t]=(a[o.t]||0)+1;return a},{}),sceneAt:k=>spr[Math.floor(km(k)/SEG)]};
 window.__PEOPLE={get onboard(){return ONBOARD},get smoke(){return SMOKE},reserveSeat,seatedPassenger,chefe,saveObj,applySave};
