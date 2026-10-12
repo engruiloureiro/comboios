@@ -1550,6 +1550,7 @@ const JSW=LSD?(RP?LSD.pos+260:LSD.pos-480):null;
 // com cais e abrigo próprios; os comboios Famalicão ↔ Guimarães passam por ela sem inverter a marcha
 const JCN=LSD?(RP?LSD.pos-320:LSD.pos+260):null,JCR=260,JCL=170;
 function jcOff(p){if(!LSD)return null;const d=RP?p-JCN:JCN-p;if(d<=0||d>JCL+30)return null;return -d*d/(2*JCR)}
+if(LSD){const k=Math.floor((JCN+(RP?-90:90))/SEG);spr[k].push({t:'lsdch',x:-6.0})}
 if(LSD)XTR.push(RP?{a:JCN,b:JCN+JCL+30,m:false,f:p=>jcOff(p)??0}:{a:JCN-JCL-30,b:JCN,m:false,f:p=>jcOff(p)??0});
 function swBtn(){if(!running||!S)return;
   if(LSD&&Math.abs(S.pos-JCN)<900&&Math.abs(S.pos-JCN)<Math.abs(S.pos-JSW)&&(RP?!REV&&S.pos<JCN:REV&&S.pos>JCN)){if(S.divC){toast('Não se muda a agulha com o comboio em cima dela.','');return}
@@ -2383,6 +2384,7 @@ function init3D(){
     for(let u=18;u<w;u+=46){x.beginPath();x.arc(u,h-14,9,Math.PI,0);x.stroke();x.beginPath();x.arc(u+23,14,9,0,Math.PI);x.stroke()}
     if(nm){x.fillStyle='#f4f6fa';x.fillRect(w*0.2,16,w*0.6,h-32);x.fillStyle='#1f4e9c';fitText(x,nm.toUpperCase(),w*0.56,h*0.5,'700','"Cormorant Garamond",Georgia,serif');x.textAlign='center';x.textBaseline='middle';x.fillText(nm.toUpperCase(),w/2,h/2+3)}};
   atAlloc('az:',512,80,(x,w,h)=>azF(x,w,h,''));
+  atAlloc('lsdT',512,110,(x,w,h)=>{x.fillStyle='rgb(240,238,230)';x.fillRect(0,0,w,h);x.fillStyle='#1c1a18';x.textAlign='center';x.textBaseline='middle';fitText(x,'LOUSADO',w*0.9,90,'700','"Times New Roman",Georgia,serif');x.fillText('LOUSADO',w/2,h/2+4)});
   // letreiro pintado na cal do abrigo do cais de Famalicão (Póvoa de Varzim)
   atAlloc('pvfT',512,300,(x,w,h)=>{x.fillStyle='rgb(240,238,230)';x.fillRect(0,0,w,h);x.fillStyle='#1c1a18';x.textAlign='center';x.textBaseline='middle';
     const f='"Times New Roman",Georgia,serif';fitText(x,'POVOA',w*0.9,118,'700',f);x.fillText('POVOA',w/2,62);fitText(x,'DE',w*0.3,60,'700',f);x.fillText('DE',w/2,140);fitText(x,'VARZIM',w*0.92,118,'700',f);x.fillText('VARZIM',w/2,228)});
@@ -3219,6 +3221,12 @@ function obj3(mb,sp,i,L){
   case'wtank':{const y=gy();cyl(mb,c,y,y+5,1.6,1.6,12,cc(170,162,150),13);cyl(mb,c,y+5,y+7.4,2.2,2.2,14,sp.lbl?cc(150,152,150):cc(70,72,70),11);cyl(mb,c,y+7.4,y+7.7,2.3,0.2,14,cc(60,60,60),0);
     if(sp.lbl&&ATL[sp.lbl]){const ft=faceTrack(i,sp.x);plateQ(mb,add([c[0],y+6.5,c[2]],mulv(ft,2.25)),ft,3.2,0.7,ATL[sp.lbl],0,false)}
     const cr=add(c,mulv(faceTrack(i,sp.x),3.5));boxRF(mb,cr,R,F,0.35,0.35,y,y+3.2,cc(50,54,52),0);boxRF(mb,add(cr,mulv(faceTrack(i,sp.x),1.1)),R,F,2.2,0.2,y+3.0,y+3.25,cc(50,54,52),0);break}
+  case'lsdch':{// cais da concordância de Lousado (fotografia): cais na curva e abrigo caiado com LOUSADO na empena
+    const ph=hy[i]+0.32;for(let k=-8;k<8;k++){const a=i+k,b=a+1,A0=PI(a,-1.8,0.32),A1=PI(a,-5.2,0.32),B0=PI(b,-1.8,0.32),B1=PI(b,-5.2,0.32);
+      mb.q(L(A1),L(B1),L(B0),L(A0),cc(196,190,176),3,[0,0,1,1]);const C0=PI(a,-1.8,-0.3),D0=PI(b,-1.8,-0.3);mb.q(L(C0),L(D0),L(B0),L(A0),cc(170,166,158),6)}
+    const w=3.6,d=6.5,h=3.0,cA=add(c,mulv(fr,-0.6));boxRF(mb,cA,R,F,w,d,ph,ph+h,cc(240,238,230),6,2,2);boxRF(mb,cA,R,F,w+0.2,d+0.2,ph+h,ph+h+0.2,cc(226,224,216),13,1,1);
+    hipRoof(mb,cA,R,F,w,d,ph+h+0.2,0.9,cc(176,86,58),0.35);const T=ATL['lsdT'];if(T)for(const e of[-1,1])plateQ(mb,[cA[0]+F[0]*e*(d/2+0.04),ph+h-0.6,cA[2]+F[2]*e*(d/2+0.04)],mulv(F,e),2.8,0.6,T,0,false);
+    boxRF(mb,add(c,mulv(F,7)),R,F,0.14,0.14,ph,ph+4.2,cc(52,50,46),0,1,1);boxRF(mb,add(c,mulv(F,7)),R,F,0.3,0.3,ph+4.2,ph+4.5,cc(255,236,190),0,0,0,0.6);break}
   case'pvst':{// Póvoa (fotografia aérea): recinto dos comboios do Porto, desenhado no referencial reto das vias do recinto;
     // edifício comprido a poente, cais do edifício e cais central, para-choques junto à rua, relvado com palmeiras até ao cais de Famalicão
     const G=PVG,F0=fr3(G.sC),Y=hy[G.iC],U3=[G.u[0],0,G.u[1]],R3=[G.r[0],0,G.r[1]],UP=[0,1,0];
@@ -4468,11 +4476,13 @@ if(!RETRY){let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');s
   const route=STN.filter(s=>rev?s.i<=LSD.i&&s.i>=z.i:s.i>=LSD.i&&s.i<=z.i);if(rev)route.reverse();
   FORCE_NC=o.ncar||2;setStops(FORCE_NC);const t={};let c=o.fw?Math.round(o.clock):Math.ceil((o.clock+240)/60)*60;t[route[0].i]=c;
   for(let k=1;k<route.length;k++){const p=route[k-1],q=route[k];c+=Math.ceil((runMin(rev?p.stopR:p.stopF,rev?q.stopR:q.stopF)*1.14+45)/60)*60;if(k<route.length-1)c+=q.ty==='ap'?30:60;t[q.i]=c}
+  if(o.ch)LSD.bc=JCN+(RP?-90:90);// chega parado ao cais da concordância
   FORCE_NC=o.ncar||2;start(LSD.i,z.i,rev,o.free?{t:{[LSD.i]:t[LSD.i]},free:true}:{t});S.free=o.free;S.back=false;updRev();S.sc=o.sc;S.maxPts+=o.maxPts||0;
-  if(o.fw||o.ch){S.pos=S.prevPos=o.ch?JCN+(RP?-1:1)*(JCL-o.pos+0):LSD.pos+(o.lsd-o.pos);if(o.ch)S.pos=S.prevPos=JCN+(RP?-60:60);S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;LSD.served=true;
+  if(o.ch)setTimeout(()=>toast('Concordância de Lousado: parado no cais da concordância. Partida às '+fHM(t[LSD.i])+'.','good'),1500);
+  if(o.fw){S.pos=S.prevPos=LSD.pos+(o.lsd-o.pos);S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;LSD.served=true;
    S.jI=0;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;setNotch&&setNotch(o.notch,true);
    setTimeout(()=>toast(o.ch?'Concordância de Lousado: seguiu para a '+(RP?'Linha do Minho, a caminho de Famalicão.':'Linha de Guimarães.'):'Lousado: entrou pela agulha na Linha da Póvoa, a caminho de Famalicão.','good'),1500)}
-  else setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Marcha em frente; partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
+  else if(!o.ch)setTimeout(()=>toast('Entrou na '+(RP?'Linha da Póvoa':'Linha de Guimarães')+' em Lousado. Marcha em frente; partida às '+fHM(t[LSD.i])+'.','good'),2500)}}
 window.__HIST={regions:HIST_REGIONS,audit:HIST_AUDIT,counts:()=>spr.reduce((a,row)=>{for(const o of row)if(o.hist)a[o.t]=(a[o.t]||0)+1;return a},{}),sceneAt:k=>spr[Math.floor(km(k)/SEG)]};
 window.__PEOPLE={get onboard(){return ONBOARD},get smoke(){return SMOKE},reserveSeat,seatedPassenger,chefe,saveObj,applySave};
 window.__cpok=()=>!!A.cpOK+' '+(AC&&AC.state);window.__SPR=()=>spr;window.__GEO=()=>({WX:Array.from(WX),WZ:Array.from(WZ),HDG:Array.from(HDG)});window.__XTR=()=>XTR;window.__T={runMin:(a,b)=>runMin(a,b),get CP(){return CP},get HONKS(){return HONKS},SIG:()=>SIG.map(g=>({p:Math.round(g.p),d:g.d,k:g.k,s:sigState(g)})),xfer:()=>xferLine(),sw:()=>swBtn(),aud:()=>({ok:!!AC,st:AC&&AC.state,erpm:Math.round(A.erpm||0),load:+(A.load||0).toFixed(2)}),PI:(i,o,y)=>PI(i,o,y),norm,sub,SEG,orb:(y,p,d)=>{if(y!=null){orbit.yaw=y;orbit.pitch=p;orbit.dist=d}},stats:()=>{let n=0,c=0;for(const [k,g] of chunks){if(g&&!g.empty){n+=g.n;c++}}const t0=performance.now();const g=buildChunk(60);const bt=performance.now()-t0;return {verts:n,chunks:c,buildMs:bt,chunk60:g.n,trainV:TM.car.n+TM.car2.n}},cam:m=>{if(typeof setCam==="function"&&use3D){camMode=m;sideCam=null}},get REV(){return REV},ahead:s=>ahead(s),get STOPS(){return STOPS},get S(){return S},km,lim:limitAt,trk,LIMCH,curve,STN,start,step,TRAINS:()=>TRAINS,setClock:c=>{S.clock=T(c)}};
