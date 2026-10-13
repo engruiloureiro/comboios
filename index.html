@@ -491,6 +491,13 @@ function pvGeo(){const G=PVG,iC=G.sC/SEG,iE=iC+100,hC=HDG[iC],u=[Math.sin(hC),-M
   G.lat=t=>{t-=G.sC;if(t<=0)return 0;for(let k=1;k<N.length;k++)if(N[k].t>=t){const a=(t-N[k-1].t)/(N[k].t-N[k-1].t);return N[k-1].l+(N[k].l-N[k-1].l)*a}return N[N.length-1].l};
   G.pFor=(n,tEnd)=>{let pv=null;for(let k=0;k<N.length;k++){const t=G.sC+N[k].t+(n-N[k].l)/N[k].rr*N[k].ru;if(t>=tEnd){if(!k)return G.sC;const t0=G.sC+N[k-1].t+(n-N[k-1].l)/N[k-1].rr*N[k-1].ru;return G.sC+(k-1+(tEnd-t0)/(t-t0))*SEG}}return G.sC+(N.length-1)*SEG};
   for(const T of G.tracks)T.X.b=G.pFor(T.n,T.end)}
+// Covas: estação de cais curtos e via de cruzamento curta (as duas vias são mais curtas do que nas outras estações). No sentido do
+// Porto, logo à saída, passagem de nível e ~400 m de trincheira entre dois paredões de granito, em curvas apertadas
+const CVS=byNameE('Covas');let CVC=null;
+if(CVS){const s=CVS,e=s.ex[0];s.pa=s.pos-62;s.bc=s.pos-28;s.stopF=s.bc+18.906;s.stopR=s.bc-18.906;if(e){e.a=s.pa-40;e.b=s.pb+40;e.tl=35}
+  CVC={pn:s.pa-55,a:s.pa-470,b:s.pa-70}}
+// Vizela: pequeno túnel de via única logo à saída da estação, no sentido do Porto
+const VZS=byNameE('Vizela'),VZT=VZS&&VZS.ex[0]?{a:VZS.ex[0].a-95,b:VZS.ex[0].a-25,tc:0}:null;
 // Caniços: a agulha fica antes da ponte de ferro
 {const cn=byNameE('Caniços');if(cn)for(const e of cn.ex)e.b=cn.pb+12}
 // Lousado (planta dos anos 80): passagem de peões a meio dos cais; o edifício, pequeno, fica no cais-ilha logo a nascente dela
@@ -543,7 +550,7 @@ let SIDE=[];
 const trackX=p=>{if(S&&S.divC){const v=jcOff(p);if(v!==null)return v}if(S&&S.pvT&&PVG&&p>PVG.tracks[0].s0&&p<PVG.sC+260){const T=PVG.tracks[0];return p<=PVG.sC?T.n*sstep((p-T.s0)/T.l):T.n}if(S&&S.divJ&&p>JSW)return XTR[0].f(p);if(S&&S.divH&&p>JSH)return jshOff(p);for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
-const TUN=RPO?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0},{a:km(0.32),b:km(0.78),tc:0}];
+const TUN=RPO?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0}].concat(VZT?[VZT]:[],[{a:km(0.32),b:km(0.78),tc:0}]);
 const BRIDGESP=[{a:km(6.933),b:km(6.972),t:3,n:'Ponte sobre o rio Leça'},{a:km(26.221),b:km(26.324),t:2,n:'Ponte de ferro sobre o rio Ave (Vila do Conde)'},{a:km(57.45),b:km(57.489),t:3,n:'Ponte sobre o rio Este'}],BRIDGESG=[{a:kR(10.3),b:kR(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:kR(26.9),b:kR(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:kR(31.6),b:kR(31.64),t:1,n:'Passagem sobre a estrada'},{a:kR(37.935),b:kR(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:kR(49.4),b:kR(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'},{a:GUI.pb+150,b:GUI.pb+160,t:2,green:true,n:'Pontão de ferro à saída de Guimarães'}];
 const BRIDGES=GP?BRIDGESP.concat(BRIDGESG.filter(q=>q.b>km(KC1)).map(q=>q.a<km(KC1)?{...q,a:km(KC1)}:q)):RP?BRIDGESP:BRIDGESG;
 function cutK(P,G){return P.filter(z=>z[0]<KC1).map(z=>[z[0],Math.min(z[1],KC1),z[2]]).concat(G.map(z=>[z[0]+DGV,z[1]+DGV,z[2]]).filter(z=>z[1]>KC1).map(z=>[Math.max(z[0],KC1),z[1],z[2]]))}
@@ -554,7 +561,7 @@ const zoneAt=p=>{const k=(p-OFF)/1000;for(const z of ZONES)if(k>=z[0]&&k<z[1])re
 const inRange=(arr,p)=>arr.find(r=>p>=r.a&&p<=r.b)||null;
 // no sentido do Porto o rio fica à esquerda (x>0) desde Vizela até à ponte de ferro antes da Trofa, onde passa para o outro lado
 const riverX=(R,p)=>R.xf?R.xf(p):R.x;
-const RIVERP=[{a:km(26.007),b:km(26.221),side:1,x:30,w:60},{a:km(26.324),b:km(26.522),side:1,x:30,w:60}],RIVERG=[{a:kR(26.2),b:kR(26.9),side:-1,x:16,w:26},{a:kR(27.06),b:kR(37.935),side:1,x:22,w:30,xf:p=>{const P=kR(29.6);return 22+70*sstep((p-(P-650))/350)*sstep(((P+450)-p)/350)}},{a:kR(38.075),b:kR(40.9),side:1,x:18,w:28},{a:kR(40.9),b:kR(42.2),side:1,x:18,w:22},{a:kR(42.2),b:kR(50.4),side:1,x:20,w:24},{a:kR(50.4),b:kR(51.6),side:1,x:30,w:20},{a:kR(51.6),b:kR(53.0),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
+const RIVERP=[{a:km(26.007),b:km(26.221),side:1,x:30,w:60},{a:km(26.324),b:km(26.522),side:1,x:30,w:60}],RIVERG=[{a:kR(26.2),b:kR(26.9),side:-1,x:16,w:26},{a:kR(27.06),b:kR(37.935),side:1,x:22,w:30,xf:p=>{const P=kR(29.6);return 22+70*sstep((p-(P-650))/350)*sstep(((P+450)-p)/350)}},{a:kR(38.075),b:kR(40.9),side:1,x:18,w:28},{a:kR(40.9),b:kR(42.2),side:1,x:18,w:22},{a:kR(42.2),b:kR(50.4),side:1,x:20,w:24},{a:kR(50.4),b:kR(51.6),side:1,x:30,w:20},{a:kR(51.6),b:kR(52.8),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 const RIVER=GP?RIVERP.concat(RIVERG.filter(q=>q.b>km(KC1)).map(q=>q.a<km(KC1)?{...q,a:km(KC1)}:q)):RP?RIVERP:RIVERG;
 
 const PROFP=[[0.55,78],[1.2,92],[26.273,7],[41.292,85],[44.854,104],[62.726,60]],PROFG=[[0.55,78],[1.2,92],[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]];
@@ -589,6 +596,10 @@ let LIMCH=[];
     const P5=i*SEG,sc=GP&&P5>km(KC0)-200&&P5<km(KC1)+150?0:RP&&!(GP&&P5>km(KC1))?(P5<km(30.852)?0.3:0.35):(P5<kR(42.5)?0.28:1)*(Math.abs(P5-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
   if(RG||GP){const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
   if(RG||GP){const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
+  // Covas: curvas apertadas dos dois lados da estação, em S (sem desviar o resto do traçado)
+  if(CVC){const bend=(pc,A,L)=>{for(let i=0;i<=TOTAL;i++)HDG[i]+=A*sstep((i*SEG-(pc-L/2))/L)},b=CVS.pb;
+    bend(CVC.a+70,0.33,110);bend((CVC.a+CVC.b)/2,-0.66,120);bend(CVC.b-40,0.33,110);
+    bend(b+70,-0.25,100);bend(b+210,0.5,110);bend(b+350,-0.25,100)}
   // Póvoa: reta ao longo do recinto e, a partir de sC, curva de raio constante (150 m) ao longo do cais de Famalicão
   if(RP&&PVG){const iC=PVG.sC/SEG,ia=iC-70,ib=iC+110,hs=HDG[ia],h1=HDG[ib],D=h1-hs,k=SEG/PVG.rho*Math.sign(D),na=Math.round(56*Math.PI/180*PVG.rho/SEG);
     for(let i=ia;i<=ib;i++){const j=i-iC;HDG[i]=j<=0?hs:hs+k*Math.min(j,na)}
@@ -626,6 +637,9 @@ let LIMCH=[];
     if(riv[k]<0)bankL[k]=0;if(riv[k]>0)bankR[k]=0;
     // muros de granito em trincheira junto ao túnel
     if(p>PV.pos-310&&p<PV.pos-160){wallL[k]={x:-3.6,h:4.5,t:'g'};wallR[k]={x:3.6,h:4.5,t:'g'}}
+    // trincheira de Covas (paredões dos dois lados) e emboquilhamentos do túnel de Vizela
+    if(CVC&&p>CVC.a&&p<CVC.b){const hh=5.2*sstep((p-CVC.a)/45)*sstep((CVC.b-p)/45);bankL[k]=bankR[k]=0;if(hh>0.6){wallL[k]={x:-3.5,h:hh,t:'g'};wallR[k]={x:3.5,h:hh,t:'g'}}}
+    if(VZT&&((p>VZT.a-60&&p<VZT.a)||(p>VZT.b&&p<VZT.b+35))){bankL[k]=bankR[k]=0;wallL[k]={x:-3.6,h:4.5,t:'g'};wallR[k]={x:3.6+Math.max(0,...trk[k]),h:4.5,t:'g'}}
     if(p>SB.pa-40&&p<SB.pos+160)wallL[k]={x:-13.5,h:9,t:'g'};
     if(p>km(0.78)&&p<km(1.55)&&!plat[k]){const hh=5.5*sstep((km(1.55)-p)/300);if(hh>0.6){wallL[k]={x:-3.6,h:hh,t:'g'};wallR[k]={x:3.6+Math.max(0,...trk[k]),h:hh,t:'g'}}}}
 })();
@@ -643,6 +657,9 @@ for(let s=0;s<STN.length-1;s++){const a=STN[s].pb+250,b=STN[s+1].pa-250;for(let 
   if(inRange(BRIDGES,p)||inRange(TUN,p)||inRange(BRIDGES,p-450)||(p>PV.pos-500&&p<PV.pos)||p<km(6.6))continue;PN.push({pos:p,honk:false,done:false})}}
 if(RP){const pv=byNameE('Póvoa de Varzim');for(let i=PN.length-1;i>=0;i--)if(PN[i].pos>pv.pos+14&&PN[i].pos<FAM.pa)PN.splice(i,1);
   for(let p=pv.pb+300;p<FAM.pa-250;p+=380+rnd()*320){if(inRange(BRIDGES,p)||STN.some(s=>p>s.pa-60&&p<s.pb+60))continue;PN.push({pos:p,honk:false,done:false,ung:rnd()<0.7})}}
+// Covas: só a passagem de nível à saída para o Porto; nenhuma junto aos emboquilhamentos do túnel de Vizela
+if(CVC){for(let i=PN.length-1;i>=0;i--)if(PN[i].pos>CVC.a-150&&PN[i].pos<CVS.pb+100)PN.splice(i,1);PN.push({pos:CVC.pn,honk:false,done:false})}
+if(VZT)for(let i=PN.length-1;i>=0;i--)if(PN[i].pos>VZT.a-250&&PN[i].pos<VZT.b+60)PN.splice(i,1);
 PN.sort((a,b)=>a.pos-b.pos);
 /* sinalização: bloco automático entre a Trindade e a Senhora da Hora (via dupla, muito tráfego) e sinais de entrada nas
    estações de cruzamento da via única, que mostram amarelo quando o itinerário está feito para a via desviada (agulhas a 30 km/h) */
@@ -2226,6 +2243,8 @@ function terrH(i,o,wx,wz){i=clamp(i,0,TOTAL-1);const base=hy[i]-0.45,E=EDGE[i];
   if(PVG&&PVG.N&&o<6){const F0=fr3(PVG.sC),dx=wx-F0.x,dz=wz-F0.z,t=dx*PVG.u[0]+dz*PVG.u[1],n=dx*PVG.r[0]+dz*PVG.r[1];
     const to=Math.max(-280-t,t-215,0),no=Math.max(-80-n,0);if(to<40&&no<40&&n<PVG.lat(PVG.sC+t)-2){h=lerp(h,base,(1-sstep(to/40))*(1-sstep(no/40)))}}
   if(RP&&o<0&&d>0){const cf=COAST(i);if(cf>0){const t2=sstep((d-260)/520);h=lerp(h,-1.8,t2*cf)}}
+  // trincheira de Covas: o terreno sobe logo atrás dos paredões
+  if(CVC&&d>0){const p=i*SEG;if(p>CVC.a-30&&p<CVC.b+30){const w=sstep((p-CVC.a+30)/60)*sstep((CVC.b+30-p)/60);h=Math.max(h,base+5.6*w*sstep(d/3)*(1-sstep((d-70)/60)))}}
   if(TUNP[i]>0&&(tun[i]||d>0)){const cover=hy[i]+11+TUNP[i]*5;const w=tun[i]?1:sstep(1-Math.max(0,d-8)/60);h=Math.max(h,lerp(h,cover,TUNP[i]*w))}
   if(BRD[i]>0)h-=BRD[i]*(1-sstep(Math.max(0,d-4)/95));
   if(riv[i]){const R=inRange(RIVER,i*SEG),so=o*riv[i],RX=riverX(R,i*SEG);if(so>RX-6&&so<RX+R.w+8){const e=Math.min(so-(RX-6),RX+R.w+8-so);h=Math.min(h,hy[i]-3.2+2.4*(1-sstep(e/7)))}}
