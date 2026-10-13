@@ -1479,10 +1479,10 @@ function penal(n,t){S.sc.pen+=n;if(t)toast(t+' (−'+n+')','bad')}
 const nextStop=()=>STOPS.find(s=>!s.served);
 const crossPending=X=>TRAINS.some(t=>t.cross===X&&t.st==='app');
 
-// dados do pacote: MaxForce 62 kN, MaxPowerAtRail 525 kW, MaxSpeed 70 km/h, massa 40 t por veículo, RollingFriction 0,0015,
+// dados do pacote: MaxForce 62 kN, MaxPowerAtRail 525 kW, MaxSpeed 70 km/h (aqui 90 km/h, a velocidade máxima real da série 9600), massa 40 t por veículo, RollingFriction 0,0015,
 // DragCoefficient 7,2; travão: aplicação 10 psi/s, alívio 5 psi/s, 70 psi para a força máxima (bMax é a desaceleração de serviço escolhida)
-const CPD={m:40000,F0:62000,P:525000,vmax:70,crr:0.0015,cda:7.2,tF:1,rpm0:200,rpm1:1500,dRpm:100,bcpS:70,bcpE:90,app:10,appE:55,rel:5,bMax:0.11,
-  TE:[[0,500],[10,336],[20,336],[30,290],[35,250],[40,210],[45,170],[50,140],[55,110],[60,90],[65,70],[70,60],[75,50]]};
+const CPD={m:40000,F0:62000,P:525000,vmax:90,crr:0.0015,cda:7.2,tF:1,rpm0:200,rpm1:1500,dRpm:100,bcpS:70,bcpE:90,app:10,appE:55,rel:5,bMax:0.11,
+  TE:[[0,500],[10,336],[20,336],[30,290],[35,250],[40,210],[45,170],[50,140],[55,110],[60,90],[65,70],[70,60],[75,52],[80,46],[85,42],[90,38],[95,34]]};
 function teAt(k){const T=CPD.TE;if(k<=0)return 1;for(let i=1;i<T.length;i++)if(k<=T[i][0]){const a=T[i-1],b=T[i];return(a[1]+(b[1]-a[1])*(k-a[0])/(b[0]-a[0]))/500}return T[T.length-1][1]/500}
 function step(dt,dr){
   S.clock+=dt;
