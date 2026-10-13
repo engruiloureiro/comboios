@@ -218,6 +218,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     </ul>
     <div class="per" id="uniSel" role="radiogroup" aria-label="Composição"><span>Composição:</span><button data-u="1" class="on">Simples</button><button data-u="2">Dupla</button><button data-u="0">Ao acaso</button></div>
     <div class="per" id="perSel" role="radiogroup" aria-label="Hora da viagem"><span>Hora da viagem:</span><button data-p="dia">Dia</button><button data-p="tarde" class="on">Fim de tarde</button><button data-p="noite">Noite</button></div>
+    <div class="per" id="gqSel" role="radiogroup" aria-label="Gráficos"><span>Gráficos:</span><button data-q="alta">Alta</button><button data-q="media">Média</button><button data-q="baixa">Baixa</button></div>
     <button class="cta" id="bLoad" hidden style="background:#4d5a3a">Continuar o jogo guardado<small id="loadInfo"></small></button>
     <button class="cta" id="bLoadF" style="background:#3f4d5a">Abrir jogo guardado em ficheiro<small>Escolha o ficheiro .json que guardou</small></button><input type="file" id="fLoad" accept=".json,application/json" hidden>
     <div class="startgrid">
@@ -4249,7 +4250,7 @@ function render3D(dtR){
      for(const q of LAMPS){if(q.i<c0||q.i>c1)continue;const dx=q.p[0]-eye[0],dy=q.p[1]-eye[1],dz=q.p[2]-eye[2];cand.push([dx*dx+dy*dy+dz*dz,dx,dy,dz,q.w])}
      cand.sort((a,b)=>a[0]-b[0]);for(let k=0;k<Math.min(24,cand.length);k++){pl[k*4]=cand[k][1];pl[k*4+1]=cand[k][2];pl[k*4+2]=cand[k][3];pl[k*4+3]=cand[k][4]}}
    gl.uniform4fv(UL.uPL,pl)}
-  const cp=clamp(Math.floor(S.pos/SEG/CH),0,1e9);let built=0;const ahead=camMode==='cab'?8:7,behind=camMode==='cab'?1:6;
+  const cp=clamp(Math.floor(S.pos/SEG/CH),0,1e9);let built=0;const ahead=camMode==='cab'?GQ.ahead:GQ.ahead-1,behind=camMode==='cab'?1:6;
   for(const [k,g] of chunks){if(Math.abs(k-cp)>14){if(g&&!g.empty){gl.deleteBuffer(g.buf);gl.deleteVertexArray(g.vao)}chunks.delete(k)}}
   const order=[];for(let d=0;d<=Math.max(ahead,behind);d++){if(d<=ahead)order.push(cp+dir*d);if(d>0&&d<=behind)order.push(cp-dir*d)}
   for(const c of order){if(c<0||c*CH>=TOTAL-1)continue;let g=chunks.get(c);
@@ -4332,9 +4333,16 @@ let running=false,paused=false,last=performance.now(),use3D=false;
 function resize(){const r=cv.parentElement.getBoundingClientRect();const dpr=Math.min(2,window.devicePixelRatio||1);
   W=Math.max(1,r.width);H=Math.max(1,r.height);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
   hY=H*0.42;K=Math.min(W*0.75,H*1.3);layoutLever();
-  if(G3){const d3=Math.min(1.6,window.devicePixelRatio||1);glc.width=Math.round(W*d3);glc.height=Math.round(H*d3)}}
+  if(G3){const d3=Math.min(GQ.res,window.devicePixelRatio||1)*GQS;glc.width=Math.round(W*d3);glc.height=Math.round(H*d3)}}
+// qualidade gráfica: resolução do 3D e distância desenhada; em 'Média' e 'Baixa' a resolução também desce sozinha se o PC não aguentar
+const GQP={alta:{res:1.6,ahead:8,auto:false},media:{res:1.0,ahead:7,auto:true},baixa:{res:0.7,ahead:5,auto:true}};
+let GQK='media';try{GQK=localStorage.getItem('gf-gq')||'media'}catch(e){}if(!GQP[GQK])GQK='media';let GQ=GQP[GQK],GQS=1,GQT={n:0,t:0};
+function setGQ(k){GQK=k;GQ=GQP[k];GQS=1;try{localStorage.setItem('gf-gq',k)}catch(e){}document.querySelectorAll('#gqSel button').forEach(b=>b.classList.toggle('on',b.dataset.q===k));resize()}
+function gqTick(dt){if(!GQ.auto||!running||paused)return;GQT.n++;GQT.t+=dt;if(GQT.t<3)return;const fps=GQT.n/GQT.t;GQT.n=0;GQT.t=0;
+  if(fps<26&&GQS>0.55){GQS=Math.max(0.55,GQS-0.15);resize()}else if(fps>50&&GQS<1){GQS=Math.min(1,GQS+0.1);resize()}}
 function frame(now){
   const dtR=Math.min(0.1,(now-last)/1000);last=now;
+  gqTick(dtR);
   if(running&&!paused){let rem=dtR*S.warp;while(rem>1e-6&&running){const d=Math.min(0.04,rem);step(d,d/S.warp);rem-=d}
     if(S.finishT>0){S.finishT-=dtR;if(S.finishT<=0)finish()}}
   if(use3D)render3D(dtR);else render();hud(dtR);audioUpdate(dtR);
@@ -4519,6 +4527,7 @@ function ttStart(n){const x=TTS.find(q=>q[0]===n);if(!x)return;const P=ttPlan(x)
   const a=byNameE(g.a),z=byNameE(g.z),t={};for(const k in g.t){const s=byNameE(k);if(s&&!s.nostop)t[s.i]=g.t[k]}
   $('#ovTT').hidden=true;start(a.i,z.i,g.rev,{t});S.ttn=n;
   toast('Comboio '+n+(x[5]==='S'?' (semidireto: não para nos apeadeiros)':'')+': '+x[2]+' → '+x[3]+', partida às '+fHM(t[a.i])+'.'+(x[1]==='X'?' Passa pela concordância de Lousado, com paragem no cais da curva.':''),'good')}
+document.querySelectorAll('#gqSel button').forEach(b=>{b.classList.toggle('on',b.dataset.q===GQK);b.onclick=()=>setGQ(b.dataset.q)});
 $('#bTT').onclick=()=>{$('#ovStart').hidden=true;$('#ovTT').hidden=false;ttRender()};$('#ttBack').onclick=()=>{$('#ovTT').hidden=true;$('#ovStart').hidden=false};
 if(!RETRY){let n=null;try{n=sessionStorage.getItem('pendingTT');sessionStorage.removeItem('pendingTT')}catch(e){}if(n)setTimeout(()=>ttStart(n),0)}
 // percursos que passam pela concordância de Lousado: correm no mundo contínuo (muda de mundo e arranca depois de recarregar)
