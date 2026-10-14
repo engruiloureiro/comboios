@@ -1542,11 +1542,12 @@ function step(dt,dr){
     if(S.horn&&dpn<450&&dpn>10)pn.honk=true;
     if(dpn<0){pn.done=true;if(pn.honk){S.sc.pn+=15;toast('Buzina a tempo na passagem de nível (+15)','good')}else penal(25,'Faltou buzinar na passagem de nível')}}
 
-  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep-15&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: partida!','good')}else toast('Pode seguir.','')}
+  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: partida!','good')}else toast('Pode seguir.','')}
   // partida
   if(S.atSt&&!S.departed&&S.v>0.3&&!S.back){S.departed=true;const st=S.atSt,d=S.clock-st.dep;
     if(crossPending(st)){emergency('Partida sem cruzamento em '+st.n);penal(200)}
-    if(d<-3){penal(30,'Partida antecipada de '+st.n);S.delay=d}
+    // depois do apito do chefe (ou do 'pode seguir') a partida nunca é antecipada
+    if(d<-3&&!S.whistled){penal(30,'Partida antecipada de '+st.n);S.delay=d}
     else{const pts=Math.round(d<=60?100:Math.max(0,100-(d-60)/2));S.sc.pun+=pts;S.delay=d}
     S.atSt=null;$('#card').hidden=true;S.announceAt=S.clock+4}
   if(S.announceAt&&S.clock>=S.announceAt){S.announceAt=0;const ns=nextStop();if(ns)say(ns===S.endSt?'Próxima estação: '+ns.n.replace(' - ',', ')+'. Término da viagem.':'Próxima estação: '+ns.n.replace(' - ',', ')+'.')}
