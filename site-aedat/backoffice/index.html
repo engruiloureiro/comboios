@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agrupamento de Escolas D. António Taipa</title>
+<meta name="description" content="Agrupamento de Escolas D. António Taipa — Freamunde, Paços de Ferreira. Proposta visual da página inicial.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0F2A3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700;800&family=Caveat:wght@600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --navy-950:#0A1B29;--navy-900:#0F2A3E;--navy-800:#17354A;--navy-700:#24506D;--navy-600:#346785;
+  --navy-200:#C6D6E3;--navy-100:#E2EBF2;--navy-50:#F1F6FA;
+  --terra-700:#8E3B22;--terra-600:#A64A2C;--terra-500:#BC6446;--terra-100:#F6E5DC;--terra-50:#FBF3EE;
+  --sky:#8CC6EA;--sky-100:#E2F1FA;--sky-ink:#1D5A80;
+  --sun:#F3C548;--sun-100:#FCF1D2;--sun-ink:#7A5600;
+  --lilac:#B7A3DF;--lilac-100:#EEE8F8;--lilac-ink:#54408F;
+  --green:#93C77F;--green-100:#E6F2DF;--green-ink:#3B6B2A;
+  --orange:#F09A5B;--orange-100:#FCE8D9;--orange-ink:#8A4313;
+  --paper:#FBF8F3;--sand:#F6EDE1;--white:#FFFFFF;--line:#ECE4D8;--line-cool:#E3E9EE;
+  --ink:#17354A;--ink-2:#3B566A;--ink-3:#566E80;
+  --on-dark:#E8F0F6;--on-dark-2:rgba(232,240,246,.84);
+  --shadow-1:0 1px 2px rgba(60,40,20,.05),0 4px 14px -6px rgba(60,40,20,.10);
+  --shadow-2:0 2px 6px rgba(40,36,30,.06),0 22px 44px -18px rgba(15,42,62,.26);
+  --container:1240px;--gutter:32px;
+  --font-head:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-hand:"Caveat","Segoe Print","Bradley Hand","Comic Neue",cursive;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:150px}
+html.menu-lock{overflow:hidden}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+h1,h2,h3,p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+:focus-visible{outline:3px solid var(--navy-700);outline-offset:3px;border-radius:8px}
+.on-dark :focus-visible{outline-color:var(--sun)}
+.container{width:100%;max-width:calc(var(--container) + 2*var(--gutter));margin-inline:auto;padding-inline:var(--gutter)}
+main{display:block}
+main:focus{outline:none}
+
+/* ---------- skip link ---------- */
+.skip{position:absolute;left:16px;top:-80px;z-index:100;padding:12px 18px;border-radius:12px;background:var(--navy-900);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--shadow-2);transition:top .2s}
+.skip:focus{top:12px;outline-color:var(--sun)}
+
+/* ---------- crayon strip (paleta do logótipo) ---------- */
+.crayon-strip{display:block;height:6px;line-height:0;background:#fff}
+.crayon-strip svg{display:block;width:100%;height:6px}
+
+/* ---------- top bar ---------- */
+.topbar{background:var(--navy-950);color:#D5E2EC;font-family:var(--font-head);font-weight:700;font-size:11.5px;letter-spacing:.14em}
+.topbar__in{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:36px}
+.topbar__tag{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;padding:3px 12px 3px 10px;border:1px solid rgba(255,255,255,.16);border-radius:999px;color:#fff;font-size:10.5px}
+.topbar__tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 3px rgba(243,197,72,.18)}
+
+/* ---------- header ---------- */
+.site-header{position:sticky;top:0;z-index:50;background:#fff;box-shadow:0 1px 0 var(--line-cool);transition:box-shadow .3s ease}
+.site-header.is-compact{box-shadow:0 1px 0 var(--line-cool),0 14px 32px -20px rgba(10,27,41,.35)}
+.brand-row{display:flex;align-items:center;gap:24px;padding-block:14px;transition:padding .3s var(--ease)}
+.is-compact .brand-row{padding-block:7px}
+.brand{display:block;flex:none;border-radius:6px}
+.brand img{width:244px;height:auto;transition:width .3s var(--ease)}
+.is-compact .brand img{width:204px}
+.brand__tag{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-family:var(--font-head);line-height:1.35;text-align:right}
+.brand__motto{font-weight:700;font-size:14.5px;color:var(--navy-800)}
+.brand__motto .sep{color:var(--terra-600)}
+.brand__place{display:flex;align-items:center;gap:6px;white-space:nowrap;font-weight:500;font-size:13.5px;color:var(--ink-3)}
+.brand__place .ic{width:15px;height:15px;color:var(--terra-600)}
+.menu-toggle{display:none}
+
+/* ---------- main navigation (desktop) ---------- */
+.main-nav{position:relative;border-top:1px solid var(--line-cool)}
+.nav-list{display:flex;align-items:stretch;margin-left:-16px}
+.nav-link{position:relative;display:flex;align-items:center;gap:6px;height:54px;padding:0 16px;font-family:var(--font-head);font-weight:700;font-size:15px;line-height:1.2;color:var(--ink);text-decoration:none;white-space:nowrap;transition:color .2s,background-color .2s,height .3s var(--ease)}
+.is-compact .nav-link{height:48px}
+.nav-link::after{content:"";position:absolute;left:16px;right:16px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--navy-200);transform:scaleX(0);transition:transform .25s var(--ease),background-color .2s}
+.nav-link:hover{color:var(--navy-900)}
+.nav-link:hover::after{transform:scaleX(1)}
+.nav-link[aria-current="page"]{color:var(--terra-600)}
+.nav-link[aria-current="page"]::after{display:none}
+.nav-mark{position:absolute;left:12px;right:12px;bottom:4px;width:calc(100% - 24px);height:8px;overflow:visible;pointer-events:none}
+.nav-link[aria-expanded="true"]{color:var(--navy-900);background:var(--navy-50)}
+.nav-link[aria-expanded="true"]::after{transform:scaleX(1);background:var(--navy-800)}
+.nav-link:focus-visible{outline-offset:-3px}
+.nav-chev{display:grid;place-items:center;color:var(--ink-3);transition:transform .25s var(--ease)}
+.nav-chev .ic{width:16px;height:16px;stroke-width:2.2}
+.nav-link[aria-expanded="true"] .nav-chev{transform:rotate(180deg);color:var(--navy-800)}
+
+/* mega panel — cada secção tem a sua cor de lápis */
+.mega{--t-c:var(--sky);--t-bg:var(--sky-100);--t-ink:var(--sky-ink)}
+.mega[data-tone="sun"]{--t-c:var(--sun);--t-bg:var(--sun-100);--t-ink:var(--sun-ink)}
+.mega[data-tone="lilac"]{--t-c:var(--lilac);--t-bg:var(--lilac-100);--t-ink:var(--lilac-ink)}
+.mega[data-tone="green"]{--t-c:var(--green);--t-bg:var(--green-100);--t-ink:var(--green-ink)}
+.mega[data-tone="orange"]{--t-c:var(--orange);--t-bg:var(--orange-100);--t-ink:var(--orange-ink)}
+.mega[data-tone="terra"]{--t-c:#E59A7C;--t-bg:var(--terra-100);--t-ink:var(--terra-700)}
+.mega{display:none;position:absolute;left:0;right:0;top:100%;z-index:2;background:#fff;border-top:1px solid var(--line-cool);box-shadow:0 34px 60px -30px rgba(10,27,41,.45);max-height:calc(100vh - var(--hdr-bottom,210px));overflow-y:auto;overscroll-behavior:contain}
+.is-open>.mega{display:block;animation:megaIn .24s var(--ease) both}
+@keyframes megaIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.mega__in{display:grid;grid-template-columns:272px minmax(0,1fr);gap:40px;padding-block:28px 32px}
+.mega__intro{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;gap:28px;min-height:168px;padding:24px 26px;border-radius:20px;background:var(--navy-900);color:#fff}
+.mega__blob{position:absolute;right:-36px;top:-40px;z-index:-1;width:150px;height:150px;color:var(--t-c);opacity:.95}
+.mega__icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.12);color:#fff}
+.mega__icon .ic{width:24px;height:24px}
+.mega__title{font-family:var(--font-head);font-weight:800;font-size:25px;line-height:1.15;letter-spacing:-.01em;max-width:12ch}
+.mega__scribble{display:block;width:88px;height:12px;margin-top:8px;color:var(--t-c)}
+.mega__list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px;align-content:start}
+.mega--two .mega__list{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mega__link{display:flex;align-items:center;gap:14px;min-height:64px;padding:10px 14px 10px 10px;border-radius:14px;font-weight:600;font-size:15px;line-height:1.35;color:var(--ink);text-decoration:none;transition:background-color .2s,color .2s}
+.mega__ico{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:12px;background:var(--t-bg);color:var(--t-ink);transition:background-color .2s,color .2s}
+.mega__go{margin-left:auto;width:16px;height:16px;color:var(--terra-600);opacity:0;transform:translateX(-6px);transition:opacity .2s,transform .25s var(--ease)}
+.mega__link:hover,.mega__link:focus-visible{background:var(--paper);color:var(--navy-900)}
+.mega__link:hover .mega__ico,.mega__link:focus-visible .mega__ico{background:var(--terra-600);color:#fff}
+.mega__link:hover .mega__go,.mega__link:focus-visible .mega__go{opacity:1;transform:none}
+.mega__link:focus-visible{outline-offset:-3px}
+@media (min-width:1000px){
+  /* as linhas da lista ocupam toda a altura do cartão de introdução (sem faixas vazias) */
+  .mega__list{align-content:stretch}
+  .mega__list>li{display:flex}
+  .mega__list>li>.mega__link{flex:1}
+  /* Comunidade Ed. (3 entradas): mosaico de três cartões */
+  .mega--tiles .mega__list{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .mega--tiles .mega__link{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr auto;align-items:end;gap:16px 12px;padding:20px 20px 18px;border:1px solid var(--line-cool);border-radius:18px;font-size:16.5px}
+  .mega--tiles .mega__ico{grid-column:1;grid-row:1;align-self:start;width:48px;height:48px;border-radius:14px}
+  .mega--tiles .mega__link>span:nth-child(2){grid-column:1;grid-row:2}
+  .mega--tiles .mega__go{grid-column:2;grid-row:2;margin:0 0 3px;opacity:.6;transform:none}
+  .mega--tiles .mega__link:hover,.mega--tiles .mega__link:focus-visible{border-color:transparent}
+  /* Projetos e Clubes (7 entradas): 2 colunas (4/3) */
+  .mega--four .mega__list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (min-width:1200px){
+  .mega--four .mega__list{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .mega--four .mega__go{display:none}
+}
+
+.scrim{position:fixed;left:0;right:0;bottom:0;top:var(--hdr-bottom,0px);z-index:40;background:rgba(10,27,41,.42);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.scrim.is-on{opacity:1;visibility:visible}
+
+/* ---------- hero ---------- */
+.hero{position:relative;isolation:isolate;overflow:hidden;background:var(--sand);padding:32px 0 96px}
+.hero__bg{position:absolute;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(720px 460px at 92% 0%,rgba(140,198,234,.30),transparent 62%),
+  radial-gradient(620px 420px at 0% 100%,rgba(243,197,72,.20),transparent 64%),
+  radial-gradient(520px 340px at 46% 8%,rgba(240,154,91,.10),transparent 70%),
+  linear-gradient(180deg,#F8F1E7 0%,#F4EADD 100%)}
+.hero__grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);grid-template-areas:"copy art" "path art";column-gap:64px;row-gap:22px;align-items:center}
+.hero__copy{grid-area:copy;align-self:end}
+.hero__art{grid-area:art}
+.pathway{grid-area:path;align-self:start}
+.hand{display:flex;align-items:center;gap:12px;font-family:var(--font-hand);font-weight:700;font-size:29px;line-height:1.05;letter-spacing:0;color:var(--terra-600)}
+.hand svg{flex:none;width:44px;height:14px;color:var(--orange)}
+.hero__title{position:relative;z-index:0;margin-top:14px;font-family:var(--font-head);font-weight:800;font-size:clamp(44px,3.6vw + 10px,62px);line-height:1;letter-spacing:-.032em;color:var(--navy-900)}
+.hero__title .w{position:relative;display:block;width:fit-content;padding-right:.03em}
+.hero__title .w + .w{margin-top:.03em}
+.hero__title .w svg{position:absolute;z-index:-1;left:-.07em;bottom:.02em;width:calc(100% + .15em);height:.42em;overflow:visible}
+.hero__intro{margin-top:18px;max-width:36ch;font-size:18px;line-height:1.55;color:var(--ink-2)}
+
+/* percurso: cartão navy (âncora de alto contraste) */
+.pathway{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:18px;max-width:580px;padding:22px 28px 24px 24px;border-radius:24px;background:var(--navy-900);color:#fff;box-shadow:0 30px 56px -30px rgba(15,42,62,.65)}
+.pathway__trail{position:absolute;z-index:-1;right:18px;bottom:14px;width:200px;height:118px;opacity:.95}
+.pathway__icon{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--sun);color:var(--navy-900)}
+.pathway__icon .ic{width:23px;height:23px}
+.pathway__eyebrow{font-family:var(--font-head);font-weight:800;font-size:12px;line-height:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--sun)}
+.pathway__title{margin-top:6px;font-family:var(--font-head);font-weight:700;font-size:22px;line-height:1.25;letter-spacing:-.01em;color:#fff}
+.pathway__text{margin-top:6px;max-width:46ch;font-size:15px;line-height:1.55;color:var(--on-dark-2)}
+.btn{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 22px;border-radius:999px;font-family:var(--font-head);font-weight:800;font-size:15px;letter-spacing:.005em;text-decoration:none;transition:background-color .2s,transform .2s var(--ease),box-shadow .2s}
+.btn--sun{margin-top:16px;background:var(--sun);color:var(--navy-950);box-shadow:0 14px 26px -14px rgba(243,197,72,.8)}
+.btn--sun:hover{background:#F8D46A;transform:translateY(-2px)}
+.btn .arr{display:inline-block;transition:transform .25s var(--ease)}
+.btn:hover .arr{transform:translateX(4px)}
+
+/* mosaico: fotografias + desenhos a lápis de cera inspirados no logótipo */
+.hero__art{position:relative;justify-self:end;width:100%;max-width:500px}
+.art-blob{position:absolute;z-index:0;left:-12%;top:-9%;width:122%;height:118%;color:var(--sky);pointer-events:none}
+.mosaic{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:14px;aspect-ratio:1/1}
+.tile{position:relative;overflow:hidden;border-radius:22px}
+.tile--a{grid-column:2/4;grid-row:1/4}
+.tile--b{grid-column:1;grid-row:2}
+.tile--g1{grid-column:1;grid-row:1}
+.tile--g2{grid-column:1;grid-row:3}
+.art-outline{grid-column:2/4;grid-row:1/4;z-index:-1;width:100%;height:100%;transform:translate(14px,14px);color:var(--terra-500);overflow:visible}
+.tile--photo{background:var(--navy-800);box-shadow:0 26px 50px -26px rgba(15,42,62,.55);border:5px solid #fff}
+/* a colagem é declarada uma só vez (CSS) para as duas molduras: menos peso depois de embutida */
+.tile__img{position:absolute;left:50%;top:50%;width:calc(var(--z)*100%);aspect-ratio:1/1;background:url(assets/noticia-outdoor-learning.jpg) 0 0/100% 100% no-repeat;transform:translate(calc(var(--cx)*-1%),calc(var(--cy)*-1%))}
+.tile--a .tile__img{--z:3.25;--cx:49.72;--cy:25.46}
+.tile--b .tile__img{--z:3.6;--cx:83.8;--cy:15.74}
+.tile--draw{background:#fff;box-shadow:0 14px 30px -20px rgba(15,42,62,.45)}
+.tile svg{display:block;width:100%;height:100%}
+.tile--g2{background:#FBF3EE}
+
+/* ---------- quick access ---------- */
+.quick{position:relative;z-index:3;margin-top:-56px}
+.quick__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.qcard{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:14px;height:100%;padding:15px 16px 15px 16px;background:#fff;border:1px solid rgba(15,42,62,.06);border-radius:20px;box-shadow:var(--shadow-2);color:var(--ink);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s}
+.qcard:hover{transform:translateY(-4px);box-shadow:0 2px 6px rgba(15,42,62,.06),0 32px 54px -22px rgba(15,42,62,.38)}
+.qcard__icon{display:grid;place-items:center;flex:none;width:46px;height:46px;border-radius:14px}
+.qcard__icon .ic{width:24px;height:24px}
+.tone-sky{background:var(--sky-100);color:var(--sky-ink)}
+.tone-orange{background:var(--orange-100);color:var(--orange-ink)}
+.tone-lilac{background:var(--lilac-100);color:var(--lilac-ink)}
+.tone-green{background:var(--green-100);color:var(--green-ink)}
+.tone-sun{background:var(--sun-100);color:var(--sun-ink)}
+.tone-terra{background:var(--terra-100);color:var(--terra-700)}
+.qcard__label{font-family:var(--font-head);font-weight:800;font-size:16.5px;line-height:1.25;letter-spacing:-.005em;white-space:nowrap}
+.qcard__arrow{display:grid;place-items:center;flex:none;margin-left:auto;width:32px;height:32px;border-radius:50%;background:var(--navy-50);color:var(--navy-800);transition:background-color .25s,color .25s,transform .25s var(--ease)}
+.qcard__arrow .ic{width:17px;height:17px;stroke-width:2.1}
+.qcard:hover .qcard__arrow{background:var(--terra-600);color:#fff;transform:translateX(3px)}
+
+/* ---------- content ---------- */
+.content{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:56px;padding-block:84px 108px}
+.section-head{margin-bottom:28px}
+.section-title{margin-top:8px;font-family:var(--font-head);font-weight:800;font-size:clamp(28px,3vw,38px);line-height:1.1;letter-spacing:-.02em;color:var(--navy-900)}
+.section-head--aside{padding-top:31px}
+.tag{display:inline-flex;align-items:center;align-self:flex-start;gap:6px;padding:5px 12px;border-radius:999px;font-family:var(--font-head);font-weight:800;font-size:11.5px;line-height:1.4;letter-spacing:.1em;text-transform:uppercase}
+.link-arrow{position:relative;display:inline-flex;align-items:center;align-self:flex-start;gap:8px;padding-bottom:4px;font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--navy-800);text-decoration:none;background:linear-gradient(var(--terra-500),var(--terra-500)) 0 100%/0 2px no-repeat;transition:background-size .35s var(--ease)}
+.link-arrow .ext{display:inline-block;color:var(--terra-600);transition:transform .25s var(--ease)}
+.card-link::after{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit}
+.card-link:focus-visible{outline:none}
+.feature:has(.card-link:focus-visible),.card:has(.card-link:focus-visible),.notice:has(.card-link:focus-visible){outline:3px solid var(--navy-700);outline-offset:3px}
+.feature:hover .link-arrow,.card:hover .link-arrow{background-size:100% 2px}
+.feature:hover .ext,.card:hover .ext{transform:translate(2px,-2px)}
+
+.feature{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:var(--shadow-1);transition:box-shadow .3s,transform .3s var(--ease)}
+.feature:hover{box-shadow:var(--shadow-2);transform:translateY(-3px)}
+.feature__media{position:relative;overflow:hidden;background:#fff}
+.feature__media::before{content:"";display:block;padding-top:100%}
+.feature__media img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:transform .7s var(--ease)}
+.feature:hover .feature__media img{transform:scale(1.03)}
+.feature__body{position:relative;display:flex;flex-direction:column;justify-content:center;padding:40px 44px 40px}
+.feature__title{margin-top:20px;font-family:var(--font-head);font-weight:800;font-size:clamp(28px,2.7vw,38px);line-height:1.1;letter-spacing:-.02em;color:var(--navy-900)}
+.feature__text{margin-top:16px;margin-bottom:28px;font-size:17px;line-height:1.6;color:var(--ink-2)}
+.feature__foot{padding-top:22px;border-top:1px solid var(--line)}
+
+.news-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:24px}
+.card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow-1);transition:box-shadow .3s,transform .3s var(--ease)}
+.card:hover{box-shadow:var(--shadow-2);transform:translateY(-4px)}
+.card__media{aspect-ratio:4/3;overflow:hidden;background:#E8EEF3}
+.card__media img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease)}
+.card__media--top img{object-position:50% 0;transform-origin:50% 0}
+.card:hover .card__media img{transform:scale(1.04)}
+.card__body{display:flex;flex-direction:column;flex:1;padding:24px 26px 26px}
+.card__title{margin-top:16px;font-family:var(--font-head);font-weight:800;font-size:22px;line-height:1.24;letter-spacing:-.01em;color:var(--navy-900)}
+.card__text{margin-top:10px;font-size:15.5px;line-height:1.6;color:var(--ink-2)}
+.card__foot{margin-top:auto;padding-top:22px}
+
+/* aside */
+.aside{min-width:0;align-self:start}
+@media (min-width:1000px){.aside.is-sticky{position:sticky;top:148px}}
+.notices{padding:8px;background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-1)}
+.timeline>li{position:relative}
+.timeline>li:not(:last-child)::after{content:"";position:absolute;left:37px;top:66px;bottom:-20px;width:2px;background:repeating-linear-gradient(180deg,#D9CDBB 0 4px,transparent 4px 9px)}
+.notice{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) 18px;align-items:center;gap:16px;padding:20px 16px;border-radius:16px;transition:background-color .2s}
+.notice:hover{background:var(--paper)}
+.notice__icon{position:relative;z-index:0;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;box-shadow:0 0 0 5px #fff}
+.notice:hover .notice__icon{box-shadow:0 0 0 5px var(--paper)}
+.notice__icon .ic{width:21px;height:21px}
+.notice__cat{font-family:var(--font-head);font-weight:800;font-size:11.5px;line-height:1.4;letter-spacing:.1em;color:var(--ink-3)}
+.notice__title{margin-top:4px;font-family:var(--font-head);font-weight:700;font-size:16.5px;line-height:1.32;color:var(--navy-900);text-wrap:pretty;text-wrap:balance}
+.nw{white-space:nowrap}
+.notice__title a{text-decoration:none}
+.notice__go{width:18px;height:18px;color:var(--ink-3);transition:transform .25s var(--ease),color .2s}
+.notice:hover .notice__go{color:var(--terra-600);transform:translateX(3px)}
+
+.contact{position:relative;isolation:isolate;overflow:hidden;margin-top:24px;padding:26px 26px 24px;border-radius:22px;background:var(--navy-900);color:#fff;box-shadow:var(--shadow-2)}
+.contact__blob{position:absolute;z-index:-1;top:-44px;right:-40px;width:140px;height:130px;color:var(--sun)}
+.contact__icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.12);color:var(--sun)}
+.contact__icon .ic{width:23px;height:23px}
+.contact__title{margin-top:18px;font-family:var(--font-head);font-weight:800;font-size:22px;line-height:1.22;letter-spacing:-.01em}
+.contact__sub{margin-top:6px;font-size:15px;color:var(--on-dark-2)}
+.contact__mail{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px;padding:14px 16px;border-radius:999px;background:#fff;color:var(--navy-900);font-weight:600;font-size:15px;white-space:nowrap;text-decoration:none;transition:background-color .2s,transform .2s var(--ease)}
+.contact__mail .ic{width:18px;height:18px;color:var(--terra-600)}
+.contact__mail:hover{background:var(--sun);transform:translateY(-1px)}
+.contact__mail:hover .ic{color:var(--navy-900)}
+.source-note{display:flex;gap:10px;margin-top:22px;padding:0 4px;font-size:13px;line-height:1.55;color:var(--ink-3)}
+.source-note .ic{width:18px;height:18px;margin-top:1px;color:var(--ink-3)}
+
+/* ---------- footer ---------- */
+.site-footer{position:relative;isolation:isolate;overflow:hidden;background:var(--navy-950);color:#D5E2EC}
+.site-footer .crayon-strip{background:transparent}
+.footer__top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px 40px;flex-wrap:wrap;padding-block:48px 34px}
+.footer__name{font-family:var(--font-head);font-weight:800;font-size:26px;line-height:1.18;letter-spacing:-.01em;color:#fff}
+.footer__place{display:flex;align-items:center;gap:8px;margin-top:8px;font-family:var(--font-hand);font-weight:700;font-size:23px;line-height:1.1;color:var(--sun)}
+.footer__place .ic{width:17px;height:17px}
+.footer__right{display:flex;align-items:center;gap:18px}
+.footer__links{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-family:var(--font-head);font-weight:700;font-size:14.5px}
+.footer__links a{display:inline-block;padding:8px 2px;color:#E3ECF3;text-decoration:none;background:linear-gradient(var(--sun),var(--sun)) 0 calc(100% - 4px)/0 2px no-repeat;transition:background-size .3s var(--ease),color .2s}
+.footer__links a:hover{color:#fff;background-size:100% 2px}
+.footer__sep{color:rgba(213,226,236,.6)}
+.to-top{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.22);color:#fff;text-decoration:none;transition:background-color .2s,color .2s}
+.to-top:hover{background:var(--sun);color:var(--navy-950)}
+.to-top .ic{width:18px;height:18px;transform:rotate(-90deg)}
+.footer__partners{display:flex;justify-content:center;margin-bottom:44px;padding:28px 24px;background:#FFFFFF;border-radius:20px;box-shadow:0 24px 50px -30px rgba(0,0,0,.6)}
+.footer__partners img{width:620px;max-width:100%;height:auto}
+
+/* ---------- responsive ---------- */
+@media (max-width:1199px){
+  .nav-list{margin-left:-11px}
+  .nav-link{padding:0 11px;font-size:14.5px;gap:4px}
+  .nav-link::after{left:11px;right:11px}
+  .nav-mark{left:8px;width:calc(100% - 16px)}
+  .content{grid-template-columns:minmax(0,1fr) 340px;gap:40px}
+  .contact{padding:24px 22px 22px}
+  .contact__mail{padding:13px 12px;font-size:14px;gap:8px}
+  .hero__grid{column-gap:44px}
+  .pathway__trail{display:none}
+  .mega__in{grid-template-columns:232px minmax(0,1fr);gap:28px}
+  /* destaque compacto: o texto cabe na altura da fotografia quadrada (colagem nunca cortada) */
+  .feature__body{padding:24px 24px 22px}
+  .feature__title{margin-top:14px;font-size:25px}
+  .feature__text{margin-top:10px;margin-bottom:16px;font-size:15.5px;line-height:1.5}
+  .feature__foot{padding-top:14px}
+    .qcard{flex-direction:column;align-items:flex-start;padding:16px 16px 16px}
+  .qcard__arrow{position:absolute;top:16px;right:14px}
+}
+@media (max-width:999px){
+  .menu-toggle{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:116px;margin-left:auto;height:46px;padding:0 18px 0 14px;border-radius:999px;background:var(--navy-900);color:#fff;font-family:var(--font-head);font-weight:800;font-size:15px;transition:background-color .2s}
+  .menu-toggle:hover{background:var(--navy-700)}
+  .menu-toggle .ic{width:22px;height:22px;stroke-width:2.1}
+  .menu-toggle .i-close{display:none}
+  .nav-open .menu-toggle .i-open{display:none}
+  .nav-open .menu-toggle .i-close{display:block}
+  .brand__tag{margin-left:0;align-items:flex-start;text-align:left;padding-left:22px;border-left:1px solid var(--line-cool)}
+  .main-nav{display:none;position:fixed;left:0;right:0;top:var(--hdr-bottom,140px);bottom:0;z-index:49;overflow-y:auto;overscroll-behavior:contain;background:#fff;border-top:1px solid var(--line-cool)}
+  .nav-open .main-nav{display:block;animation:drawerIn .26s var(--ease) both}
+  @keyframes drawerIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+  .nav-list{flex-direction:column;margin:0;padding-block:8px 40px}
+  .nav-item{border-bottom:1px solid var(--line-cool)}
+  .nav-link,.is-compact .nav-link{width:100%;height:auto;min-height:62px;padding:14px 2px;font-size:17px;justify-content:space-between;white-space:normal}
+  .nav-mark{left:0;bottom:10px;width:84px}
+  .nav-link:hover::after{transform:scaleX(0)}
+  .nav-link::after{left:calc(-1*var(--gutter));right:auto;top:14px;bottom:14px;width:4px;height:auto;border-radius:0 4px 4px 0;transform:scaleX(0)}
+  .nav-link[aria-expanded="true"]{background:transparent}
+  .nav-link[aria-expanded="true"]::after{transform:none;background:var(--terra-600)}
+  .nav-chev{width:34px;height:34px;border-radius:50%;background:var(--navy-50)}
+  .nav-link[aria-expanded="true"] .nav-chev{background:var(--navy-900);color:#fff}
+  .mega{position:static;display:none;max-height:none;overflow:visible;border:0;box-shadow:none;background:transparent}
+  .is-open>.mega{animation:none}
+  .mega__in{display:block;padding:0 0 16px}
+  .mega__intro{display:none}
+  .mega__list,.mega--two .mega__list{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px}
+  .mega__link{min-height:54px;padding:8px 10px 8px 6px;font-size:15.5px;border-bottom:1px solid var(--terra-100);border-radius:12px 12px 0 0}
+  .mega__ico{width:36px;height:36px;border-radius:10px}
+  .mega__ico .ic{width:18px;height:18px}
+  .mega__go{opacity:.75;transform:none;width:17px;height:17px}
+  .scrim{z-index:45}
+  .content{grid-template-columns:minmax(0,1fr);gap:64px}
+  .aside{position:static}
+  .aside{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:24px;align-items:start}
+  .aside .section-head{grid-column:1/-1;padding-top:0}
+  .aside .contact{margin-top:0}
+  .aside .source-note{grid-column:2}
+  .feature__body{padding:36px 34px 32px}
+  .feature__title{margin-top:18px;font-size:clamp(26px,3.6vw,34px)}
+  .feature__text{margin-top:14px;margin-bottom:24px;font-size:16.5px;line-height:1.6}
+  .feature__foot{padding-top:20px}
+  }
+@media (max-width:899px){
+  .hero{padding:36px 0 104px}
+  .hero__grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:"copy art" "path path";column-gap:32px;row-gap:34px}
+  .hero__copy{align-self:center}
+  .hero .hand{font-size:25px;gap:10px}
+  .hero .hand svg{width:32px}
+  .pathway{max-width:none}
+  .pathway__trail{display:block}
+  .hero__art{max-width:340px}
+  .quick{margin-top:-56px}
+  .quick__grid{gap:14px}
+}
+@media (max-width:759px){
+  .quick__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+}
+/* a partir de 779px: logótipo + botão Menu numa linha, lema e localidade por baixo */
+@media (max-width:779px){
+  .brand-row{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"logo toggle" "tag tag";align-items:center;column-gap:12px;row-gap:10px;padding-block:12px}
+  .brand{grid-area:logo}
+  .menu-toggle{grid-area:toggle;justify-self:end}
+  .brand__tag{grid-area:tag;flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:12px;row-gap:2px;padding:10px 0 0;border-left:0;border-top:1px solid var(--line-cool)}
+  .brand__motto{font-size:13px}
+  .brand__place{font-size:12.5px}
+  .is-compact .brand__tag{display:none}
+}
+@media (max-width:699px){
+  .topbar__in{flex-direction:column;justify-content:center;gap:6px;padding-block:9px;text-align:center}
+  .topbar{font-size:10.5px;letter-spacing:.11em}
+  .topbar__tag{font-size:9.5px}
+}
+@media (max-width:719px){
+  .hero__grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"copy" "art" "path";row-gap:28px}
+  .hero__art{justify-self:stretch;max-width:none}
+  .art-blob{left:-6%;top:-18%;width:112%;height:136%}
+  .mosaic{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);aspect-ratio:auto;height:150px;gap:10px}
+  .tile--g1{grid-column:1;grid-row:1}
+  .tile--a{grid-column:2;grid-row:1}
+  .tile--g2{grid-column:3;grid-row:1}
+  .tile--b{display:none}
+  .art-outline{grid-column:2;grid-row:1;transform:translate(8px,8px)}
+  .tile--a .tile__img{--z:4;--cx:52.3;--cy:36.1}
+  .feature{grid-template-columns:minmax(0,1fr)}
+  .feature__body{padding:28px 24px 26px}
+  .feature__foot{padding-top:20px}
+  .feature__text{margin-bottom:24px}
+  .aside{display:block}
+  .aside .contact{margin-top:24px}
+}
+@media (max-width:640px){
+  :root{--gutter:20px}
+  .brand img{width:196px}
+  .is-compact .brand img{width:170px}
+  .mega__list,.mega--two .mega__list{grid-template-columns:minmax(0,1fr)}
+  .hero{padding:30px 0 96px}
+  .hand{font-size:26px}
+  .hand svg{width:34px}
+  .hero__title{font-size:clamp(44px,12.4vw,58px);margin-top:12px}
+  .hero__intro{font-size:17px;margin-top:16px}
+  .tile{border-radius:16px}
+  .tile--photo{border-width:4px}
+  .pathway{grid-template-columns:minmax(0,1fr);padding:20px 20px 22px;border-radius:20px}
+  .pathway__icon{display:none}
+  .pathway__trail{display:none}
+  .pathway__title{font-size:21px;margin-top:8px}
+  .btn{width:100%;justify-content:center}
+  .quick{margin-top:-52px}
+  .qcard{gap:12px;padding:16px 14px;border-radius:18px}
+  .qcard__label{font-size:15.5px}
+  .qcard__arrow{top:14px;right:12px;width:30px;height:30px}
+  .content{padding-block:60px 72px;gap:56px}
+  .section-head{margin-bottom:22px}
+  .news-grid{grid-template-columns:minmax(0,1fr);gap:20px;margin-top:20px}
+  .card__body{padding:22px 20px 22px}
+  .notice{padding:18px 12px;gap:14px}
+  .timeline>li:not(:last-child)::after{left:33px;top:62px}
+  .contact{padding:24px 22px}
+  .footer__top{flex-direction:column;align-items:flex-start;padding-block:36px 26px}
+  .footer__name{font-size:23px}
+  .footer__right{width:100%;align-items:flex-end;justify-content:space-between}
+  .footer__partners{padding:18px 14px;border-radius:16px;margin-bottom:32px}
+  .footer__links{flex-direction:column;align-items:flex-start;gap:0}
+  .footer__sep{display:none}
+}
+@media (max-width:379px){
+  .brand img{width:158px}
+  .is-compact .brand img{width:150px}
+  .menu-toggle{padding:0 14px 0 12px;gap:8px}
+  .qcard__label{white-space:normal}
+  .contact__mail{font-size:13.5px;gap:6px;padding-inline:14px}
+  .btn{height:auto;min-height:48px;padding:10px 18px;line-height:1.3;text-align:center}
+  .hand{font-size:23px}
+  .hand svg{width:26px}
+}
+@media (max-width:359px){
+  .contact__mail .ic{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- textura "lápis de cera" partilhada por todos os traços decorativos (eco do desenho do logótipo) -->
+    <filter id="crayon" x="-10%" y="-30%" width="120%" height="160%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="1" seed="11" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.9 1.8" result="ga"/>
+      <feComposite in="d" in2="ga" operator="in"/>
+    </filter>
+    <filter id="crayon-soft" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="3" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.4 1.6" result="ga"/>
+      <feComposite in="d" in2="ga" operator="in"/>
+    </filter>
+    <!-- variante para manchas grandes e traços finos: bordo irregular, grão discreto -->
+    <filter id="crayon-fill" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" seed="9" result="w"/>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="7" xChannelSelector="R" yChannelSelector="G" result="d0"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="5" result="n"/>
+      <feDisplacementMap in="d0" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="2" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -.62 1.27" result="ga"/>
+      <feComposite in="d" in2="ga" operator="in"/>
+    </filter>
+  </defs>
+  <symbol id="blob" viewBox="0 0 150 150"><path d="M80 8c34 2 62 26 64 60s-22 70-58 74S10 124 8 88 46 6 80 8z" fill="currentColor"/></symbol>
+  <symbol id="squiggle" viewBox="0 0 46 14"><path d="M2 7 C 10 3, 18 11, 26 7 S 38 3, 44 7" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-cap" viewBox="0 0 24 24"><path d="M2.5 9 12 4.5 21.5 9 12 13.5z"/><path d="M6.5 11v4.8c0 1.4 2.5 3 5.5 3s5.5-1.6 5.5-3V11"/><path d="M21.5 9v5.5"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M8.5 20.5h7M12 16.5v4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.8C10 5.2 7.2 4.6 3 5v13.5c4.2-.4 7 .2 9 1.8 2-1.6 4.8-2.2 9-1.8V5c-4.2-.4-7 .2-9 1.8z"/><path d="M12 6.8v13.5"/></symbol>
+  <symbol id="i-utensils" viewBox="0 0 24 24"><path d="M3.5 2.5V9a2 2 0 0 0 2 2h3.5a2 2 0 0 0 2-2V2.5"/><path d="M7.2 2.5v19"/><path d="M20.5 15V2.5a5 5 0 0 0-5 5v5.5a2 2 0 0 0 2 2h3zm0 0v6.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></symbol>
+  <symbol id="i-school" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V10.5L12 6l7 4.5V21"/><path d="M12 6V2.8h3.2"/><path d="M10 21v-4.5h4V21"/><path d="M9 12.5h.01M15 12.5h.01"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5s-7-6-7-11.7a7 7 0 0 1 14 0c0 5.7-7 11.7-7 11.7z"/><circle cx="12" cy="9.8" r="2.6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.4-3.6 3.1-6 6.5-6s6.1 2.4 6.5 6"/><path d="M15.5 4.8a3.5 3.5 0 0 1 0 6.4"/><path d="M18 14.4c2 .8 3.3 2.9 3.5 5.6"/></symbol>
+  <symbol id="i-org" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1.2"/><rect x="3" y="16" width="6" height="5" rx="1.2"/><rect x="15" y="16" width="6" height="5" rx="1.2"/><path d="M12 8v4M6 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3.5v17M7.5 20.5h9M4.5 7h15"/><path d="M5 7.5 2.5 13a2.6 2.6 0 0 0 5 0z"/><path d="M19 7.5 16.5 13a2.6 2.6 0 0 0 5 0z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 0 1-12.3 7.6L3.5 21l1.4-4.6A8.5 8.5 0 1 1 20.5 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.6 5.6 3.6 9s-1.2 6.4-3.6 9c-2.4-2.6-3.6-5.6-3.6-9S9.6 5.6 12 3z"/></symbol>
+  <symbol id="i-presentation" viewBox="0 0 24 24"><path d="M3 4h18"/><path d="M4.5 4v10a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V4"/><path d="M12 15.5v3M8 21l4-2.5 4 2.5"/></symbol>
+  <symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16.2c.6-1.4 1.8-2.2 3.2-2.2s2.6.8 3.2 2.2"/><path d="M15 10h3.5M15 13.5h2.5"/></symbol>
+  <symbol id="i-backpack" viewBox="0 0 24 24"><path d="M5.5 10a6.5 6.5 0 0 1 13 0v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z"/><path d="M9 4.6V4a3 3 0 0 1 6 0v.6"/><path d="M8.5 21v-5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5"/><path d="M9.5 10.5h5"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2.5h7.5A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M10.2 8.3v4.4l3.8-2.2z"/><path d="M8.5 20.5h7"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/><path d="m8 5.3 8 4.5"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="4.5" width="16" height="11" rx="1.8"/><path d="M2 19.5h20"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V3.5"/><path d="M5 4.5h12.5l-2.5 4 2.5 4H5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-8-4.7-8-10.6A4.4 4.4 0 0 1 8.4 5c1.5 0 2.8.7 3.6 1.9C12.8 5.7 14.1 5 15.6 5A4.4 4.4 0 0 1 20 9.4C20 15.3 12 20 12 20z"/><path d="M7.5 11.5h2.2l1.3-2 2 4 1.3-2h2.2"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.6 5 2.6-1.5-7"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 16.5c1.2-1.6 2.2-2.1 2.6-1.1.4 1.1 1 1.4 2.2.2.8-.8 1.4-.9 2.2 0"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14.5 3.5h6v6"/><path d="M10 14 20.5 3.5"/><path d="M18 13.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5.5"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5A2.5 2.5 0 0 1 11 3h2a2.5 2.5 0 0 1 2.5 2.5V7"/><path d="M3 12.5h18"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx=".8"/><path d="M9.5 2.5V6M14.5 2.5V6M9.5 18v3.5M14.5 18v3.5M2.5 9.5H6M2.5 14.5H6M18 9.5h3.5M18 14.5h3.5"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.01"/></symbol>
+</svg>
+
+<a class="skip" href="#conteudo">Saltar para o conteúdo principal</a>
+
+<div class="topbar on-dark" id="topo">
+  <div class="container topbar__in">
+    <span>AGRUPAMENTO DE ESCOLAS D. ANTÓNIO TAIPA</span>
+    <span class="topbar__tag">PROPOSTA VISUAL · PÁGINA INICIAL</span>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="crayon-strip" aria-hidden="true">
+    <svg viewBox="0 0 1000 8" preserveAspectRatio="none"><g filter="url(#crayon)"><rect x="0" y="0" width="204" height="8" fill="#8CC6EA"/><rect x="200" y="0" width="204" height="8" fill="#F3C548"/><rect x="400" y="0" width="204" height="8" fill="#F09A5B"/><rect x="600" y="0" width="204" height="8" fill="#B7A3DF"/><rect x="800" y="0" width="200" height="8" fill="#93C77F"/></g></svg>
+  </div>
+  <div class="container brand-row">
+    <a class="brand" href="#"><img src="assets/logo-agrupamento.png" alt="Logótipo do Agrupamento de Escolas D. António Taipa" width="244" height="73"></a>
+    <div class="brand__tag">
+      <span class="brand__motto">Educação <span class="sep">·</span> Conhecimento <span class="sep">·</span> Comunidade</span>
+      <span class="brand__place"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg>Freamunde, Paços de Ferreira</span>
+    </div>
+    <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu-principal">
+      <svg class="ic i-open" aria-hidden="true"><use href="#i-menu"/></svg><svg class="ic i-close" aria-hidden="true"><use href="#i-close"/></svg><span class="menu-toggle__label">Menu</span>
+    </button>
+  </div>
+
+  <nav class="main-nav" id="menu-principal" aria-label="Menu principal">
+    <div class="container">
+      <ul class="nav-list">
+        <li class="nav-item"><a class="nav-link" href="#" aria-current="page" data-menu="Entrada">Entrada<svg class="nav-mark" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><path d="M3 5 C 30 2.6, 70 2.4, 97 4.2" fill="none" stroke="#A64A2C" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke" filter="url(#crayon-fill)"/></svg></a></li>
+
+        <li class="nav-item">
+          <button class="nav-link" type="button" data-menu="O agrupamento" aria-expanded="false" aria-controls="sub-agrupamento">O agrupamento<span class="nav-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev"/></svg></span></button>
+          <div class="mega" id="sub-agrupamento" data-tone="sky">
+            <div class="container mega__in">
+              <div class="mega__intro" aria-hidden="true"><svg class="mega__blob" viewBox="0 0 150 150"><use href="#blob" filter="url(#crayon-fill)"/></svg><span class="mega__icon"><svg class="ic"><use href="#i-school"/></svg></span><div><p class="mega__title">O agrupamento</p><svg class="mega__scribble" viewBox="0 0 46 14" preserveAspectRatio="none"><use href="#squiggle" filter="url(#crayon-fill)"/></svg></div></div>
+              <ul class="mega__list">
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><span>História</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-school"/></svg></span><span>Escolas</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></span><span>Localização e contactos</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-org"/></svg></span><span>Órgãos de gestão</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg></span><span>Documentos estruturantes</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span><span>Proteção de dados</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-scale"/></svg></span><span>MENAC</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><span>EQAVET</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg></span><span>Estratégia da Educação para a Cidadania</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" type="button" data-menu="Comunidade Ed." aria-expanded="false" aria-controls="sub-comunidade">Comunidade Ed.<span class="nav-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev"/></svg></span></button>
+          <div class="mega mega--tiles" id="sub-comunidade" data-tone="sun">
+            <div class="container mega__in">
+              <div class="mega__intro" aria-hidden="true"><svg class="mega__blob" viewBox="0 0 150 150"><use href="#blob" filter="url(#crayon-fill)"/></svg><span class="mega__icon"><svg class="ic"><use href="#i-users"/></svg></span><div><p class="mega__title">Comunidade Ed.</p><svg class="mega__scribble" viewBox="0 0 46 14" preserveAspectRatio="none"><use href="#squiggle" filter="url(#crayon-fill)"/></svg></div></div>
+              <ul class="mega__list">
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-presentation"/></svg></span><span>Docentes</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-id"/></svg></span><span>Não docentes</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-backpack"/></svg></span><span>Alunos/EE</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" type="button" data-menu="P.T.Digital" aria-expanded="false" aria-controls="sub-ptdigital">P.T.Digital<span class="nav-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev"/></svg></span></button>
+          <div class="mega mega--two" id="sub-ptdigital" data-tone="lilac">
+            <div class="container mega__in">
+              <div class="mega__intro" aria-hidden="true"><svg class="mega__blob" viewBox="0 0 150 150"><use href="#blob" filter="url(#crayon-fill)"/></svg><span class="mega__icon"><svg class="ic"><use href="#i-laptop"/></svg></span><div><p class="mega__title">P.T.Digital</p><svg class="mega__scribble" viewBox="0 0 46 14" preserveAspectRatio="none"><use href="#squiggle" filter="url(#crayon-fill)"/></svg></div></div>
+              <ul class="mega__list">
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg></span><span>Documentação</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span><span>RED - Rec. Educ. Dig.</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-package"/></svg></span><span>KIT’s DIGITAIS</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-laptop"/></svg></span><span>Plataformas de Formação – MOOCs</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" type="button" data-menu="Projetos e Clubes" aria-expanded="false" aria-controls="sub-projetos">Projetos e Clubes<span class="nav-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev"/></svg></span></button>
+          <div class="mega mega--four" id="sub-projetos" data-tone="green">
+            <div class="container mega__in">
+              <div class="mega__intro" aria-hidden="true"><svg class="mega__blob" viewBox="0 0 150 150"><use href="#blob" filter="url(#crayon-fill)"/></svg><span class="mega__icon"><svg class="ic"><use href="#i-star"/></svg></span><div><p class="mega__title">Projetos e Clubes</p><svg class="mega__scribble" viewBox="0 0 46 14" preserveAspectRatio="none"><use href="#squiggle" filter="url(#crayon-fill)"/></svg></div></div>
+              <ul class="mega__list">
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></span><span>Projetos Internacionais</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg></span><span>Projetos Nacionais</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><span>Projetos do Agrupamento</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg></span><span>Projetos de Saúde</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></span><span>Clubes</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-award"/></svg></span><span>Distinções</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-pen"/></svg></span><span>Protocolos</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" type="button" data-menu="Ligações" aria-expanded="false" aria-controls="sub-ligacoes">Ligações<span class="nav-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev"/></svg></span></button>
+          <div class="mega" id="sub-ligacoes" data-tone="orange">
+            <div class="container mega__in">
+              <div class="mega__intro" aria-hidden="true"><svg class="mega__blob" viewBox="0 0 150 150"><use href="#blob" filter="url(#crayon-fill)"/></svg><span class="mega__icon"><svg class="ic"><use href="#i-link"/></svg></span><div><p class="mega__title">Ligações</p><svg class="mega__scribble" viewBox="0 0 46 14" preserveAspectRatio="none"><use href="#squiggle" filter="url(#crayon-fill)"/></svg></div></div>
+              <ul class="mega__list">
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg></span><span>Pedido de Manutenção</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg></span><span>Moodle</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></span><span>Office365</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg></span><span>Ligações internas</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-external"/></svg></span><span>Ligações externas</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-database"/></svg></span><span>GIAE</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" type="button" data-menu="Oferta Formativa" aria-expanded="false" aria-controls="sub-oferta">Oferta Formativa<span class="nav-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev"/></svg></span></button>
+          <div class="mega mega--two" id="sub-oferta" data-tone="terra">
+            <div class="container mega__in">
+              <div class="mega__intro" aria-hidden="true"><svg class="mega__blob" viewBox="0 0 150 150"><use href="#blob" filter="url(#crayon-fill)"/></svg><span class="mega__icon"><svg class="ic"><use href="#i-cap"/></svg></span><div><p class="mega__title">Oferta Formativa</p><svg class="mega__scribble" viewBox="0 0 46 14" preserveAspectRatio="none"><use href="#squiggle" filter="url(#crayon-fill)"/></svg></div></div>
+              <ul class="mega__list">
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg></span><span>Cursos Profissionais</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg></span><span>Educação e Formação Profissional</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg></span><span>Atividades Cursos Profissionais de Eletrónica e Mecatrónica</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg></span><span>Folheto Curso Eletrónica, Automação e Computadores</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg></span><span>Folheto Curso Auxiliar de Saúde</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-cog"/></svg></span><span>Folheto Curso de Mecatrónica</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+                <li><a class="mega__link" href="#"><span class="mega__ico"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></span><span>Folheto de Técnico de Energias Renováveis</span><svg class="ic mega__go" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+              </ul>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+<div class="scrim" aria-hidden="true"></div>
+
+<main id="conteudo" tabindex="-1">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <p class="hand"><svg viewBox="0 0 46 14" aria-hidden="true"><use href="#squiggle" filter="url(#crayon-fill)"/></svg>A nossa comunidade educativa</p>
+        <h1 class="hero__title" id="hero-title">
+          <span class="w">Aprender.<svg viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"><path d="M6 19 C 70 13, 170 11, 294 9 C 297 16, 296 25, 293 32 C 200 34, 100 37, 8 38 C 4 31, 4 25, 6 19 Z" fill="#8CC6EA" fill-opacity=".85" filter="url(#crayon)"/></svg></span>
+          <span class="w">Crescer.<svg viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C 80 10, 190 13, 296 11 C 298 18, 297 26, 295 34 C 190 36, 90 33, 6 37 C 3 29, 3 22, 4 14 Z" fill="#F3C548" fill-opacity=".85" filter="url(#crayon)"/></svg></span>
+          <span class="w">Participar.<svg viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"><path d="M5 16 C 90 11, 180 15, 295 10 C 298 17, 298 26, 294 33 C 200 37, 110 34, 7 38 C 3 31, 3 23, 5 16 Z" fill="#F09A5B" fill-opacity=".78" filter="url(#crayon)"/></svg></span>
+        </h1>
+        <p class="hero__intro">Um espaço de encontro para alunos, famílias e profissionais de educação.</p>
+      </div>
+
+      <div class="pathway on-dark">
+        <svg class="pathway__trail" viewBox="0 0 220 130" aria-hidden="true"><g fill="none" stroke-linecap="round" filter="url(#crayon-fill)"><path d="M6 126 C 40 112, 62 92, 98 96 S 150 92, 168 58 S 196 22, 214 14" stroke="#BC6446" stroke-width="5" stroke-dasharray="1 13"/><circle cx="214" cy="14" r="7" fill="#F3C548" stroke="none"/></g></svg>
+        <span class="pathway__icon" aria-hidden="true"><svg class="ic"><use href="#i-cap"/></svg></span>
+        <div class="pathway__body">
+          <p class="pathway__eyebrow">Percursos de aprendizagem</p>
+          <h2 class="pathway__title">O teu futuro começa com uma escolha.</h2>
+          <p class="pathway__text">Conhece a oferta formativa e os percursos de ensino profissional do agrupamento.</p>
+          <button class="btn btn--sun" type="button" data-open-menu="Oferta Formativa" aria-controls="sub-oferta">Explorar a oferta formativa <span class="arr" aria-hidden="true">→</span></button>
+        </div>
+      </div>
+
+      <div class="hero__art" aria-hidden="true">
+        <svg class="art-blob" viewBox="0 0 500 560" preserveAspectRatio="none"><path d="M262 18c92 4 190 58 218 160s-8 218-78 290-186 92-262 56S20 410 14 300 50 70 120 38s104-22 142-20z" fill="currentColor" fill-opacity=".34" filter="url(#crayon)"/></svg>
+        <div class="mosaic">
+          <svg class="art-outline" viewBox="0 0 330 500" preserveAspectRatio="none"><rect x="3" y="3" width="324" height="494" rx="24" fill="none" stroke="currentColor" stroke-width="3.2" vector-effect="non-scaling-stroke" filter="url(#crayon)"/></svg>
+          <div class="tile tile--draw tile--g1">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+              <rect width="100" height="100" fill="#E7F3FB"/>
+              <g filter="url(#crayon-soft)">
+                <circle cx="60" cy="38" r="15" fill="#F3C548"/>
+                <g stroke="#F3C548" stroke-width="4" stroke-linecap="round"><path d="M60 13v-7M60 63v7M35 38h-7M85 38h7M42 20l-5-5M78 56l5 5M42 56l-5 5M78 20l5-5"/></g>
+                <path d="M-4 84 C 22 70, 50 80, 104 66 L104 104 L-4 104 Z" fill="#93C77F"/>
+                <path d="M12 26 q5 -5.5 10 0 q5 -5.5 10 0" fill="none" stroke="#17354A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </svg>
+          </div>
+          <div class="tile tile--photo tile--a"><span class="tile__img"></span></div>
+          <div class="tile tile--photo tile--b"><span class="tile__img"></span></div>
+          <div class="tile tile--draw tile--g2">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+              <rect width="100" height="100" fill="#FBF3EE"/>
+              <g filter="url(#crayon-soft)">
+                <g stroke="#B7A3DF" stroke-width="3" stroke-linecap="round"><path d="M6 46 L14 40M6 54 L14 48M6 62 L14 56M6 70 L14 64M6 78 L14 72"/></g>
+                <rect x="18" y="34" width="66" height="7" fill="#F09A5B"/>
+                <g stroke="#17354A" stroke-width="1.8" fill="none"><rect x="18" y="34" width="66" height="50"/></g>
+                <g stroke="#17354A" stroke-width="1.3">
+                  <rect x="24" y="47" width="12" height="11" fill="#8CC6EA"/><rect x="39" y="47" width="12" height="11" fill="#F3C548"/><rect x="54" y="47" width="12" height="11" fill="#B7A3DF"/><rect x="69" y="47" width="10" height="11" fill="#93C77F"/>
+                  <rect x="24" y="63" width="12" height="11" fill="#E59A7C"/><rect x="39" y="63" width="12" height="11" fill="#93C77F"/><rect x="54" y="63" width="12" height="11" fill="#8CC6EA"/><rect x="69" y="63" width="10" height="11" fill="#F3C548"/>
+                </g>
+                <path d="M4 88 H96" stroke="#93C77F" stroke-width="4" stroke-linecap="round"/>
+                <path d="M30 22 C 40 14, 52 14, 62 20" fill="none" stroke="#8CC6EA" stroke-width="3" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="quick" aria-label="Acessos rápidos">
+    <div class="container">
+      <ul class="quick__grid">
+        <li><a class="qcard" href="#"><span class="qcard__icon tone-sky" aria-hidden="true"><svg class="ic"><use href="#i-cap"/></svg></span><span class="qcard__label">Inovar Consultas</span><span class="qcard__arrow" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span></a></li>
+        <li><a class="qcard" href="#"><span class="qcard__icon tone-orange" aria-hidden="true"><svg class="ic"><use href="#i-monitor"/></svg></span><span class="qcard__label">Office365</span><span class="qcard__arrow" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span></a></li>
+        <li><a class="qcard" href="#"><span class="qcard__icon tone-lilac" aria-hidden="true"><svg class="ic"><use href="#i-book"/></svg></span><span class="qcard__label">Moodle</span><span class="qcard__arrow" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span></a></li>
+        <li><a class="qcard" href="#"><span class="qcard__icon tone-green" aria-hidden="true"><svg class="ic"><use href="#i-utensils"/></svg></span><span class="qcard__label">Ementas</span><span class="qcard__arrow" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="container content">
+    <section class="news" aria-labelledby="news-title">
+      <div class="section-head">
+        <p class="hand"><svg viewBox="0 0 46 14" aria-hidden="true"><use href="#squiggle" filter="url(#crayon-fill)"/></svg>Notícias e atividades</p>
+        <h2 class="section-title" id="news-title">Vida do agrupamento</h2>
+      </div>
+
+      <article class="feature">
+        <div class="feature__media"><img src="assets/noticia-outdoor-learning.jpg" alt="Atividades Outdoor Learning do agrupamento: alunos em tarefas práticas no exterior" width="1080" height="1080"></div>
+        <div class="feature__body">
+          <p class="tag tone-terra">Aprendizagem · Erasmus+</p>
+          <h3 class="feature__title">Aprender para lá da sala de aula.</h3>
+          <p class="feature__text">Atividades práticas, descoberta e trabalho em equipa ao ar livre.</p>
+          <div class="feature__foot">
+            <a class="link-arrow card-link" href="https://aefreamunde.com/index.php/projetos/712-atividade-outdoor-learning" target="_blank" rel="noopener"><span lang="en">Outdoor Learning</span> <span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (abre num novo separador)</span></a>
+          </div>
+        </div>
+      </article>
+
+      <div class="news-grid">
+        <article class="card">
+          <div class="card__media card__media--top"><img src="assets/noticia-future-plan.jpg" alt="Cartaz da iniciativa Future Plan 2.0" width="391" height="546"></div>
+          <div class="card__body">
+            <p class="tag tone-sky">Projetos internacionais</p>
+            <h3 class="card__title" lang="en">Future Plan 2.0</h3>
+            <p class="card__text" lang="en">Local Hands, Global Impact.</p>
+            <div class="card__foot"><a class="link-arrow card-link" href="https://aefreamunde.com/index.php/projetos/projetos-internacionais/programa-erasmus/informacoes/725-future-plan-2-0" target="_blank" rel="noopener">Conhecer o projeto <span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (abre num novo separador)</span></a></div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card__media"><img src="assets/noticia-local-voices.jpg" alt="Comunidade escolar na sessão do projeto Local Voices to European Colours" width="560" height="556"></div>
+          <div class="card__body">
+            <p class="tag tone-lilac">Comunidade · Cultura</p>
+            <h3 class="card__title">O património local liga-nos à Europa.</h3>
+            <p class="card__text">Partilha de experiências com a comunidade escolar.</p>
+            <div class="card__foot"><a class="link-arrow card-link" href="https://aefreamunde.com/index.php/projetos/709-comunidade-escolar-celebra-o-patrimonio-local-em-sessao-de-disseminacao-do-projeto-erasmus-local-voices-to-european-colours" target="_blank" rel="noopener">Ver a notícia <span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (abre num novo separador)</span></a></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="aside" aria-labelledby="info-title">
+      <div class="section-head section-head--aside">
+        <h2 class="section-title" id="info-title">Informação útil</h2>
+      </div>
+      <div class="notices">
+        <ol class="timeline">
+          <li>
+            <article class="notice">
+              <span class="notice__icon tone-sky" aria-hidden="true"><svg class="ic"><use href="#i-book"/></svg></span>
+              <div>
+                <p class="notice__cat">ALUNOS E FAMÍLIAS</p>
+                <h3 class="notice__title"><a class="card-link" href="#">Manuais <span class="nw">escolares 26/27</span></a></h3>
+              </div>
+              <svg class="ic notice__go" aria-hidden="true"><use href="#i-chev-r"/></svg>
+            </article>
+          </li>
+          <li>
+            <article class="notice">
+              <span class="notice__icon tone-sun" aria-hidden="true"><svg class="ic"><use href="#i-users"/></svg></span>
+              <div>
+                <p class="notice__cat">COMUNIDADE EDUCATIVA</p>
+                <h3 class="notice__title"><a class="card-link" href="#">Associação de Pais: Assembleia Geral Ordinária</a></h3>
+              </div>
+              <svg class="ic notice__go" aria-hidden="true"><use href="#i-chev-r"/></svg>
+            </article>
+          </li>
+          <li>
+            <article class="notice">
+              <span class="notice__icon tone-lilac" aria-hidden="true"><svg class="ic"><use href="#i-briefcase"/></svg></span>
+              <div>
+                <p class="notice__cat">DOCENTES</p>
+                <h3 class="notice__title"><a class="card-link" href="#">Contratação de <span class="nw">escola —</span> <span class="nw">Grupo 540</span></a></h3>
+              </div>
+              <svg class="ic notice__go" aria-hidden="true"><use href="#i-chev-r"/></svg>
+            </article>
+          </li>
+        </ol>
+      </div>
+
+      <div class="contact on-dark">
+        <svg class="contact__blob" viewBox="0 0 150 150" preserveAspectRatio="none" aria-hidden="true"><use href="#blob" filter="url(#crayon-fill)"/></svg>
+        <span class="contact__icon" aria-hidden="true"><svg class="ic"><use href="#i-mail"/></svg></span>
+        <h3 class="contact__title">Precisas de falar connosco?</h3>
+        <p class="contact__sub">Secretaria do agrupamento</p>
+        <a class="contact__mail" href="mailto:secretaria@aefreamunde.com"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg>secretaria@aefreamunde.com</a>
+      </div>
+
+      <p class="source-note"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span>Imagens e notícias: site oficial do agrupamento. Seleção ilustrativa para esta proposta de layout.</span></p>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer on-dark">
+  <div class="crayon-strip" aria-hidden="true">
+    <svg viewBox="0 0 1000 8" preserveAspectRatio="none"><g filter="url(#crayon)"><rect x="0" y="0" width="204" height="8" fill="#8CC6EA"/><rect x="200" y="0" width="204" height="8" fill="#F3C548"/><rect x="400" y="0" width="204" height="8" fill="#F09A5B"/><rect x="600" y="0" width="204" height="8" fill="#B7A3DF"/><rect x="800" y="0" width="200" height="8" fill="#93C77F"/></g></svg>
+  </div>
+  <div class="container footer__top">
+    <div>
+      <p class="footer__name">Agrupamento de Escolas<br>D. António Taipa</p>
+      <p class="footer__place"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg>Freamunde, Paços de Ferreira</p>
+    </div>
+    <div class="footer__right">
+      <nav aria-label="Ligações do rodapé">
+        <ul class="footer__links">
+          <li><a href="#">Contactos</a></li>
+          <li class="footer__sep" aria-hidden="true">·</li>
+          <li><a href="#">Documentos estruturantes</a></li>
+          <li class="footer__sep" aria-hidden="true">·</li>
+          <li><a href="#">Proteção de dados</a></li>
+        </ul>
+      </nav>
+      <a class="to-top" href="#topo" aria-label="Voltar ao topo da página"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+  </div>
+  <div class="container">
+    <div class="footer__partners"><img src="assets/logos-institucionais.png" alt="Logótipos institucionais" width="620" height="53"></div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const header = document.querySelector('.site-header');
+  const nav = document.getElementById('menu-principal');
+  const toggle = document.querySelector('[data-menu-toggle]');
+  const toggleLabel = toggle.querySelector('.menu-toggle__label');
+  const scrim = document.querySelector('.scrim');
+  const buttons = Array.from(nav.querySelectorAll('button[data-menu]'));
+  const mq = window.matchMedia('(min-width: 1000px)');
+  const isDesktop = () => mq.matches;
+  /* tudo o que fica por baixo da gaveta (telemóvel/tablet) torna-se inerte enquanto ela está aberta */
+  const behindDrawer = ['.skip', '.topbar', 'main', '.site-footer'].map(q => document.querySelector(q)).filter(Boolean);
+  const aside = document.querySelector('.aside');
+  let returnTo = null; /* elemento que abriu um painel fora do menu (botão do destaque) */
+
+  const setHdr = () => root.style.setProperty('--hdr-bottom', Math.max(0, Math.round(header.getBoundingClientRect().bottom)) + 'px');
+  const drawerOpen = () => header.classList.contains('nav-open');
+  const openBtn = () => buttons.find(b => b.getAttribute('aria-expanded') === 'true');
+
+  function sync() {
+    setHdr();
+    scrim.classList.toggle('is-on', isDesktop() ? !!openBtn() : drawerOpen());
+  }
+  function setSub(btn, open) {
+    btn.setAttribute('aria-expanded', String(open));
+    btn.parentElement.classList.toggle('is-open', open);
+  }
+  function closeSubs(except) { buttons.forEach(b => { if (b !== except) setSub(b, false); }); }
+  function setDrawer(open) {
+    header.classList.toggle('nav-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggleLabel.textContent = open ? 'Fechar' : 'Menu';
+    const lock = open && !isDesktop();
+    root.classList.toggle('menu-lock', lock);
+    behindDrawer.forEach(el => el.toggleAttribute('inert', lock));
+    if (!open) closeSubs();
+  }
+  /* a coluna lateral só fica fixa quando cabe inteira no ecrã (abaixo do cabeçalho compacto) */
+  const fitAside = () => { if (aside) aside.classList.toggle('is-sticky', isDesktop() && aside.offsetHeight + 148 + 16 <= window.innerHeight); };
+  const firstEntry = btn => document.getElementById(btn.getAttribute('aria-controls')).querySelector('a');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      returnTo = null;
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      closeSubs(btn);
+      setSub(btn, open);
+      sync();
+    });
+    btn.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowDown' || !isDesktop()) return;
+      e.preventDefault();
+      closeSubs(btn); setSub(btn, true); sync();
+      const first = firstEntry(btn);
+      if (first) first.focus();
+    });
+    /* fecha o painel quando o foco do teclado sai do item (incluindo para o item seguinte do menu) */
+    btn.parentElement.addEventListener('focusout', e => {
+      if (!isDesktop()) return;
+      const to = e.relatedTarget;
+      if (to && !btn.parentElement.contains(to) && btn.getAttribute('aria-expanded') === 'true') { setSub(btn, false); sync(); returnTo = null; }
+    });
+  });
+
+  toggle.addEventListener('click', () => { setDrawer(!drawerOpen()); sync(); });
+
+  document.querySelectorAll('[data-open-menu]').forEach(el => el.addEventListener('click', e => {
+    e.stopPropagation();
+    const btn = nav.querySelector('[data-menu="' + el.dataset.openMenu + '"]');
+    if (!btn) return;
+    returnTo = el;
+    if (!isDesktop()) setDrawer(true);
+    closeSubs(btn); setSub(btn, true); sync();
+    if (!isDesktop()) nav.scrollTop = Math.max(0, btn.parentElement.offsetTop - 8);
+    const first = firstEntry(btn);
+    (first || btn).focus({ preventScroll: true });
+  }));
+
+  const backTo = () => { const t = returnTo; returnTo = null; return t; };
+  scrim.addEventListener('click', () => {
+    closeSubs(); if (drawerOpen()) setDrawer(false); sync();
+    const t = backTo(); if (t) t.focus({ preventScroll: true });
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.closest('[data-open-menu]')) return;
+    if (header.contains(e.target)) {
+      if (isDesktop() && !nav.contains(e.target) && openBtn()) { closeSubs(); sync(); }
+      return;
+    }
+    if (openBtn() || drawerOpen()) { closeSubs(); if (drawerOpen()) setDrawer(false); sync(); returnTo = null; }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const b = openBtn();
+    if (b) {
+      setSub(b, false); sync();
+      /* no computador, o foco volta a quem abriu o painel (ex.: "Explorar a oferta formativa") */
+      if (isDesktop() && returnTo) backTo().focus(); else b.focus({ preventScroll: true });
+      return;
+    }
+    if (drawerOpen()) { setDrawer(false); sync(); (backTo() || toggle).focus(); }
+  });
+
+  let compact = false, ticking = false;
+  const onScroll = () => {
+    ticking = false;
+    const y = window.scrollY;
+    if (!compact && y > 160) { compact = true; header.classList.add('is-compact'); }
+    else if (compact && y < 60) { compact = false; header.classList.remove('is-compact'); }
+    if (openBtn() || drawerOpen()) setHdr();
+  };
+  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  header.addEventListener('transitionend', setHdr);
+  window.addEventListener('resize', () => { setHdr(); fitAside(); });
+  window.addEventListener('load', fitAside);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { setHdr(); fitAside(); });
+  const onMq = () => { returnTo = null; closeSubs(); setDrawer(false); sync(); fitAside(); };
+  if (mq.addEventListener) mq.addEventListener('change', onMq); else mq.addListener(onMq);
+  setHdr(); fitAside();
+})();
+</script>
+<script>
+/* =====================================================================
+   Conteúdos geridos no backoffice (Supabase).
+   A página já traz o conteúdo atual escrito no HTML; se o Supabase não
+   responder, esse conteúdo fica visível tal como está.
+   ===================================================================== */
+const SITE_SUPABASE_URL = 'https://mvbzrmcytngsihkhglxe.supabase.co';
+const SITE_SUPABASE_KEY = 'sb_publishable_L75v9OCy4WGSUxoarDC_QQ_1gwGuRsk';
+
+/* Converte ligações de partilha do OneDrive/SharePoint numa ligação direta para o ficheiro. */
+function siteLigacaoDireta(url) {
+  url = String(url || '').trim();
+  if (!url) return '';
+  try {
+    const u = new URL(url, location.href);
+    if (/(^|\.)1drv\.ms$|(^|\.)onedrive\.live\.com$/i.test(u.hostname) && !/\/download/i.test(u.pathname)) {
+      const b64 = btoa(unescape(encodeURIComponent(url))).replace(/=+$/, '').replace(/\//g, '_').replace(/\+/g, '-');
+      return 'https://api.onedrive.com/v1.0/shares/u!' + b64 + '/root/content';
+    }
+    if (/\.sharepoint\.com$/i.test(u.hostname) && !u.searchParams.has('download')) {
+      u.searchParams.set('download', '1');
+      return u.href;
+    }
+    return u.href.startsWith(location.origin) && !/^https?:/i.test(url) ? url : u.href;
+  } catch (e) { return url; }
+}
+
+(() => {
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  /* só http(s), mailto e tel; "www.…" ganha https://; o resto fica como caminho relativo */
+  const safeUrl = u => {
+    u = String(u || '').trim();
+    if (!u) return '#';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return /^(https?|mailto|tel):/i.test(u) ? u : '#';
+    return /^www\./i.test(u) ? 'https://' + u : u;
+  };
+  const ICONES = /^i-[a-z-]+$/;
+  const ico = (id, cls) => '<svg class="ic' + (cls ? ' ' + cls : '') + '" aria-hidden="true"><use href="#' + (ICONES.test(id) ? id : 'i-link') + '"/></svg>';
+  const externa = u => /^https?:/i.test(u) && !u.startsWith(location.origin);
+  const novaAba = ' <span class="sr-only"> (abre num novo separador)</span>';
+  const tones = ['sky', 'orange', 'lilac', 'green', 'sun', 'terra'];
+
+  async function api(path) {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 7000);
+    try {
+      const r = await fetch(SITE_SUPABASE_URL + '/rest/v1/' + path, { headers: { apikey: SITE_SUPABASE_KEY, Accept: 'application/json' }, signal: ctl.signal });
+      if (!r.ok) throw new Error(r.status + ' ' + path);
+      return await r.json();
+    } finally { clearTimeout(t); }
+  }
+
+  function aplicarMenus(menus, itens) {
+    menus.forEach(m => {
+      const panel = document.getElementById('sub-' + m.chave);
+      const btn = document.querySelector('button[aria-controls="sub-' + m.chave + '"]');
+      if (!panel || !btn) return;
+      if (m.rotulo) {
+        const tn = [...btn.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+        if (tn) tn.textContent = m.rotulo;
+        btn.dataset.menu = m.rotulo;
+        const t = panel.querySelector('.mega__title'); if (t) t.textContent = m.rotulo;
+        document.querySelectorAll('[data-open-menu]').forEach(el => { if (el.dataset.openMenuKey === m.chave) el.dataset.openMenu = m.rotulo; });
+      }
+      const lista = itens.filter(i => i.menu === m.chave).sort((x, y) => (x.ordem || 0) - (y.ordem || 0));
+      const ul = panel.querySelector('.mega__list');
+      if (!ul || !lista.length) return;
+      ul.innerHTML = lista.map(i => {
+        const href = safeUrl(i.url);
+        const nova = i.nova_aba || externa(href);
+        return '<li><a class="mega__link" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '><span class="mega__ico">' + ico(i.icone) + '</span><span>' + esc(i.rotulo) + '</span>' + ico('i-arrow', 'mega__go') + (nova ? novaAba : '') + '</a></li>';
+      }).join('');
+    });
+  }
+
+  function aplicarDestaque(d) {
+    if (!d) return;
+    const set = (sel, v) => { const el = document.querySelector(sel); if (el && v) el.textContent = v; };
+    const hand = document.querySelector('.hero__copy .hand');
+    if (hand && d.eyebrow) { const tn = [...hand.childNodes].reverse().find(n => n.nodeType === 3 && n.textContent.trim()); if (tn) tn.textContent = d.eyebrow; }
+    if (Array.isArray(d.palavras)) document.querySelectorAll('.hero__title .w').forEach((w, i) => {
+      const tn = [...w.childNodes].find(n => n.nodeType === 3); if (tn && d.palavras[i]) tn.textContent = d.palavras[i];
+    });
+    set('.hero__intro', d.intro);
+    set('.pathway__eyebrow', d.percurso_eyebrow);
+    set('.pathway__title', d.percurso_titulo);
+    set('.pathway__text', d.percurso_texto);
+    const btn = document.querySelector('.pathway .btn');
+    if (btn && d.percurso_botao) { const tn = [...btn.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()); if (tn) tn.textContent = d.percurso_botao + ' '; }
+    if (d.imagem_url) {
+      const url = siteLigacaoDireta(d.imagem_url);
+      document.querySelectorAll('.tile__img').forEach(el => {
+        el.style.cssText = 'left:0;top:0;width:100%;height:100%;transform:none;aspect-ratio:auto;background:url("' + url.replace(/"/g, '%22') + '") center/cover no-repeat';
+      });
+    }
+  }
+
+  function aplicarAcessos(lista) {
+    const ul = document.querySelector('.quick__grid');
+    if (!ul || !Array.isArray(lista) || !lista.length) return;
+    ul.innerHTML = lista.slice(0, 4).map((a, i) => {
+      const href = safeUrl(a.url || '#'); const nova = externa(href);
+      return '<li><a class="qcard" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '><span class="qcard__icon tone-' + tones[i % 4] + '" aria-hidden="true">' + ico(a.icone || 'i-link') + '</span><span class="qcard__label">' + esc(a.rotulo) + '</span><span class="qcard__arrow" aria-hidden="true">' + ico('i-arrow') + '</span>' + (nova ? novaAba : '') + '</a></li>';
+    }).join('');
+  }
+
+  function linkNoticia(n) {
+    if (!n.ligacao_url) return '';
+    const href = safeUrl(n.ligacao_url); const nova = externa(href);
+    return '<a class="link-arrow card-link" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '>' + esc(n.ligacao_texto || 'Ver a notícia') + ' <span class="ext" aria-hidden="true">' + (nova ? '↗' : '→') + '</span>' + (nova ? novaAba : '') + '</a>';
+  }
+  const img = n => n.imagem_url ? '<img src="' + esc(siteLigacaoDireta(n.imagem_url)) + '" alt="' + esc(n.imagem_alt || '') + '">' : '';
+  const lang = n => n.idioma ? ' lang="' + esc(n.idioma) + '"' : '';
+
+  function aplicarNoticias(lista) {
+    if (!lista.length) return;
+    const destaque = lista.find(n => n.destaque) || lista[0];
+    const outras = lista.filter(n => n !== destaque).slice(0, 2);
+    const f = document.querySelector('.feature');
+    if (f) f.innerHTML =
+      (destaque.imagem_url ? '<div class="feature__media">' + img(destaque) + '</div>' : '') +
+      '<div class="feature__body">' + (destaque.categoria ? '<p class="tag tone-' + esc(destaque.cor || 'terra') + '">' + esc(destaque.categoria) + '</p>' : '') +
+      '<h3 class="feature__title"' + lang(destaque) + '>' + esc(destaque.titulo) + '</h3>' +
+      (destaque.resumo ? '<p class="feature__text"' + lang(destaque) + '>' + esc(destaque.resumo) + '</p>' : '') +
+      '<div class="feature__foot">' + linkNoticia(destaque) + '</div></div>';
+    const grid = document.querySelector('.news-grid');
+    if (grid) grid.innerHTML = outras.map(n =>
+      '<article class="card">' + (n.imagem_url ? '<div class="card__media' + (n.imagem_topo ? ' card__media--top' : '') + '">' + img(n) + '</div>' : '') +
+      '<div class="card__body">' + (n.categoria ? '<p class="tag tone-' + esc(n.cor || 'sky') + '">' + esc(n.categoria) + '</p>' : '') +
+      '<h3 class="card__title"' + lang(n) + '>' + esc(n.titulo) + '</h3>' +
+      (n.resumo ? '<p class="card__text"' + lang(n) + '>' + esc(n.resumo) + '</p>' : '') +
+      '<div class="card__foot">' + linkNoticia(n) + '</div></div></article>').join('');
+  }
+
+  function iconeAviso(p) {
+    p = String(p || '').toUpperCase();
+    if (/ALUNO|FAMÍLIA|FAMILIA|ENCARREGADO/.test(p)) return ['sky', 'i-book'];
+    if (/COMUNIDADE|PAIS/.test(p)) return ['sun', 'i-users'];
+    if (/DOCENTE|PROFESSOR|PESSOAL/.test(p)) return ['lilac', 'i-briefcase'];
+    return ['green', 'i-info'];
+  }
+  function aplicarAvisos(lista) {
+    const ol = document.querySelector('.timeline');
+    if (!ol || !lista.length) return;
+    ol.innerHTML = lista.slice().sort((x, y) => (x.ordem || 0) - (y.ordem || 0)).slice(0, 6).map(a => {
+      const [tone, icon] = iconeAviso(a.publico);
+      const href = safeUrl(a.ligacao_url);
+      const nova = externa(href);
+      return '<li><article class="notice"><span class="notice__icon tone-' + tone + '" aria-hidden="true">' + ico(icon) + '</span><div>' +
+        '<p class="notice__cat">' + esc(a.publico) + '</p><h3 class="notice__title"><a class="card-link" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '>' + esc(a.titulo) + (nova ? novaAba : '') + '</a></h3></div>' +
+        ico('i-chev-r', 'notice__go') + '</article></li>';
+    }).join('');
+  }
+
+  const hoje = new Date().toISOString().slice(0, 10);
+  const pedidos = [
+    api('site_menus?select=chave,rotulo,ordem&order=ordem'),
+    api('site_menu_itens?select=menu,rotulo,url,icone,ordem,nova_aba&visivel=eq.true&order=ordem'),
+    api('site_config?select=chave,valor'),
+    api('site_noticias?select=*&publicado=eq.true&data_publicacao=lte.' + hoje + '&order=data_publicacao.desc&limit=12'),
+    api('site_avisos?select=*&publicado=eq.true&order=ordem,inicio.desc&limit=12'),
+  ];
+  const btnOferta = document.querySelector('[data-open-menu="Oferta Formativa"]');
+  if (btnOferta) btnOferta.dataset.openMenuKey = 'oferta';
+  Promise.allSettled(pedidos).then(([menus, itens, config, noticias, avisos]) => {
+    const ok = r => r.status === 'fulfilled' && Array.isArray(r.value);
+    try { if (ok(menus) && ok(itens)) aplicarMenus(menus.value, itens.value); } catch (e) { console.warn('menus', e); }
+    if (ok(config)) {
+      const c = Object.fromEntries(config.value.map(x => [x.chave, x.valor]));
+      try { aplicarDestaque(c.destaque); } catch (e) { console.warn('destaque', e); }
+      try { aplicarAcessos(c.acessos); } catch (e) { console.warn('acessos', e); }
+    }
+    try { if (ok(noticias)) aplicarNoticias(noticias.value); } catch (e) { console.warn('noticias', e); }
+    try {
+      if (ok(avisos)) aplicarAvisos(avisos.value.filter(a => (!a.inicio || a.inicio <= hoje) && (!a.fim || a.fim >= hoje)));
+    } catch (e) { console.warn('avisos', e); }
+    document.documentElement.classList.add('conteudos-carregados');
+    window.dispatchEvent(new Event('resize'));
+  });
+})();
+</script>
+</body>
+</html>

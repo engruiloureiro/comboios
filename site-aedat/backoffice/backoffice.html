@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light">
+<title>Backoffice · Agrupamento de Escolas D. António Taipa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&family=Caveat:wght@700&display=swap">
+<style>
+:root{
+ --navy-950:#0A1B29;--navy-900:#0F2A3E;--navy-800:#17354A;--navy-700:#24506D;--navy-100:#E2EBF2;--navy-50:#F1F6FA;
+ --terra-700:#8E3B22;--terra-600:#A64A2C;--terra-100:#F6E5DC;--terra-50:#FBF3EE;
+ --paper:#FBF8F3;--sand:#F6EDE1;--line:#ECE4D8;--line-2:#DDD3C4;--ink:#17354A;--ink-2:#3B566A;--ink-3:#566E80;
+ --sky:#8CC6EA;--sky-50:#E7F3FB;--sun:#F3C548;--sun-50:#FEF4D3;--orange:#F09A5B;--orange-50:#FDECDD;--lilac:#B7A3DF;--lilac-50:#F1ECFB;--green:#93C77F;--green-50:#E8F4E0;
+ --ok:#2F7A4B;--ok-50:#E7F4EC;--err:#B03A2E;--err-50:#FDECEA;--warn:#8A5D10;--warn-50:#FFF6E0;
+ --r:14px;--r-sm:10px;--shadow-1:0 1px 2px rgba(23,53,74,.06),0 2px 8px rgba(23,53,74,.05);--shadow-2:0 18px 50px -18px rgba(10,27,41,.45);
+ --font-head:Manrope,'Segoe UI',system-ui,sans-serif;--font-body:Inter,'Segoe UI',system-ui,sans-serif;--font-hand:Caveat,'Segoe Print',cursive;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 var(--font-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--terra-600)}
+:focus-visible{outline:3px solid var(--navy-700);outline-offset:2px;border-radius:6px}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.crayon{height:5px;background:linear-gradient(90deg,var(--sky) 0 20%,var(--sun) 20% 40%,var(--orange) 40% 60%,var(--lilac) 60% 80%,var(--green) 80%)}
+
+/* entrada */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(700px 400px at 10% 0,var(--sky-50),transparent 70%),radial-gradient(700px 500px at 100% 100%,var(--terra-50),transparent 70%),var(--paper)}
+.login__card{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-2);overflow:hidden}
+.login__in{padding:32px 32px 28px}
+.login__logo{display:block;width:220px;max-width:100%;height:auto;margin:0 0 18px}
+.hand{font-family:var(--font-hand);font-weight:700;font-size:22px;color:var(--terra-600);margin:0}
+.login h1{font:800 28px/1.15 var(--font-head);letter-spacing:-.02em;margin:2px 0 6px}
+.muted{color:var(--ink-3);font-size:14px}
+
+/* estrutura */
+.app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-900);color:#DCE7F0;display:flex;flex-direction:column}
+.side__brand{padding:20px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.side__brand .logo{display:block;background:#fff;border-radius:12px;padding:8px 10px;margin-bottom:14px}
+.side__brand .logo img{display:block;width:100%;max-width:200px;height:auto}
+.side__title{font:800 17px/1.2 var(--font-head);color:#fff;margin:0}
+.side__sub{font-size:12.5px;color:#9FB6C8;margin:2px 0 0}
+.side nav{padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.side__kicker{font:700 10.5px/1 var(--font-head);letter-spacing:.14em;text-transform:uppercase;color:#7E9AAF;padding:14px 12px 8px}
+.navbtn{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:#DCE7F0;text-align:left;padding:10px 12px;border-radius:10px;font-weight:600;font-size:14.5px;position:relative}
+.navbtn:hover{background:rgba(255,255,255,.06);color:#fff}
+.navbtn[aria-current="page"]{background:rgba(255,255,255,.1);color:#fff}
+.navbtn[aria-current="page"]::before{content:"";position:absolute;left:-10px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:var(--sun)}
+.navbtn .ic{color:var(--sky)}
+.side__foot{margin-top:auto;padding:14px 16px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:12.5px;color:#9FB6C8;display:flex;flex-direction:column;gap:8px}
+.side__foot .who{overflow-wrap:anywhere}
+.role{display:inline-flex;align-items:center;gap:6px;font:700 11px/1 var(--font-head);letter-spacing:.08em;text-transform:uppercase;padding:5px 9px;border-radius:999px;background:rgba(243,197,72,.16);color:var(--sun);width:max-content}
+.ghost{border:1px solid rgba(255,255,255,.18);background:transparent;color:#fff;border-radius:10px;padding:8px 12px;text-align:left;font-weight:600;font-size:13.5px;display:flex;gap:10px;align-items:center;text-decoration:none}
+.ghost:hover{background:rgba(255,255,255,.07)}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:5;background:rgba(251,248,243,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top__in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(16px,3vw,40px)}
+.top h1{font:800 22px/1.2 var(--font-head);letter-spacing:-.015em;margin:0}
+.top p{margin:2px 0 0}
+.content{padding:24px clamp(16px,3vw,40px) 60px;max-width:1240px;width:100%}
+
+/* componentes */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 16px;border-radius:999px;border:1px solid var(--line-2);background:#fff;font-weight:600;font-size:14px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--navy-700)}
+.btn--pri{background:var(--terra-600);border-color:var(--terra-600);color:#fff}
+.btn--pri:hover{background:var(--terra-700);border-color:var(--terra-700)}
+.btn--navy{background:var(--navy-800);border-color:var(--navy-800);color:#fff}
+.btn--danger{color:var(--err);border-color:#EBC3BE}
+.btn--danger:hover{background:var(--err-50);border-color:var(--err)}
+.btn--sm{min-height:32px;padding:4px 12px;font-size:13px}
+.btn--icon{width:34px;min-height:34px;padding:0}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-1)}
+.card__head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line)}
+.card__head h2{font:800 17px/1.2 var(--font-head);margin:0}
+.card__body{padding:18px 20px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.toolbar .search{flex:1;min-width:220px;max-width:420px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.stat{padding:18px 20px;border-radius:var(--r);background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-1);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--c,var(--sky))}
+.stat strong{display:block;font:800 30px/1 var(--font-head);letter-spacing:-.02em}
+.stat span{display:block;color:var(--ink-3);font-size:13.5px;margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font:700 11px/1.3 var(--font-head);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--paper)}
+tbody tr:hover{background:#FDFBF7}
+td.title{font-weight:600;max-width:420px}
+td.title small{display:block;font-weight:400;color:var(--ink-3)}
+.thumb{width:56px;height:42px;border-radius:8px;object-fit:cover;background:var(--sand);display:block}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.b-ok{background:var(--ok-50);color:var(--ok)}.b-off{background:#F0F1F2;color:#5F6B73}.b-warn{background:var(--warn-50);color:var(--warn)}.b-star{background:var(--sun-50);color:#7A5600}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font:700 11px/1.6 var(--font-head);letter-spacing:.06em;text-transform:uppercase}
+.tone-terra{background:var(--terra-100);color:var(--terra-700)}.tone-sky{background:var(--sky-50);color:#1D6894}.tone-lilac{background:var(--lilac-50);color:#6145A4}.tone-sun{background:var(--sun-50);color:#7A5600}.tone-green{background:var(--green-50);color:#3A7025}.tone-orange{background:var(--orange-50);color:#A3461A}
+.empty{padding:28px;text-align:center;color:var(--ink-3)}
+.actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* formulários */
+.field{display:block;margin:0 0 14px}
+.field>span{display:block;font-weight:600;font-size:13.5px;margin:0 0 6px;color:var(--ink-2)}
+.field small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:5px}
+.in{display:block;width:100%;min-height:42px;padding:9px 12px;border:1px solid var(--line-2);border-radius:var(--r-sm);background:#fff}
+.in:focus{outline:none;border-color:var(--navy-700);box-shadow:0 0 0 3px rgba(36,80,109,.15)}
+textarea.in{min-height:84px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.check{display:flex;gap:10px;align-items:flex-start;margin:4px 0 12px;font-size:14px}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--terra-600)}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatches label{position:relative}
+.swatches input{position:absolute;opacity:0}
+.swatches span{display:inline-block;padding:6px 12px;border-radius:999px;border:2px solid transparent;font-size:12.5px;font-weight:700;cursor:pointer}
+.swatches input:checked+span{border-color:var(--navy-800)}
+.swatches input:focus-visible+span{outline:3px solid var(--navy-700);outline-offset:2px}
+.preview{display:flex;gap:14px;align-items:center;padding:12px;border:1px dashed var(--line-2);border-radius:var(--r-sm);background:var(--paper);margin:-4px 0 14px}
+.preview img{width:120px;height:90px;object-fit:cover;border-radius:8px;background:var(--sand)}
+.preview .st{font-size:13px}
+.st-ok{color:var(--ok)}.st-err{color:var(--err)}
+.help{padding:12px 14px;border-radius:var(--r-sm);background:var(--sky-50);color:#174E70;font-size:13.5px;margin:0 0 14px}
+.help b{color:#0F3B57}
+
+/* menus */
+.menu-block+.menu-block{margin-top:16px}
+.item-row{display:grid;grid-template-columns:34px minmax(150px,1.3fr) minmax(150px,1.4fr) 150px auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.item-row:last-child{border-bottom:0}
+.item-row .in{min-height:38px;padding:7px 10px;font-size:14px}
+.ico-prev{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--sky-50);color:#1D6894}
+.mini-checks{display:flex;gap:12px;font-size:12.5px;white-space:nowrap}
+.mini-checks label{display:flex;gap:5px;align-items:center}
+.mini-checks input{accent-color:var(--terra-600)}
+.dirty{box-shadow:inset 4px 0 0 var(--sun)}
+
+/* janela */
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:18px;background:rgba(10,27,41,.55);backdrop-filter:blur(3px)}
+.modal__box{width:min(780px,100%);max-height:94vh;display:flex;flex-direction:column;background:#fff;border-radius:20px;box-shadow:var(--shadow-2);overflow:hidden}
+.modal__head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line)}
+.modal__head h2{font:800 19px/1.2 var(--font-head);margin:0}
+.modal__body{padding:20px 22px;overflow:auto}
+.modal__foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:14px 22px;border-top:1px solid var(--line);background:var(--paper)}
+.modal__foot .spacer{margin-right:auto}
+
+.toast{position:fixed;right:20px;bottom:20px;z-index:60;max-width:380px;padding:12px 16px;border-radius:12px;background:var(--navy-900);color:#fff;box-shadow:var(--shadow-2);font-size:14px;display:flex;gap:10px;align-items:center}
+.toast.err{background:var(--err)}
+.alert{padding:12px 14px;border-radius:var(--r-sm);font-size:14px;margin:0 0 14px}
+.alert.err{background:var(--err-50);color:var(--err)}
+.alert.ok{background:var(--ok-50);color:var(--ok)}
+.loading{display:flex;align-items:center;gap:12px;color:var(--ink-3);padding:30px}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--terra-600);animation:roda .8s linear infinite}
+@keyframes roda{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media (max-width:980px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.item-row{grid-template-columns:34px 1fr 1fr;}.item-row .ico-sel,.item-row .mini-checks,.item-row .actions{grid-column:span 1}}
+@media (max-width:760px){
+ .app{display:block}
+ .side{position:relative;height:auto}
+ .side nav{flex-direction:row;overflow-x:auto;padding:8px 10px}
+ .side__kicker,.side__foot .who,.side__brand .logo{display:none}
+ .navbtn{white-space:nowrap;width:auto}
+ .navbtn[aria-current="page"]::before{left:10px;right:10px;top:auto;bottom:2px;width:auto;height:3px}
+ .side__foot{flex-direction:row;flex-wrap:wrap;padding:10px 14px}
+ .row,.row3{grid-template-columns:1fr}
+ .item-row{grid-template-columns:34px 1fr}
+ .item-row>*{grid-column:2}.item-row>.ico-prev{grid-column:1;grid-row:1}
+ table .hide-sm{display:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-cap" viewBox="0 0 24 24"><path d="M2.5 9 12 4.5 21.5 9 12 13.5z"/><path d="M6.5 11v4.8c0 1.4 2.5 3 5.5 3s5.5-1.6 5.5-3V11"/><path d="M21.5 9v5.5"/></symbol><symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M8.5 20.5h7M12 16.5v4"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.8C10 5.2 7.2 4.6 3 5v13.5c4.2-.4 7 .2 9 1.8 2-1.6 4.8-2.2 9-1.8V5c-4.2-.4-7 .2-9 1.8z"/><path d="M12 6.8v13.5"/></symbol><symbol id="i-utensils" viewBox="0 0 24 24"><path d="M3.5 2.5V9a2 2 0 0 0 2 2h3.5a2 2 0 0 0 2-2V2.5"/><path d="M7.2 2.5v19"/><path d="M20.5 15V2.5a5 5 0 0 0-5 5v5.5a2 2 0 0 0 2 2h3zm0 0v6.5"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></symbol><symbol id="i-school" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V10.5L12 6l7 4.5V21"/><path d="M12 6V2.8h3.2"/><path d="M10 21v-4.5h4V21"/><path d="M9 12.5h.01M15 12.5h.01"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5s-7-6-7-11.7a7 7 0 0 1 14 0c0 5.7-7 11.7-7 11.7z"/><circle cx="12" cy="9.8" r="2.6"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.4-3.6 3.1-6 6.5-6s6.1 2.4 6.5 6"/><path d="M15.5 4.8a3.5 3.5 0 0 1 0 6.4"/><path d="M18 14.4c2 .8 3.3 2.9 3.5 5.6"/></symbol><symbol id="i-org" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1.2"/><rect x="3" y="16" width="6" height="5" rx="1.2"/><rect x="15" y="16" width="6" height="5" rx="1.2"/><path d="M12 8v4M6 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol><symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3.5v17M7.5 20.5h9M4.5 7h15"/><path d="M5 7.5 2.5 13a2.6 2.6 0 0 0 5 0z"/><path d="M19 7.5 16.5 13a2.6 2.6 0 0 0 5 0z"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 0 1-12.3 7.6L3.5 21l1.4-4.6A8.5 8.5 0 1 1 20.5 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.6 3.6 5.6 3.6 9s-1.2 6.4-3.6 9c-2.4-2.6-3.6-5.6-3.6-9S9.6 5.6 12 3z"/></symbol><symbol id="i-presentation" viewBox="0 0 24 24"><path d="M3 4h18"/><path d="M4.5 4v10a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V4"/><path d="M12 15.5v3M8 21l4-2.5 4 2.5"/></symbol><symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16.2c.6-1.4 1.8-2.2 3.2-2.2s2.6.8 3.2 2.2"/><path d="M15 10h3.5M15 13.5h2.5"/></symbol><symbol id="i-backpack" viewBox="0 0 24 24"><path d="M5.5 10a6.5 6.5 0 0 1 13 0v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z"/><path d="M9 4.6V4a3 3 0 0 1 6 0v.6"/><path d="M8.5 21v-5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5"/><path d="M9.5 10.5h5"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2.5h7.5A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M10.2 8.3v4.4l3.8-2.2z"/><path d="M8.5 20.5h7"/></symbol><symbol id="i-package" viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/><path d="m8 5.3 8 4.5"/></symbol><symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="4.5" width="16" height="11" rx="1.8"/><path d="M2 19.5h20"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V3.5"/><path d="M5 4.5h12.5l-2.5 4 2.5 4H5"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol><symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-8-4.7-8-10.6A4.4 4.4 0 0 1 8.4 5c1.5 0 2.8.7 3.6 1.9C12.8 5.7 14.1 5 15.6 5A4.4 4.4 0 0 1 20 9.4C20 15.3 12 20 12 20z"/><path d="M7.5 11.5h2.2l1.3-2 2 4 1.3-2h2.2"/></symbol><symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.6 5 2.6-1.5-7"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 16.5c1.2-1.6 2.2-2.1 2.6-1.1.4 1.1 1 1.4 2.2.2.8-.8 1.4-.9 2.2 0"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol><symbol id="i-external" viewBox="0 0 24 24"><path d="M14.5 3.5h6v6"/><path d="M10 14 20.5 3.5"/><path d="M18 13.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5.5"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5A2.5 2.5 0 0 1 11 3h2a2.5 2.5 0 0 1 2.5 2.5V7"/><path d="M3 12.5h18"/></symbol><symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></symbol><symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx=".8"/><path d="M9.5 2.5V6M14.5 2.5V6M9.5 18v3.5M14.5 18v3.5M2.5 9.5H6M2.5 14.5H6M18 9.5h3.5M18 14.5h3.5"/></symbol><symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol><symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12z"/></symbol><symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.01"/></symbol></defs></svg>
+<div id="app"><div class="loading"><span class="spin" aria-hidden="true"></span>A carregar…</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+const SUPABASE_URL = 'https://mvbzrmcytngsihkhglxe.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_L75v9OCy4WGSUxoarDC_QQ_1gwGuRsk';
+const SITE_URL = 'index.html';
+const LOGO = 'assets/logo-agrupamento.png';
+
+/* Converte ligações de partilha do OneDrive/SharePoint numa ligação direta para o ficheiro. */
+function siteLigacaoDireta(url) {
+  url = String(url || '').trim();
+  if (!url) return '';
+  try {
+    const u = new URL(url, location.href);
+    if (/(^|\.)1drv\.ms$|(^|\.)onedrive\.live\.com$/i.test(u.hostname) && !/\/download/i.test(u.pathname)) {
+      const b64 = btoa(unescape(encodeURIComponent(url))).replace(/=+$/, '').replace(/\//g, '_').replace(/\+/g, '-');
+      return 'https://api.onedrive.com/v1.0/shares/u!' + b64 + '/root/content';
+    }
+    if (/\.sharepoint\.com$/i.test(u.hostname) && !u.searchParams.has('download')) {
+      u.searchParams.set('download', '1');
+      return u.href;
+    }
+    return u.href.startsWith(location.origin) && !/^https?:/i.test(url) ? url : u.href;
+  } catch (e) { return url; }
+}
+
+
+const MENUS_ICONES = ['i-link','i-external','i-file','i-folder','i-book','i-cap','i-school','i-users','i-id','i-presentation','i-backpack','i-org','i-pin','i-clock','i-shield','i-scale','i-check','i-chat','i-globe','i-flag','i-star','i-heart','i-award','i-pen','i-wrench','i-grid','i-database','i-briefcase','i-spark','i-cpu','i-cog','i-bolt','i-laptop','i-monitor','i-play','i-package','i-mail','i-utensils','i-info'];
+const CORES = [['terra','Terracota'],['sky','Azul'],['lilac','Lilás'],['sun','Amarelo'],['green','Verde'],['orange','Laranja']];
+const PUBLICOS = ['ALUNOS E FAMÍLIAS','COMUNIDADE EDUCATIVA','DOCENTES','NÃO DOCENTES','ENCARREGADOS DE EDUCAÇÃO','TODOS'];
+
+let sb = null;
+const S = { user: null, perfil: null, view: 'painel', noticias: [], avisos: [], menus: [], itens: [], config: {}, perfis: [], filtro: '', modal: null, loading: true, erro: '' };
+
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ico = id => '<svg class="ic" aria-hidden="true"><use href="#' + esc(id) + '"/></svg>';
+const $ = s => document.querySelector(s);
+const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+const chk = id => !!(document.getElementById(id) || {}).checked;
+const hoje = () => new Date().toISOString().slice(0, 10);
+const dataPT = d => d ? d.split('-').reverse().join('/') : '—';
+const isAdmin = () => S.perfil === 'admin';
+
+function toast(msg, err) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast' + (err ? ' err' : ''); t.setAttribute('role', err ? 'alert' : 'status');
+  t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), err ? 7000 : 3500);
+}
+function falha(e, acao) { console.error(e); toast('Não foi possível ' + acao + ': ' + (e && e.message || e), true); }
+
+/* ------------------------------------------------------------------ sessão */
+async function iniciar() {
+  try {
+    if (!window.supabase || !window.supabase.createClient) throw new Error('Não foi possível carregar a biblioteca do Supabase. Verifica a ligação à Internet.');
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) await entrarComo(session.user); else { S.loading = false; render(); }
+  } catch (e) { S.loading = false; S.erro = e.message; render(); }
+}
+async function entrarComo(user) {
+  S.loading = true; render();
+  const { data, error } = await sb.from('site_perfis').select('perfil,email').eq('user_id', user.id).maybeSingle();
+  if (error || !data) {
+    await sb.auth.signOut();
+    S.user = null; S.loading = false;
+    S.erro = error ? 'Erro ao verificar o perfil: ' + error.message : 'Esta conta não tem acesso ao backoffice. Pede a um administrador que te atribua um perfil.';
+    return render();
+  }
+  S.user = user; S.perfil = data.perfil; S.erro = '';
+  await carregarTudo();
+  S.loading = false; render();
+}
+async function login(ev) {
+  ev.preventDefault();
+  const email = val('l-email'), password = document.getElementById('l-pass').value;
+  const btn = $('#l-btn'); btn.disabled = true; btn.textContent = 'A entrar…';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { S.erro = /invalid/i.test(error.message) ? 'Email ou palavra-passe incorretos.' : error.message; render(); return; }
+  await entrarComo(data.user);
+}
+async function sair() { await sb.auth.signOut(); Object.assign(S, { user: null, perfil: null, view: 'painel', erro: '' }); render(); }
+
+async function carregarTudo() {
+  const q = [
+    sb.from('site_noticias').select('*').order('data_publicacao', { ascending: false }),
+    sb.from('site_avisos').select('*').order('ordem').order('inicio', { ascending: false }),
+  ];
+  if (isAdmin()) q.push(
+    sb.from('site_menus').select('*').order('ordem'),
+    sb.from('site_menu_itens').select('*').order('ordem'),
+    sb.from('site_config').select('*'),
+    sb.from('site_perfis').select('*').order('email'));
+  const r = await Promise.all(q);
+  const erro = r.find(x => x.error);
+  if (erro) toast('Erro ao carregar dados: ' + erro.error.message + '. Confirma que o SQL de instalação foi executado.', true);
+  S.noticias = r[0].data || []; S.avisos = r[1].data || [];
+  if (isAdmin()) {
+    S.menus = r[2].data || []; S.itens = r[3].data || [];
+    S.config = Object.fromEntries((r[4].data || []).map(c => [c.chave, c.valor]));
+    S.perfis = r[5].data || [];
+  }
+}
+
+/* ------------------------------------------------------------------ vistas */
+const VIEWS = [
+  ['painel', 'Painel', 'i-grid', false],
+  ['noticias', 'Notícias e atividades', 'i-file', false],
+  ['avisos', 'Informação útil', 'i-info', false],
+  ['menus', 'Menus e submenus', 'i-menu', true],
+  ['destaque', 'Destaque e acessos', 'i-star', true],
+  ['utilizadores', 'Utilizadores', 'i-users', true],
+];
+
+function render() {
+  const app = $('#app');
+  if (S.loading) { app.innerHTML = '<div class="loading" role="status"><span class="spin" aria-hidden="true"></span>A carregar…</div>'; return; }
+  if (!S.user) { app.innerHTML = vLogin(); const e = $('#l-email'); if (e) e.focus(); return; }
+  const v = VIEWS.find(x => x[0] === S.view) || VIEWS[0];
+  if (v[3] && !isAdmin()) S.view = 'painel';
+  const titulo = { painel: ['Painel', 'Resumo dos conteúdos do site'], noticias: ['Notícias e atividades', 'A notícia em destaque e as duas mais recentes aparecem na página inicial'], avisos: ['Informação útil', 'Avisos curtos com público-alvo e datas de publicação'], menus: ['Menus e submenus', 'Os menus do site e as respetivas entradas'], destaque: ['Destaque e acessos rápidos', 'Textos e imagem do topo da página inicial e os quatro atalhos'], utilizadores: ['Utilizadores', 'Quem pode entrar no backoffice e com que perfil'] }[S.view];
+  app.innerHTML =
+    '<div class="app"><aside class="side"><div class="crayon" aria-hidden="true"></div><div class="side__brand"><span class="logo"><img src="' + LOGO + '" alt="Logótipo do Agrupamento de Escolas D. António Taipa" width="244" height="73"></span><p class="side__title">Backoffice do site</p><p class="side__sub">Agrupamento de Escolas D. António Taipa</p></div>' +
+    '<nav aria-label="Secções do backoffice"><div class="side__kicker">Conteúdos</div>' +
+    VIEWS.filter(x => !x[3] || isAdmin()).map((x, i) => (x[0] === 'menus' ? '<div class="side__kicker">Administração</div>' : '') +
+      '<button class="navbtn" data-a="view" data-v="' + x[0] + '"' + (S.view === x[0] ? ' aria-current="page"' : '') + '>' + ico(x[2]) + x[1] + '</button>').join('') +
+    '</nav><div class="side__foot"><span class="role">' + (isAdmin() ? 'Administrador' : 'Editor') + '</span><span class="who">' + esc(S.user.email) + '</span>' +
+    '<a class="ghost" href="' + SITE_URL + '" target="_blank" rel="noopener">' + ico('i-external') + 'Ver o site</a>' +
+    '<button class="ghost" data-a="recarregar">' + ico('i-cog') + 'Atualizar dados</button>' +
+    '<button class="ghost" data-a="sair">' + ico('i-close') + 'Terminar sessão</button></div></aside>' +
+    '<div class="main"><header class="top"><div class="top__in"><div><h1>' + titulo[0] + '</h1><p class="muted">' + titulo[1] + '</p></div>' + acoesTopo() + '</div></header>' +
+    '<main class="content" id="conteudo">' + ({ painel: vPainel, noticias: vNoticias, avisos: vAvisos, menus: vMenus, destaque: vDestaque, utilizadores: vUtilizadores }[S.view])() + '</main></div></div>' + vModal();
+  const f = document.querySelector('.modal [data-autofocus]'); if (f) f.focus();
+}
+function acoesTopo() {
+  if (S.view === 'noticias') return '<button class="btn btn--pri" data-a="nova-noticia">+ Nova notícia</button>';
+  if (S.view === 'avisos') return '<button class="btn btn--pri" data-a="novo-aviso">+ Novo aviso</button>';
+  return '';
+}
+
+function vLogin() {
+  return '<div class="login"><div class="login__card"><div class="crayon" aria-hidden="true"></div><div class="login__in">' +
+    '<img class="login__logo" src="' + LOGO + '" alt="Logótipo do Agrupamento de Escolas D. António Taipa" width="244" height="73">' +
+    '<p class="hand">Backoffice do site</p><h1>Entrar</h1><p class="muted">Acesso reservado a quem gere os conteúdos do site do agrupamento.</p>' +
+    (S.erro ? '<div class="alert err" role="alert">' + esc(S.erro) + '</div>' : '') +
+    '<form id="login-form"><label class="field"><span>Email</span><input class="in" type="email" id="l-email" autocomplete="username" required></label>' +
+    '<label class="field"><span>Palavra-passe</span><input class="in" type="password" id="l-pass" autocomplete="current-password" required></label>' +
+    '<button class="btn btn--pri" id="l-btn" type="submit" style="width:100%;min-height:46px">Entrar</button></form></div></div></div>';
+}
+
+function estadoNoticia(n) {
+  if (!n.publicado) return '<span class="badge b-off">Rascunho</span>';
+  if (n.data_publicacao > hoje()) return '<span class="badge b-warn">Agendada</span>';
+  return '<span class="badge b-ok">Publicada</span>';
+}
+function estadoAviso(a) {
+  if (!a.publicado) return '<span class="badge b-off">Rascunho</span>';
+  if (a.inicio && a.inicio > hoje()) return '<span class="badge b-warn">Agendado</span>';
+  if (a.fim && a.fim < hoje()) return '<span class="badge b-off">Expirado</span>';
+  return '<span class="badge b-ok">Visível</span>';
+}
+function naPaginaInicial() {
+  const pub = S.noticias.filter(n => n.publicado && n.data_publicacao <= hoje());
+  const d = pub.find(n => n.destaque) || pub[0];
+  return d ? [d, ...pub.filter(n => n !== d).slice(0, 2)] : [];
+}
+
+function vPainel() {
+  const pub = S.noticias.filter(n => n.publicado && n.data_publicacao <= hoje()).length;
+  const rasc = S.noticias.filter(n => !n.publicado).length;
+  const avisosVis = S.avisos.filter(a => a.publicado && (!a.inicio || a.inicio <= hoje()) && (!a.fim || a.fim >= hoje())).length;
+  const home = naPaginaInicial();
+  return '<div class="stats">' +
+    [[pub, 'Notícias publicadas', 'var(--terra-600)'], [rasc, 'Rascunhos de notícias', 'var(--sun)'], [avisosVis, 'Avisos visíveis', 'var(--sky)'], [isAdmin() ? S.perfis.length : '—', 'Utilizadores com perfil', 'var(--green)']]
+      .map(s => '<div class="stat" style="--c:' + s[2] + '"><strong>' + s[0] + '</strong><span>' + s[1] + '</span></div>').join('') + '</div>' +
+    '<div class="grid2"><section class="card"><div class="card__head"><h2>Na página inicial agora</h2><button class="btn btn--sm" data-a="view" data-v="noticias">Gerir notícias</button></div><div class="card__body">' +
+    (home.length ? '<ol style="margin:0;padding-left:20px">' + home.map((n, i) => '<li style="margin:0 0 8px"><b>' + esc(n.titulo) + '</b>' + (i === 0 ? ' <span class="badge b-star">Destaque</span>' : '') + '<br><span class="muted">' + esc(n.categoria || '') + ' · ' + dataPT(n.data_publicacao) + '</span></li>').join('') + '</ol>' : '<p class="muted">Ainda não há notícias publicadas. A página mostra o conteúdo de exemplo.</p>') +
+    '</div></section><section class="card"><div class="card__head"><h2>Informação útil visível</h2><button class="btn btn--sm" data-a="view" data-v="avisos">Gerir avisos</button></div><div class="card__body">' +
+    (avisosVis ? '<ul style="margin:0;padding-left:20px">' + S.avisos.filter(a => a.publicado && (!a.inicio || a.inicio <= hoje()) && (!a.fim || a.fim >= hoje())).slice(0, 6).map(a => '<li style="margin:0 0 8px"><span class="muted" style="font-size:12px;font-weight:700;letter-spacing:.06em">' + esc(a.publico) + '</span><br>' + esc(a.titulo) + '</li>').join('') + '</ul>' : '<p class="muted">Não há avisos visíveis.</p>') +
+    '</div></section></div>' +
+    '<div class="help" style="margin-top:18px"><b>Imagens e documentos:</b> ficam no OneDrive do agrupamento. No OneDrive, escolhe <b>Partilhar → Qualquer pessoa com a ligação pode ver</b>, copia a ligação e cola-a no campo da imagem ou da ligação. O backoffice converte-a numa ligação direta e mostra a pré-visualização.</div>';
+}
+
+function filtrar(lista, campos) {
+  const q = S.filtro.toLowerCase();
+  return q ? lista.filter(x => campos.some(c => String(x[c] || '').toLowerCase().includes(q))) : lista;
+}
+function vNoticias() {
+  const lista = filtrar(S.noticias, ['titulo', 'categoria', 'resumo']);
+  const home = naPaginaInicial();
+  return '<div class="toolbar"><input class="in search" id="filtro" type="search" placeholder="Pesquisar por título ou categoria…" value="' + esc(S.filtro) + '" aria-label="Pesquisar notícias"></div>' +
+    '<div class="card table-wrap"><table><thead><tr><th class="hide-sm">Imagem</th><th>Notícia</th><th class="hide-sm">Data</th><th>Estado</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>' +
+    (lista.length ? lista.map(n => '<tr><td class="hide-sm">' + (n.imagem_url ? '<img class="thumb" src="' + esc(siteLigacaoDireta(n.imagem_url)) + '" alt="">' : '<span class="thumb"></span>') + '</td>' +
+      '<td class="title">' + (n.categoria ? '<span class="tag tone-' + esc(n.cor) + '">' + esc(n.categoria) + '</span><br>' : '') + esc(n.titulo) + (home[0] === n ? ' <span class="badge b-star">Destaque</span>' : home.includes(n) ? ' <span class="badge b-ok">Na página inicial</span>' : '') + '<small>' + esc(n.resumo || '') + '</small></td>' +
+      '<td class="hide-sm">' + dataPT(n.data_publicacao) + '</td><td>' + estadoNoticia(n) + '</td>' +
+      '<td><div class="actions"><button class="btn btn--sm" data-a="editar-noticia" data-id="' + n.id + '">Editar</button></div></td></tr>').join('')
+      : '<tr><td colspan="5" class="empty">' + (S.filtro ? 'Nenhuma notícia corresponde à pesquisa.' : 'Ainda não existem notícias. Cria a primeira com “Nova notícia”.') + '</td></tr>') +
+    '</tbody></table></div>';
+}
+function vAvisos() {
+  const lista = filtrar(S.avisos, ['titulo', 'publico']);
+  return '<div class="toolbar"><input class="in search" id="filtro" type="search" placeholder="Pesquisar avisos…" value="' + esc(S.filtro) + '" aria-label="Pesquisar avisos"></div>' +
+    '<div class="card table-wrap"><table><thead><tr><th>Aviso</th><th class="hide-sm">Período</th><th class="hide-sm">Ordem</th><th>Estado</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>' +
+    (lista.length ? lista.map(a => '<tr><td class="title"><small style="font-weight:700;letter-spacing:.06em">' + esc(a.publico) + '</small>' + esc(a.titulo) + '</td>' +
+      '<td class="hide-sm">' + (a.inicio || a.fim ? dataPT(a.inicio) + ' a ' + dataPT(a.fim) : 'Sempre') + '</td><td class="hide-sm">' + a.ordem + '</td><td>' + estadoAviso(a) + '</td>' +
+      '<td><div class="actions"><button class="btn btn--sm" data-a="editar-aviso" data-id="' + a.id + '">Editar</button></div></td></tr>').join('')
+      : '<tr><td colspan="5" class="empty">' + (S.filtro ? 'Nenhum aviso corresponde à pesquisa.' : 'Ainda não existem avisos.') + '</td></tr>') +
+    '</tbody></table></div>';
+}
+
+/* ---- menus: edição local por menu, gravada de uma vez */
+const rascunhoMenus = {};
+function itensDoMenu(chave) {
+  if (!rascunhoMenus[chave]) rascunhoMenus[chave] = { rotulo: (S.menus.find(m => m.chave === chave) || {}).rotulo || '', itens: S.itens.filter(i => i.menu === chave).map(i => ({ ...i })), apagados: [], sujo: false };
+  return rascunhoMenus[chave];
+}
+function icoSelect(id, atual) {
+  return '<select class="in ico-sel" id="' + id + '" aria-label="Ícone">' + MENUS_ICONES.map(i => '<option value="' + i + '"' + (i === atual ? ' selected' : '') + '>' + i.slice(2) + '</option>').join('') + '</select>';
+}
+function vMenus() {
+  return '<div class="help">O menu <b>Entrada</b> é a página inicial e não tem submenu. Podes mudar o nome de cada menu, acrescentar, remover, ordenar ou ocultar entradas e definir a ligação de cada uma (página, documento do OneDrive ou site externo). As alterações de cada menu só ficam no site depois de carregares em <b>Guardar menu</b>.</div>' +
+    S.menus.map(m => {
+      const r = itensDoMenu(m.chave);
+      return '<section class="card menu-block' + (r.sujo ? ' dirty' : '') + '" data-menu-block="' + m.chave + '"><div class="card__head"><label class="field" style="margin:0;flex:1;min-width:220px;max-width:360px"><span>Nome do menu</span><input class="in" data-menu-rotulo="' + m.chave + '" value="' + esc(r.rotulo) + '"></label>' +
+        '<div class="actions">' + (r.sujo ? '<span class="badge b-warn">Alterações por guardar</span>' : '') + '<button class="btn btn--sm" data-a="item-novo" data-v="' + m.chave + '">+ Entrada</button><button class="btn btn--sm btn--navy" data-a="menu-guardar" data-v="' + m.chave + '"' + (r.sujo ? '' : ' disabled') + '>Guardar menu</button></div></div><div class="card__body">' +
+        (r.itens.length ? r.itens.map((it, i) => '<div class="item-row" data-k="' + m.chave + '" data-i="' + i + '"><span class="ico-prev">' + ico(it.icone) + '</span>' +
+          '<input class="in" data-f="rotulo" value="' + esc(it.rotulo) + '" aria-label="Nome da entrada" placeholder="Nome da entrada">' +
+          '<input class="in" data-f="url" value="' + esc(it.url === '#' ? '' : it.url) + '" aria-label="Ligação" placeholder="Ligação (https://… ou OneDrive)">' +
+          icoSelect('ico-' + m.chave + '-' + i, it.icone).replace('<select ', '<select data-f="icone" ') +
+          '<span class="mini-checks"><label><input type="checkbox" data-f="visivel"' + (it.visivel ? ' checked' : '') + '>Visível</label><label><input type="checkbox" data-f="nova_aba"' + (it.nova_aba ? ' checked' : '') + '>Nova aba</label></span>' +
+          '<span class="actions"><button class="btn btn--icon" data-a="item-subir" title="Subir" aria-label="Subir ' + esc(it.rotulo) + '"' + (i ? '' : ' disabled') + '>↑</button><button class="btn btn--icon" data-a="item-descer" title="Descer" aria-label="Descer ' + esc(it.rotulo) + '"' + (i < r.itens.length - 1 ? '' : ' disabled') + '>↓</button><button class="btn btn--icon btn--danger" data-a="item-apagar" title="Remover" aria-label="Remover ' + esc(it.rotulo) + '">×</button></span></div>').join('')
+          : '<p class="muted">Este menu não tem entradas.</p>') +
+        '</div></section>';
+    }).join('');
+}
+
+function vDestaque() {
+  const d = S.config.destaque || {}; const p = d.palavras || [];
+  const ac = Array.isArray(S.config.acessos) ? S.config.acessos : [];
+  return '<form id="destaque-form"><section class="card"><div class="card__head"><h2>Destaque (topo da página inicial)</h2></div><div class="card__body">' +
+    '<label class="field"><span>Frase manuscrita</span><input class="in" id="d-eyebrow" value="' + esc(d.eyebrow) + '"></label>' +
+    '<div class="row3">' + [0, 1, 2].map(i => '<label class="field"><span>Palavra ' + (i + 1) + ' do título</span><input class="in" id="d-p' + i + '" value="' + esc(p[i]) + '"></label>').join('') + '</div>' +
+    '<label class="field"><span>Texto de apresentação</span><textarea class="in" id="d-intro">' + esc(d.intro) + '</textarea></label>' +
+    '<div class="row"><label class="field"><span>Cartão “percursos”: etiqueta</span><input class="in" id="d-pe" value="' + esc(d.percurso_eyebrow) + '"></label><label class="field"><span>Cartão “percursos”: título</span><input class="in" id="d-pt" value="' + esc(d.percurso_titulo) + '"></label></div>' +
+    '<label class="field"><span>Cartão “percursos”: texto</span><textarea class="in" id="d-px">' + esc(d.percurso_texto) + '</textarea></label>' +
+    '<label class="field"><span>Texto do botão (abre o menu Oferta Formativa)</span><input class="in" id="d-pb" value="' + esc(d.percurso_botao) + '"></label>' +
+    campoImagem('d-img', d.imagem_url, 'Fotografia do destaque (opcional)', 'Deixa em branco para manter a fotografia atual (Outdoor Learning).') +
+    '</div></section>' +
+    '<section class="card" style="margin-top:16px"><div class="card__head"><h2>Acessos rápidos</h2></div><div class="card__body">' +
+    [0, 1, 2, 3].map(i => { const a = ac[i] || {}; return '<div class="row3" style="align-items:end"><label class="field"><span>Atalho ' + (i + 1) + ': nome</span><input class="in" id="a-r' + i + '" value="' + esc(a.rotulo) + '"></label><label class="field"><span>Ligação</span><input class="in" id="a-u' + i + '" value="' + esc(a.url === '#' ? '' : a.url) + '" placeholder="https://…"></label><label class="field"><span>Ícone</span>' + icoSelect('a-i' + i, a.icone || 'i-link') + '</label></div>'; }).join('') +
+    '</div></section><div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn--pri" type="submit">Guardar destaque e acessos</button></div></form>';
+}
+
+function vUtilizadores() {
+  return '<div class="grid2"><section class="card"><div class="card__head"><h2>Perfis atribuídos</h2></div><div class="table-wrap"><table><thead><tr><th>Email</th><th>Perfil</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>' +
+    S.perfis.map(p => '<tr><td style="overflow-wrap:anywhere">' + esc(p.email) + (p.user_id === S.user.id ? ' <span class="muted">(tu)</span>' : '') + '</td><td>' +
+      (p.user_id === S.user.id ? '<span class="badge b-star">Administrador</span>' :
+        '<select class="in" data-perfil-email="' + esc(p.email) + '" aria-label="Perfil de ' + esc(p.email) + '" style="min-height:36px"><option value="admin"' + (p.perfil === 'admin' ? ' selected' : '') + '>Administrador</option><option value="editor"' + (p.perfil === 'editor' ? ' selected' : '') + '>Editor</option></select>') +
+      '</td><td>' + (p.user_id === S.user.id ? '' : '<button class="btn btn--sm btn--danger" data-a="perfil-remover" data-v="' + esc(p.email) + '">Retirar acesso</button>') + '</td></tr>').join('') +
+    '</tbody></table></div></section>' +
+    '<section class="card"><div class="card__head"><h2>Dar acesso a uma conta</h2></div><div class="card__body"><form id="perfil-form">' +
+    '<div class="help">1. No Supabase, cria a conta em <b>Authentication → Users → Add user</b> (email e palavra-passe).<br>2. Indica aqui o email e o perfil.</div>' +
+    '<label class="field"><span>Email da conta</span><input class="in" type="email" id="p-email" required></label>' +
+    '<label class="field"><span>Perfil</span><select class="in" id="p-perfil"><option value="editor">Editor: notícias e avisos</option><option value="admin">Administrador: tudo, incluindo menus, destaque e utilizadores</option></select></label>' +
+    '<button class="btn btn--pri" type="submit">Atribuir perfil</button></form></div></section></div>';
+}
+
+/* ------------------------------------------------------------------ janelas */
+function campoImagem(id, url, rotulo, ajuda) {
+  return '<label class="field"><span>' + rotulo + '</span><input class="in" id="' + id + '" value="' + esc(url) + '" placeholder="Ligação de partilha do OneDrive (https://1drv.ms/… ou …sharepoint.com/…)" data-preview="' + id + '-prev"><small>' + (ajuda || 'No OneDrive: Partilhar → “Qualquer pessoa com a ligação pode ver” → Copiar ligação.') + '</small></label>' +
+    '<div class="preview" id="' + id + '-prev"' + (url ? '' : ' hidden') + '><img alt="" src="' + esc(url ? siteLigacaoDireta(url) : '') + '"><span class="st" aria-live="polite">' + (url ? 'A verificar a imagem…' : '') + '</span></div>';
+}
+function vModal() {
+  const m = S.modal; if (!m) return '';
+  let titulo, corpo, pe;
+  if (m.tipo === 'noticia') {
+    const n = m.dados;
+    titulo = n.id ? 'Editar notícia' : 'Nova notícia';
+    corpo = '<form id="modal-form"><label class="field"><span>Título *</span><input class="in" id="n-titulo" required value="' + esc(n.titulo) + '" data-autofocus></label>' +
+      '<label class="field"><span>Resumo</span><textarea class="in" id="n-resumo" maxlength="300">' + esc(n.resumo) + '</textarea><small>Uma ou duas frases. Aparece por baixo do título.</small></label>' +
+      '<div class="row"><label class="field"><span>Categoria</span><input class="in" id="n-categoria" value="' + esc(n.categoria) + '" placeholder="Ex.: Projetos internacionais" list="cats"><datalist id="cats">' + [...new Set(S.noticias.map(x => x.categoria).filter(Boolean))].map(c => '<option value="' + esc(c) + '">').join('') + '</datalist></label>' +
+      '<div class="field"><span>Cor da categoria</span><div class="swatches">' + CORES.map(c => '<label><input type="radio" name="n-cor" value="' + c[0] + '"' + ((n.cor || 'terra') === c[0] ? ' checked' : '') + '><span class="tone-' + c[0] + '">' + c[1] + '</span></label>').join('') + '</div></div></div>' +
+      campoImagem('n-img', n.imagem_url, 'Imagem') +
+      '<div class="row"><label class="field"><span>Descrição da imagem (texto alternativo)</span><input class="in" id="n-alt" value="' + esc(n.imagem_alt) + '" placeholder="O que se vê na imagem"></label>' +
+      '<div class="field"><span>Enquadramento</span><label class="check"><input type="checkbox" id="n-topo"' + (n.imagem_topo ? ' checked' : '') + '>Cartaz: mostrar a parte de cima da imagem (não cortar o título)</label></div></div>' +
+      '<div class="row"><label class="field"><span>Ligação para a notícia completa</span><input class="in" id="n-url" value="' + esc(n.ligacao_url) + '" placeholder="https://aefreamunde.com/…"></label>' +
+      '<label class="field"><span>Texto da ligação</span><input class="in" id="n-ltexto" value="' + esc(n.ligacao_texto || 'Ver a notícia') + '"></label></div>' +
+      '<div class="row"><label class="field"><span>Data de publicação</span><input class="in" type="date" id="n-data" value="' + esc(n.data_publicacao || hoje()) + '"><small>Com data futura, a notícia só aparece nesse dia.</small></label>' +
+      '<div class="field"><span>Publicação</span><label class="check"><input type="checkbox" id="n-pub"' + (n.publicado ? ' checked' : '') + '>Publicada no site</label><label class="check"><input type="checkbox" id="n-dest"' + (n.destaque ? ' checked' : '') + '>Notícia em destaque (a grande, na página inicial)</label><label class="check"><input type="checkbox" id="n-en"' + (n.idioma === 'en' ? ' checked' : '') + '>Título e resumo em inglês</label></div></div></form>';
+    pe = (n.id ? '<button class="btn btn--danger spacer" data-a="apagar-noticia">Apagar</button>' : '') + '<button class="btn" data-a="fechar">Cancelar</button><button class="btn btn--pri" type="submit" form="modal-form">Guardar</button>';
+  } else if (m.tipo === 'aviso') {
+    const a = m.dados;
+    titulo = a.id ? 'Editar aviso' : 'Novo aviso';
+    corpo = '<form id="modal-form"><label class="field"><span>Público-alvo</span><input class="in" id="v-publico" list="publicos" value="' + esc(a.publico || PUBLICOS[0]) + '"><datalist id="publicos">' + PUBLICOS.map(p => '<option value="' + p + '">').join('') + '</datalist><small>O ícone e a cor do aviso dependem do público (alunos/famílias, comunidade, docentes).</small></label>' +
+      '<label class="field"><span>Título *</span><input class="in" id="v-titulo" required value="' + esc(a.titulo) + '" data-autofocus></label>' +
+      '<label class="field"><span>Ligação (opcional)</span><input class="in" id="v-url" value="' + esc(a.ligacao_url) + '" placeholder="Página ou documento no OneDrive"></label>' +
+      '<div class="row3"><label class="field"><span>Mostrar a partir de</span><input class="in" type="date" id="v-inicio" value="' + esc(a.inicio) + '"></label><label class="field"><span>Mostrar até</span><input class="in" type="date" id="v-fim" value="' + esc(a.fim) + '"></label><label class="field"><span>Ordem</span><input class="in" type="number" id="v-ordem" value="' + esc(a.ordem == null ? (S.avisos.length + 1) * 10 : a.ordem) + '"><small>Menor aparece primeiro.</small></label></div>' +
+      '<label class="check"><input type="checkbox" id="v-pub"' + (a.publicado ? ' checked' : '') + '>Publicado no site</label></form>';
+    pe = (a.id ? '<button class="btn btn--danger spacer" data-a="apagar-aviso">Apagar</button>' : '') + '<button class="btn" data-a="fechar">Cancelar</button><button class="btn btn--pri" type="submit" form="modal-form">Guardar</button>';
+  }
+  return '<div class="modal" data-overlay="1"><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="modal-t"><div class="modal__head"><h2 id="modal-t">' + titulo + '</h2><button class="btn btn--icon" data-a="fechar" aria-label="Fechar">×</button></div><div class="modal__body">' + corpo + '</div><div class="modal__foot">' + pe + '</div></div></div>';
+}
+
+/* pré-visualização das imagens do OneDrive */
+function verificarImagem(input) {
+  const box = document.getElementById(input.dataset.preview); if (!box) return;
+  const url = input.value.trim();
+  box.hidden = !url; if (!url) return;
+  const img = box.querySelector('img'), st = box.querySelector('.st');
+  st.className = 'st'; st.textContent = 'A verificar a imagem…';
+  img.onload = () => { st.className = 'st st-ok'; st.textContent = 'Imagem encontrada (' + img.naturalWidth + '×' + img.naturalHeight + ').'; };
+  img.onerror = () => { st.className = 'st st-err'; st.textContent = 'Não foi possível abrir a imagem. Confirma que a partilha é “Qualquer pessoa com a ligação” e que a ligação é de um ficheiro de imagem.'; };
+  img.src = siteLigacaoDireta(url);
+}
+
+/* ------------------------------------------------------------------ gravação */
+async function guardarNoticia() {
+  const n = S.modal.dados;
+  const d = { titulo: val('n-titulo'), resumo: val('n-resumo') || null, categoria: val('n-categoria') || null, cor: (document.querySelector('input[name="n-cor"]:checked') || {}).value || 'terra',
+    imagem_url: val('n-img') || null, imagem_alt: val('n-alt') || null, imagem_topo: chk('n-topo'), ligacao_url: val('n-url') || null, ligacao_texto: val('n-ltexto') || 'Ver a notícia',
+    data_publicacao: val('n-data') || hoje(), publicado: chk('n-pub'), destaque: chk('n-dest'), idioma: chk('n-en') ? 'en' : null };
+  if (!d.titulo) return toast('Indica o título da notícia.', true);
+  if (d.imagem_url && !d.imagem_alt) return toast('Descreve a imagem (texto alternativo) para quem usa leitores de ecrã.', true);
+  try {
+    if (d.destaque) { const r = await sb.from('site_noticias').update({ destaque: false }).eq('destaque', true).neq('id', n.id || '00000000-0000-0000-0000-000000000000'); if (r.error) throw r.error; }
+    const r = n.id ? await sb.from('site_noticias').update(d).eq('id', n.id) : await sb.from('site_noticias').insert(d);
+    if (r.error) throw r.error;
+    S.modal = null; await carregarTudo(); render(); toast('Notícia guardada.');
+  } catch (e) { falha(e, 'guardar a notícia'); }
+}
+async function apagar(tabela, id, nome) {
+  if (!confirm('Apagar definitivamente ' + nome + '?')) return;
+  const r = await sb.from(tabela).delete().eq('id', id);
+  if (r.error) return falha(r.error, 'apagar');
+  S.modal = null; await carregarTudo(); render(); toast('Apagado.');
+}
+async function guardarAviso() {
+  const a = S.modal.dados;
+  const d = { publico: (val('v-publico') || PUBLICOS[0]).toUpperCase(), titulo: val('v-titulo'), ligacao_url: val('v-url') || null, inicio: val('v-inicio') || null, fim: val('v-fim') || null, ordem: parseInt(val('v-ordem'), 10) || 0, publicado: chk('v-pub') };
+  if (!d.titulo) return toast('Indica o título do aviso.', true);
+  if (d.inicio && d.fim && d.fim < d.inicio) return toast('A data final não pode ser anterior à inicial.', true);
+  const r = a.id ? await sb.from('site_avisos').update(d).eq('id', a.id) : await sb.from('site_avisos').insert(d);
+  if (r.error) return falha(r.error, 'guardar o aviso');
+  S.modal = null; await carregarTudo(); render(); toast('Aviso guardado.');
+}
+async function guardarMenu(chave) {
+  const r = itensDoMenu(chave);
+  if (!r.rotulo.trim()) return toast('O menu precisa de um nome.', true);
+  if (r.itens.some(i => !i.rotulo.trim())) return toast('Todas as entradas precisam de nome.', true);
+  try {
+    let x = await sb.from('site_menus').update({ rotulo: r.rotulo.trim() }).eq('chave', chave); if (x.error) throw x.error;
+    if (r.apagados.length) { x = await sb.from('site_menu_itens').delete().in('id', r.apagados); if (x.error) throw x.error; }
+    const linhas = r.itens.map((i, k) => { const l = { menu: chave, rotulo: i.rotulo.trim(), url: (i.url || '').trim() || '#', icone: i.icone || 'i-link', ordem: (k + 1) * 10, visivel: !!i.visivel, nova_aba: !!i.nova_aba }; if (i.id) l.id = i.id; return l; });
+    const novas = linhas.filter(l => !l.id), existentes = linhas.filter(l => l.id);
+    if (existentes.length) { x = await sb.from('site_menu_itens').upsert(existentes); if (x.error) throw x.error; }
+    if (novas.length) { x = await sb.from('site_menu_itens').insert(novas); if (x.error) throw x.error; }
+    delete rascunhoMenus[chave]; await carregarTudo(); render(); toast('Menu “' + r.rotulo.trim() + '” guardado.');
+  } catch (e) { falha(e, 'guardar o menu'); }
+}
+async function guardarDestaque() {
+  const destaque = { eyebrow: val('d-eyebrow'), palavras: [val('d-p0'), val('d-p1'), val('d-p2')], intro: val('d-intro'), percurso_eyebrow: val('d-pe'), percurso_titulo: val('d-pt'), percurso_texto: val('d-px'), percurso_botao: val('d-pb'), imagem_url: val('d-img') || null };
+  const acessos = [0, 1, 2, 3].map(i => ({ rotulo: val('a-r' + i), url: val('a-u' + i) || '#', icone: val('a-i' + i) })).filter(a => a.rotulo);
+  if (destaque.palavras.some(p => !p)) return toast('Preenche as três palavras do título.', true);
+  const r = await sb.from('site_config').upsert([{ chave: 'destaque', valor: destaque }, { chave: 'acessos', valor: acessos }]);
+  if (r.error) return falha(r.error, 'guardar o destaque');
+  await carregarTudo(); render(); toast('Destaque e acessos guardados.');
+}
+async function definirPerfil(email, perfil) {
+  const r = await sb.rpc('site_definir_perfil', { p_email: email, p_perfil: perfil });
+  if (r.error) return falha(r.error, 'alterar o perfil');
+  await carregarTudo(); render(); toast(perfil ? 'Perfil atribuído a ' + email + '.' : 'Acesso retirado a ' + email + '.');
+}
+
+/* ------------------------------------------------------------------ eventos */
+document.addEventListener('submit', e => {
+  const id = e.target.id;
+  if (id === 'login-form') return login(e);
+  e.preventDefault();
+  if (id === 'modal-form') return S.modal.tipo === 'noticia' ? guardarNoticia() : guardarAviso();
+  if (id === 'destaque-form') return guardarDestaque();
+  if (id === 'perfil-form') return definirPerfil(val('p-email'), val('p-perfil'));
+});
+document.addEventListener('click', e => {
+  if (e.target.dataset && e.target.dataset.overlay) { S.modal = null; return render(); }
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const a = b.dataset.a, v = b.dataset.v;
+  if (a === 'view') { S.view = v; S.filtro = ''; render(); window.scrollTo(0, 0); }
+  else if (a === 'sair') sair();
+  else if (a === 'recarregar') { Object.keys(rascunhoMenus).forEach(k => delete rascunhoMenus[k]); carregarTudo().then(() => { render(); toast('Dados atualizados.'); }); }
+  else if (a === 'fechar') { S.modal = null; render(); }
+  else if (a === 'nova-noticia') { S.modal = { tipo: 'noticia', dados: { publicado: true, cor: 'terra', data_publicacao: hoje() } }; render(); }
+  else if (a === 'editar-noticia') { S.modal = { tipo: 'noticia', dados: { ...S.noticias.find(n => n.id === b.dataset.id) } }; render(); document.querySelectorAll('[data-preview]').forEach(verificarImagem); }
+  else if (a === 'apagar-noticia') apagar('site_noticias', S.modal.dados.id, 'a notícia “' + S.modal.dados.titulo + '”');
+  else if (a === 'novo-aviso') { S.modal = { tipo: 'aviso', dados: { publicado: true } }; render(); }
+  else if (a === 'editar-aviso') { S.modal = { tipo: 'aviso', dados: { ...S.avisos.find(x => x.id === b.dataset.id) } }; render(); }
+  else if (a === 'apagar-aviso') apagar('site_avisos', S.modal.dados.id, 'o aviso “' + S.modal.dados.titulo + '”');
+  else if (a === 'menu-guardar') guardarMenu(v);
+  else if (a === 'item-novo') { const r = itensDoMenu(v); r.itens.push({ rotulo: '', url: '', icone: 'i-link', visivel: true, nova_aba: false }); r.sujo = true; render(); const rows = document.querySelectorAll('[data-menu-block="' + v + '"] .item-row input[data-f="rotulo"]'); if (rows.length) rows[rows.length - 1].focus(); }
+  else if (/^item-/.test(a)) {
+    const row = b.closest('.item-row'); const r = itensDoMenu(row.dataset.k); const i = +row.dataset.i;
+    if (a === 'item-apagar') { const [x] = r.itens.splice(i, 1); if (x.id) r.apagados.push(x.id); }
+    if (a === 'item-subir' && i > 0) [r.itens[i - 1], r.itens[i]] = [r.itens[i], r.itens[i - 1]];
+    if (a === 'item-descer' && i < r.itens.length - 1) [r.itens[i + 1], r.itens[i]] = [r.itens[i], r.itens[i + 1]];
+    r.sujo = true; render();
+  }
+  else if (a === 'perfil-remover') { if (confirm('Retirar o acesso ao backoffice a ' + v + '?')) definirPerfil(v, null); }
+});
+function marcarSujo(chave) {
+  const r = itensDoMenu(chave); if (r.sujo) return;
+  r.sujo = true;
+  const bl = document.querySelector('[data-menu-block="' + chave + '"]');
+  if (bl) { bl.classList.add('dirty'); const g = bl.querySelector('[data-a="menu-guardar"]'); if (g) g.disabled = false; }
+}
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'filtro') { S.filtro = t.value; const pos = t.selectionStart; render(); const f = $('#filtro'); f.focus(); f.setSelectionRange(pos, pos); return; }
+  if (t.dataset.menuRotulo) { itensDoMenu(t.dataset.menuRotulo).rotulo = t.value; marcarSujo(t.dataset.menuRotulo); return; }
+  const row = t.closest && t.closest('.item-row');
+  if (row && t.dataset.f) {
+    const it = itensDoMenu(row.dataset.k).itens[+row.dataset.i];
+    it[t.dataset.f] = t.type === 'checkbox' ? t.checked : t.value;
+    if (t.dataset.f === 'icone') row.querySelector('.ico-prev').innerHTML = ico(t.value);
+    marcarSujo(row.dataset.k);
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.preview) verificarImagem(t);
+  if (t.dataset && t.dataset.perfilEmail) definirPerfil(t.dataset.perfilEmail, t.value);
+  const row = t.closest && t.closest('.item-row');
+  if (row && t.type === 'checkbox') { itensDoMenu(row.dataset.k).itens[+row.dataset.i][t.dataset.f] = t.checked; marcarSujo(row.dataset.k); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.modal) { S.modal = null; render(); } });
+window.addEventListener('beforeunload', e => { if (Object.values(rascunhoMenus).some(r => r.sujo)) { e.preventDefault(); e.returnValue = ''; } });
+iniciar();
+</script>
+</body>
+</html>
