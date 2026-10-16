@@ -1376,15 +1376,15 @@ function pickVoice(){try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
 // anúncio sonoro das estações principais (voz masculina portuguesa do navegador, precedida do gongo da estação)
 const ANN_ST=new Set(['Porto-Trindade','Senhora da Hora','Trofa','Santo Tirso','Guimarães','Lousado','Famalicão','Póvoa de Varzim','Fafe']);
-let annVoice=null;
+let annVoice=null,annMale=false;
 function pickAnnVoice(){try{const vs=speechSynthesis.getVoices().filter(v=>/^pt/i.test(v.lang)),male=/duarte|cristiano|ricardo|antonio|antónio|daniel|jo[aã]o|male|masculin|homem/i;
-  annVoice=vs.find(v=>/pt[-_]PT/i.test(v.lang)&&male.test(v.name))||vs.find(v=>male.test(v.name))||vs.find(v=>/pt[-_]PT/i.test(v.lang))||vs[0]||null}catch(e){}}
+  annVoice=vs.find(v=>/duarte/i.test(v.name))||vs.find(v=>/pt[-_]PT/i.test(v.lang)&&male.test(v.name))||vs.find(v=>male.test(v.name))||vs.find(v=>/pt[-_]PT/i.test(v.lang))||vs[0]||null;annMale=!!annVoice&&male.test(annVoice.name)}catch(e){}}
 if('speechSynthesis' in window){pickAnnVoice();speechSynthesis.addEventListener&&speechSynthesis.addEventListener('voiceschanged',pickAnnVoice)}
 function annGong(){if(!AC||muted)return;const t=AC.currentTime;[[659,0],[523,0.45],[392,0.9]].forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;
   g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(0.18,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+d+1.3);o.connect(g);g.connect(A.bus);if(A.rev)g.connect(A.rev);o.start(t+d);o.stop(t+d+1.4)})}
 function announceDep(dest){if(muted||!('speechSynthesis' in window))return;annGong();
   const nm=dest.replace('Porto-Trindade','Porto, Trindade').replace(' - ',', ');
-  setTimeout(()=>{try{if(!annVoice)pickAnnVoice();const u=new SpeechSynthesisUtterance('Vai partir da linha número um, o comboio com destino a '+nm+'.');u.lang='pt-PT';if(annVoice)u.voice=annVoice;u.pitch=0.75;u.rate=0.9;u.volume=1;
+  setTimeout(()=>{try{if(!annVoice)pickAnnVoice();const u=new SpeechSynthesisUtterance('Vai partir da linha número um, o comboio com destino a '+nm+'.');u.lang='pt-PT';if(annVoice)u.voice=annVoice;u.pitch=annMale?0.9:0.35;u.rate=0.88;u.volume=1;
     speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},1500)}
 function say(text){return;if(!('speechSynthesis' in window))return;setTimeout(()=>{try{const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';if(voice)u.voice=voice;u.rate=0.95;u.volume=0.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},1300)}
 
