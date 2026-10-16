@@ -465,11 +465,10 @@ main:focus{outline:none}
 </style>
 <style>
 /* ---------- Os nossos canais (coluna da direita, na vertical) ---------- */
-.canais{margin:26px 0 24px}
-.canais__head{margin-bottom:12px}
-.canais__head .hand{font-size:24px;gap:10px}
-.canais__head .hand svg{width:34px}
-.canais__title{margin:2px 0 0;font-family:var(--font-head);font-weight:800;font-size:22px;line-height:1.15;letter-spacing:-.015em;color:var(--navy-900)}
+.canais{margin:0 0 34px}
+.canais .section-head{margin-bottom:22px}
+/* com os canais no topo, a coluna já fica alinhada com 'Vida do agrupamento' */
+.aside .canais + .section-head--aside{padding-top:0}
 .canais__grid{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .canal{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:14px;padding:14px 14px 14px 18px;background:#fff;border:1px solid rgba(15,42,62,.07);border-radius:18px;box-shadow:var(--shadow-1);color:var(--ink);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s}
 .canal::after{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--canal,var(--terra-600))}
@@ -816,6 +815,7 @@ main:focus{outline:none}
     </section>
 
     <section class="aside" aria-labelledby="info-title">
+      <div class="canais" role="region" aria-labelledby="canais-title"><div class="section-head"><p class="hand"><svg viewBox="0 0 46 14" aria-hidden="true"><use href="#squiggle" filter="url(#crayon-fill)"/></svg>Segue-nos</p><h2 class="section-title" id="canais-title">Os nossos canais</h2></div><ul class="canais__grid"><li><a class="canal" data-cor="terra" href="#"><span class="canal__icon tone-terra" aria-hidden="true"><svg class="ic"><use href="#i-news"/></svg></span><span class="canal__txt"><span class="canal__name">Ecos de Taipa</span><span class="canal__desc">O jornal escolar do agrupamento</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="red" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-youtube"/></svg></span><span class="canal__txt"><span class="canal__name">Taipa360</span><span class="canal__desc">O nosso canal no YouTube</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="blue" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-eu"/></svg></span><span class="canal__txt"><span class="canal__name">Erasmus+</span><span class="canal__desc">Projetos europeus e mobilidades</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li></ul></div>
       <div class="section-head section-head--aside">
         <h2 class="section-title" id="info-title">Informação útil</h2>
       </div>
@@ -854,7 +854,6 @@ main:focus{outline:none}
         </ol>
       </div>
 
-      <div class="canais" role="region" aria-labelledby="canais-title"><div class="canais__head"><p class="hand"><svg viewBox="0 0 46 14" aria-hidden="true"><use href="#squiggle" filter="url(#crayon-fill)"/></svg>Segue-nos</p><h2 class="canais__title" id="canais-title">Os nossos canais</h2></div><ul class="canais__grid"><li><a class="canal" data-cor="terra" href="#"><span class="canal__icon tone-terra" aria-hidden="true"><svg class="ic"><use href="#i-news"/></svg></span><span class="canal__txt"><span class="canal__name">Ecos de Taipa</span><span class="canal__desc">O jornal escolar do agrupamento</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="red" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-youtube"/></svg></span><span class="canal__txt"><span class="canal__name">Taipa360</span><span class="canal__desc">O nosso canal no YouTube</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="blue" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-eu"/></svg></span><span class="canal__txt"><span class="canal__name">Erasmus+</span><span class="canal__desc">Projetos europeus e mobilidades</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li></ul></div>
       <div class="contact on-dark">
         <svg class="contact__blob" viewBox="0 0 150 150" preserveAspectRatio="none" aria-hidden="true"><use href="#blob" filter="url(#crayon-fill)"/></svg>
         <span class="contact__icon" aria-hidden="true"><svg class="ic"><use href="#i-mail"/></svg></span>
