@@ -23,7 +23,7 @@
 4. Publica a pasta inteira no Cloudflare Pages (como no site da Direção de Curso).
    O site fica em `.../index.html` e o backoffice em `.../backoffice.html`.
 
-O projeto Supabase configurado é o mesmo da Direção de Curso (`mvbzrmcytngsihkhglxe`). Para usar outro, muda
+O projeto Supabase configurado é o do site da escola (`kqptdpwutpukkudthsfr`), separado da Direção de Curso. Para usar outro, muda
 `SITE_SUPABASE_URL`/`SITE_SUPABASE_KEY` no fim do `index.html` e `SUPABASE_URL`/`SUPABASE_KEY` no `backoffice.html`.
 
 ## Perfis
