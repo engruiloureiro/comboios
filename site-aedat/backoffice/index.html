@@ -464,25 +464,27 @@ main:focus{outline:none}
 }
 </style>
 <style>
-/* ---------- Os nossos canais (jornal, YouTube, Erasmus+) ---------- */
-.canais{padding:64px 0 8px}
-.canais__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
-.canais__grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
-.canal{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:18px;height:100%;padding:22px 22px 22px 20px;background:#fff;border:1px solid rgba(15,42,62,.07);border-radius:22px;box-shadow:var(--shadow-1);color:var(--ink);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s}
-.canal::after{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--canal,var(--terra-600))}
-.canal:hover{transform:translateY(-4px);box-shadow:var(--shadow-2)}
-.canal__icon{display:grid;place-items:center;flex:none;width:60px;height:60px;border-radius:18px}
-.canal__icon .ic{width:30px;height:30px;stroke-width:1.7}
-.canal__txt{display:flex;flex-direction:column;gap:3px;min-width:0}
-.canal__name{font-family:var(--font-head);font-weight:800;font-size:19px;line-height:1.2;letter-spacing:-.01em;color:var(--navy-900)}
-.canal__desc{font-size:14.5px;line-height:1.45;color:var(--ink-3)}
-.canal__go{display:grid;place-items:center;flex:none;margin-left:auto;width:36px;height:36px;border-radius:50%;background:var(--navy-50);color:var(--navy-800);transition:background-color .25s,color .25s,transform .25s var(--ease)}
-.canal__go .ic{width:17px;height:17px;stroke-width:2.1}
-.canal:hover .canal__go{background:var(--canal,var(--terra-600));color:#fff;transform:translate(2px,-2px)}
+/* ---------- Os nossos canais (coluna da direita, na vertical) ---------- */
+.canais{margin:26px 0 24px}
+.canais__head{margin-bottom:12px}
+.canais__head .hand{font-size:24px;gap:10px}
+.canais__head .hand svg{width:34px}
+.canais__title{margin:2px 0 0;font-family:var(--font-head);font-weight:800;font-size:22px;line-height:1.15;letter-spacing:-.015em;color:var(--navy-900)}
+.canais__grid{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.canal{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:14px;padding:14px 14px 14px 18px;background:#fff;border:1px solid rgba(15,42,62,.07);border-radius:18px;box-shadow:var(--shadow-1);color:var(--ink);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s}
+.canal::after{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--canal,var(--terra-600))}
+.canal:hover{transform:translateX(-3px);box-shadow:var(--shadow-2)}
+.canal__icon{display:grid;place-items:center;flex:none;width:46px;height:46px;border-radius:14px}
+.canal__icon .ic{width:24px;height:24px;stroke-width:1.8}
+.canal__txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.canal__name{font-family:var(--font-head);font-weight:800;font-size:16px;line-height:1.25;color:var(--navy-900)}
+.canal__desc{font-size:13px;line-height:1.4;color:var(--ink-3)}
+.canal__go{display:grid;place-items:center;flex:none;margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--navy-50);color:var(--navy-800);transition:background-color .25s,color .25s}
+.canal__go .ic{width:15px;height:15px;stroke-width:2.1}
+.canal:hover .canal__go{background:var(--canal,var(--terra-600));color:#fff}
 .canal[data-cor=terra]{--canal:#A64A2C}.canal[data-cor=red]{--canal:#D9302A}.canal[data-cor=blue]{--canal:#1F4FA8}.canal[data-cor=sky]{--canal:#2E86C1}.canal[data-cor=green]{--canal:#3A8A4F}.canal[data-cor=lilac]{--canal:#7357B8}
 .canal[data-cor=red] .canal__icon{background:#FDE7E5;color:#B3221D}.canal[data-cor=blue] .canal__icon{background:#E3EAF8;color:#1F4FA8}
 @media (prefers-reduced-motion:reduce){.canal,.canal__go{transition:none}.canal:hover{transform:none}}
-@media (max-width:759px){.canais{padding-top:48px}.canais__grid{gap:12px}.canal{padding:16px 16px 16px 18px;gap:14px;border-radius:18px}.canal__icon{width:50px;height:50px;border-radius:15px}.canal__icon .ic{width:26px;height:26px}.canal__name{font-size:17px}}
 </style>
 </head>
 <body>
@@ -772,13 +774,6 @@ main:focus{outline:none}
     </div>
   </section>
 
-
-  <section class="canais" aria-labelledby="canais-title">
-    <div class="container">
-      <div class="canais__head section-head"><div><p class="hand"><svg viewBox="0 0 46 14" aria-hidden="true"><use href="#squiggle" filter="url(#crayon-fill)"/></svg>Segue-nos</p><h2 class="section-title" id="canais-title">Os nossos canais</h2></div></div>
-      <ul class="canais__grid"><li><a class="canal" data-cor="terra" href="#"><span class="canal__icon tone-terra" aria-hidden="true"><svg class="ic"><use href="#i-news"/></svg></span><span class="canal__txt"><span class="canal__name">Ecos de Taipa</span><span class="canal__desc">O jornal escolar do agrupamento</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="red" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-youtube"/></svg></span><span class="canal__txt"><span class="canal__name">Taipa360</span><span class="canal__desc">O nosso canal no YouTube</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="blue" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-eu"/></svg></span><span class="canal__txt"><span class="canal__name">Erasmus+</span><span class="canal__desc">Projetos europeus e mobilidades</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li></ul>
-    </div>
-  </section>
   <div class="container content">
     <section class="news" aria-labelledby="news-title">
       <div class="section-head">
@@ -859,6 +854,7 @@ main:focus{outline:none}
         </ol>
       </div>
 
+      <div class="canais" role="region" aria-labelledby="canais-title"><div class="canais__head"><p class="hand"><svg viewBox="0 0 46 14" aria-hidden="true"><use href="#squiggle" filter="url(#crayon-fill)"/></svg>Segue-nos</p><h2 class="canais__title" id="canais-title">Os nossos canais</h2></div><ul class="canais__grid"><li><a class="canal" data-cor="terra" href="#"><span class="canal__icon tone-terra" aria-hidden="true"><svg class="ic"><use href="#i-news"/></svg></span><span class="canal__txt"><span class="canal__name">Ecos de Taipa</span><span class="canal__desc">O jornal escolar do agrupamento</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="red" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-youtube"/></svg></span><span class="canal__txt"><span class="canal__name">Taipa360</span><span class="canal__desc">O nosso canal no YouTube</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="blue" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-eu"/></svg></span><span class="canal__txt"><span class="canal__name">Erasmus+</span><span class="canal__desc">Projetos europeus e mobilidades</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li></ul></div>
       <div class="contact on-dark">
         <svg class="contact__blob" viewBox="0 0 150 150" preserveAspectRatio="none" aria-hidden="true"><use href="#blob" filter="url(#crayon-fill)"/></svg>
         <span class="contact__icon" aria-hidden="true"><svg class="ic"><use href="#i-mail"/></svg></span>

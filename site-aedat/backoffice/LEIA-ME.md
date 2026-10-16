@@ -50,7 +50,7 @@ administrador do Microsoft 365 para ativar essa opção para a pasta das imagens
 
 ## Os nossos canais (Ecos de Taipa, Taipa360, Erasmus+)
 
-Por baixo dos acessos rápidos há a secção **Os nossos canais**, com acesso direto ao jornal escolar, ao canal do
+Na coluna da direita, por baixo da Informação útil, há a secção **Os nossos canais**, com acesso direto ao jornal escolar, ao canal do
 YouTube e ao site Erasmus+. No backoffice (**Destaque, acessos e canais**) defines, para cada canal, o nome, uma
 descrição curta, a ligação, o ícone e a cor (até 4 canais). Deixa o nome em branco para retirar um canal.
 As ligações abrem numa nova aba.
