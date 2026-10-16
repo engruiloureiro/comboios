@@ -1374,6 +1374,18 @@ function doorCloseSnd(){if(!AC)return;setTimeout(()=>{hiss(.5,.2);beep(70,.25,.3
 let voice=null;
 function pickVoice(){try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/pt[-_]PT/i.test(v.lang))||vs.find(v=>/^pt/i.test(v.lang))||null}catch(e){}}
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+// anúncio sonoro das estações principais (voz masculina portuguesa do navegador, precedida do gongo da estação)
+const ANN_ST=new Set(['Porto-Trindade','Senhora da Hora','Trofa','Santo Tirso','Guimarães','Lousado','Famalicão','Póvoa de Varzim','Fafe']);
+let annVoice=null;
+function pickAnnVoice(){try{const vs=speechSynthesis.getVoices().filter(v=>/^pt/i.test(v.lang)),male=/duarte|cristiano|ricardo|antonio|antónio|daniel|jo[aã]o|male|masculin|homem/i;
+  annVoice=vs.find(v=>/pt[-_]PT/i.test(v.lang)&&male.test(v.name))||vs.find(v=>male.test(v.name))||vs.find(v=>/pt[-_]PT/i.test(v.lang))||vs[0]||null}catch(e){}}
+if('speechSynthesis' in window){pickAnnVoice();speechSynthesis.addEventListener&&speechSynthesis.addEventListener('voiceschanged',pickAnnVoice)}
+function annGong(){if(!AC||muted)return;const t=AC.currentTime;[[659,0],[523,0.45],[392,0.9]].forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;
+  g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(0.18,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+d+1.3);o.connect(g);g.connect(A.bus);if(A.rev)g.connect(A.rev);o.start(t+d);o.stop(t+d+1.4)})}
+function announceDep(dest){if(muted||!('speechSynthesis' in window))return;annGong();
+  const nm=dest.replace('Porto-Trindade','Porto, Trindade').replace(' - ',', ');
+  setTimeout(()=>{try{if(!annVoice)pickAnnVoice();const u=new SpeechSynthesisUtterance('Vai partir da linha número um, o comboio com destino a '+nm+'.');u.lang='pt-PT';if(annVoice)u.voice=annVoice;u.pitch=0.75;u.rate=0.9;u.volume=1;
+    speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},1500)}
 function say(text){return;if(!('speechSynthesis' in window))return;setTimeout(()=>{try{const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';if(voice)u.voice=voice;u.rate=0.95;u.volume=0.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},1300)}
 
 /* ---- sons originais do pacote CP 9600 (µ-law 8 bits a 22 kHz, embutidos em #cp9600sons) ----
@@ -1542,6 +1554,8 @@ function step(dt,dr){
     if(S.horn&&dpn<450&&dpn>10)pn.honk=true;
     if(dpn<0){pn.done=true;if(pn.honk){S.sc.pn+=15;toast('Buzina a tempo na passagem de nível (+15)','good')}else penal(25,'Faltou buzinar na passagem de nível')}}
 
+  // 1 minuto antes da partida, nas estações principais: "Vai partir da linha número 1 o comboio com destino a …"
+  if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
   if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: partida!','good')}else toast('Pode seguir.','')}
   // partida
   if(S.atSt&&!S.departed&&S.v>0.3&&!S.back){S.departed=true;const st=S.atSt,d=S.clock-st.dep;
