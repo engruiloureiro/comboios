@@ -1022,6 +1022,15 @@ function siteLigacaoDireta(url) {
   } catch (e) { return url; }
 }
 
+
+/* Identificador de um vídeo do YouTube a partir de qualquer ligação (watch, youtu.be, shorts, embed, live). */
+function siteYoutubeId(url) {
+  url = String(url || '').trim();
+  if (/^[\w-]{11}$/.test(url)) return url;
+  const m = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/i);
+  return m ? m[1] : '';
+}
+
 (() => {
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   /* só http(s), mailto e tel; "www.…" ganha https://; o resto fica como caminho relativo */
@@ -1106,6 +1115,14 @@ function siteLigacaoDireta(url) {
     return '<a class="link-arrow card-link" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '>' + esc(n.ligacao_texto || 'Ver a notícia') + ' <span class="ext" aria-hidden="true">' + (nova ? '↗' : '→') + '</span>' + (nova ? novaAba : '') + '</a>';
   }
   const img = n => n.imagem_url ? '<img src="' + esc(siteLigacaoDireta(n.imagem_url)) + '" alt="' + esc(n.imagem_alt || '') + '">' : '';
+  /* vídeo: miniatura com botão; o leitor do YouTube só carrega quando se carrega no botão */
+  const temMedia = n => !!(n.imagem_url || siteYoutubeId(n.video_url));
+  const media = n => {
+    const id = siteYoutubeId(n.video_url);
+    if (!id) return img(n);
+    const capa = n.imagem_url ? siteLigacaoDireta(n.imagem_url) : 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+    return '<button type="button" class="yt" data-yt="' + id + '" data-titulo="' + esc(n.titulo) + '" aria-label="Ver o vídeo: ' + esc(n.titulo) + '"><img src="' + esc(capa) + '" alt=""><span class="yt__play" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7A8.5 8.5 0 0 0 60.5 1.7C55.2.3 34 .3 34 .3S12.8.3 7.5 1.7A8.5 8.5 0 0 0 1.5 7.7C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#E1251B"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span><span class="yt__tag" aria-hidden="true">Vídeo</span></button>';
+  };
   const lang = n => n.idioma ? ' lang="' + esc(n.idioma) + '"' : '';
 
   function aplicarNoticias(lista) {
@@ -1114,14 +1131,14 @@ function siteLigacaoDireta(url) {
     const outras = lista.filter(n => n !== destaque).slice(0, 2);
     const f = document.querySelector('.feature');
     if (f) f.innerHTML =
-      (destaque.imagem_url ? '<div class="feature__media">' + img(destaque) + '</div>' : '') +
+      (temMedia(destaque) ? '<div class="feature__media">' + media(destaque) + '</div>' : '') +
       '<div class="feature__body">' + (destaque.categoria ? '<p class="tag tone-' + esc(destaque.cor || 'terra') + '">' + esc(destaque.categoria) + '</p>' : '') +
       '<h3 class="feature__title"' + lang(destaque) + '>' + esc(destaque.titulo) + '</h3>' +
       (destaque.resumo ? '<p class="feature__text"' + lang(destaque) + '>' + esc(destaque.resumo) + '</p>' : '') +
       '<div class="feature__foot">' + linkNoticia(destaque) + '</div></div>';
     const grid = document.querySelector('.news-grid');
     if (grid) grid.innerHTML = outras.map(n =>
-      '<article class="card">' + (n.imagem_url ? '<div class="card__media' + (n.imagem_topo ? ' card__media--top' : '') + '">' + img(n) + '</div>' : '') +
+      '<article class="card">' + (temMedia(n) ? '<div class="card__media' + (n.imagem_topo ? ' card__media--top' : '') + '">' + media(n) + '</div>' : '') +
       '<div class="card__body">' + (n.categoria ? '<p class="tag tone-' + esc(n.cor || 'sky') + '">' + esc(n.categoria) + '</p>' : '') +
       '<h3 class="card__title"' + lang(n) + '>' + esc(n.titulo) + '</h3>' +
       (n.resumo ? '<p class="card__text"' + lang(n) + '>' + esc(n.resumo) + '</p>' : '') +
@@ -1147,6 +1164,28 @@ function siteLigacaoDireta(url) {
         ico('i-chev-r', 'notice__go') + '</article></li>';
     }).join('');
   }
+
+  const css = document.createElement('style');
+  css.textContent = '.yt{all:unset;box-sizing:border-box;position:absolute;inset:0;display:block;cursor:pointer;background:#0A1B29}' +
+    '.card__media{position:relative}.yt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover!important;transform:none!important}' +
+    '.yt__play{position:absolute;left:50%;top:50%;width:68px;height:48px;transform:translate(-50%,-50%);transition:transform .2s;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}' +
+    '.yt:hover .yt__play,.yt:focus-visible .yt__play{transform:translate(-50%,-50%) scale(1.1)}' +
+    '.yt:focus-visible{outline:3px solid #F3C548;outline-offset:-3px}' +
+    '.yt__tag{position:absolute;left:12px;top:12px;padding:3px 10px;border-radius:999px;background:rgba(10,27,41,.78);color:#fff;font:700 11px/1.6 Manrope,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase}' +
+    '.yt-frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}';
+  document.head.appendChild(css);
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('.yt[data-yt]');
+    if (!b) return;
+    const f = document.createElement('iframe');
+    f.className = 'yt-frame';
+    f.src = 'https://www.youtube-nocookie.com/embed/' + b.dataset.yt + '?autoplay=1&rel=0&modestbranding=1';
+    f.title = 'Vídeo: ' + (b.dataset.titulo || 'YouTube');
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    f.allowFullscreen = true;
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    b.replaceWith(f); f.focus();
+  });
 
   const hoje = new Date().toISOString().slice(0, 10);
   const pedidos = [

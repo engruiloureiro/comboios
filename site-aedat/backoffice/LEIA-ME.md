@@ -48,6 +48,19 @@ As imagens e os documentos ficam no OneDrive do agrupamento — o Supabase só g
 Nota: algumas contas Microsoft 365 escolares não permitem partilhas "Qualquer pessoa". Nesse caso, pede ao
 administrador do Microsoft 365 para ativar essa opção para a pasta das imagens do site.
 
+## Vídeos do YouTube
+
+Cada notícia pode ter um vídeo. No YouTube, abre o vídeo → **Partilhar** → **Copiar** e cola a ligação no campo
+**Vídeo do YouTube** da notícia (servem ligações `youtube.com/watch?v=…`, `youtu.be/…` e `youtube.com/shorts/…`).
+
+- O vídeo tem de ser **público** ou **não listado** (os privados não abrem no site).
+- No site aparece a miniatura do vídeo com um botão de reprodução; o vídeo só carrega quando alguém carrega no botão,
+  e usa o modo de privacidade reforçada do YouTube (`youtube-nocookie.com`).
+- Se também indicares uma imagem, essa imagem é usada como capa em vez da miniatura do YouTube.
+
+**Se já tinhas executado o SQL antes:** volta a executar o `supabase-backoffice.sql` completo — acrescenta o campo do
+vídeo sem apagar nada.
+
 ## Na página inicial
 
 - **Notícias**: a notícia marcada como destaque (ou, se nenhuma estiver marcada, a mais recente) e as duas publicadas

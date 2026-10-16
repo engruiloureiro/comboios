@@ -66,6 +66,7 @@ create table if not exists public.site_noticias (
   imagem_url      text,                              -- ligação OneDrive (ou caminho assets/...)
   imagem_alt      text,
   imagem_topo     boolean not null default false,   -- cartazes: recortar a partir do topo
+  video_url       text,                              -- ligação de um vídeo do YouTube (opcional)
   ligacao_url     text,
   ligacao_texto   text not null default 'Ver a notícia',
   data_publicacao date not null default current_date,
@@ -75,6 +76,9 @@ create table if not exists public.site_noticias (
   atualizado_em   timestamptz not null default now(),
   atualizado_por  uuid default auth.uid()
 );
+
+-- instalações anteriores: acrescenta a coluna do vídeo se ainda não existir
+alter table public.site_noticias add column if not exists video_url text;
 
 -- ---------------------------------------------------------------- Avisos (Informação útil)
 create table if not exists public.site_avisos (

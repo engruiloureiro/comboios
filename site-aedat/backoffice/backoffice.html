@@ -204,6 +204,14 @@ function siteLigacaoDireta(url) {
   } catch (e) { return url; }
 }
 
+/* Identificador de um vídeo do YouTube a partir de qualquer ligação (watch, youtu.be, shorts, embed, live). */
+function siteYoutubeId(url) {
+  url = String(url || '').trim();
+  if (/^[\w-]{11}$/.test(url)) return url;
+  const m = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/i);
+  return m ? m[1] : '';
+}
+
 
 const MENUS_ICONES = ['i-link','i-external','i-file','i-folder','i-book','i-cap','i-school','i-users','i-id','i-presentation','i-backpack','i-org','i-pin','i-clock','i-shield','i-scale','i-check','i-chat','i-globe','i-flag','i-star','i-heart','i-award','i-pen','i-wrench','i-grid','i-database','i-briefcase','i-spark','i-cpu','i-cog','i-bolt','i-laptop','i-monitor','i-play','i-package','i-mail','i-utensils','i-info'];
 const CORES = [['terra','Terracota'],['sky','Azul'],['lilac','Lilás'],['sun','Amarelo'],['green','Verde'],['orange','Laranja']];
@@ -371,8 +379,8 @@ function vNoticias() {
   const home = naPaginaInicial();
   return '<div class="toolbar"><input class="in search" id="filtro" type="search" placeholder="Pesquisar por título ou categoria…" value="' + esc(S.filtro) + '" aria-label="Pesquisar notícias"></div>' +
     '<div class="card table-wrap"><table><thead><tr><th class="hide-sm">Imagem</th><th>Notícia</th><th class="hide-sm">Data</th><th>Estado</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>' +
-    (lista.length ? lista.map(n => '<tr><td class="hide-sm">' + (n.imagem_url ? '<img class="thumb" src="' + esc(siteLigacaoDireta(n.imagem_url)) + '" alt="">' : '<span class="thumb"></span>') + '</td>' +
-      '<td class="title">' + (n.categoria ? '<span class="tag tone-' + esc(n.cor) + '">' + esc(n.categoria) + '</span><br>' : '') + esc(n.titulo) + (home[0] === n ? ' <span class="badge b-star">Destaque</span>' : home.includes(n) ? ' <span class="badge b-ok">Na página inicial</span>' : '') + '<small>' + esc(n.resumo || '') + '</small></td>' +
+    (lista.length ? lista.map(n => '<tr><td class="hide-sm">' + (n.imagem_url ? '<img class="thumb" src="' + esc(siteLigacaoDireta(n.imagem_url)) + '" alt="">' : (siteYoutubeId(n.video_url) ? '<img class="thumb" src="https://i.ytimg.com/vi/' + siteYoutubeId(n.video_url) + '/default.jpg" alt="">' : '<span class="thumb"></span>')) + '</td>' +
+      '<td class="title">' + (n.categoria ? '<span class="tag tone-' + esc(n.cor) + '">' + esc(n.categoria) + '</span><br>' : '') + esc(n.titulo) + (siteYoutubeId(n.video_url) ? ' <span class="badge b-warn">Vídeo</span>' : '') + (home[0] === n ? ' <span class="badge b-star">Destaque</span>' : home.includes(n) ? ' <span class="badge b-ok">Na página inicial</span>' : '') + '<small>' + esc(n.resumo || '') + '</small></td>' +
       '<td class="hide-sm">' + dataPT(n.data_publicacao) + '</td><td>' + estadoNoticia(n) + '</td>' +
       '<td><div class="actions"><button class="btn btn--sm" data-a="editar-noticia" data-id="' + n.id + '">Editar</button></div></td></tr>').join('')
       : '<tr><td colspan="5" class="empty">' + (S.filtro ? 'Nenhuma notícia corresponde à pesquisa.' : 'Ainda não existem notícias. Cria a primeira com “Nova notícia”.') + '</td></tr>') +
@@ -461,7 +469,9 @@ function vModal() {
       '<label class="field"><span>Resumo</span><textarea class="in" id="n-resumo" maxlength="300">' + esc(n.resumo) + '</textarea><small>Uma ou duas frases. Aparece por baixo do título.</small></label>' +
       '<div class="row"><label class="field"><span>Categoria</span><input class="in" id="n-categoria" value="' + esc(n.categoria) + '" placeholder="Ex.: Projetos internacionais" list="cats"><datalist id="cats">' + [...new Set(S.noticias.map(x => x.categoria).filter(Boolean))].map(c => '<option value="' + esc(c) + '">').join('') + '</datalist></label>' +
       '<div class="field"><span>Cor da categoria</span><div class="swatches">' + CORES.map(c => '<label><input type="radio" name="n-cor" value="' + c[0] + '"' + ((n.cor || 'terra') === c[0] ? ' checked' : '') + '><span class="tone-' + c[0] + '">' + c[1] + '</span></label>').join('') + '</div></div></div>' +
-      campoImagem('n-img', n.imagem_url, 'Imagem') +
+      campoImagem('n-img', n.imagem_url, 'Imagem', 'No OneDrive: Partilhar → “Qualquer pessoa com a ligação pode ver” → Copiar ligação. Com vídeo, a imagem é opcional: sem ela usa-se a miniatura do YouTube.') +
+      '<label class="field"><span>Vídeo do YouTube (opcional)</span><input class="in" id="n-video" value="' + esc(n.video_url) + '" placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…" data-yt-preview="n-video-prev"><small>No YouTube: Partilhar → Copiar. O vídeo tem de ser público ou “não listado”.</small></label>' +
+      '<div class="preview" id="n-video-prev"' + (n.video_url ? '' : ' hidden') + '><img alt="" src="' + (siteYoutubeId(n.video_url) ? 'https://i.ytimg.com/vi/' + siteYoutubeId(n.video_url) + '/hqdefault.jpg' : '') + '"><span class="st" aria-live="polite">' + (siteYoutubeId(n.video_url) ? 'Vídeo reconhecido.' : '') + '</span></div>' +
       '<div class="row"><label class="field"><span>Descrição da imagem (texto alternativo)</span><input class="in" id="n-alt" value="' + esc(n.imagem_alt) + '" placeholder="O que se vê na imagem"></label>' +
       '<div class="field"><span>Enquadramento</span><label class="check"><input type="checkbox" id="n-topo"' + (n.imagem_topo ? ' checked' : '') + '>Cartaz: mostrar a parte de cima da imagem (não cortar o título)</label></div></div>' +
       '<div class="row"><label class="field"><span>Ligação para a notícia completa</span><input class="in" id="n-url" value="' + esc(n.ligacao_url) + '" placeholder="https://aefreamunde.com/…"></label>' +
@@ -498,9 +508,10 @@ function verificarImagem(input) {
 async function guardarNoticia() {
   const n = S.modal.dados;
   const d = { titulo: val('n-titulo'), resumo: val('n-resumo') || null, categoria: val('n-categoria') || null, cor: (document.querySelector('input[name="n-cor"]:checked') || {}).value || 'terra',
-    imagem_url: val('n-img') || null, imagem_alt: val('n-alt') || null, imagem_topo: chk('n-topo'), ligacao_url: val('n-url') || null, ligacao_texto: val('n-ltexto') || 'Ver a notícia',
+    imagem_url: val('n-img') || null, imagem_alt: val('n-alt') || null, imagem_topo: chk('n-topo'), video_url: val('n-video') || null, ligacao_url: val('n-url') || null, ligacao_texto: val('n-ltexto') || 'Ver a notícia',
     data_publicacao: val('n-data') || hoje(), publicado: chk('n-pub'), destaque: chk('n-dest'), idioma: chk('n-en') ? 'en' : null };
   if (!d.titulo) return toast('Indica o título da notícia.', true);
+  if (d.video_url && !siteYoutubeId(d.video_url)) return toast('A ligação do vídeo não parece ser do YouTube. Copia-a em Partilhar → Copiar no YouTube.', true);
   if (d.imagem_url && !d.imagem_alt) return toast('Descreve a imagem (texto alternativo) para quem usa leitores de ecrã.', true);
   try {
     if (d.destaque) { const r = await sb.from('site_noticias').update({ destaque: false }).eq('destaque', true).neq('id', n.id || '00000000-0000-0000-0000-000000000000'); if (r.error) throw r.error; }
@@ -604,8 +615,18 @@ document.addEventListener('input', e => {
     marcarSujo(row.dataset.k);
   }
 });
+function verificarVideo(input) {
+  const box = document.getElementById(input.dataset.ytPreview); if (!box) return;
+  const url = input.value.trim(), id = siteYoutubeId(url);
+  box.hidden = !url; if (!url) return;
+  const img = box.querySelector('img'), st = box.querySelector('.st');
+  if (!id) { img.removeAttribute('src'); st.className = 'st st-err'; st.textContent = 'Esta ligação não é de um vídeo do YouTube.'; return; }
+  img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+  st.className = 'st st-ok'; st.textContent = 'Vídeo reconhecido. No site aparece a miniatura com o botão de reprodução.';
+}
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.dataset && t.dataset.ytPreview) verificarVideo(t);
   if (t.dataset && t.dataset.preview) verificarImagem(t);
   if (t.dataset && t.dataset.perfilEmail) definirPerfil(t.dataset.perfilEmail, t.value);
   const row = t.closest && t.closest('.item-row');
