@@ -463,6 +463,27 @@ main:focus{outline:none}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 </style>
+<style>
+/* ---------- Os nossos canais (jornal, YouTube, Erasmus+) ---------- */
+.canais{padding:64px 0 8px}
+.canais__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.canais__grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.canal{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:18px;height:100%;padding:22px 22px 22px 20px;background:#fff;border:1px solid rgba(15,42,62,.07);border-radius:22px;box-shadow:var(--shadow-1);color:var(--ink);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s}
+.canal::after{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--canal,var(--terra-600))}
+.canal:hover{transform:translateY(-4px);box-shadow:var(--shadow-2)}
+.canal__icon{display:grid;place-items:center;flex:none;width:60px;height:60px;border-radius:18px}
+.canal__icon .ic{width:30px;height:30px;stroke-width:1.7}
+.canal__txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+.canal__name{font-family:var(--font-head);font-weight:800;font-size:19px;line-height:1.2;letter-spacing:-.01em;color:var(--navy-900)}
+.canal__desc{font-size:14.5px;line-height:1.45;color:var(--ink-3)}
+.canal__go{display:grid;place-items:center;flex:none;margin-left:auto;width:36px;height:36px;border-radius:50%;background:var(--navy-50);color:var(--navy-800);transition:background-color .25s,color .25s,transform .25s var(--ease)}
+.canal__go .ic{width:17px;height:17px;stroke-width:2.1}
+.canal:hover .canal__go{background:var(--canal,var(--terra-600));color:#fff;transform:translate(2px,-2px)}
+.canal[data-cor=terra]{--canal:#A64A2C}.canal[data-cor=red]{--canal:#D9302A}.canal[data-cor=blue]{--canal:#1F4FA8}.canal[data-cor=sky]{--canal:#2E86C1}.canal[data-cor=green]{--canal:#3A8A4F}.canal[data-cor=lilac]{--canal:#7357B8}
+.canal[data-cor=red] .canal__icon{background:#FDE7E5;color:#B3221D}.canal[data-cor=blue] .canal__icon{background:#E3EAF8;color:#1F4FA8}
+@media (prefers-reduced-motion:reduce){.canal,.canal__go{transition:none}.canal:hover{transform:none}}
+@media (max-width:759px){.canais{padding-top:48px}.canais__grid{gap:12px}.canal{padding:16px 16px 16px 18px;gap:14px;border-radius:18px}.canal__icon{width:50px;height:50px;border-radius:15px}.canal__icon .ic{width:26px;height:26px}.canal__name{font-size:17px}}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -538,7 +559,7 @@ main:focus{outline:none}
   <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
-  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.01"/></symbol><symbol id="i-news" viewBox="0 0 24 24"><path d="M4 5h13v13a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2V5Z"/><path d="M17 9h3v9a2 2 0 0 1-2 2"/><path d="M7.5 9h6M7.5 12.5h6M7.5 16h4"/></symbol><symbol id="i-youtube" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="m10 9.2 5 2.8-5 2.8V9.2Z"/></symbol><symbol id="i-eu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 5.8v.01M12 18.2v.01M5.8 12h.01M18.2 12h.01M7.6 7.6h.01M16.4 16.4h.01M7.6 16.4h.01M16.4 7.6h.01" stroke-width="2.6"/></symbol>
 </svg>
 
 <a class="skip" href="#conteudo">Saltar para o conteúdo principal</a>
@@ -751,6 +772,13 @@ main:focus{outline:none}
     </div>
   </section>
 
+
+  <section class="canais" aria-labelledby="canais-title">
+    <div class="container">
+      <div class="canais__head section-head"><div><p class="hand"><svg viewBox="0 0 46 14" aria-hidden="true"><use href="#squiggle" filter="url(#crayon-fill)"/></svg>Segue-nos</p><h2 class="section-title" id="canais-title">Os nossos canais</h2></div></div>
+      <ul class="canais__grid"><li><a class="canal" data-cor="terra" href="#"><span class="canal__icon tone-terra" aria-hidden="true"><svg class="ic"><use href="#i-news"/></svg></span><span class="canal__txt"><span class="canal__name">Ecos de Taipa</span><span class="canal__desc">O jornal escolar do agrupamento</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="red" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-youtube"/></svg></span><span class="canal__txt"><span class="canal__name">Taipa360</span><span class="canal__desc">O nosso canal no YouTube</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li><li><a class="canal" data-cor="blue" href="#"><span class="canal__icon " aria-hidden="true"><svg class="ic"><use href="#i-eu"/></svg></span><span class="canal__txt"><span class="canal__name">Erasmus+</span><span class="canal__desc">Projetos europeus e mobilidades</span></span><span class="canal__go" aria-hidden="true"><svg class="ic"><use href="#i-external"/></svg></span></a></li></ul>
+    </div>
+  </section>
   <div class="container content">
     <section class="news" aria-labelledby="news-title">
       <div class="section-head">
@@ -1109,6 +1137,21 @@ function siteYoutubeId(url) {
     }).join('');
   }
 
+  function aplicarCanais(lista) {
+    const sec = document.querySelector('.canais'), ul = sec && sec.querySelector('.canais__grid');
+    if (!ul || !Array.isArray(lista)) return;
+    const ok = lista.filter(c => c && c.rotulo);
+    sec.hidden = !ok.length;
+    const tone = { terra: 'tone-terra', sky: 'tone-sky', green: 'tone-green', lilac: 'tone-lilac' };
+    ul.innerHTML = ok.map(c => {
+      const href = safeUrl(c.url); const nova = externa(href);
+      const cor = /^[a-z]+$/.test(c.cor || '') ? c.cor : 'terra';
+      return '<li><a class="canal" data-cor="' + cor + '" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '><span class="canal__icon ' + (tone[cor] || '') + '" aria-hidden="true">' + ico(c.icone || 'i-link') + '</span>' +
+        '<span class="canal__txt"><span class="canal__name">' + esc(c.rotulo) + '</span>' + (c.descricao ? '<span class="canal__desc">' + esc(c.descricao) + '</span>' : '') + '</span>' +
+        '<span class="canal__go" aria-hidden="true">' + ico('i-external') + '</span>' + (nova ? novaAba : '') + '</a></li>';
+    }).join('');
+  }
+
   function linkNoticia(n) {
     if (!n.ligacao_url) return '';
     const href = safeUrl(n.ligacao_url); const nova = externa(href);
@@ -1204,6 +1247,7 @@ function siteYoutubeId(url) {
       const c = Object.fromEntries(config.value.map(x => [x.chave, x.valor]));
       try { aplicarDestaque(c.destaque); } catch (e) { console.warn('destaque', e); }
       try { aplicarAcessos(c.acessos); } catch (e) { console.warn('acessos', e); }
+      try { aplicarCanais(c.canais); } catch (e) { console.warn('canais', e); }
     }
     try { if (ok(noticias)) aplicarNoticias(noticias.value); } catch (e) { console.warn('noticias', e); }
     try {

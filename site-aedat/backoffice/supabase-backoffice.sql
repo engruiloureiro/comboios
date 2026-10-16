@@ -263,6 +263,14 @@ insert into public.site_config (chave, valor) values
      jsonb_build_object('rotulo', 'Ementas', 'url', '#', 'icone', 'i-utensils')))
 on conflict (chave) do nothing;
 
+-- Os nossos canais (jornal escolar, canal do YouTube, Erasmus+) — as ligações definem-se no backoffice
+insert into public.site_config (chave, valor) values
+  ('canais', jsonb_build_array(
+     jsonb_build_object('rotulo', 'Ecos de Taipa', 'descricao', 'O jornal escolar do agrupamento', 'url', '#', 'icone', 'i-news', 'cor', 'terra'),
+     jsonb_build_object('rotulo', 'Taipa360', 'descricao', 'O nosso canal no YouTube', 'url', '#', 'icone', 'i-youtube', 'cor', 'red'),
+     jsonb_build_object('rotulo', 'Erasmus+', 'descricao', 'Projetos europeus e mobilidades', 'url', '#', 'icone', 'i-eu', 'cor', 'blue')))
+on conflict (chave) do nothing;
+
 -- ---------------------------------------------------------------- Primeiro administrador
 -- 1) Cria a conta em Authentication → Users → Add user (com email e palavra-passe).
 -- 2) Substitui o email abaixo e executa só esta linha:

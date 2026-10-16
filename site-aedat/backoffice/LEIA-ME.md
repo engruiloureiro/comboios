@@ -48,6 +48,13 @@ As imagens e os documentos ficam no OneDrive do agrupamento — o Supabase só g
 Nota: algumas contas Microsoft 365 escolares não permitem partilhas "Qualquer pessoa". Nesse caso, pede ao
 administrador do Microsoft 365 para ativar essa opção para a pasta das imagens do site.
 
+## Os nossos canais (Ecos de Taipa, Taipa360, Erasmus+)
+
+Por baixo dos acessos rápidos há a secção **Os nossos canais**, com acesso direto ao jornal escolar, ao canal do
+YouTube e ao site Erasmus+. No backoffice (**Destaque, acessos e canais**) defines, para cada canal, o nome, uma
+descrição curta, a ligação, o ícone e a cor (até 4 canais). Deixa o nome em branco para retirar um canal.
+As ligações abrem numa nova aba.
+
 ## Vídeos do YouTube
 
 Cada notícia pode ter um vídeo. No YouTube, abre o vídeo → **Partilhar** → **Copiar** e cola a ligação no campo
@@ -59,7 +66,7 @@ Cada notícia pode ter um vídeo. No YouTube, abre o vídeo → **Partilhar** �
 - Se também indicares uma imagem, essa imagem é usada como capa em vez da miniatura do YouTube.
 
 **Se já tinhas executado o SQL antes:** volta a executar o `supabase-backoffice.sql` completo — acrescenta o campo do
-vídeo sem apagar nada.
+vídeo e os canais sem apagar nada.
 
 ## Na página inicial
 
