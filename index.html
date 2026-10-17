@@ -1400,14 +1400,14 @@ function vozPlay(keys){const t0=AC.currentTime+1.6;let t=t0;for(const k of keys)
   if(A.rev){const r=AC.createGain();r.gain.value=0.22;g.connect(r);r.connect(A.rev)}s.start(t);t+=b.duration+0.12}}
 // o comboio para em todas as estações e apeadeiros do percurso que ainda faltam?
 function paraTodas(){const rest=ORD.filter(s=>(REV?s.i<S.atSt.i&&s.i>=S.endSt.i:s.i>S.atSt.i&&s.i<=S.endSt.i));return rest.every(s=>s.nostop||s.dep!==null)}
-function announceDep(dest){if(muted)return;
+function announceDep(dest){if(muted)return;try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}
   const dk=VOZD[dest];if(dk&&AC){vozLoad();const go=()=>{if(!VOZB.anuncio||!VOZB[dk])return announceTTS(dest);annGong();vozPlay(['anuncio',dk].concat(paraTodas()&&VOZB.todos?['todos']:[]))};
     if(VOZB.anuncio&&VOZB[dk])go();else VOZP.then(go);return}
   announceTTS(dest)}
 function announceTTS(dest){if(muted||!('speechSynthesis' in window))return;annGong();
   const nm=dest.replace('Porto-Trindade','Porto, Trindade').replace(' - ',', ');
   setTimeout(()=>{try{if(!annVoice)pickAnnVoice();const u=new SpeechSynthesisUtterance('Vai partir da linha número um, o comboio com destino a '+nm+'.');u.lang='pt-PT';if(annVoice)u.voice=annVoice;u.pitch=annMale?0.9:0.35;u.rate=0.88;u.volume=1;
-    speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},1500)}
+    if(speechSynthesis.speaking)speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u)}catch(e){}},1500)}
 function say(text){return;if(!('speechSynthesis' in window))return;setTimeout(()=>{try{const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';if(voice)u.voice=voice;u.rate=0.95;u.volume=0.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},1300)}
 
 /* ---- sons originais do pacote CP 9600 (µ-law 8 bits a 22 kHz, embutidos em #cp9600sons) ----
