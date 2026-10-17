@@ -4148,7 +4148,7 @@ function passengerFrame(p){
 function reserveSeat(px){
  const zs=[-5.805,-5.225,-4.255,-3.675,-2.755,-.905,.015,.595,1.565,2.145,3.115,3.695,4.665,5.245,6.195,6.825,7.78];
  const candidates=[],preferredCar=clamp(Math.floor(px.entryD/CSP),0,S.ncar-1),preferredRow=6+Math.floor(h2(Math.floor(px.k*65535)+71,43)*10);
- for(let car=0;car<S.ncar;car++)for(let row=0;row<zs.length;row++)for(const x of[-1.03,-.57,.57,1.03]){
+ for(let car=0;car<S.ncar;car++)for(let row=0;row<zs.length;row++)for(const x of[-.95,-.53,.53,.95]){
    const rev=car%2?-1:1,d=car*CSP+CSP/2+rev*zs[row],key=car+':'+row+':'+x;
    if(d<car*CSP+1.3||d>(car+1)*CSP-1.3||ONBOARD.some(p=>p.key===key))continue;
    candidates.push({key,seatD:d,seatX:x,facing:rev*(row%2?-1:1),score:Math.abs(car-preferredCar)*40+Math.abs(row-preferredRow)*1.6+Math.abs(d-px.entryD)*.08+(Math.abs(x)<.8?.15:0)});
@@ -4162,7 +4162,7 @@ function seatedPassenger(mb,o,fw,col,id,sit){
  paxCoat(mb,o,R,F,[[hip,.19,.13],[hip+.17,.18,.12],[hip+.46,.225,.14],[hip+.57,.23,.13],[hip+.64,.10,.08]],col,10);
  for(const sd of[-1,1]){const x=sd*.11,knee=P(x,.48,.37*sit),ankle=P(x,.09,.39*sit);
    paxTube(mb,P(x,hip,0),knee,.09,.075,tr,8);paxTube(mb,knee,ankle,.07,.05,tr,8);sph(mb,P(x,.065,.09+.39*sit),.08,.065,.14,shoe);
-   const elbow=P(sd*.28,hip+.22,.07),hand=P(sd*.16,hip+.07,.25);paxTube(mb,P(sd*.24,hip+.53,0),elbow,.095,.075,col,8);paxTube(mb,elbow,hand,.072,.045,col,8);sph(mb,hand,.046,.045,.06,skin);
+   const elbow=P(sd*.2,hip+.22,.1),hand=P(sd*.12,hip+.1,.27);paxTube(mb,P(sd*.2,hip+.53,0),elbow,.095,.075,col,8);paxTube(mb,elbow,hand,.072,.045,col,8);sph(mb,hand,.046,.045,.06,skin);
  }
  paxTube(mb,P(0,hip+.61,0),P(0,hip+.70,0),.06,.055,skin,8);
  sph(mb,P(0,hip+.79,0),.105,.135,.10,skin);sph(mb,P(0,hip+.88,-.015),.108,.07,.104,cc(64,48,38));
