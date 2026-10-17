@@ -4006,7 +4006,7 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   for(const a of ALIGHT){if(a.done)continue;if(Math.abs(a.P[0]-eye[0])+Math.abs(a.P[2]-eye[2])>1400){a.done=true;continue}
     let walk=false;if(a.delay>0){a.delay-=pdt;if(S.atSt===a.st)busy=true;continue}if(!a.arr){walk=true;a.ph+=pdt*7;if(step2(a.P,a.T,1.3))a.arr=true}person(a.P,a.c,walk,a.ph,a.k,a.T)}
   // Depois da porta, subir, atravessar o vestíbulo, percorrer o corredor e sentar.
-  for(const p of ONBOARD){
+  for(const p of ONBOARD){if(p.phase>=3&&p.sit>=1)continue;// sentados: malha guardada por carruagem (paxCache)
     const approach=(key,target,speed)=>{const d=target-p[key];p[key]+=Math.sign(d)*Math.min(Math.abs(d),speed*pdt);return Math.abs(d)<.025};
     if(p.phase===0){if(approach('y',CPH+1.10,.7)&&approach('x',0,1.1))p.phase=1}
     else if(p.phase===1){if(approach('d',p.seatD,1.4))p.phase=2}
@@ -4140,6 +4140,19 @@ function paxHuman(mb,O,fw,outfit,walk,phase,id,details){
   }
 }
 
+// passageiros sentados: uma malha por carruagem, construída uma vez no referencial da carruagem e desenhada com a matriz
+// do veículo; só se refaz quando alguém se senta ou se levanta (antes eram refeitos todos, a cada imagem)
+const PAXC=[];
+function paxCacheDraw(eye){if(!S||!ONBOARD.length)return;const dir=REV?-1:1;
+  for(let car=0;car<S.ncar;car++){const list=ONBOARD.filter(p=>p.phase>=3&&p.sit>=1&&clamp(Math.floor(p.d/CSP),0,S.ncar-1)===car);
+    const sig=list.length+':'+list.map(p=>p.key).join(',');let c=PAXC[car];
+    if(!c||c.sig!==sig){const rev=car%2?-1:1,sgn=dir*rev,mb=new MB();
+      for(const p of list){const lz=-CP.FB+rev*(CSP/2-(p.d-car*CSP));seatedPassenger(mb,[-sgn*p.x,p.y-CPH,lz],[0,0,rev*p.facing],p.c,p.k,1)}
+      c=PAXC[car]={sig,m:list.length?upload(mb,undefined,c&&c.m):(c&&c.m?Object.assign(c.m,{n:0}):null),sgn};c.dir=dir}
+    if(!c.m||!c.m.n)continue;
+    const rev=car%2?-1:1,sgn=dir*rev,pc=S.pos-dir*(car*CSP+CSP/2),pa=pc+sgn*CP.FB,pb=pc+sgn*CP.RB,A=wp(pa,trackX(pa),CPH),B=wp(pb,trackX(pb),CPH),Fv=norm(sub(A,B));
+    if(c.dir!==dir){c.sig='';continue}
+    const M=mdl(A,Fv,eye);M[0]=-M[0];M[1]=-M[1];M[2]=-M[2];drawM(c.m,M,[1,0])}}
 function passengerFrame(p){
  const dir=REV?-1:1,car=clamp(Math.floor(p.d/CSP),0,S.ncar-1),rev=car%2?-1:1,pc=S.pos-dir*(car*CSP+CSP/2),sgn=dir*rev;
  const pa=pc+sgn*CP.FB,pb=pc+sgn*CP.RB,A=wp(pa,trackX(pa),CPH),B=wp(pb,trackX(pb),CPH),F=norm(sub(A,B)),R=norm(cross(F,[0,1,0])),U=cross(R,F),O=sub(A,mulv(F,CP.FB));
@@ -4277,6 +4290,7 @@ function render3D(dtR){
   const eyeY=[eye[0],eye[1],eye[2]];
   buildDyn([eye[0],0,eye[2]],S.pos);gl.uniformMatrix4fv(UL.uM,false,new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,-eye[1],0,1]));gl.uniform2f(UL.uHT,1,0);
   if(DYN.n){gl.bindVertexArray(DYN.vao);gl.drawArrays(gl.TRIANGLES,0,DYN.n)}
+  paxCacheDraw(eye);
   // comboios
   const lights=dark>0.2||true;
   trainDraw(S.pos,dir,trackX,[1,0,0,1],eyeY,(camMode==='cab'&&!CP.ok)||(camMode==='salao'?'int':false),S.ncar,S.livB,window.__OD||cpDoorState());
