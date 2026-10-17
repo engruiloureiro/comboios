@@ -578,11 +578,13 @@ function stF(p){let d=1e9;for(const s of STN)d=Math.min(d,p<s.pa?s.pa-p:p>s.pb?p
 function otherOff(p){return null}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+(e.to-e.from)*sstep(t/(e.tl||60))}
 function branchOffs(p){return[]}
-function capAt(k){if(GP&&k>KC1)return capG(k-DGV);if(RP){if(PVG&&k>(PVG.sC-OFF)/1000-0.3&&k<(PVG.sC-OFF)/1000+0.2)return 30;if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
+function capAt(k){if(GP&&k>KC1)return capG(k-DGV);if(RP){if(PVG&&k>(PVG.sC-OFF)/1000-0.3&&k<(PVG.sC-OFF)/1000+0.2)return 30;if(k<0.18)return 30;if(k<0.8)return 50;// túnel da Trindade (PK 0,32–0,78): 50 km/h
+  if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}if(Math.abs(k-6.05)<0.35)return 40;
   if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526){for(const[a0,b0]of[[30.85,31.8],[37.2,37.7],[43.4,44.3],[46.4,47.4],[50.1,50.8],[52.3,53.0],[54.1,54.8],[58.4,59.2]])if(k>=a0&&k<b0)return 30;return 50}return 70}
   return capG(k)}
 function capG(k){
-  if(k<0.45)return 30;if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
+  if(k<0.18)return 30;if(k<0.8)return 50;// túnel da Trindade (PK 0,32–0,78): 50 km/h
+  if(k<6.4){if(Math.abs(k-2.25)<0.3)return 50;if(Math.abs(k-6.05)<0.35)return 40;return 60}
   if(Math.abs(k-6.05)<0.35)return 40;if(k>=6.4&&k<6.75)return 30;if(Math.abs(k-25.4)<0.5||Math.abs(k-29.6)<0.45)return 40;if(Math.abs(k-27)<0.3||Math.abs(k-41.25)<0.3||Math.abs(k-38.0)<0.2)return 60;if(Math.abs(k-37.9)<0.35)return 50;if(Math.abs(k-35.6)<0.4)return 50;
   if(k<42.5)return 80;if(Math.abs(k-53.2)<0.4)return 50;const g=k-G0;if(g<-0.5)return 70;if(Math.abs(g)<0.5)return 30;if(g>0&&g<1.6)return 40;if(Math.abs(g-8.49)<0.25)return 30;if(Math.abs(g-15.4)<0.3)return 30;if(k>80.585-0.8)return 30;return 60}
 const LIMA=new Uint8Array(Math.ceil(TOTAL*SEG/50)+2);
