@@ -2267,7 +2267,9 @@ function hud(dtR){
   else if(ns){const d=ahead(ns);$('#dNext').textContent=short(ns.n);
     $('#dDist').textContent=d>=1000?(d/1000).toFixed(1).replace('.',',')+' km':d>-100?(d<300?d.toFixed(0):Math.round(d/10)*10)+' m':'—';$('#dArr').textContent=fHM(ns.dep)}
   $('#dClock').textContent=fHMS(S.clock);
-  {const t=S.trip0==null?null:Math.max(0,Math.floor(S.clock-S.trip0));$('#dTrip').textContent=t===null?'--:--':(t>=3600?Math.floor(t/3600)+':':'')+String(Math.floor(t/60)%60).padStart(t>=3600?2:1,'0')+':'+String(t%60).padStart(2,'0')}
+  // tempo de viagem: desde a hora de partida marcada na estação de origem, pelo relógio do jogo (as pausas não contam)
+  {const o=STOPS[0],t0=o&&o.dep!=null&&!S.free?o.dep:S.trip0,t=t0==null?null:Math.floor(S.clock-t0);
+   $('#dTrip').textContent=t===null||t<0?'--':(t>=3600?Math.floor(t/3600)+'h'+String(Math.floor(t/60)%60).padStart(2,'0')+'m':Math.floor(t/60)+'m')+String(t%60).padStart(2,'0')+'s'}
   $('#dLim').textContent=lim;
   const nl=REV?nextLimitR(S.pos):nextLimit(S.pos);$('#dNextLim').innerHTML=nl?'<b>'+nl.v+'</b> em '+(Math.round(nl.d/10)*10)+' m':'';
   {const pn=REV?PN.slice().reverse().find(q=>q.pos<S.pos):PN.find(q=>q.pos>S.pos),pd=pn?Math.abs(pn.pos-S.pos):1e9;$('#dSig').innerHTML=pd<1500?(pd<450&&!pn.honk?'<b style="color:#9a2a10">PN '+Math.round(pd)+' m, buzinar!</b>':'PN a <b>'+Math.round(pd)+' m</b>'):'Via livre'}
