@@ -1623,7 +1623,7 @@ function step(dt,dr){
   if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
   if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
   if(S.trip0==null&&S.v>0.3)S.trip0=S.clock;
-  if(S.hornSeq){const el=(performance.now()-S.hornSeq)/1000;if(el>=2||paused){S.hornSeq=0;S.horn=false;hb.classList.remove('down')}else{S.horn=true;S.hornK=el<1?'horn_lo':'horn_hi'}}
+  if(S.hornSeq){const el=(performance.now()-S.hornSeq)/1000;if(el>=1.5||paused){S.hornSeq=0;S.horn=false;hb.classList.remove('down')}else{S.horn=true;S.hornK=el<0.5?'horn_lo':'horn_hi'}}
   // o maquinista buzina antes de arrancar (depois de fechar as portas)
   if(S.atSt&&!S.departed&&!S.doors&&S.horn)S.depHorn=true;
   // partida
