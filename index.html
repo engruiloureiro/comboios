@@ -1182,6 +1182,15 @@ const HIST_AUDIT={version:'2026-10-10',removed:0,added:0};
  put(GMR.pos-36,{t:'hturntable',x:-23,r:6.8});
  put(GMR.pos-108,{t:'hcedar',x:18,h:19});
  put(GMR.pos-175,{t:'hboundary',x:18,len:48,h:1.2,hedge:true});
+ // Guimarães: largo da estação, avenida que sobe para a cidade e rua ao longo da via, no lugar do casario
+ // disperso e dos campos que aqui havia (só ficam as peças da estação e da via)
+ {const bc=GUI.bc,keep=new Set(['bldg','lamp','board','pax','stop','sig','tpole','wcol','silvo','bench','lim','avis','ea','pk','pn','pnx','buffer','slamp','canopy','kiosk','shelter']);
+  const inZ=(u,x)=>(x<-13&&x>-62&&u>-345&&u<128)||(x<-38&&x>-500&&u>-24&&u<54);
+  for(let k=at(bc-370);k<=at(bc+135);k++){const u=k*SEG-bc;spr[k]=spr[k].filter(o=>keep.has(o.t)||!inZ(u,o.x))}
+  put(bc,{t:'gmrlargo',x:-20});
+  for(let u=-320;u<-40;u+=40)put(bc+u,{t:'gmrrua',x:-24,wall:u<-90});
+  // a nascente do largo a rua continua sem casas, para não tapar o castelo a quem está no cais
+  for(const u of[44,84])put(bc+u,{t:'gmrrua',x:-24,bare:true});}
  // Manter a folga integral das linhas de cruzamento e dos sinais.
  // Última barreira para peças cénicas colocadas perto de agulhas.
  const flat=new Set(['patio','campo','hstonebridge','hroadbridge','hivy','hreeds']);
@@ -2314,6 +2323,9 @@ function terrH(i,o,wx,wz){i=clamp(i,0,TOTAL-1);const base=hy[i]-0.45,E=EDGE[i];
   // trincheira de Covas: o terreno sobe logo atrás dos paredões
   if(CVC&&d>0){const p=i*SEG;if(p>CVC.a-30&&p<CVC.b+30){const w=sstep((p-CVC.a+30)/60)*sstep((CVC.b+30-p)/60);h=Math.max(h,base+5.6*w*sstep(d/3)*(1-sstep((d-70)/60)))}}
   if(TUNP[i]>0&&(tun[i]||d>0)){const cover=hy[i]+11+TUNP[i]*5;const w=tun[i]?1:sstep(1-Math.max(0,d-8)/60);h=Math.max(h,lerp(h,cover,TUNP[i]*w))}
+  // Guimarães: largo da estação, avenida e rua ao longo da via em terreno plano (a avenida sobe 2 %)
+  if((RG||GP)&&GUI.i>=0&&o<-12){const u=i*SEG-GUI.bc;if(u>-400&&u<170){const w1=(1-sstep((u-128)/30))*(1-sstep((-u-340)/40))*(1-sstep((-o-52)/25)),
+    w2=(1-sstep((Math.abs(u-15)-24)/22))*(1-sstep((-o-480)/60)),w=Math.max(w1,w2);if(w>0)h=lerp(h,base+0.02*Math.max(0,-o-52),w)}}
   if(BRD[i]>0)h-=BRD[i]*(1-sstep(Math.max(0,d-4)/95));
   if(riv[i]){const R=inRange(RIVER,i*SEG),so=o*riv[i],RX=riverX(R,i*SEG);if(so>RX-6&&so<RX+R.w+8){const e=Math.min(so-(RX-6),RX+R.w+8-so);h=Math.min(h,hy[i]-3.2+2.4*(1-sstep(e/7)))}}
   return h}
@@ -2546,7 +2558,7 @@ function init3D(){
      if(im.complete&&im.naturalWidth)paint();else im.addEventListener('load',paint,{once:true});
    }
   atTxt('S','S','#fff','#111',64,64,52);atTxt('eaE','E','#f4f4f0','#111',64,64,54);atTxt('eaA','A','#f4f4f0','#111',64,64,54);atTxt('mabor','MABOR','#1a3a8a','#f4f4f0',320,56,48);atTxt('wtPV','PÓVOA','#111','#d6d8d6',300,64,52);atTxt('ud','U.D.','#f4f4f0','#111',96,56,40);for(const n of['1','2'])atTxt('lin'+n,'LINHA '+n,'#f4f4f0','#111',160,48,34);for(let n=1;n<=6;n++)atTxt('ln'+n,'LINHA '+n,'#1d3b74','#f4f2ea',192,64,44);atTxt('n9611','9611','#d63a28','#f4f4f0',128,40,30);atTxt('n9611s','9611','#2a2a2a','rgb(214,215,212)',128,36,26);atAlloc('clock',128,128,(x,w,h)=>{x.fillStyle='#f6f3ea';x.beginPath();x.arc(64,64,60,0,7);x.fill();x.strokeStyle='#222';x.lineWidth=5;x.stroke();for(let k=0;k<12;k++){const a=k/12*6.283;x.fillStyle='#222';x.fillRect(64+Math.sin(a)*48-2,64-Math.cos(a)*48-5,4,10)}x.lineWidth=6;x.beginPath();x.moveTo(64,64);x.lineTo(64+34,64-8);x.moveTo(64,64);x.lineTo(60,20);x.stroke()});atStop();atDest('GUIMARÃES');for(const s of STN)atDest(s.n.toUpperCase());atDest('PORTO S. BENTO');atDest('LOUSADO');atTxt('cp','CP','#f4c318','#1a1a1a',128,64,50);
-  if(RG||GP){atTxt('histTrin','PORTO — TRINDADE','#e6dec8','#333a35',500,48,36);atTxt('histwindow','', '#363f3f','#ddd',32,48,10);for(const label of ['FIAÇÃO DE SANTO THYRSO','FÁBRICA DO RIO VIZELA'])atTxt('hist:'+label,label,'#cec2a2','#30352f',420,40,30);}
+  if(RG||GP){for(const s of GMR_SIGNS)atTxt('gs:'+s,s,'#f1ead6','#5a2a1e',256,48,34);atTxt('gs:TÁXIS','TÁXIS','#1d3b74','#f4f2ea',192,64,44);atTxt('histTrin','PORTO — TRINDADE','#e6dec8','#333a35',500,48,36);atTxt('histwindow','', '#363f3f','#ddd',32,48,10);for(const label of ['FIAÇÃO DE SANTO THYRSO','FÁBRICA DO RIO VIZELA'])atTxt('hist:'+label,label,'#cec2a2','#30352f',420,40,30);}
   ATEX=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,ATEX);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atC);gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
   if(an)gl.texParameterf(gl.TEXTURE_2D,an.TEXTURE_MAX_ANISOTROPY_EXT,4);
@@ -3031,6 +3043,99 @@ function bldg3(mb,sp,i,base,R,F,sd,L){
     plateQ(mb,P(0,yb+h-0.8),n,Math.min(w*0.6,8),0.7,atBoard(sp.n),0,false);return}
 }
 /* Modelação cénica independente de todos os modelos de material circulante. */
+// Guimarães (1985): largo da estação com plátanos, praça de táxis, chafariz e quiosque; a avenida que sobe para a
+// cidade, com prédios de três a cinco pisos e lojas no rés-do-chão; a rua ao longo da via com casas de dois e três pisos
+const GMR_FAC=[[238,230,208],[228,214,180],[216,224,214],[240,236,228],[224,198,162],[204,212,222],[236,216,190],[214,190,172],[230,222,196]];
+const GMR_SIGNS=['CAFÉ','FARMÁCIA','PASTELARIA','RESTAURANTE','PENSÃO','MERCEARIA','SAPATARIA','BARBEARIA','DROGARIA','PAPELARIA'];
+const GMR_CARS=[[232,232,226],[196,40,36],[40,60,110],[60,90,60],[204,172,64],[124,124,128],[212,200,170],[150,40,90],[90,140,170],[176,90,40]];
+// candeeiros do largo e da avenida: [u ao longo da via a partir do centro do edifício, x, sentido do braço (u,x)]
+function gmrLampsUV(){const L=[];for(let x=-60;x>-460;x-=28){L.push([10.2,x,1,0]);L.push([19.8,x-14,-1,0])}
+  for(const u of[-40,-22,0,30,44])L.push([u,-45.6,0,1]);return L}
+function gmrFrame(){const i=Math.floor(GUI.bc/SEG),c0=PI(i,0,0),A=RV(i),B=FV(i),u0=GUI.bc-i*SEG;
+  const W=(u,x)=>[c0[0]+B[0]*(u+u0)+A[0]*x,0,c0[2]+B[2]*(u+u0)+A[2]*x];
+  const gH=(u,x)=>{const w=W(u,x),ii=clamp(i+Math.round((u+u0)/SEG),0,TOTAL-1);return terrH(ii,x,w[0],w[2])};return{i,A,B,W,gH}}
+function gmrLampPts(){const f=gmrFrame();return gmrLampsUV().map(([u,x,du,dx])=>{const w=f.W(u+du*1.3,x+dx*1.3);w[1]=f.gH(u,x)+6.0;return w})}
+function gmrCity(mb,sp,i,L,r,tree,ROOF){
+  const UP=[0,1,0],WIN=ATL['histwindow'],GLS=cc(52,62,72),GRA=cc(150,146,138),DK=cc(40,42,44),PAV=cc(214,208,196),WH=cc(236,234,226);
+  const AWN=[[150,40,36],[40,90,60],[60,70,130],[180,120,40],[120,60,40]];
+  const TT=N=>[N[2],0,-N[0]];
+  // quadrilátero vertical de normal N centrado em c (mundo), meia largura hw
+  const fqN=(c,N,hw,y0,y1,col,l)=>{const T=TT(N);mb.q(L([c[0]-T[0]*hw,y0,c[2]-T[2]*hw]),L([c[0]+T[0]*hw,y0,c[2]+T[2]*hw]),L([c[0]+T[0]*hw,y1,c[2]+T[2]*hw]),L([c[0]-T[0]*hw,y1,c[2]-T[2]*hw]),col,l||0)};
+  // prédio de c (centro, mundo) com a fachada principal virada para N: largura w, fundo d, fl pisos, loja no rés-do-chão
+  const bld=(c,N,w,d,fl,y,shop)=>{const T=TT(N),col=cc(...GMR_FAC[Math.floor(r()*GMR_FAC.length)]),top=y+0.6+fl*3.05,cl=L(c);
+    boxRF(mb,cl,T,N,w,d,y-1.5,top,col,0);boxRF(mb,cl,T,N,w+0.08,d+0.08,y-1.5,y+0.6,GRA,13,2,2,0,1,true);
+    boxRF(mb,cl,T,N,w+0.3,d+0.3,top,top+0.25,cc(234,228,214),0);hipRoof(mb,cl,T,N,w,d,top+0.25,1.6,ROOF(),0.35);
+    const f=add(c,mulv(N,d/2+0.04)),nw=Math.max(1,Math.floor((w-0.8)/2.6));
+    for(let q=0;q<nw;q++){const t=-(nw-1)*1.3+q*2.6,p=add(f,mulv(T,t));for(let k=1;k<fl;k++)plateQ(mb,L([p[0],y+0.6+k*3.05+1.4,p[2]]),N,1.0,1.45,WIN,0,false)}
+    if(shop){const g=add(f,mulv(N,0.02));fqN(g,N,w/2-0.6,y+0.6,y+2.75,GLS,16);
+      const aw=cc(...AWN[Math.floor(r()*AWN.length)]);boxRF(mb,L(add(f,mulv(N,0.75))),T,N,w-1.2,1.5,y+2.85,y+3.0,aw,0);boxRF(mb,L(add(f,mulv(N,1.48))),T,N,w-1.2,0.05,y+2.55,y+3.0,aw,0);
+      const s=ATL['gs:'+GMR_SIGNS[Math.floor(r()*GMR_SIGNS.length)]];if(s&&w>5)plateQ(mb,L([g[0]+N[0]*0.04,y+3.45,g[2]+N[2]*0.04]),N,Math.min(w-2,4.2),0.6,s,0,false)}
+    else{const dt=-w/2+1.6;fqN(add(f,mulv(T,dt)),N,0.65,y+0.6,y+2.9,cc(96,62,40),0);
+      for(let q=0;q<nw;q++){const t=-(nw-1)*1.3+q*2.6;if(Math.abs(t-dt)<1.5)continue;const p=add(f,mulv(T,t));plateQ(mb,L([p[0],y+2.0,p[2]]),N,1.0,1.45,WIN,0,false)}}};
+  // automóvel (c centro no chão, Ax ao comprimento); táxi preto de tejadilho verde
+  const car=(c,Ax,y,col,taxi)=>{const N=TT(Ax);boxRF(mb,L(c),N,Ax,1.66,4.0,y+0.32,y+0.95,col,0);
+    const cb=add(c,mulv(Ax,-0.25));boxRF(mb,L(cb),N,Ax,1.5,2.1,y+0.95,y+1.36,GLS,16);boxRF(mb,L(cb),N,Ax,1.54,2.0,y+1.36,y+1.44,taxi?cc(46,120,70):col,0);
+    if(taxi)boxRF(mb,L(cb),N,Ax,0.5,0.25,y+1.44,y+1.62,WH,0);
+    for(const e of[-1.3,1.3])for(const s2 of[-0.8,0.8])cyl(mb,L(add(c,add(mulv(Ax,e),mulv(N,s2)))),y,y+0.6,0.3,0.3,7,cc(22,22,22),0)};
+  const carCol=()=>cc(...GMR_CARS[Math.floor(r()*GMR_CARS.length)]);
+  const disc=(c,y,rad,col,l)=>{const cl=L(c);for(let k=0;k<16;k++){const a0=k/16*6.2832,a1=(k+1)/16*6.2832;
+    mb.t([cl[0],y,cl[2]],[cl[0]+Math.cos(a1)*rad,y,cl[2]+Math.sin(a1)*rad],[cl[0]+Math.cos(a0)*rad,y,cl[2]+Math.sin(a0)*rad],UP,UP,UP,col,[0.5,0.5],[1,0.5],[0.5,1],l||0,0,1)}};
+  if(sp.t==='gmrlargo'){
+    const{A,B,W,gH}=gmrFrame();
+    const Pt=(u,x,dy)=>{const w=W(u,x);w[1]=gH(u,x)+dy;return L(w)};
+    // chão: parte em quadrados de 8 m que seguem o terreno
+    const gq=(u0,u1,x0,x1,dy,col,l,s)=>{const nu=Math.max(1,Math.ceil((u1-u0)/8)),nx=Math.max(1,Math.ceil((x1-x0)/8));
+      for(let a=0;a<nu;a++)for(let b=0;b<nx;b++){const ua=u0+(u1-u0)*a/nu,ub=u0+(u1-u0)*(a+1)/nu,xa=x0+(x1-x0)*b/nx,xb=x0+(x1-x0)*(b+1)/nx;
+        mb.q(Pt(ua,xa,dy),Pt(ua,xb,dy),Pt(ub,xb,dy),Pt(ub,xa,dy),col,l,[xa/s,ua/s,xb/s,ub/s])}};
+    // o largo em calçada e a avenida (faixa de 9 m, passeios largos com plátanos)
+    gq(-42,44,-46,-19.6,0.12,PAV,14,4);gq(-42,5.5,-62,-46,0.12,PAV,14,4);gq(24.5,44,-62,-46,0.12,PAV,14,4);
+    gq(10.5,19.5,-470,-46,0.08,[1,1,1],8,7);gq(5.5,10.5,-470,-46,0.18,PAV,14,4);gq(19.5,24.5,-470,-46,0.18,PAV,14,4);
+    for(let x=-466;x<-52;x+=6)gq(14.9,15.1,x,x+3,0.12,WH,0,1);
+    for(let u=10.9;u<19.3;u+=1.1)gq(u,u+0.55,-53,-49,0.12,WH,0,1);
+    // plátanos à volta do largo e ao longo da avenida
+    const T0=(u,x,kind,hh)=>tree({c:Pt(u,x,0),y:gH(u,x),R:A,F:B},kind,hh);
+    for(let u=-38;u<=44;u+=9){if(u>-26&&u<-2||u>3&&u<27)continue;T0(u,-43.5,'plane',11+r()*3)}
+    for(let x=-58;x>-462;x-=13){T0(9.4,x,'plane',6.8+r()*1.2);T0(20.6,x-6,'plane',6.8+r()*1.2)}
+    // candeeiros
+    const LP=gmrLampsUV();for(const[u,x,du,dx]of LP){const y=gH(u,x),c=Pt(u,x,0),tip=Pt(u+du*1.3,x+dx*1.3,0);
+      boxRF(mb,c,A,B,0.16,0.16,y,y+6.2,cc(64,66,68),0);limb(mb,[c[0],y+6.1,c[2]],[tip[0],y+6.3,tip[2]],0.08,0.08,cc(64,66,68),B);boxRF(mb,[tip[0],0,tip[2]],A,B,0.5,0.5,y+5.95,y+6.15,cc(255,236,190),0,0,0,0.6)}
+    // chafariz de granito no meio do largo, em frente à torre
+    {const w=W(-12,-33),y=gH(-12,-33),cl=L(w),G=cc(176,170,160);cyl(mb,cl,y-0.2,y+0.55,2.6,2.6,18,G,13);cyl(mb,cl,y+0.3,y+0.55,2.35,2.35,18,G,13);cyl(mb,cl,y+0.55,y+0.55,2.6,2.35,18,G,13);
+      disc(w,y+0.42,2.35,cc(120,150,160),9);cyl(mb,cl,y+0.4,y+1.9,0.32,0.22,10,G,13);cyl(mb,cl,y+1.9,y+2.05,0.9,0.9,12,G,13);disc(w,y+2.05,0.9,G);cyl(mb,cl,y+2.05,y+2.6,0.12,0.08,8,G,13)}
+    // quiosque dos jornais
+    {const w=W(-36,-37),y=gH(-36,-37),cl=L(w),gc=cc(46,96,70);cyl(mb,cl,y,y+2.5,1.25,1.25,8,gc,0);cyl(mb,cl,y+0.9,y+2.1,1.27,1.27,8,GLS,16);cyl(mb,cl,y+2.5,y+2.5,1.7,1.25,8,gc,0);cyl(mb,cl,y+2.5,y+3.3,1.7,0.15,8,gc,0)}
+    // bancos de jardim
+    for(const u of[-20,-6]){const w=W(u,-43.6),y=gH(u,-43.6);boxRF(mb,L(w),A,B,0.5,1.9,y+0.42,y+0.5,cc(120,84,52),0);boxRF(mb,L(add(w,mulv(A,-0.25))),A,B,0.08,1.9,y+0.5,y+0.95,cc(120,84,52),0);for(const e of[-0.8,0.8])boxRF(mb,L(add(w,mulv(B,e))),A,B,0.45,0.08,y,y+0.42,DK,0)}
+    // praça de táxis ao lado do edifício, com a placa
+    for(const u of[-38,-33,-28])car(W(u,-23.2),B,gH(u,-23.2)+0.12,cc(24,24,26),true);
+    {const w=W(-41.5,-21.4),y=gH(-41.5,-21.4);boxRF(mb,L(w),A,B,0.08,0.08,y,y+2.5,DK,0);plateQ(mb,L([w[0],y+2.3,w[2]]),B,1.3,0.43,ATL['gs:TÁXIS'],0,true)}
+    // carros estacionados no largo e ao longo da avenida
+    for(const u of[30,35,40])if(r()<0.8)car(W(u,-40.3),B,gH(u,-40.3)+0.12,carCol(),false);
+    for(let x=-62;x>-455;x-=11){if(r()<0.45)car(W(11.5,x),A,gH(11.5,x)+0.08,carCol(),false);if(r()<0.45)car(W(18.5,x-5),mulv(A,-1),gH(18.5,x-5)+0.08,carCol(),false)}
+    // autocarro urbano parado junto ao armazém, com o abrigo da paragem
+    {const u=31.5,x=-27.5,w=W(u,x),y=gH(u,x)+0.12,cl=L(w);
+      boxRF(mb,cl,A,B,2.5,11,y+0.35,y+3.05,cc(236,230,214),0);boxRF(mb,cl,A,B,2.53,10.3,y+1.55,y+2.6,GLS,16);boxRF(mb,cl,A,B,2.54,11.02,y+0.75,y+1.05,cc(196,70,40),0);boxRF(mb,cl,A,B,2.3,10.6,y+3.05,y+3.2,cc(210,206,196),0);
+      for(const s of[1,-1])fqN(add(w,mulv(B,s*5.52)),mulv(B,s),1.1,y+1.3,y+2.75,GLS,16);
+      for(const e of[-3.6,3.4])for(const s2 of[-1.05,1.05])cyl(mb,L(add(w,add(mulv(B,e),mulv(A,s2)))),y-0.12,y+1.0,0.5,0.5,8,cc(22,22,22),0);
+      const sh=W(31,-21.6),ys=gH(31,-21.6);boxRF(mb,L(sh),A,B,1.5,3.4,ys+2.35,ys+2.5,cc(70,78,86),0);boxRF(mb,L(add(sh,mulv(A,0.7))),A,B,0.06,3.2,ys+0.2,ys+2.35,GLS,16);
+      for(const e of[-1.6,1.6])boxRF(mb,L(add(sh,add(mulv(B,e),mulv(A,0.7)))),A,B,0.08,0.08,ys,ys+2.35,DK,0)}
+    // os prédios dos dois lados da avenida (fachadas viradas para a faixa)
+    for(const side of[-1,1]){let x=-62;while(x>-455){const w=10+r()*7;if(r()<0.1){x-=8;continue}
+      const fl=x>-150?3+Math.floor(r()*2):3+Math.floor(r()*3),d=13,uc=side<0?5.5-d/2:24.5+d/2,xc=x-w/2;
+      bld(W(uc,xc),side<0?B:mulv(B,-1),w,d,fl,gH(uc,xc),r()<0.55);x-=w+0.1}}
+    return}
+  // rua ao longo da via (troços de 40 m): passeio, faixa, passeio, casas de dois e três pisos e o muro da estação
+  const P2=(ii,x,dy)=>{const w=PI(ii,x,0);w[1]=terrH(ii,x,w[0],w[2])+dy;return L(w)};
+  for(let q=0;q<8;q++){const a=i+q,b2=a+1;if(b2>=TOTAL)break;
+    const rq=(x0,x1,dy,col,l,s)=>mb.q(P2(a,x0,dy),P2(a,x1,dy),P2(b2,x1,dy),P2(b2,x0,dy),col,l,[x0/s,(a*SEG)/s,x1/s,(b2*SEG)/s]);
+    rq(-24,-19.8,0.16,PAV,14,4);rq(-32,-24,0.07,[1,1,1],8,7);rq(-34.5,-32,0.16,PAV,14,4);
+    if(sp.wall){const w0=PI(a,-19.6,0),w1=PI(b2,-19.6,0),y=terrH(a,-19.6,w0[0],w0[2]);boxRF(mb,L(mulv(add(w0,w1),0.5)),RV(a),FV(a),0.45,SEG+0.02,y-0.3,y+1.05,cc(176,170,160),13,2,2)}}
+  let t=sp.bare?40:0;while(t<40){const w=7+r()*4;if(t+w>40.5)break;if(r()<0.12){t+=6;continue}
+    const uc=t+w/2,ii=clamp(i+Math.round(uc/SEG),0,TOTAL-1),Rr=RV(ii),Ff=FV(ii),cw=add(PI(ii,-39.5,0),mulv(Ff,uc-(ii-i)*SEG));cw[1]=0;
+    if(PN.some(q=>Math.abs(q.pos-(i*SEG+uc))<14)){t+=w;continue}
+    bld(cw,Rr,w,10,2+(r()<0.45?1:0),terrH(ii,-39.5,cw[0],cw[2]),r()<0.35);t+=w+0.05}
+  for(const uu of[8,27])if(r()<0.55){const ii=clamp(i+Math.round(uu/SEG),0,TOTAL-1),w=PI(ii,-31,0);car(w,FV(ii),terrH(ii,-31,w[0],w[2])+0.07,carCol(),false)}
+}
 function histObject3(mb,sp,i,L){
  const R=RV(i),F=FV(i),sd=Math.sign(sp.x)||1,nn=mulv(R,-sd),base=PI(i,sp.x,0);
  const c=L(base),y=terrH(i,sp.x,base[0],base[2]),stone=cc(159,154,139),dark=cc(47,48,42),roof=cc(145,85,60);
@@ -3523,6 +3628,7 @@ function obj3(mb,sp,i,L){
     if(sp.palm){const pc=add(cc2,add(mulv(R,-sd*(d/2+1)),mulv(F,w/2+1.5)));cyl(mb,pc,y,y+9,0.25,0.18,8,cc(120,100,76),0);for(let k=0;k<9;k++){const a=k/9*6.283,tip=[pc[0]+Math.cos(a)*2.8,y+8,pc[2]+Math.sin(a)*2.8];limb(mb,[pc[0],y+9,pc[2]],tip,0.55,0.06,cc(70,110,52),[0,1,0])}}break}
   case'canopy':{const y=hy[i]+0.35;boxRF(mb,c,R,F,sp.w+0.6,sp.len,y+3.3,y+3.45,cc(150,160,168),0);boxRF(mb,c,R,F,sp.w+0.64,sp.len+0.04,y+3.15,y+3.3,sp.col?cc(...sp.col):cc(60,90,140),0);
     for(let u=-sp.len/2+2;u<sp.len/2;u+=7)boxRF(mb,add(c,mulv(F,u)),R,F,0.18,0.18,y,y+3.3,sp.col?cc(...sp.col):cc(80,86,92),0);break}
+  case'gmrlargo':case'gmrrua':gmrCity(mb,sp,i,L,r,tree,ROOF);break;
   case'lnum':{const uv=atTxt('ln'+sp.n,'LINHA '+sp.n,'#1d3b74','#f4f2ea',192,64,44),dk=cc(46,50,54);
     if(sp.k==='buf'){const y=hy[i]+0.2,b=add(c,mulv(F,-(REV?-1:1)*0.9));for(const s of[-0.75,0.75])boxRF(mb,add(b,mulv(R,s)),R,F,0.09,0.09,y,y+2.55,dk,0);
       plateQ(mb,[b[0],y+2.3,b[2]],F,1.7,0.56,uv,0,true)}
@@ -4319,7 +4425,8 @@ let LAMPS=null;
 function collectLamps(){LAMPS=[];for(let i=0;i<TOTAL;i++)for(const sp of spr[i]){const b=PI(i,sp.x,0);
   if(sp.t==='lamp')LAMPS.push({i,p:[b[0],hy[i]+(sp.y||0)+6.7,b[2]],w:1.0});
   else if(sp.t==='slamp'){const g=terrH(i,sp.x,b[0],b[2]),f=faceTrack(i,sp.x);LAMPS.push({i,p:[b[0]+f[0]*1.3,g+6.0,b[2]+f[2]*1.3],w:0.9})}
-  else if(sp.t==='bldg')LAMPS.push({i,p:[b[0],hy[i]+3.0,b[2]],w:0.7})}
+  else if(sp.t==='bldg')LAMPS.push({i,p:[b[0],hy[i]+3.0,b[2]],w:0.7});
+  else if(sp.t==='gmrlargo')for(const p of gmrLampPts())LAMPS.push({i,p,w:0.9})}
   for(const pn of PN){if(pn.ung)continue;const i=Math.floor(pn.pos/SEG);for(const x of[-6,6]){const b=PI(i,x,0);LAMPS.push({i,p:[b[0],hy[i]+5,b[2]],w:0.6})}}}
 function render3D(dtR){
   lighting();
@@ -4400,10 +4507,14 @@ function buildLM(m){const G=m!=='P';const g=fr3(G?GUI.pos:SB.pos);const mb=new M
     const iA=Math.max(0,Math.floor((cp-3500)/SEG)),iB=Math.min(TOTAL-1,Math.floor((cp+3500)/SEG)),gc=fr3(cp);
     for(let n=0;n<N;n++){const ang=rr()*6.283,rad=R0+Math.sqrt(rr())*R1;const wx=gc.x+Math.cos(ang)*rad+x0,wz=gc.z+Math.sin(ang)*rad+z0,x=wx-ox,z=wz-oz;
       let bi=0,bd=1e9;for(let i=iA;i<iB;i+=4){const d=(WX[i]-wx)**2+(WZ[i]-wz)**2;if(d<bd){bd=d;bi=i}}if(bd<85*85)continue;
-      const Rv=RV(bi),o=(wx-WX[bi])*Rv[0]+(wz-WZ[bi])*Rv[2];if(skipE&&skipE(o,bi))continue;
+      const Rv=RV(bi),o=(wx-WX[bi])*Rv[0]+(wz-WZ[bi])*Rv[2];if(skipE&&skipE(o,bi,wx,wz))continue;
       const y=terrH(bi,o,wx,wz),w=8+rr()*14,d=8+rr()*10,h=rr()<tall?12+rr()*14:5+rr()*6;const R2=norm([Math.cos(ang*3),0,Math.sin(ang*3)]),F2=[-R2[2],0,R2[0]];
       boxRF(mb,[x,0,z],R2,F2,w,d,y-2,y+h,cc(...FAC[Math.floor(rr()*FAC.length)]),4,12,12,-1);hipRoof(mb,[x,0,z],R2,F2,w,d,y+h,h>11?2.2:1.8,cc(186,98,68),0.3)}};
-  if(G)town(GUI.pos,-150,-500,280,120,1300,4242,0.015,(o,bi)=>o>40&&(bi*SEG-GUI.pos)>1300);
+  if(G){const gb=fr3(GUI.bc),vx=g.x+350-gb.x,vz=g.z-1450-gb.z,V2=vx*vx+vz*vz;
+    town(GUI.pos,-150,-500,560,120,1250,4242,0.015,(o,bi,wx,wz)=>{if(o>40&&(bi*SEG-GUI.pos)>1300)return true;const u=bi*SEG-GUI.bc;
+      if(o<-20&&o>-520&&u>-35&&u<65||o<-20&&o>-75&&u>-370&&u<65)return true;
+      // corredor de vista da estação para o castelo
+      const t=((wx-gb.x)*vx+(wz-gb.z)*vz)/V2;if(t>0&&t<0.85){const dx=wx-gb.x-vx*t,dz=wz-gb.z-vz*t;if(dx*dx+dz*dz<45*45)return true}return false})}
   else{town(byNameE('Vila do Conde').pos,0,0,260,140,700,991,0.12,(o,bi)=>o<-300||(o>0&&o<110&&bi*SEG>km(26.35)&&bi*SEG<byNameE('Vila do Conde').pa));town(byNameE('Póvoa de Varzim').pos,0,0,380,140,800,993,0.5,(o,bi)=>o<-420||(o<0&&o>-112&&bi*SEG>PVG.sC-320&&bi*SEG<PVG.sC+260));town(FAM.pos,0,0,320,130,900,995,0.25,null)}
   if(m!=='T')town(SB.pos+800,0,0,G?470:700,110,1500,777,G?0.20:0.45,null);
   // Torre dos Clérigos e igreja, ~0,8 km a sul da Trindade
