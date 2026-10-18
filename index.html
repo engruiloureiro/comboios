@@ -563,6 +563,8 @@ function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v==
 let SIDE=[];
 const trackX=p=>{if(S&&S.divC){const v=jcOff(p);if(v!==null)return v}if(S&&S.pvT&&PVG&&p>PVG.tracks[0].s0&&p<PVG.sC+260){const T=PVG.tracks[0];return p<=PVG.sC?T.n*sstep((p-T.s0)/T.l):T.n}if(S&&S.divJ&&p>JSW)return XTR[0].f(p);if(S&&S.divH&&p>JSH)return jshOff(p);for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
+// a Avenida de França é o único apeadeiro com chefe de estação
+const hasChefe=s=>s.ty!=='ap'||s.n==='Avenida de França';
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=RPO?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0}].concat(VZT?[VZT]:[],[{a:km(0.32),b:km(0.78),tc:0}]);
 const BRIDGESP=[{a:km(6.933),b:km(6.972),t:3,n:'Ponte sobre o rio Leça'},{a:km(26.221),b:km(26.324),t:2,n:'Ponte de ferro sobre o rio Ave (Vila do Conde)'},{a:km(57.45),b:km(57.489),t:3,n:'Ponte sobre o rio Este'}],BRIDGESG=[{a:kR(10.3),b:kR(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:kR(26.9),b:kR(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:kR(31.6),b:kR(31.64),t:1,n:'Passagem sobre a estrada'},{a:kR(37.935),b:kR(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:kR(49.4),b:kR(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'},{a:GUI.pb+149.5,b:GUI.pb+159.5,t:1,green:true,rd:true,n:'Pontão de ferro sobre a estrada, à saída de Guimarães'}];
@@ -1621,7 +1623,7 @@ function step(dt,dr){
 
   // 1 minuto antes da partida, nas estações principais: "Vai partir da linha número 1 o comboio com destino a …"
   if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
-  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
+  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(hasChefe(S.atSt)){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
   if(S.trip0==null&&S.v>0.3)S.trip0=S.clock;
   if(S.hornSeq){const el=(performance.now()-S.hornSeq)/1000;if(el>=1.5||paused){S.hornSeq=0;S.horn=false;hb.classList.remove('down')}else{S.horn=true;S.hornK=el<0.5?'horn_lo':'horn_hi'}}
   // o maquinista buzina antes de arrancar (depois de fechar as portas)
@@ -4294,7 +4296,7 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
      }
    }SMESH=upload(sm,gl.DYNAMIC_DRAW,SMESH);
   }
-  for(const s of STN){if(s.ty==='ap'||Math.abs(s.pos-centerP)>500)continue;const stp=REV?s.stopR-9:s.stopF+9,i=Math.floor(stp/SEG),r=s.pl[0],sd=Math.sign(r[0]);
+  for(const s of STN){if(!hasChefe(s)||Math.abs(s.pos-centerP)>500)continue;const stp=REV?s.stopR-9:s.stopF+9,i=Math.floor(stp/SEG),r=s.pl[0],sd=Math.sign(r[0]);
     const pvt=s===PVA&&r[0]<-9,w=pvt?wp(stp,r[0]+sd*1.5,s.ph):PI(i,r[0]+sd*1.5,s.ph),Rv=pvt?[PVG.r[0],0,PVG.r[1]]:RV(i),Fv=pvt?[PVG.u[0],0,PVG.u[1]]:FV(i);const face=mulv(Rv,-sd),look=mulv(Fv,REV?-1:1);const fw=norm(add(mulv(face,0.8),mulv(look,0.6)));
     const at=S.atSt===s&&S.whT0?(performance.now()-S.whT0)/1000:-1;chefe(mb,[w[0]-eye[0],w[1],w[2]-eye[2]],fw,at)}
   for(const pn of PN){if(VINT)break;if(pn.ung||Math.abs(pn.pos-centerP)>900)continue;const blink=(t*2|0)%2;const i=Math.floor(pn.pos/SEG)-1;
