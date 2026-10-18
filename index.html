@@ -1598,8 +1598,8 @@ function step(dt,dr){
   const inDiv=SIDE.some(e=>S.pos>e.a&&S.pos<e.b);const lim=S.back||inDiv?Math.min(30,limitAt(S.pos)):limitAt(S.pos);S.limNow=lim;
   for(const X of STN)if(X.divert&&!X.divAnn&&ahead(X)<1200&&ahead(X)>0){X.divAnn=true;toast('Cruzamento em '+X.n+': entrada pela via desviada, a 30 km/h nas agulhas.','')}S.over=false;
   S.derT=S.derT||0;if(kmh>lim+18){S.derT+=dt;if(S.derT>2.5){gameOver('A automotora descarrilou: entrou numa curva a '+Math.round(kmh)+' km/h com limite de '+lim+'.');return}}else S.derT=Math.max(0,S.derT-dt);
-  // tolerância de 5 % sobre o limite, sem penalização
-  if(kmh>lim*1.05+0.5){S.over=true;S.sc.pen+=2*dt}
+  // tolerância de 10 % sobre o limite, sem penalização
+  if(kmh>lim*1.10+0.5){S.over=true;S.sc.pen+=2*dt}
   if(S.notch===0&&kmh>20&&!S.emUsed){S.emUsed=true;penal(20,'Travagem de emergência')}
   if(S.notch!==0)S.emUsed=false;
 
