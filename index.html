@@ -162,6 +162,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <div class="row"><span>Limite <b id="dLim">--</b></span><span id="dNextLim"></span></div>
       <div class="row"><span id="dSig">Sinal —</span><span id="dDelay">Pontual</span></div>
       <div class="row"><span id="dMsg"></span><span><b id="dScore">0</b> pts</span></div>
+      <div class="row"><span>Tempo de viagem <b id="dTrip">--:--</b></span><span></span></div>
     </div>
     <div id="lever" aria-label="Manípulo de tração e travão" role="slider" tabindex="0"><div id="notches"></div><div id="handle"></div></div>
     <div id="btns">
@@ -1620,6 +1621,7 @@ function step(dt,dr){
   // 1 minuto antes da partida, nas estações principais: "Vai partir da linha número 1 o comboio com destino a …"
   if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
   if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
+  if(S.trip0==null&&S.v>0.3)S.trip0=S.clock;
   // o maquinista buzina antes de arrancar (depois de fechar as portas)
   if(S.atSt&&!S.departed&&!S.doors&&S.horn)S.depHorn=true;
   // partida
@@ -2265,6 +2267,7 @@ function hud(dtR){
   else if(ns){const d=ahead(ns);$('#dNext').textContent=short(ns.n);
     $('#dDist').textContent=d>=1000?(d/1000).toFixed(1).replace('.',',')+' km':d>-100?(d<300?d.toFixed(0):Math.round(d/10)*10)+' m':'—';$('#dArr').textContent=fHM(ns.dep)}
   $('#dClock').textContent=fHMS(S.clock);
+  {const t=S.trip0==null?null:Math.max(0,Math.floor(S.clock-S.trip0));$('#dTrip').textContent=t===null?'--:--':(t>=3600?Math.floor(t/3600)+':':'')+String(Math.floor(t/60)%60).padStart(t>=3600?2:1,'0')+':'+String(t%60).padStart(2,'0')}
   $('#dLim').textContent=lim;
   const nl=REV?nextLimitR(S.pos):nextLimit(S.pos);$('#dNextLim').innerHTML=nl?'<b>'+nl.v+'</b> em '+(Math.round(nl.d/10)*10)+' m':'';
   {const pn=REV?PN.slice().reverse().find(q=>q.pos<S.pos):PN.find(q=>q.pos>S.pos),pd=pn?Math.abs(pn.pos-S.pos):1e9;$('#dSig').innerHTML=pd<1500?(pd<450&&!pn.honk?'<b style="color:#9a2a10">PN '+Math.round(pd)+' m, buzinar!</b>':'PN a <b>'+Math.round(pd)+' m</b>'):'Via livre'}
@@ -4674,7 +4677,7 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 document.querySelectorAll('#uniSel button').forEach(b=>b.onclick=()=>{UNITS=+b.dataset.u;document.querySelectorAll('#uniSel button').forEach(q=>q.classList.toggle('on',q===b));setStops(UNITS===2?4:2);if(!$('#ovCustom').hidden)custRender()});
 function saveObj(){return{v:1,line:LINE,free:!!S.free,via:S.via||null,viaEnd:S.viaEnd||null,swJ:!!S.swJ,swH:!!S.swH,swC:!!S.swC,ns:STN.length,ncar:S.ncar,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
-    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
+    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,trip0:S.trip0,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
     onboard:ONBOARD.map(p=>({...p,c:p.c.slice()})),paxTaken:STN.map(s=>({taken:(s.pax3||[]).map(p=>!!p.in),alighted:!!s.alightDone})),
     st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])}}
 function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
