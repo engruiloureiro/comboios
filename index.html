@@ -225,7 +225,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <li>Não há CONVEL: respeite os limites. Entrar numa curva muito acima do limite faz descarrilar.</li>
       <li>Nas estações, espere o apito do <b>chefe</b> para partir. Nos apeadeiros, parta à hora.</li>
       <li>Buzine antes de cada <b>passagem de nível</b> (o painel mostra a distância). Carregue em <b>Homem-morto</b> quando piscar.</li>
-      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: 8 acelerar, 2 travar, 9 homem-morto, 7, 4 e 1 buzinas (aguda, média e grave), E portas, P pausa, R inversor, Z agulha, T tempo acelerado.</li>
+      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: 8 acelerar, 2 travar, 9 homem-morto, buzinas: 7 aguda, 3 média, 1 grave e 4 dois tons (grave e aguda), E portas, P pausa, R inversor, Z agulha, T tempo acelerado.</li>
       <li><b>Cruzamentos</b>: na via única as automotoras cruzam-se nas estações. Se a contrária ainda não chegou, o chefe não dá a partida: espere. Partir antes é falta grave e pode acabar em colisão.</li>
       <li><b>Marcha atrás</b> (botão Marcha ou R): com a automotora parada e o manípulo em 0 ou travão, mude o inversor para recuar, por exemplo depois de passar a placa de paragem. Em marcha atrás o limite é 30 km/h.</li>
     </ul>
@@ -1540,7 +1540,8 @@ function audioUpdate(dtR){
   if(S.horn&&!S.hornT0)S.hornT0=performance.now();if(!S.horn)S.hornT0=0;const hd=S.hornT0?(performance.now()-S.hornT0)/1000:0;
   if(hd>0&&hd<0.12)for(const[o,f0]of A.hO)o.frequency.setTargetAtTime(f0*(0.965+hd*0.3),t,.02);else if(hd>=0.12)for(const[o,f0]of A.hO)o.frequency.setTargetAtTime(f0,t,.03);
   if(A.hornB){A.hH.gain.value=0;A.hL.gain.value=0;
-    if(S.horn&&on&&!A.hs){const s=AC.createBufferSource();s.buffer=A.cp?A.cp[S.hornK||'horn_hi']:A.hornB;s.loop=true;if(A.cpOK){s.loopStart=S.hornK==='horn'?1.2:0.25;s.loopEnd=s.buffer.duration-0.05}else{s.loopStart=0.7;s.loopEnd=1.7}const g=AC.createGain();g.gain.value=0.75;s.connect(g);g.connect(A.bus);g.connect(A.rev);s.start();A.hs=[s,g]}
+    if(S.horn&&on&&!A.hs){const s=AC.createBufferSource();s.buffer=A.cp?A.cp[S.hornK||'horn_hi']:A.hornB;s.loop=true;if(A.cpOK){s.loopStart=S.hornK==='horn'?1.2:0.25;s.loopEnd=s.buffer.duration-0.05}else{s.loopStart=0.7;s.loopEnd=1.7}const g=AC.createGain();g.gain.value=0.75;s.connect(g);g.connect(A.bus);g.connect(A.rev);s.start();A.hs=[s,g];A.hsK=S.hornK}
+    if(A.hs&&S.horn&&on&&A.hsK!==S.hornK){const[s,g]=A.hs;g.gain.setTargetAtTime(0,t,0.015);s.stop(t+0.08);A.hs=null}
     if(A.hs&&(!S.horn||!on)){const[s,g]=A.hs;g.gain.setTargetAtTime(0,t,0.05);s.stop(t+0.4);A.hs=null}}
   else A.hg.gain.setTargetAtTime(S.horn&&on?0.13:0,t,hd<0.1?0.04:0.03);A.hH.gain.setTargetAtTime(hd<0.9?1:0,t,.02);A.hL.gain.setTargetAtTime(hd>=0.9?0.8:0,t,.02);
   if(A.cpOK)cpAudioUpd(dtA,on,inside);
@@ -1622,6 +1623,7 @@ function step(dt,dr){
   if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
   if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
   if(S.trip0==null&&S.v>0.3)S.trip0=S.clock;
+  if(S.hornSeq){const el=(performance.now()-S.hornSeq)/1000;if(el>=2||paused){S.hornSeq=0;S.horn=false;hb.classList.remove('down')}else{S.horn=true;S.hornK=el<1?'horn_lo':'horn_hi'}}
   // o maquinista buzina antes de arrancar (depois de fechar as portas)
   if(S.atSt&&!S.departed&&!S.doors&&S.horn)S.depHorn=true;
   // partida
@@ -4844,7 +4846,7 @@ $('#bVig').onclick=()=>{if(!running)return;if(S.vigOn)beep(990,.08,.08);S.vigOn=
 $('#bWarp').onclick=()=>{if(!S)return;S.warp=S.warp===1?2:S.warp===2?4:S.warp===4?8:1;$('#bWarp').textContent='Tempo ×'+S.warp};
 const hb=$('#bHorn');
 const hornOn=(e,k)=>{if(e)e.preventDefault();if(S&&running){S.hornK=k||'horn_hi';S.horn=true;hb.classList.add('down')}};
-const hornOff=()=>{if(S)S.horn=false;hb.classList.remove('down')};
+const hornOff=()=>{if(S){S.horn=false;S.hornSeq=0}hb.classList.remove('down')};
 hb.addEventListener('pointerdown',hornOn);['pointerup','pointerleave','pointercancel'].forEach(ev=>hb.addEventListener(ev,hornOff));
 $('#bMute').onclick=()=>{muted=!muted;$('#bMute').textContent=muted?'🔇':'🔊';if(muted&&'speechSynthesis' in window)speechSynthesis.cancel();audioInit()};
 function setPause(p){if(!running&&p)return;paused=p;$('#ovPause').hidden=!p;if(p&&S)S.horn=false}
@@ -4854,8 +4856,8 @@ const numKey=e=>{const m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code||'');return m?m
 document.addEventListener('keydown',e=>{if(!S)return;const n=numKey(e);const k=n?'#'+n:e.key.toLowerCase();
   if(k==='arrowup'||k==='#8'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='#2'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#4')hornOn(e,'horn');else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
-document.addEventListener('keyup',e=>{const n=numKey(e);if(n==='7'||n==='4'||n==='1'||e.key===' ')hornOff()});
+  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#3')hornOn(e,'horn');else if(k==='#4'){e.preventDefault();if(S&&running&&!S.hornSeq){S.hornSeq=performance.now();S.hornK='horn_lo';S.horn=true;hb.classList.add('down')}}else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
+document.addEventListener('keyup',e=>{const n=numKey(e);if(n==='7'||n==='3'||n==='1'||e.key===' ')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);
 reset(0,6,false);resize();
