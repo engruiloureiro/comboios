@@ -39,6 +39,17 @@ canvas{display:block;width:100%;height:100%}
 .dot.done{background:#b8231c}
 .dot.miss{background:#222;border-color:#222}
 .dot.pass{width:4px;height:4px;top:7px;margin-left:-2px;border-width:0;background:#fff}
+#route{position:absolute;left:14px;top:46px;width:230px;pointer-events:none;font-family:'Barlow Condensed','Arial Narrow',Arial,sans-serif;background:rgba(255,255,255,.88);border-radius:10px;padding:8px 10px 8px 8px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#route .rl{position:relative;margin-left:10px}
+#route .bar{position:absolute;left:0;top:10px;bottom:10px;width:14px;background:#e3312d;border-radius:7px}
+#route .bar.past{background:#b9b4b0}
+#route .st{position:relative;height:30px;display:flex;align-items:center;padding-left:24px;font-size:18px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#route .st::before{content:'';position:absolute;left:3px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+#route .st.done{color:#8c8783}#route .st.miss{color:#8c8783;text-decoration:line-through}#route .st.end{font-weight:700}
+#route .st.now{font-weight:700;color:#1a1a1a}
+#route .tr{position:absolute;left:-5px;width:24px;height:12px;margin-top:-6px;background:#ffd24a;border:2px solid #1a1a1a;border-radius:3px;transition:top .3s linear}
+#route .hd{font-size:13px;color:#555;margin:0 0 4px 2px;letter-spacing:.04em;text-transform:uppercase}
+@media (max-width:700px){#route{width:170px;transform:scale(.8);transform-origin:top left}}
 #me{position:absolute;top:-2px;width:0;height:0;margin-left:-7px;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #ffd24a}
 .tr{position:absolute;top:8px;right:12px;display:flex;gap:6px}
 .ico{width:34px;height:30px;border:0;border-radius:7px;background:rgba(20,24,28,.65);color:#fff;font:600 14px/1 inherit;cursor:pointer}
@@ -139,6 +150,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <canvas id="cv"></canvas>
     <div id="strip"><div class="line"></div><div id="dots"></div><div id="me"></div></div>
     <div class="tr"><button class="ico" id="bCam" aria-label="Mudar de vista">🎥</button><button class="ico" id="bQS" aria-label="Guardar o jogo">💾</button><button class="ico" id="bMute" aria-label="Ligar ou desligar som">🔊</button><button class="ico" id="bPause" aria-label="Pausa">❚❚</button></div>
+    <div id="route" aria-hidden="true"><div class="hd" id="routeHd"></div><div class="rl"><div class="bar past" id="routePast"></div><div class="bar" id="routeBar"></div><div id="routeSt"></div><div class="tr" id="routeTr"></div></div></div>
     <div id="toast" role="status" aria-live="polite"></div>
     <div id="card" class="azulejo" hidden><span id="cardName"></span><small id="cardSub"></small></div>
   </div>
@@ -212,7 +224,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <li>Não há CONVEL: respeite os limites. Entrar numa curva muito acima do limite faz descarrilar.</li>
       <li>Nas estações, espere o apito do <b>chefe</b> para partir. Nos apeadeiros, parta à hora.</li>
       <li>Buzine antes de cada <b>passagem de nível</b> (o painel mostra a distância). Carregue em <b>Homem-morto</b> quando piscar.</li>
-      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: 8 acelerar, 2 travar, A areeiro (manter premida quando as rodas patinam), 9 homem-morto, 7, 4 e 1 buzinas (aguda, média e grave), E portas, P pausa, R inversor, Z agulha, T tempo acelerado.</li>
+      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: 8 acelerar, 2 travar, 9 homem-morto, 7, 4 e 1 buzinas (aguda, média e grave), E portas, P pausa, R inversor, Z agulha, T tempo acelerado.</li>
       <li><b>Cruzamentos</b>: na via única as automotoras cruzam-se nas estações. Se a contrária ainda não chegou, o chefe não dá a partida: espere. Partir antes é falta grave e pode acabar em colisão.</li>
       <li><b>Marcha atrás</b> (botão Marcha ou R): com a automotora parada e o manípulo em 0 ou travão, mude o inversor para recuar, por exemplo depois de passar a placa de paragem. Em marcha atrás o limite é 30 km/h.</li>
     </ul>
@@ -1561,18 +1573,6 @@ function step(dt,dr){
   const bd=S.emerg||S.notch===0?CPD.bcpE:S.notch<6?(6-S.notch)/5*CPD.bcpS:(S.doors?CPD.bcpS*0.5:0);
   S.bcp=S.bcp||0;const bcp0=S.bcp;S.bcp+=clamp(bd-S.bcp,-CPD.rel*dt,(S.emerg||S.notch===0?CPD.appE:CPD.app)*dt);S.bcpUp=S.bcp>bcp0+1e-4;
   let Fb=(S.bcp/CPD.bcpS)*CPD.bMax*Mv*9.81;
-  // aderência roda-carril: carril seco de dia, húmido de manhã cedo e à noite, manchas de folhas e humidade no campo;
-  // o areeiro (tecla A) ajuda. Tração a mais faz patinar; travão a mais bloqueia as rodas (perde-se força e ficam calos)
-  {const hr=((S.clock/3600)%24+24)%24,i=clamp(Math.floor(S.pos/SEG),0,TOTAL-1),blk=Math.floor(S.pos/150);
-   let mu=tun[i]?0.33:(hr<9||hr>=20?0.24:0.33);if(!tun[i]&&/rural|valley|mixed|penha/.test(zoneI[i])&&hash(blk*7+LINE.length)<0.07)mu*=0.5;
-   S.sand=S.sand===undefined?120:S.sand;if(S.sandOn&&S.sand>0&&S.v>0.05||S.sandOn&&S.sand>0&&Ft>0){mu+=0.1;S.sand=Math.max(0,S.sand-dt)}
-   S.mu=mu;const Fadh=mu*nMot*CPD.m*0.5*9.81;
-   if(Ft>Fadh&&!S.doors){Ft=Fadh*0.8;S.slipT=(S.slipT||0)+dt;if(!S.slipW){S.slipW=true;toast('Patinagem! Alivie o manípulo'+(S.sand>0?' ou deite areia (tecla A).':'.'),'bad')}
-     if(S.slipT>4&&!S.slipP){S.slipP=true;penal(5,'Patinagem prolongada')}}else{S.slipT=0;if(Ft<Fadh*0.7){S.slipW=false;S.slipP=false}}
-   const Fbl=mu*Mv*9.81*0.9;
-   if(Fb>Fbl&&S.v>1){Fb=Fbl*0.85;S.slideT=(S.slideT||0)+dt;if(!S.slideW){S.slideW=true;toast('Rodas bloqueadas na travagem! Alivie o travão.','bad')}
-     if(S.slideT>2&&!S.slideP){S.slideP=true;penal(15,'Rodas com calos (travagem bloqueada)')}}else{S.slideT=0;if(Fb<Fbl*0.7){S.slideW=false;S.slideP=false}}
-   S.slip=S.slipT>0;S.slide=S.slideT>0}
   const Fr=Mv*9.81*CPD.crr+0.5*1.225*CPD.cda*S.v*S.v;
   const mv=(REV?-1:1)*(S.back?-1:1);const g=9.81*gradeAt(S.pos)*mv;
   let a;
@@ -1618,9 +1618,12 @@ function step(dt,dr){
 
   // 1 minuto antes da partida, nas estações principais: "Vai partir da linha número 1 o comboio com destino a …"
   if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
-  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: partida!','good')}else toast('Pode seguir.','')}
+  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(S.atSt.ty!=='ap'){whistle();toast('O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
+  // o maquinista buzina antes de arrancar (depois de fechar as portas)
+  if(S.atSt&&!S.departed&&!S.doors&&S.horn)S.depHorn=true;
   // partida
   if(S.atSt&&!S.departed&&S.v>0.3&&!S.back){S.departed=true;const st=S.atSt,d=S.clock-st.dep;S.depSt=st;S.depOK=!!S.whistled&&!crossPending(st);
+    if(!S.depHorn)penal(25,'Faltou buzinar antes de partir de '+st.n);
     if(crossPending(st)){emergency('Partida sem cruzamento em '+st.n);penal(200)}
     // depois do apito do chefe (ou do 'pode seguir') a partida nunca é antecipada
     if(d<-3&&!S.whistled){penal(30,'Partida antecipada de '+st.n);S.delay=d}
@@ -1737,13 +1740,13 @@ function doorBtn(){
     return;
   }
   if(S.v>0.05){toast('Pare o comboio antes de abrir as portas.','');return}
-  const near=STN.find(s=>ahead(s)<=15&&ahead(s)>=-20);
+  const near=STN.find(s=>ahead(s)<=15&&ahead(s)>=-20.5);
   if(near&&near.dep===null){toast('Este comboio não tem paragem em '+near.n+'.','');return}
-  const s=STOPS.find(s=>!s.served&&ahead(s)<=15&&ahead(s)>=-20);
+  const s=STOPS.find(s=>!s.served&&ahead(s)<=15&&ahead(s)>=-20.5);
   if(!s){toast(S.atSt?'Embarque já feito. Feche as portas e siga.':'Não está junto à placa de paragem de uma plataforma.','');return}
-  const err=-ahead(s),acc=Math.max(0,Math.round(100-Math.abs(err)*6));
-  s.served=true;S.atSt=s;S.departed=false;S.doors=true;S.dwell=15;S.dwX=0;S.whistled=false;S.sc.acc+=acc;doorOpenSnd();
-  let sub=(Math.abs(err)<1?'Paragem perfeita':'Paragem a '+Math.abs(err).toFixed(1).replace('.',',')+' m '+(err<0?'antes':'depois')+' da placa');
+  const err=-ahead(s),ae=Math.abs(err),acc=ae<1?100:Math.max(10,Math.round(100-(ae-1)*(err>0?4.2:5.5)));
+  s.served=true;S.atSt=s;S.departed=false;S.doors=true;S.dwell=15;S.dwX=0;S.whistled=false;S.depHorn=false;S.sc.acc+=acc;doorOpenSnd();
+  let sub=(Math.abs(err)<1?'Paragem perfeita':'Paragem a '+Math.abs(err).toFixed(1).replace('.',',')+' m '+(err<0?'antes':'depois')+' da placa'+(Math.abs(err)>8?' (menos pontos)':''));
   if(s===S.endSt){const d=S.clock-s.dep,pts=Math.round(Math.abs(d)<=60?100:Math.max(0,100-(Math.abs(d)-60)/2));S.sc.pun+=pts;S.delay=d;sub+='  |  chegada '+(Math.abs(d)<31?'à hora':fDelay(d))}
   else sub+='  |  parte às '+fHM(s.dep);
   $('#cardName').textContent=s.n;$('#cardSub').textContent=sub;$('#card').hidden=false;
@@ -2230,7 +2233,21 @@ function setNotch(i,silent){if(!S)return;i=clamp(i,0,11);
 function leverFromY(y){const r=lever.getBoundingClientRect(),pad=12;const t=clamp((y-r.top-pad)/(r.height-pad*2),0,1);setNotch(11-Math.round(t*11))}
 lever.addEventListener('pointerdown',e=>{lever.setPointerCapture(e.pointerId);leverFromY(e.clientY)});
 lever.addEventListener('pointermove',e=>{if(lever.hasPointerCapture(e.pointerId))leverFromY(e.clientY)});
-function buildStrip(){const el=$('#dots');el.innerHTML='';const a=SB.pos,Ln=END-a;
+// percurso na lateral: a paragem anterior, a próxima e as seguintes, com a automotora entre elas
+const RT_N=6,RT_H=30;let rtFirst=-1;
+function updRoute(force){const el=$('#routeSt');if(!el||!S||!STOPS.length)return;
+  const dirp=s=>REV?-s.pos:s.pos,me=REV?-S.pos:S.pos;let k=STOPS.findIndex(s=>!s.served);if(k<0)k=STOPS.length-1;
+  const nx=STOPS[k],pv=STOPS[k-1];let first=Math.max(0,Math.min(k-1,STOPS.length-RT_N));
+  if(force||first!==rtFirst){rtFirst=first;el.innerHTML='';for(let q=first;q<Math.min(STOPS.length,first+RT_N);q++){const s=STOPS[q],d=document.createElement('div');
+      d.className='st'+(s.skipped?' miss':s.served?' done':'')+(q===STOPS.length-1?' end':'');d.textContent=s.n;el.appendChild(d)}
+    $('#routeHd').textContent=(S.free?'Marcha':'Comboio')+' para '+S.endSt.n}
+  const rows=el.children;for(let q=0;q<rows.length;q++){const s=STOPS[first+q];rows[q].classList.toggle('done',!!s.served&&!s.skipped);rows[q].classList.toggle('now',S.atSt===s)}
+  // posição: 0 no centro da primeira linha; entre duas paragens, proporcional à distância
+  let y;if(S.atSt&&STOPS.indexOf(S.atSt)>=0)y=STOPS.indexOf(S.atSt)-first;
+  else if(!pv)y=k-first-clamp((dirp(nx)-me)/400,0,0.6);else{const f=clamp((me-dirp(pv))/((dirp(nx)-dirp(pv))||1),0,1);y=k-1-first+f}
+  y=clamp(y,-0.4,rows.length-0.6);const px=RT_H/2+y*RT_H;$('#routeTr').style.top=px+'px';
+  $('#routePast').style.height=Math.max(0,px-10)+'px';$('#routeBar').style.top=Math.max(10,px)+'px'}
+function buildStrip(){updRoute(true);const el=$('#dots');el.innerHTML='';const a=SB.pos,Ln=END-a;
   for(const s of STN){const d=document.createElement('div');d.className='dot'+(s.dep===null?' pass':s.skipped?' miss':s.served?' done':'');d.style.left=((s.pos-a)/Ln*100)+'%';d.title=s.n;el.appendChild(d)}}
 let hudT=0;
 function hud(dtR){
@@ -2238,7 +2255,7 @@ function hud(dtR){
   const lim=S.limNow||limitAt(S.pos);limG.setAttribute('transform','rotate('+ang(lim)+' 60 60)');
   $('#me').style.borderTopColor=REV?'#7fd3ff':'#ffd24a';$('#me').style.left=(clamp((S.pos-SB.pos)/(END-SB.pos),0,1)*100)+'%';
   if(toastT>0){toastT-=dtR;if(toastT<=0)$('#toast').classList.remove('show')}
-  hudT-=dtR;if(hudT>0)return;hudT=0.12;
+  hudT-=dtR;if(hudT>0)return;hudT=0.12;updRoute(false);
   dSpd.textContent=Math.round(S.v*3.6);
   const ns=nextStop();
   const short=n=>n.replace('Águas Santas - Palmilheira','Águas Santas').replace('Porto ','');
@@ -2259,11 +2276,11 @@ function hud(dtR){
   else if(S.vigOn)st='Confirme vigilância: '+Math.ceil(S.vigLeft)+' s';
   else if(S.over)st='Excesso de velocidade';
   else if(S.doors&&S.notch>6)st='Tração cortada: portas abertas';
-  else if(ns&&!S.doors&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20)st='Na plataforma: abra as portas';
+  else if(ns&&!S.doors&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20.5)st='Na plataforma: abra as portas';
   else if(S.atSt&&!S.departed&&!S.doors&&crossPending(S.atSt))st='Aguarde o cruzamento com a automotora contrária';
   else if(S.atSt&&!S.departed&&!S.doors)st=S.clock>=S.atSt.dep-20?'Sinal aberto: pode partir':'Aguarde a hora de partida';
   $('#dMsg').textContent=st;
-  const bd=$('#bDoor'),canOpen=ns&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20&&!S.doors;
+  const bd=$('#bDoor'),canOpen=ns&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20.5&&!S.doors;
   bd.textContent=S.doors?'Fechar portas':'Abrir portas';bd.className='btn'+(canOpen||(S.doors&&S.dwell<=0)?' go':'');
   $('#bVig').className='btn'+(S.vigOn?' warn':'');
 }
@@ -4831,8 +4848,8 @@ const numKey=e=>{const m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code||'');return m?m
 document.addEventListener('keydown',e=>{if(!S)return;const n=numKey(e);const k=n?'#'+n:e.key.toLowerCase();
   if(k==='arrowup'||k==='#8'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='#2'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='a'){if(S.sand>0){if(!S.sandOn)toast('Areeiro: a deitar areia nos carris ('+Math.ceil(S.sand)+' s de areia).','');S.sandOn=true}else toast('O areeiro está vazio.','bad')}else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#4')hornOn(e,'horn');else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
-document.addEventListener('keyup',e=>{if(e.key&&e.key.toLowerCase()==='a'&&S)S.sandOn=false;const n=numKey(e);if(n==='7'||n==='4'||n==='1'||e.key===' ')hornOff()});
+  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#4')hornOn(e,'horn');else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
+document.addEventListener('keyup',e=>{const n=numKey(e);if(n==='7'||n==='4'||n==='1'||e.key===' ')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);
 reset(0,6,false);resize();
