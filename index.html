@@ -1320,8 +1320,11 @@ function reset(startIdx,endIdx,rev,svc){
      // só circulam automotoras UDD 9600 (locomotivas e vagões ficam apenas estacionados)
      const fr=false,cons=null,e=X.ex[0],len=cons?cons.reduce((s,q)=>s+q.len+0.6,0):rnd()<0.75?TLEN(2):TLEN(4),stopA=X===PV?(REV?e.b-65-len:e.a+65):REV?X.pos-8-len:X.pa+6,arrT=X.dep-150+Math.round(rnd()*330);
      // nem sempre a nossa automotora fica na via principal: às vezes é ela que entra na via desviada
-     const busy=PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a),weDiv=!busy&&X!==PV&&rnd()<0.45;if(weDiv){SIDE.push(e);X.divert=true}
-     TRAINS.push({cross:X,e,stopA,arrT,len,cons,o:0,c:fr?'loco':'u',v:0,vmax:fr?9+rnd()*3:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:weDiv?(p=>p<LOU.pos?(REV?0:4):0):(p=>p<LOU.pos?(REV?0:4):(exOff(e,p)??0))})}}
+     const busy=PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a),weDiv=!busy&&X!==PV&&rnd()<0.5;if(weDiv){SIDE.push(e);X.divert=true}
+     TRAINS.push({cross:X,e,stopA,arrT,len,cons,o:0,c:fr?'loco':'u',v:0,vmax:fr?9+rnd()*3:12+rnd()*4,lit:true,mov:false,st:'app',dir,xo:weDiv?(p=>p<LOU.pos?(REV?0:4):0):(p=>p<LOU.pos?(REV?0:4):(exOff(e,p)??0))})}
+   // se nenhum cruzamento calhou na via desviada, muitas vezes é a nossa automotora que entra num deles (ao acaso)
+   const cx=TRAINS.filter(t=>t.cross&&t.cross!==PV&&!PARKED.some(q=>q.o===t.e.to&&q.a<t.e.b&&q.a+q.len>t.e.a));
+   if(cx.length&&!SIDE.length&&rnd()<0.65){const t=cx[Math.floor(rnd()*cx.length)],X=t.cross,e=t.e;SIDE.push(e);X.divert=true;t.xo=p=>p<LOU.pos?(REV?0:4):0}}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   buildStrip();
 }
