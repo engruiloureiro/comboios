@@ -711,6 +711,7 @@ function sigState(g){if(g.k==='ent')return g.st.divert?'Y':'G';
 function minho(n){const c=[{m:'bloco',len:13.4,ht:[1,0],bog:[2.6,10.8],bm:'bbog'}];for(let k=0;k<n;k++)c.push({m:'sfm',len:23.5,bog:[3.2,20.3],bm:'bbog'});return c}
 function paxTrain(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'coach',len:16.5,bog:[2.4,14.1]});return c}
 function freight(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'wag',len:8.2});return c}
+let LOCAT=()=>null;
 const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:-12,a:PVG.sC+60,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-5.5,a:BUFFER_R+9,len:TLEN(2),c:'u',lit:false},{o:9,a:BUFFER_R+6,len:TLEN(2),c:'u',lit:false},{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}].concat(LSD?[{o:4,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}]:[],GP?[{o:4,a:PV.pos+60,len:TLEN(2),c:'u',lit:true},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:13.3,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)}]:[]):[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:4,a:PV.pos+60,len:TLEN(2),c:'u',lit:true},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-5.5,a:BUFFER_R+9,len:TLEN(2),c:'u',lit:false},{o:9,a:BUFFER_R+6,len:TLEN(2),c:'u',lit:false},{o:12.5,a:SB.pa+4,len:TLEN(2),c:'u',lit:false},{o:12.5,a:SB.pa+50,len:TLEN(2),c:'u',lit:false},{o:13.3,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:TLEN(2),c:'u',lit:false},{o:-27,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
@@ -816,7 +817,7 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     [24.4,27.2,'trofa'],[27.2,31.2,'lousado'],[31.2,34.4,'agri'],[34.4,36.8,'tirso'],[36.8,40.6,'ave'],[40.6,43.4,'aves'],
     [43.4,52.4,'lordelo'],[52.4,54.4,'vizela'],[54.4,57.6,'gmrsub'],[G0+8.3,G0+18,'serra'],[G0+18,999,'fafe']];
   const LOCS=GP?cutK(LOCSP,LOCSG):RP?LOCSP:LOCSG;
-  const locAt=p=>{const k=(p-OFF)/1000;for(const q of LOCS)if(k>=q[0]&&k<q[1])return q[2];return null};
+  const locAt=p=>{const k=(p-OFF)/1000;for(const q of LOCS)if(k>=q[0]&&k<q[1])return q[2];return null};LOCAT=locAt;
   const LW={custoias:[['emig',30],['ware',18],['row',20],['garden',12],['corn',12],['capela',3]],coast:[['woods',38],['corn',22],['minho',10],['emig',16],['capela',4],['ramada',6]],
     vconde:[['row',42],['apt',14],['garden',14],['emig',16],['church',4]],povoa:[['apt',42],['row',30],['garden',12],['emig',12]],famalicao:[['row',28],['factory',18],['emig',24],['apt',12],['garden',10]],
     trindade:[['row',90],['church',4],['garden',6]],boavista:[['apt',30],['row',34],['garden',20],['ware',8],['church',3]],
@@ -1087,12 +1088,13 @@ const HIST_AUDIT={version:'2026-10-10',removed:0,added:0};
        const depth=24+hr(s+13)*20,x=sd*(e+depth/2+3),kind=hr(s+17)<.32?'prado':hr(s+17)<.76?'lav':'milho';
        put(p,{t:'campo',x,w:72,d:depth,k:kind});
        put(p,{t:'hboundary',x:sd*(e+2),len:70,h:.72+hr(s+19)*.35,hedge:hr(s+21)<.40});
-       if(hr(s+23)<.34)put(p+21,{t:'ramada',x:sd*(e+depth+6),len:20,s});
+       if(hr(s+23)<.5)put(p+21,{t:'ramada',x:sd*(e+depth+6),len:20,s});
        if(hr(s+25)<.10)put(p-18,{t:'espig',x:sd*(e+depth+11)});
      }
-     const houseChance=near?Math.max(.5,reg.homes):reg.homes;
+     // nos anos 80 o casario disperso chegava quase à via: mais casas e mais perto
+     const houseChance=near?Math.max(.6,reg.homes):Math.min(.85,reg.homes*1.8+.12);
      if(!greenSlope&&hr(s+31)<houseChance){
-       const x=sd*(e+(urban?8:54));
+       const x=sd*(e+(urban?8:18+hr(s+39)*40));
        if(urban){
          const apartment=p>km(1.8)&&hr(s+33)<.19;
          put(p,{t:apartment?'apt':'row',x,len:38,w:20,fl:4,f0:reg.floors,f1:reg.floors+1,tile:.24,shop:.13,street:false,bal:true,r:true,s,c:[209,201,178],h:14});
@@ -1270,6 +1272,56 @@ if(TRC){const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1),put=(p,o)=>spr[at(p)].pus
      return hi<0||Math.abs(x)+2*hw<lo||Math.abs(x)-hw>hi})};
  if(LSD){if(RP)clr(JCN,JCN+240,jcOff);else clr(JCN-240,JCN,jcOff)}
  if(GP){const a=km(KC0),b=km(KC1);clr(a,a+260,p=>CHO(Math.max(0,p-a)));clr(b-260,b,p=>CHO(Math.max(0,b-p)))}}
+
+/* ---- paisagem de 1985: plano intermédio e de fundo (80 a 450 m), de acordo com cada localidade ----
+   Porto (Boavista, Ramalde): blocos de habitação de 4 a 9 pisos dos anos 60 a 80 e armazéns; Senhora da Hora, Custóias:
+   moradias e prédios baixos; Maia: casas, pavilhões industriais e campos; Castêlo da Maia, Muro, Lousado, interior da Póvoa:
+   casario disperso minhoto com campos de milho, lavrados e prados, e manchas de eucalipto e pinheiro; Mindelo e Modivas:
+   pinhal junto à costa e campos de areia; Vale do Ave (Santo Tirso a Vizela): fábricas têxteis com cobertura em dente de
+   serra e chaminés de tijolo, bairros operários e encostas com mata; Fafe e serra: pinhal, eucaliptal e penedos */
+const FARP={
+  city:{n:16,w:{block:8,house:4,shed:1,trees:1},fl:[4,9],ground:380},
+  suburb:{n:10,w:{house:7,block:2,shed:1,trees:2,field:1},fl:[3,5]},
+  maia:{n:9,w:{house:4,shed:3,field:3,trees:2,hedge:1},fl:[2,3]},
+  rural:{n:10,w:{house:4,field:3,trees:3,wood:2,hedge:2,chapel:0.12},fl:[1,2]},
+  coast:{n:9,w:{wood:5,field:3,house:2,hedge:1},fl:[1,2],pine:1},
+  town:{n:12,w:{house:8,block:3,trees:2,field:1},fl:[2,4],ground:110},
+  resort:{n:14,w:{block:7,house:4,trees:1},fl:[5,10],ground:300},
+  ave:{n:9,w:{shed:4,house:4,trees:2,wood:2},fl:[2,3]},
+  serra:{n:8,w:{wood:6,trees:2,house:1,rock:2},fl:[1,2]},
+  green:{n:7,w:{wood:6,trees:3},fl:[1,1]}};
+const FARL={boavista:'city',ramalde:'city',shora:'suburb',custoias:'suburb',maia:'maia',agri:'rural',lousado:'rural',gmrsub:'rural',
+  coast:'coast',vconde:'town',povoa:'resort',famalicao:'town',trofa:'town',tirso:'town',vizela:'town',fafe:'town',ave:'ave',aves:'ave',lordelo:'ave',serra:'serra'};
+let FARX=null;
+// marcos a não tapar: igrejas, mosteiros, termas, estádio, aeroporto, aqueduto, casino, Mabor, fábricas, pátios
+function farX(){const X=[],LMR={bigchurch:50,mosteiro:110,termas:70,stadium:130,pacos:60,airport:420,aqueduto:45,casino:70,romanica:45,mabor:230,hillchapel:260,pvelha:60,factory:40,hgate:35,patio:35,galpao:30,church:30,capela:20,trin:45,gmrlargo:60};
+ for(let k=0;k<TOTAL;k++)for(const o of spr[k])if(LMR[o.t]){const w=PI(k,o.x||0,0);X.push([w[0],w[2],LMR[o.t]])}
+ if(RG&&GUI.i>=0){const g=fr3(GUI.pos);X.push([g.x+350,g.z-1450,380]);X.push([g.x+2900,g.z+700,1650])}return X}
+{const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1);
+ const ext={campo:o=>(o.d||30)/2,arvores:o=>(o.rv||10)+3,woods:o=>o.dep||20,factory:o=>(o.w||30)/2+6,ware:o=>(o.w||30)/2+5,patio:o=>(o.d||30)/2,galpao:o=>(o.d||15)/2,trilho:o=>o.wd||3};
+ const skipT=/^(sig|lim|avis|ea|silvo|tpole|pk|pn|pnu|pnx|lamp|slamp|board|stop|bench|pax|kiosk|buffer|pole|mast|over|foot|lnum|lclock|canopy|wcol|car|far|hivy|wallLow)$/;
+ const near=(p,a,b)=>p>a&&p<b;
+ for(let k=6;k<TOTAL-6;k+=12){const p=k*SEG;if(p<km(1.65)||p>BUFFER-120)continue;
+   const loc=LOCAT(p);let prof=FARL[loc]||'rural';
+   if(LSD&&Math.abs(p-LPC)<700)continue;
+   if(GP&&p>km(KC0)-450&&p<km(KC1)+450)continue;
+   if(LSD&&Math.abs(p-JCN)<450)continue;
+   if(RP&&FAM&&Math.abs(p-FAM.pos)<650)continue;
+   if(tun[k])continue;
+   for(const sd of[-1,1]){
+     if(near(p,JSH-60,JSH+700)&&sd===(RP?1:-1))continue;
+     if((RG||GP)&&GUI.i>=0&&Math.abs(p-GUI.pos)<1300&&sd===-1)continue;
+     if(PVG&&near(p,PVG.sC-350,PVG.sC+450)&&sd<0)continue;
+     let pr=prof;if((RG||GP)&&GUI.i>=0&&near(p,GUI.pa-160,kR(64.0))&&sd>0)pr='green';
+     // o que já existe deste lado: o plano de fundo começa para lá disso
+     let m=0;for(let q=k-8;q<=k+20;q++){const j=clamp(q,0,TOTAL-1);for(const o of[0,...trk[j],...trkX[j]])if(Math.sign(o)===sd)m=Math.max(m,Math.abs(o)+6);
+       for(const o of spr[j]){const x=o.x||0;if(Math.sign(x)!==sd||Math.abs(x)>(/^(campo|arvores|woods|trilho|corn|vine|ramada|hboundary|espig|rock)$/.test(o.t)?90:220)||skipT.test(o.t))continue;m=Math.max(m,Math.abs(x)+(ext[o.t]?ext[o.t](o):14))}
+       if(riv[j]===sd){const rv=inRange(RIVER,j*SEG);if(rv)m=Math.max(m,riverX(rv,j*SEG)+rv.w+18)}
+       const w=sd<0?wallL[j]:wallR[j];if(w)m=Math.max(m,Math.abs(w.x)+6)}
+     if(STN.some(s=>p>s.pa-90&&p<s.pb+90))m=Math.max(m,95);
+     if(PN.some(q=>Math.abs(q.pos-p)<40))m=Math.max(m,55);
+     const v0=Math.max(40,m+10);if(v0>360)continue;
+     spr[k].push({t:'far',x:sd*Math.min(v0,300),v0,sd,pr,s:k*7919+(sd+1)*104729})}}}
 
 /* ================= HORÁRIO / ESTADO ================= */
 const fmt2=n=>String(n).padStart(2,'0');
@@ -3312,6 +3364,86 @@ function trinObj(mb,sp,i,L,tree,r){
     plateQ(mb,L(add(c,add(mulv(F,-0.71),[0,yb+0.3,0]))),mulv(F,-1),0.5,0.35,ATL['cpLogo'],0,false);
     for(let n=0;n<4;n++)blob(mb,L(add(c,add(mulv(F,(n-1.5)*0.32),[0,yb+0.9,0]))),0.35,0.32,0.35,cc(52,110,52),i*5+n);return}
 }
+// plano de fundo: casas, prédios, pavilhões, árvores e campos de baixo detalhe
+const FAR_WALL=[[236,232,222],[232,222,196],[226,212,182],[240,238,232],[214,206,194],[222,214,200],[236,226,206],[210,196,176],[200,208,206]];
+const FAR_GRANITE=[[176,170,158],[164,158,148],[186,180,168]];
+function farObj(mb,sp,i,L){
+  if(!FARX)FARX=farX();const P=FARP[sp.pr]||FARP.rural,sd=sp.sd;let rs=sp.s>>>0;const r=()=>{rs=(Math.imul(rs,1664525)+1013904223)>>>0;return rs/4294967296};
+  const UP=[0,1,0],TOT=Object.values(P.w).reduce((a,b)=>a+b,0),pick=()=>{let x=r()*TOT;for(const[k,v]of Object.entries(P.w)){x-=v;if(x<=0)return k}return'house'};
+  let vmax=sp.pr==='city'||sp.pr==='resort'?380:440;if(sd<0&&COAST(i)>0.1)vmax=Math.min(vmax,235);
+  if(sp.v0>=vmax-20)return;
+  const placed=[];
+  // nas cidades o chão entre os prédios é rua, passeio e logradouro, não prado
+  if(P.ground){const v1=Math.min(vmax,P.ground);if(v1>sp.v0+10){const nu=3,nv=Math.max(2,Math.round((v1-sp.v0)/40));
+    for(let a=0;a<nu;a++)for(let b=0;b<nv;b++){const Q=(aa,bb)=>{const u=-30+60*aa/nu,v=sp.v0-4+(v1-sp.v0+4)*bb/nv,ii=clamp(i+Math.round(u/SEG),0,TOTAL-1),w=PI(ii,sd*v,0),fu=u-(ii-i)*SEG,F2=FV(ii);
+        const x=w[0]+F2[0]*fu,z=w[2]+F2[2]*fu;return L([x,terrH(ii,sd*v,x,z)+0.18,z])};
+      mb.q(Q(a,b),Q(a+1,b),Q(a+1,b+1),Q(a,b+1),cc(176,172,162),14,[0,0,6,6])}}}
+  const tri=(a,b,c,col,l)=>{const n=nrm(a,b,c);const N=n[1]<0?mulv(n,-1):n;mb.t(a,b,c,N,N,N,col,[0,0],[1,0],[0,1],l||0,0,1)};
+  // árvore de baixo detalhe: tronco e copa em bicone de seis faces
+  const lowTree=(x,y,z,h,kind)=>{const tc=kind==='euc'?cc(206,198,180):cc(104,78,56),R0=[1,0,0],F0=[0,0,1];
+    boxRF(mb,L([x,0,z]),R0,F0,0.45,0.45,y-0.3,y+h*(kind==='pine'?0.78:0.55),tc,0,0,0,0,1,true);
+    const cr=kind==='pine'?h*0.3:kind==='euc'?h*0.16:h*0.34,y0=kind==='pine'?y+h*0.72:kind==='euc'?y+h*0.42:y+h*0.38,y1=y+h,ym=kind==='pine'?y+h*0.86:(y0+y1)/2;
+    const col=kind==='pine'?cc(54,82,50):kind==='euc'?cc(108,128,98):cc(72,104,58),v=0.86+r()*0.26,c2=mulv(col,v);
+    const ring=[];for(let q=0;q<6;q++){const a=q/6*6.2832+r()*0.4,rr=cr*(0.8+r()*0.35);ring.push(L([x+Math.cos(a)*rr,ym,z+Math.sin(a)*rr]))}
+    const T=L([x,y1,z]),B=L([x,y0,z]);for(let q=0;q<6;q++){const a=ring[q],b=ring[(q+1)%6];tri(T,b,a,c2,10);tri(B,a,b,mulv(c2,0.8),10)}};
+  // em qualidade baixa o plano de fundo leva metade das peças
+  const N=Math.round((P.n+2+Math.floor(r()*3))*(typeof GQK!=='undefined'&&GQK==='baixa'?0.5:1));
+  for(let q=0;q<N;q++){let kind=pick();const u=(r()-0.5)*58,v=sp.v0+(vmax-sp.v0)*Math.pow(r(),1.35);
+    const ii=clamp(i+Math.round(u/SEG),0,TOTAL-1),w=PI(ii,sd*v,0);
+    if(FARX.some(e=>(w[0]-e[0])**2+(w[2]-e[1])**2<e[2]*e[2]))continue;
+    const rad=kind==='chapel'?12:kind==='rock'?8:kind==='block'?(sp.pr==='city'||sp.pr==='resort'?12:16):kind==='shed'?26:kind==='field'?24:kind==='wood'?22:kind==='hedge'?14:kind==='trees'?10:7;
+    if(placed.some(e=>Math.hypot(e[0]-u,e[1]-v)<e[2]+rad))continue;placed.push([u,v,rad]);
+    let y=terrH(ii,sd*v,w[0],w[2]);const Rt=RV(ii),Ft=FV(ii),ang=(r()-0.5)*0.5,ca=Math.cos(ang),sa=Math.sin(ang);
+    // em encosta, o edifício assenta no ponto mais baixo do terreno debaixo dele
+    if(kind==='house'||kind==='block'||kind==='shed'||kind==='chapel'){const e2=kind==='shed'?14:kind==='block'?8:4;for(const[da,db]of[[e2,0],[-e2,0],[0,e2],[0,-e2]]){const x=w[0]+Rt[0]*da+Ft[0]*db,z=w[2]+Rt[2]*da+Ft[2]*db;y=Math.min(y,terrH(ii,sd*v+da*sd,x,z)+0.3)}}
+    const A=[Rt[0]*ca-Ft[0]*sa,0,Rt[2]*ca-Ft[2]*sa],B=[Ft[0]*ca+Rt[0]*sa,0,Ft[2]*ca+Rt[2]*sa],c=L([w[0],0,w[2]]),toT=mulv(A,-sd);
+    if(kind==='house'){const fl=P.fl[0]+Math.floor(r()*(P.fl[1]-P.fl[0]+1)),gr=(sp.pr==='rural'||sp.pr==='serra')&&r()<0.3,
+      col=cc(...(gr?FAR_GRANITE[Math.floor(r()*3)]:FAR_WALL[Math.floor(r()*FAR_WALL.length)])),wd=7+r()*4,dp=7+r()*3,H=fl*3+0.4;
+      boxRF(mb,c,A,B,dp,wd,y-1.5,y+H,col,0);hipRoof(mb,c,A,B,dp,wd,y+H,1.4+r()*0.6,cc(176+r()*30,88+r()*20,62+r()*10),0.35);
+      const fc=add(c,mulv(toT,dp/2+0.03));for(let f=0;f<fl;f++)for(const s of[-1,1]){const pc=add(fc,mulv(B,s*wd*0.24)),y2=y+0.9+f*3;
+        mb.q([pc[0]-B[0]*0.55,y2,pc[2]-B[2]*0.55],[pc[0]+B[0]*0.55,y2,pc[2]+B[2]*0.55],[pc[0]+B[0]*0.55,y2+1.3,pc[2]+B[2]*0.55],[pc[0]-B[0]*0.55,y2+1.3,pc[2]-B[2]*0.55],cc(52,58,64),0)}
+      if(r()<0.35)lowTree(w[0]+B[0]*(wd/2+3),y,w[2]+B[2]*(wd/2+3),6+r()*4,'oak');
+      // espigueiro de granito no quinteiro
+      if((sp.pr==='rural'||sp.pr==='serra')&&r()<0.25){const ec=add(c,add(mulv(toT,dp/2+4),mulv(B,wd/2-1))),gs=cc(178,172,160);boxRF(mb,ec,B,A,4.2,1.1,y,y+0.9,gs,0,0,0,0,1,true);
+        boxRF(mb,ec,B,A,4.6,1.4,y+0.9,y+2.3,cc(168,160,146),0);hipRoof(mb,ec,B,A,4.6,1.4,y+2.3,0.7,cc(170,96,70),0.15)}
+      // ramada (vinha em latada) ao lado da casa, nas aldeias
+      if((sp.pr==='rural'||sp.pr==='maia'||sp.pr==='coast')&&r()<0.45){const rc=add(c,mulv(B,-(wd/2+5))),g=cc(70+r()*20,108+r()*20,52),st=cc(170,166,158);
+        for(const a2 of[-1,1])for(const b2 of[-1,1])boxRF(mb,add(rc,add(mulv(A,a2*3.6),mulv(B,b2*3))),A,B,0.25,0.25,y-0.2,y+2.3,st,0,0,0,0,1,true);
+        const Q=(a2,b2)=>{const q2=add(rc,add(mulv(A,a2*4.2),mulv(B,b2*3.5)));return[q2[0],y+2.3,q2[2]]};mb.q(Q(-1,-1),Q(1,-1),Q(1,1),Q(-1,1),g,10,[0,0,2,2]);mb.q(Q(-1,1),Q(1,1),Q(1,-1),Q(-1,-1),mulv(g,0.8),10,[0,0,2,2])}}
+    else if(kind==='block'){const fl=P.fl[0]+Math.floor(r()*(P.fl[1]-P.fl[0]+1)),wd=14+r()*12,dp=10+r()*3,H=fl*3+1,col=cc(...FAC[Math.floor(r()*FAC.length)]);
+      boxRF(mb,c,A,B,dp,wd,y-2,y+H,col,0);boxRF(mb,c,A,B,dp+0.3,wd+0.3,y+H,y+H+0.3,cc(196,194,188),0);
+      for(const[n,hw,o]of[[toT,wd/2-0.8,dp/2],[mulv(toT,-1),wd/2-0.8,dp/2],[B,dp/2-0.8,wd/2],[mulv(B,-1),dp/2-0.8,wd/2]]){const T=[n[2],0,-n[0]],q0=add(c,mulv(n,o+0.04));
+        for(let f=0;f<fl;f++){const y2=y+1.1+f*3;mb.q([q0[0]-T[0]*hw,y2,q0[2]-T[2]*hw],[q0[0]+T[0]*hw,y2,q0[2]+T[2]*hw],[q0[0]+T[0]*hw,y2+1.3,q0[2]+T[2]*hw],[q0[0]-T[0]*hw,y2+1.3,q0[2]-T[2]*hw],cc(70,80,92),0)}}}
+    else if(kind==='shed'){// pavilhão fabril com cobertura em dente de serra (o Vale do Ave) ou de duas águas (Maia)
+      const ln=30+r()*34,wd=18+r()*14,H=6+r()*2.5,col=sp.pr==='maia'&&r()<0.6?cc(214,214,208):cc(196,176,150);
+      boxRF(mb,c,A,B,wd,ln,y-1.5,y+H,col,0,0,0,0,1,true);
+      const nt=Math.max(3,Math.round(ln/9)),seg=ln/nt;for(let t=0;t<nt;t++){const b0=-ln/2+t*seg,b1=b0+seg,P0=(bb,aa,yy)=>add(c,add(mulv(B,bb),mulv(A,aa))).map((v2,ix)=>ix===1?yy:v2);
+        const a=L(P0(b0,-wd/2,0)),_=0;const p1=P0(b0,-wd/2,y+H),p2=P0(b0,wd/2,y+H),p3=P0(b1,wd/2,y+H+2.2),p4=P0(b1,-wd/2,y+H+2.2),p5=P0(b1,wd/2,y+H),p6=P0(b1,-wd/2,y+H);
+        mb.q(p1,p2,p3,p4,cc(150,146,140),11);mb.q(p6,p5,p3,p4,cc(60,70,80),16);
+        tri(p1,p4,p6,col,0);tri(p2,p5,p3,col,0)}
+      if(sp.pr==='ave'&&r()<0.6){const ch=add(c,add(mulv(B,ln/2-3),mulv(A,wd/2+2)));cyl(mb,ch,y,y+H+18+r()*8,1.3,0.8,8,cc(150,86,64),0)}}
+    else if(kind==='wood'){// mata: eucaliptal e pinhal (pinhal só, junto à costa)
+      const n2=8+Math.floor(r()*7),rad2=16+r()*10;for(let t=0;t<n2;t++){const a=r()*6.283,rr=Math.sqrt(r())*rad2,x=w[0]+Math.cos(a)*rr,z=w[2]+Math.sin(a)*rr;
+        const yy=terrH(ii,sd*v+Math.cos(a)*rr,x,z),k2=P.pine?'pine':r()<0.6?'euc':'pine';lowTree(x,yy,z,k2==='euc'?18+r()*10:12+r()*7,k2)}}
+    else if(kind==='hedge'){// renque de árvores (carvalhos e choupos) a dividir os campos
+      const n2=5+Math.floor(r()*4),ln=30+r()*24;for(let t=0;t<n2;t++){const s2=(t/(n2-1)-0.5)*ln,x=w[0]+B[0]*s2+A[0]*(r()-0.5),z=w[2]+B[2]*s2+A[2]*(r()-0.5);
+        lowTree(x,terrH(ii,sd*v,x,z),z,P.pine?10+r()*5:8+r()*6,P.pine?'pine':r()<0.25?'euc':'oak')}}
+    else if(kind==='chapel'){// capela caiada com sineira e cruz
+      const W=cc(240,238,230);boxRF(mb,c,A,B,10,6,y-1,y+5,W,0);hipRoof(mb,c,A,B,10,6,y+5,1.6,cc(176,96,70),0.3);const fc=add(c,mulv(toT,5.05));
+      boxRF(mb,fc,A,B,0.3,2.2,y+5,y+7.6,W,0);boxRF(mb,fc,A,B,0.35,0.15,y+7.6,y+8.6,cc(80,80,80),0);boxRF(mb,fc,A,B,0.35,0.7,y+8.2,y+8.35,cc(80,80,80),0)}
+    else if(kind==='rock'){// penedos de granito
+      const n2=1+Math.floor(r()*3);for(let t=0;t<n2;t++){const x=w[0]+(r()-0.5)*8,z=w[2]+(r()-0.5)*8,yy=terrH(ii,sd*v,x,z),rr=1.5+r()*2.5,col=cc(150+r()*20,146+r()*16,138+r()*12);
+        const ring=[];for(let q2=0;q2<6;q2++){const a=q2/6*6.2832+r()*0.5;ring.push(L([x+Math.cos(a)*rr*(0.7+r()*0.5),yy+rr*0.35,z+Math.sin(a)*rr*(0.7+r()*0.5)]))}
+        const T=L([x,yy+rr*(0.8+r()*0.6),z]),Bt=L([x,yy-0.5,z]);for(let q2=0;q2<6;q2++){tri(T,ring[(q2+1)%6],ring[q2],col,0);tri(Bt,ring[q2],ring[(q2+1)%6],mulv(col,0.85),0)}}}
+    else if(kind==='trees'){const n2=3+Math.floor(r()*4);for(let t=0;t<n2;t++){const a=r()*6.283,rr=r()*9,x=w[0]+Math.cos(a)*rr,z=w[2]+Math.sin(a)*rr,ii2=ii;
+        const yy=terrH(ii2,sd*v+Math.cos(a)*rr,x,z);let k2=P.pine?'pine':sp.pr==='serra'||sp.pr==='green'?(r()<0.5?'pine':'euc'):(r()<0.4?'euc':r()<0.6?'pine':'oak');
+        lowTree(x,yy,z,k2==='euc'?16+r()*10:k2==='pine'?11+r()*7:7+r()*5,k2)}}
+    else if(kind==='field'){// campo: milho, lavrado ou prado, em quadrícula sobre o terreno
+      const ln=26+r()*30,wd=18+r()*16,fk=r(),col=sp.pr==='coast'?(fk<0.5?cc(176,168,128):cc(108,140,70)):fk<0.4?cc(92+r()*16,128+r()*14,54):fk<0.7?cc(132,104,76):cc(104,142,66),l=fk>=0.4&&fk<0.7?21:0;
+      for(let a=0;a<2;a++)for(let b=0;b<2;b++){const Q=(aa,bb)=>{const x=w[0]+A[0]*(aa-0.5)*wd+B[0]*(bb-0.5)*ln,z=w[2]+A[2]*(aa-0.5)*wd+B[2]*(bb-0.5)*ln;return L([x,terrH(ii,sd*v+(aa-0.5)*wd*sd,x,z)+0.25,z])};
+        mb.q(Q(a/2,b/2),Q((a+1)/2,b/2),Q((a+1)/2,(b+1)/2),Q(a/2,(b+1)/2),col,l,[0,0,wd/6,ln/3])}}
+  }
+}
 function histObject3(mb,sp,i,L){
  const R=RV(i),F=FV(i),sd=Math.sign(sp.x)||1,nn=mulv(R,-sd),base=PI(i,sp.x,0);
  const c=L(base),y=terrH(i,sp.x,base[0],base[2]),stone=cc(159,154,139),dark=cc(47,48,42),roof=cc(145,85,60);
@@ -3806,6 +3938,7 @@ function obj3(mb,sp,i,L){
     for(let u=-sp.len/2+2;u<sp.len/2;u+=7)boxRF(mb,add(c,mulv(F,u)),R,F,0.18,0.18,y,y+3.3,sp.pc?cc(...sp.pc):sp.col?cc(...sp.col):cc(80,86,92),0);break}
   case'gmrlargo':case'gmrrua':gmrCity(mb,sp,i,L,r,tree,ROOF);break;
   case'trin':trinObj(mb,sp,i,L,tree,r);break;
+  case'far':farObj(mb,sp,i,L);break;
   case'lnum':{const uv=ATL['lnw'+sp.n],dk=cc(46,50,54);
     if(sp.k==='buf'){const y=hy[i]+0.2,b=add(c,mulv(F,-0.6)),dst=TRIN_DEST()[sp.n-1];boxRF(mb,b,R,F,0.12,0.12,y,y+3.25,dk,0);
       plateQ(mb,[b[0]+F[0]*0.08,y+3.35,b[2]+F[2]*0.08],F,0.55,0.55,ATL['clock'],0,false);
