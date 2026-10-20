@@ -441,7 +441,9 @@ const bearing=(from,to)=>Math.atan2(to[0]-from[0],to[1]-from[1]);
 const BPOS={neo:-150,'neo-g':-95,old:-110,old2:-110,erm:-150,new:-90,ns:-90,ho:-60,'v-ap':-30,'v-lsd':-68,'v-ramal':-38,'v-fam':-70,'v-est1':-40,'v-est':-55,'v-est2':-60,'v-fafe':-75,'v-st':-75,'v-sdh':-60,'v-can':-50,'v-gmr':-80,'v-trin':-95,'v-maia':-62,'v-gran':-48,'v-ara':-40,'v-lord':-42,'v-pv':-30,'v-lsdc':-45};
 // composição: 1 = unidade simples (2 caixas), 2 = unidade dupla (4 caixas), 0 = ao acaso
 let UNITS=1,FORCE_NC=0;const TLEN=nc=>nc*18.906;
-function setStops(nc){const h=TLEN(nc)/2;for(const s of STN){s.stopF=s.bc+h;s.stopR=s.bc-h}}
+function setStops(nc){const h=TLEN(nc)/2;for(const s of STN){s.stopF=s.bc+h;s.stopR=s.bc-h}
+  // Trindade: parte e chega quase encostada aos para-choques (2 m entre o engate e a travessa do para-choques)
+  try{const e=(Math.floor(BUFFER_R/SEG)+1)*SEG+0.8+2;SB.stopR=e;SB.stopF=e+TLEN(nc)}catch(e){}}
 const LAY={
  VG:{pl:[[-1.8,-6.5],[5.8,9.8]],ex:[[0,4],[0,-9.5]]},
  VFM:{pl:[[1.8,7.5],[-5.8,-9.2]],ex:[[0,-4],[0,-11]]},
@@ -969,11 +971,12 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
     if(s===PVA)continue;// Póvoa: cais e edifício desenhados à parte (recinto reto e cais de Famalicão)
     for(const r of s.pl){const sd=Math.sign(r[0]),mid=(r[0]+r[1])/2,outer=r[1];
       const txr=trackXR(s.stopR),isOurs=r[0]===-1.8||r[0]===1.8,isOursR=Math.abs(Math.abs(r[0]-txr)-1.8)<0.01;
-      if(isOursR){at(s.bc-18.906).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'R'});at(s.bc-37.81).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'R',u2:true});s.doorR=-Math.sign(r[0]-txr)}
+      // na Trindade o comboio encosta aos para-choques: não há marcos de paragem
+      if(isOursR){if(s!==SB){at(s.bc-18.906).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'R'});at(s.bc-37.81).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'R',u2:true})}s.doorR=-Math.sign(r[0]-txr)}
       for(const d of[200,120,40])if(s.pos-d>s.pa)at(s.pos-d).push({t:'board',x:mid,y:s.ph,n:s.n});
       if(s!==SB&&s.ty==='ap'&&s.sty!=='v-lsdc'&&!s.lay.startsWith('PS'))at(s.bc).push({t:'shelter',x:outer-sd*1.6,y:s.ph});
       for(let p=s.pa+10;p<=s.pos;p+=30)at(p).push({t:'lamp',x:outer-sd*0.5,y:s.ph});
-      if(isOurs){at(s.bc+18.906).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'F'});at(s.bc+37.81).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'F',u2:true});at(s.bc-8).push({t:'bench',x:outer-sd*1.2,y:s.ph})}
+      if(isOurs){if(s!==SB){at(s.bc+18.906).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'F'});at(s.bc+37.81).push({t:'stop',x:r[0]+sd*0.45,y:s.ph,d:'F',u2:true})}at(s.bc-8).push({t:'bench',x:outer-sd*1.2,y:s.ph})}
       if((isOurs||isOursR||s.pl.length===1)&&!s.nostop){
         const np=(s.ty==='term'?10:3)+Math.floor(rnd()*(s.big?10:5));
         s.pax=s.pax||[];
@@ -1703,6 +1706,8 @@ function step(dt,dr){
    for(const k of[0,1]){const tg=S.doors&&k===dside?1:0;S.dOpen[k]+=clamp(tg-S.dOpen[k],-dt/1.07,dt/1.07)}}
   if(S.doors)S.v=0;
   S.prevPos=S.pos;S.pos+=mv*S.v*dt;
+  // para-choques da Trindade: não se pode avançar mais de 2 m além do ponto de paragem
+  if(REV&&S.pos<SB.stopR-2){S.pos=SB.stopR-2;if(S.v>0.6){emergency('Embate nos para-choques da Trindade');penal(100)}S.v=0}
   const kmh=S.v*3.6;
   if(S.emerg&&S.v===0&&S.notch<=5){S.emerg=false;toast('Emergência rearmada.','')}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
