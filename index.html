@@ -25,10 +25,11 @@ html{height:100%}
 body{height:100%;margin:0;background:var(--cab);color:var(--ink);
   font-family:'Barlow Condensed','Arial Narrow',Arial,sans-serif;overflow:hidden;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-body{display:flex;align-items:center;justify-content:center}
-#app{display:flex;flex-direction:column;width:100%;max-width:1920px;margin:0 auto}
-/* imagem do jogo sempre em 16:9; o tamanho certo é posto em fitView() */
-#view{flex:none;position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#000}
+/* a imagem do jogo ocupa toda a largura da janela (16:9 se couber); o painel fica por baixo ou, se não houver altura, por cima da parte de baixo da imagem */
+#app{position:relative;width:100%;height:100%;overflow:hidden}
+#view{position:absolute;left:0;top:0;width:100%;overflow:hidden;background:#000}
+#app #dash{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:1500px;box-sizing:border-box}
+#app.over #dash{background:linear-gradient(rgba(50,56,62,.55),rgba(39,44,49,.88));border-top:0;border-radius:14px 14px 0 0}
 canvas{display:block;width:100%;height:100%}
 #gl,#cv{position:absolute;inset:0}
 #gl{filter:sepia(.2) saturate(.84) contrast(1.06) brightness(1.02)}
@@ -151,7 +152,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <canvas id="gl"></canvas>
     <canvas id="cv"></canvas>
     <div id="strip"><div class="line"></div><div id="dots"></div><div id="me"></div></div>
-    <div class="tr"><button class="ico" id="bCam" aria-label="Mudar de vista">🎥</button><button class="ico" id="bQS" aria-label="Guardar o jogo">💾</button><button class="ico" id="bMute" aria-label="Ligar ou desligar som">🔊</button><button class="ico" id="bPause" aria-label="Pausa">❚❚</button></div>
+    <div class="tr"><button class="ico" id="bCam" aria-label="Mudar de vista">🎥</button><button class="ico" id="bQS" aria-label="Guardar o jogo">💾</button><button class="ico" id="bMute" aria-label="Ligar ou desligar som">🔊</button><button class="ico" id="bFull" aria-label="Ecrã inteiro">⛶</button><button class="ico" id="bPause" aria-label="Pausa">❚❚</button></div>
     <div id="route" aria-hidden="true"><div class="hd" id="routeHd"></div><div class="rl"><div class="bar past" id="routePast"></div><div class="bar" id="routeBar"></div><div id="routeSt"></div><div class="tr" id="routeTr"></div></div></div>
     <div id="toast" role="status" aria-live="polite"></div>
     <div id="card" class="azulejo" hidden><span id="cardName"></span><small id="cardSub"></small></div>
@@ -227,7 +228,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <li>Não há CONVEL: respeite os limites. Entrar numa curva muito acima do limite faz descarrilar.</li>
       <li>Nas estações, espere o apito do <b>chefe</b> para partir. Nos apeadeiros, parta à hora.</li>
       <li>Buzine antes de cada <b>passagem de nível</b> (o painel mostra a distância). Carregue em <b>Homem-morto</b> quando piscar.</li>
-      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: 8 acelerar, 2 travar, 9 homem-morto, buzinas: 7 aguda, 3 média, 1 grave e 4 dois tons (grave e aguda), E portas, P pausa, R inversor, Z agulha, T tempo acelerado.</li>
+      <li>Botão 🎥 (ou C): cabina, exterior, junto à via e aérea. Teclado: 8 acelerar, 2 travar, 9 homem-morto, buzinas: 7 aguda, 3 média, 1 grave e 4 dois tons (grave e aguda), E portas, F ecrã inteiro, P pausa, R inversor, Z agulha, T tempo acelerado.</li>
       <li><b>Cruzamentos</b>: na via única as automotoras cruzam-se nas estações. Se a contrária ainda não chegou, o chefe não dá a partida: espere. Partir antes é falta grave e pode acabar em colisão.</li>
       <li><b>Marcha atrás</b> (botão Marcha ou R): com a automotora parada e o manípulo em 0 ou travão, mude o inversor para recuar, por exemplo depois de passar a placa de paragem. Em marcha atrás o limite é 30 km/h.</li>
     </ul>
@@ -4877,8 +4878,9 @@ function setCam(m){camMode=m;sideCam=null;toast('Vista: '+CAMN[m],'');$('#bCam')
 let running=false,paused=false,last=performance.now(),use3D=false;
 // a imagem do jogo em 16:9, tão grande quanto a janela deixa com o painel por baixo
 function fitView(){const app=$('#app'),view=$('#view'),dash=$('#dash');if(!app||!view||!dash)return;
-  const dh=dash.offsetHeight||200,w=Math.max(160,Math.min(window.innerWidth,1920,(window.innerHeight-dh)*16/9));
-  app.style.width=Math.floor(w)+'px';view.style.height=Math.floor(w*9/16)+'px'}
+  const W0=window.innerWidth,H0=window.innerHeight,dh=dash.offsetHeight||200,h16=Math.round(W0*9/16);
+  // cabe a imagem 16:9 e o painel por baixo: assim fica; senão a imagem vai até ao fundo da janela e o painel fica por cima dela
+  const below=h16+dh<=H0;app.classList.toggle('over',!below);view.style.height=(below?h16:H0)+'px'}
 function resize(){fitView();const r=cv.parentElement.getBoundingClientRect();const dpr=Math.min(2,window.devicePixelRatio||1);
   W=Math.max(1,r.width);H=Math.max(1,r.height);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
   hY=H*0.42;K=Math.min(W*0.75,H*1.3);layoutLever();
@@ -5096,10 +5098,12 @@ const numKey=e=>{const m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code||'');return m?m
 document.addEventListener('keydown',e=>{if(!S)return;const n=numKey(e);const k=n?'#'+n:e.key.toLowerCase();
   if(k==='arrowup'||k==='#8'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='#2'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#3')hornOn(e,'horn');else if(k==='#4'){e.preventDefault();if(S&&running&&!S.hornSeq){S.hornSeq=performance.now();S.hornK='horn_lo';S.horn=true;hb.classList.add('down')}}else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
+  else if(k==='f')fullBtn();else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#3')hornOn(e,'horn');else if(k==='#4'){e.preventDefault();if(S&&running&&!S.hornSeq){S.hornSeq=performance.now();S.hornK='horn_lo';S.horn=true;hb.classList.add('down')}}else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
 document.addEventListener('keyup',e=>{const n=numKey(e);if(n==='7'||n==='3'||n==='1'||e.key===' ')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
-window.addEventListener('resize',resize);
+window.addEventListener('resize',resize);document.addEventListener('fullscreenchange',()=>setTimeout(resize,50));
+function fullBtn(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+{const b=$('#bFull');if(b)b.onclick=fullBtn}
 reset(0,6,false);resize();
 if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);if(glRetry())throw e;use3D=false;glc.style.display='none';const el=document.getElementById('err');el.style.display='block';el.textContent='3D indisponível, a usar gráficos simples: '+e.message}}else glc.style.display='none';setNotch(3,true);requestAnimationFrame(frame);
 // chegada à outra linha depois da inversão em Lousado: continua o serviço, a hora e a pontuação
