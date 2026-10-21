@@ -571,13 +571,17 @@ if(PVG)for(const T of PVG.tracks){const X={a:T.s0,b:T.end,m:false,pv:T,f:p=>p<=P
 function trackXR(p){if(p<DBL.a||p>DBL.b)return 0;const v=exOff(DBL,p);return v===null?0:v}
 // via da nossa automotora: principal (0) ou, nas estações de cruzamento escolhidas, a via desviada
 let SIDE=[];
-const trackX=p=>{if(S&&S.divC){const v=jcOff(p);if(v!==null)return v}if(S&&S.pvT&&PVG&&p>PVG.tracks[0].s0&&p<PVG.sC+260){const T=PVG.tracks[0];return p<=PVG.sC?T.n*sstep((p-T.s0)/T.l):T.n}if(S&&S.divJ&&p>JSW)return XTR[0].f(p);if(S&&S.divH&&p>JSH)return jshOff(p);for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
+const trackX=p=>{if(S&&S.ofi)return ofiX(p);if(S&&S.divC){const v=jcOff(p);if(v!==null)return v}if(S&&S.pvT&&PVG&&p>PVG.tracks[0].s0&&p<PVG.sC+260){const T=PVG.tracks[0];return p<=PVG.sC?T.n*sstep((p-T.s0)/T.l):T.n}if(S&&S.divJ&&p>JSW)return XTR[0].f(p);if(S&&S.divH&&p>JSH)return jshOff(p);for(const e of SIDE)if(p>e.a&&p<e.b){const v=exOff(e,p);if(v!==null)return v}return REV?trackXR(p):0};
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // a Avenida de França é o único apeadeiro com chefe de estação
 const hasChefe=s=>s.ty!=='ap'||s.n==='Avenida de França';
 // postos de abastecimento de gasóleo, fora do cais de passageiros e com manobrista: Trindade, Guimarães, Fafe, Póvoa e Famalicão.
 // [estação, lado da estação (1 = depois do fim do cais, -1 = antes do início), distância ao cais, lado da via onde fica a bomba]
-const FUEL_L=400;let NOREF=false,XST=null;   // litros de gasóleo por automotora
+const FUEL_L=400;let NOREF=false,XST=null,OFI_REQ=false;
+// oficina de Guimarães: o primeiro comboio da manhã para Fafe e o primeiro para a Trindade saem dela. A automotora sai pela via da
+// oficina até passar a agulha (fase 'shed'), inverte a marcha e segue pela linha 3 (13,3 m, à direita) até à via principal ('loop')
+const OFG=(RG||GP)&&GUI&&GUI.i>=0?GUI:null;
+function ofiX(p){const G=OFG,J=G.pb-40;if(S.ofi.ph==='shed'&&p>J)return 13.3+tProf(p-J,13.2);const v=exOff(G.ex[1],p);return v===null?0:v}   // litros de gasóleo por automotora
 const DEPOTS=[['Porto-Trindade',1,160,-1,1],['Guimarães',1,125,-1],['Fafe',-1,140,1],['Póvoa de Varzim',-1,140,1],['Famalicão',-1,140,-1]]
   .map(([n,d,o,sd,cp])=>{const s=byNameE(n);return s?{st:s,p:d>0?s.pb+o:s.pa-o,sd,x:sd*3.4,cp:!!cp}:null}).filter(Boolean);   // cp: posto compacto (na trincheira da Trindade)
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
@@ -1373,7 +1377,7 @@ function farX(){const X=[],LMR={bigchurch:50,mosteiro:110,termas:70,stadium:130,
    clear(k-4,k+4,q=>Math.sign(q.x||0)===D.sd&&Math.abs(q.x||0)<20);spr[k].push({t:'fuel',x:D.x,cp:D.cp})}
  // oficina das automotoras em Guimarães, do lado direito no sentido de Fafe, com os portões virados para a estação
  const G=(RG||GP)&&byNameE('Guimarães');
- if(G){const p=G.pb+118,k=Math.floor(p/SEG);clear(k-9,k+5,q=>(q.x||0)>6&&(q.x||0)<52);clear(Math.floor((G.pb-95)/SEG),k-9,q=>(q.x||0)>10&&(q.x||0)<40);spr[k].push({t:'oficina',x:30})}}
+ if(G){const p=G.pb+121,k=Math.floor(p/SEG);clear(k-9,k+5,q=>(q.x||0)>6&&(q.x||0)<52);clear(Math.floor((G.pb-95)/SEG),k-9,q=>(q.x||0)>10&&(q.x||0)<40);spr[k].push({t:'oficina',x:30})}}
 
 /* ================= HORÁRIO / ESTADO ================= */
 const fmt2=n=>String(n).padStart(2,'0');
@@ -1749,7 +1753,7 @@ function step(dt,dr){
   // velocidade (CONVEL)
   const inDiv=SIDE.some(e=>S.pos>e.a&&S.pos<e.b);const limT=S.back||inDiv?Math.min(30,limitAt(S.pos)):limitAt(S.pos);let lim=limT;
   // precaução (amarelo) até ao sinal seguinte e marcha à vista depois de um sinal de paragem permissiva
-  if(S.ref)lim=Math.min(lim,30);if(S.sigLim)lim=Math.min(lim,S.sigLim.v);if(S.vista){lim=Math.min(lim,30);const e=S.vista.end;if(e!=null&&(REV?S.pos<e-TLEN(S.ncar):S.pos>e+TLEN(S.ncar))){S.vista=null;toast('Fim da marcha à vista.','')}}
+  if(S.ref||S.ofi)lim=Math.min(lim,30);if(S.sigLim)lim=Math.min(lim,S.sigLim.v);if(S.vista){lim=Math.min(lim,30);const e=S.vista.end;if(e!=null&&(REV?S.pos<e-TLEN(S.ncar):S.pos>e+TLEN(S.ncar))){S.vista=null;toast('Fim da marcha à vista.','')}}
   S.limNow=lim;
   for(const X of STN)if(X.divert&&!X.divAnn&&ahead(X)<1200&&ahead(X)>0){X.divAnn=true;toast('Cruzamento em '+X.n+': entrada pela via desviada, a 30 km/h nas agulhas.','')}S.over=false;
   S.derT=S.derT||0;if(kmh>limT+18){S.derT+=dt;if(S.derT>2.5){gameOver('A automotora descarrilou: entrou numa curva a '+Math.round(kmh)+' km/h com limite de '+limT+'.');return}}else S.derT=Math.max(0,S.derT-dt);
@@ -1764,7 +1768,7 @@ function step(dt,dr){
   // de cantonamento ou de um avançado, até ao sinal seguinte
   {const[g,gd]=nextSig();if(g&&g.k==='blk'&&!g.pr&&S.v<0.1&&gd<250&&sigState(g)==='R'){S.permT=(S.permG0===g?S.permT:0)+dt;S.permG0=g;
      if(S.permT>=30&&S.permG!==g){S.permG=g;toast('Paragem permissiva cumprida: pode avançar em marcha à vista (máx. 30 km/h).','good')}}}
-  for(const gS of SIG){if(gS.d!==DIRC)continue;if(REV?(gS.p<S.prevPos&&gS.p>=S.pos):(gS.p>S.prevPos&&gS.p<=S.pos)){const st=sigState(gS),perm=gS.k==='blk'&&!gS.pr;
+  for(const gS of SIG){if(gS.d!==DIRC||S.ref||S.ofi)continue;if(REV?(gS.p<S.prevPos&&gS.p>=S.pos):(gS.p>S.prevPos&&gS.p<=S.pos)){const st=sigState(gS),perm=gS.k==='blk'&&!gS.pr;
     if(S.vista&&S.vista.g!==gS&&S.vista.end==null)S.vista.end=gS.p;
     if(st==='R'){if(perm&&S.permG===gS){S.vista={g:gS,end:null};toast('Marcha à vista até a cauda passar o sinal seguinte.','')}
       else{emergency(perm?'Sinal de paragem permissiva ultrapassado sem os 30 s de paragem':'Passagem de sinal em paragem absoluta');penal(200)}}
@@ -1772,6 +1776,11 @@ function step(dt,dr){
     if(st==='Y')toast((gS.k==='av'?'Sinal avançado em precaução':'Sinal amarelo: precaução')+', máximo '+S.sigLim.v+' km/h até ao sinal seguinte.','');
     else if(st==='YF')toast('Aviso de precaução: o sinal seguinte estará em precaução.','')}}
 
+  // saída da oficina: passar a agulha, inverter, seguir pela linha 3 até à via principal; aí começa a ida ao posto de gasóleo
+  if(S.ofi){const G=OFG,dm=REV?-1:1,len=TLEN(S.ncar),hi=Math.max(S.pos,S.pos-dm*len),lo=Math.min(S.pos,S.pos-dm*len);
+    if(S.ofi.ph==='shed'&&hi<G.pb-43&&S.v<0.05){S.ofi.ph='loop';toast('Passou a agulha da oficina. O manobrista muda-a: inverta a marcha e siga pela linha 3 até à via principal, para o posto de gasóleo.','good')}
+    else if(S.ofi.ph==='loop'&&lo>G.pb+105){S.ofi=null;const dI=DEPOTS.findIndex(D=>D.st===G),p0=REV?G.stopR:G.stopF;
+      if(dI>=0){const D=DEPOTS[dI];S.ref={d:dI,ph:'ir',ah:(D.p-p0)*dm>0}}toast('Na via principal: pare com a automotora junto à bomba de gasóleo.','good')}}
   // manobra ao posto de gasóleo: ir até à bomba, desligar o motor, abastecer, ligar e voltar ao cais
   if(S.ref){const Rf=S.ref,D=DEPOTS[Rf.d],p0=REV?S.startSt.stopR:S.startSt.stopF,dm=REV?-1:1;
     if(Rf.ph==='ir'){if(atPump(D)&&S.v<0.05&&!Rf.told){Rf.told=true;toast('Parado junto à bomba: desligue o motor (I) e abasteça (G).','good')}
@@ -1796,13 +1805,13 @@ function step(dt,dr){
 
   // 1 minuto antes da partida, nas estações principais: "Vai partir da linha número 1 o comboio com destino a …"
   if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
-  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&!S.ref&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(hasChefe(S.atSt)){whistle();toast(dark>0.5?'O chefe da estação apita e mostra a lanterna verde: buzine e parta!':'O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
+  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&!S.ref&&!S.ofi&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(hasChefe(S.atSt)){whistle();toast(dark>0.5?'O chefe da estação apita e mostra a lanterna verde: buzine e parta!':'O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
   if(S.trip0==null&&S.v>0.3)S.trip0=S.clock;
   if(S.hornSeq){const el=(performance.now()-S.hornSeq)/1000;if(el>=1.5||paused){S.hornSeq=0;S.horn=false;hb.classList.remove('down')}else{S.horn=true;S.hornK=el<0.5?'horn_lo':'horn_hi'}}
   // o maquinista buzina antes de arrancar (depois de fechar as portas)
   if(S.atSt&&!S.departed&&!S.doors&&S.horn)S.depHorn=true;
   // partida
-  if(S.atSt&&!S.departed&&S.v>0.3&&!S.back&&!S.ref){S.departed=true;const st=S.atSt,d=S.clock-st.dep;S.depSt=st;S.depOK=!!S.whistled&&!crossPending(st);
+  if(S.atSt&&!S.departed&&S.v>0.3&&!S.back&&!S.ref&&!S.ofi){S.departed=true;const st=S.atSt,d=S.clock-st.dep;S.depSt=st;S.depOK=!!S.whistled&&!crossPending(st);
     if(!S.depHorn)penal(25,'Faltou buzinar antes de partir de '+st.n);
     if(crossPending(st)){emergency('Partida sem cruzamento em '+st.n);penal(200)}
     // depois do apito do chefe (ou do 'pode seguir') a partida nunca é antecipada
@@ -2498,6 +2507,7 @@ function hud(dtR){
   else if(S.ref)st=refMsg();
   else if(S.endWait)st='Fim de serviço: desligue o motor (I)';
   else if(S.eng<1&&S.atSt&&!S.departed)st='Motor desligado: ignição (tecla I)';
+  else if(S.ofi)st=S.ofi.ph==='shed'?'Manobra: saia da oficina '+(REV?'em frente':'em marcha atrás')+' até passar a agulha':'Manobra: '+(REV?'em marcha atrás':'em frente')+' pela linha 3 até à via principal';
   else if(ns&&!S.doors&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20.5)st='Na plataforma: abra as portas';
   else if(S.atSt&&!S.departed&&!S.doors&&crossPending(S.atSt))st='Aguarde o cruzamento com a automotora contrária';
   else if(S.atSt&&!S.departed&&!S.doors)st=S.clock>=S.atSt.dep-20?'Sinal aberto: pode partir':'Aguarde a hora de partida';
@@ -4152,15 +4162,20 @@ function obj3(mb,sp,i,L){
     boxRF(mb,Q(3.39,4.2),R,F,0.02,0.9,y+1.2,y+1.9,cc(60,70,78),0);break}
   case'oficina':{// oficina de reparação das automotoras: nave de alvenaria rebocada, telhado de duas águas em fibrocimento com
     // claraboias, janelas altas, dois portões virados para a estação e as duas vias de acesso sobre um pátio de betão
-    const Lg=36,Wd=14,h=6.6,y=y0,P3=(a,f,yy)=>[c[0]+R[0]*a+F[0]*f,yy,c[2]+R[2]*a+F[2]*f],Q=(a,f)=>add(c,add(mulv(R,a),mulv(F,f)));
-    boxRF(mb,c,R,F,Wd,Lg,y-0.4,y+h,cc(226,218,198),0);boxRF(mb,c,R,F,Wd+0.06,Lg+0.06,y-0.4,y+0.7,cc(150,140,124),0);
+    const Lg=42,Wd=14,h=6.6,y=y0,P3=(a,f,yy)=>[c[0]+R[0]*a+F[0]*f,yy,c[2]+R[2]*a+F[2]*f],Q=(a,f)=>add(c,add(mulv(R,a),mulv(F,f))),wc=cc(226,218,198),pc0=cc(150,140,124);
+    // paredes (a frente com dois vãos de portão abertos, para as automotoras entrarem), soco e chão de betão
+    for(const sg of[-1,1]){boxRF(mb,Q(sg*(Wd/2-0.15),0),R,F,0.3,Lg,y-0.4,y+h,wc,0);boxRF(mb,Q(sg*(Wd/2-0.12),0),R,F,0.36,Lg+0.06,y-0.4,y+0.7,pc0,0)}
+    boxRF(mb,Q(0,Lg/2-0.15),R,F,Wd,0.3,y-0.4,y+h,wc,0);
+    for(const[a0,a1]of[[-Wd/2,-5.7],[-1.3,1.3],[5.7,Wd/2]])boxRF(mb,Q((a0+a1)/2,-Lg/2+0.15),R,F,a1-a0,0.3,y-0.4,y+h,wc,0);
+    boxRF(mb,Q(0,-Lg/2+0.15),R,F,Wd,0.3,y+5.3,y+h,wc,0);boxRF(mb,c,R,F,Wd-0.6,Lg-0.6,y-0.4,y+0.08,cc(120,118,112),0);
     const rc=cc(160,158,150),ov=0.5;
     mb.q(P3(-Wd/2-ov,-Lg/2-ov,y+h),P3(-Wd/2-ov,Lg/2+ov,y+h),P3(0,Lg/2+ov,y+h+2.8),P3(0,-Lg/2-ov,y+h+2.8),rc,0);
     mb.q(P3(Wd/2+ov,Lg/2+ov,y+h),P3(Wd/2+ov,-Lg/2-ov,y+h),P3(0,-Lg/2-ov,y+h+2.8),P3(0,Lg/2+ov,y+h+2.8),rc,0);
     for(const f of[-Lg/2,Lg/2]){const a=P3(-Wd/2,f,y+h),b=P3(Wd/2,f,y+h),t=P3(0,f,y+h+2.7),nn=mulv(F,Math.sign(f));mb.t(a,b,t,nn,nn,nn,cc(226,218,198),[0,0],[1,0],[0.5,1],0,0,1)}
     for(let f=-Lg/2+3;f<Lg/2-2;f+=6)for(const sg of[-1,1]){boxRF(mb,Q(sg*Wd/4,f),R,F,2.2,1.4,y+h+1.3,y+h+1.5,cc(176,200,206),0)}
     for(let f=-Lg/2+3;f<Lg/2-2;f+=4)for(const sg of[-1,1])boxRF(mb,Q(sg*(Wd/2+0.03),f),R,F,0.06,2.2,y+2.4,y+5.2,cc(64,76,82),0);
-    for(const a of[-3.5,3.5]){boxRF(mb,Q(a,-Lg/2-0.05),R,F,4.4,0.12,y,y+5.3,cc(44,78,58),0);boxRF(mb,Q(a,-Lg/2-0.08),R,F,0.08,0.14,y,y+5.3,cc(30,40,34),0)}
+    // folhas dos portões abertas para fora, encostadas à fachada
+    for(const a of[-3.5,3.5])for(const sg of[-1,1])boxRF(mb,Q(a+sg*2.2,-Lg/2-1.1),R,F,0.1,2.2,y,y+5.3,cc(44,78,58),0);
     {const pc=Q(0,-Lg/2-0.1);plateQ(mb,[pc[0],y+h+1.0,pc[2]],mulv(F,-1),5.6,0.7,ATL.oficina,0,false)}
     boxRF(mb,Q(0,-Lg/2-9),R,F,Wd+2,18,y-0.3,y+0.06,cc(150,148,140),6,2,2);
     break}
@@ -5126,11 +5141,16 @@ function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.livB=
   const st=STN[idx];toast((S.ncar>2?'Unidade dupla 9600 (4 caixas)':'Automotora 9600')+' para '+S.endSt.n+'. Partida de '+st.n+' às '+fHM(st.dep)+'. Arranque depois do apito do chefe da estação.','');
   // continuação depois da mudança de linha ou jogo retomado: mantém o motor e o gasóleo
   if(XST){S.fuel=XST.fuel;S.eng=XST.eng;XST=null}
+  // primeiro comboio da manhã de Guimarães: começa 20 min antes, dentro da oficina, com o depósito na reserva
+  if(OFI_REQ&&OFG&&st===OFG){const len=TLEN(S.ncar);S.ofi={ph:'shed'};S.pos=S.prevPos=REV?OFG.pb+101:OFG.pb+101+len;S.fuel=0.07+Math.random()*0.05;
+    S.clock=Math.min(S.clock,st.dep-1200);S.jI=0;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
+    setTimeout(()=>{if(S.ofi)toast('Primeiro comboio do dia: a automotora está na oficina. Ligue o motor e saia '+(REV?'em marcha à frente':'em marcha atrás (tecla R)')+' até passar a agulha; depois inverta e siga pela linha da direita até à via principal e ao posto de gasóleo. O manobrista orienta a manobra.','bad')},5200)}
+  OFI_REQ=false;
   // algumas viagens começam 10 min mais cedo com o depósito na reserva: manobra ao posto de gasóleo antes da partida
   {const dI=DEPOTS.findIndex(D=>D.st===st);
-   if(!NOREF&&dI>=0&&Math.random()<0.3){const D=DEPOTS[dI],ah=(D.p-S.pos)*(REV?-1:1)>0;S.fuel=0.06+Math.random()*0.06;S.clock=Math.min(S.clock,st.dep-600);S.ref={d:dI,ph:'ir',ah};
+   if(!S.ofi&&!NOREF&&dI>=0&&Math.random()<0.3){const D=DEPOTS[dI],ah=(D.p-S.pos)*(REV?-1:1)>0;S.fuel=0.06+Math.random()*0.06;S.clock=Math.min(S.clock,st.dep-600);S.ref={d:dI,ph:'ir',ah};
      setTimeout(()=>{if(S.ref)toast('Depósito de gasóleo na reserva. Antes da partida leve a automotora ao posto de abastecimento, '+(ah?'em frente':'em marcha atrás')+', a '+Math.round(Math.abs(D.p-S.pos))+' m: o manobrista orienta a manobra.','bad')},5200)}
-   else setTimeout(()=>{if(S&&S.eng<1&&!S.engS)toast('Antes de partir, ligue o motor: tecla I (Ignição).','')},5200);NOREF=false}
+   else if(!S.ofi)setTimeout(()=>{if(S&&S.eng<1&&!S.engS)toast('Antes de partir, ligue o motor: tecla I (Ignição).','')},5200);NOREF=false}
   setTimeout(()=>say((S.semi?'Comboio semirrápido com destino a ':'Comboio urbano com destino a ')+S.endSt.n+(S.semi?', com paragem em '+STOPS.slice(1,-1).map(x=>x.n.replace('Porto ','')).join(', '):'')+'. Partida às '+fHM(st.dep).replace(':',' e ')+'.'),900)}
 function finish(){running=false;S.horn=false;
   const sc=S.sc,t=Math.max(0,total()),r=t/S.maxPts,stars=r>0.85?3:r>0.65?2:r>0.4?1:0;
@@ -5152,7 +5172,7 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 document.querySelectorAll('#uniSel button').forEach(b=>b.onclick=()=>{UNITS=+b.dataset.u;document.querySelectorAll('#uniSel button').forEach(q=>q.classList.toggle('on',q===b));setStops(UNITS===2?4:2);if(!$('#ovCustom').hidden)custRender()});
 function saveObj(){return{v:1,line:LINE,free:!!S.free,via:S.via||null,viaEnd:S.viaEnd||null,swJ:!!S.swJ,swH:!!S.swH,swC:!!S.swC,ns:STN.length,ncar:S.ncar,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
-    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,trip0:S.trip0,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT,eng:S.eng,fuel:S.fuel,ref:S.ref,endWait:!!S.endWait},
+    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,trip0:S.trip0,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT,eng:S.eng,fuel:S.fuel,ref:S.ref,ofi:S.ofi||null,endWait:!!S.endWait},
     onboard:ONBOARD.map(p=>({...p,c:p.c.slice()})),paxTaken:STN.map(s=>({taken:(s.pax3||[]).map(p=>!!p.in),alighted:!!s.alightDone})),
     st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])}}
 function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
@@ -5171,7 +5191,7 @@ function applySave(o){if(!o)return;
   if(o.line&&o.line!==LINE){try{sessionStorage.setItem('pendingLoad',JSON.stringify(o))}catch(e){}running=false;setLine(o.line);return}
   if(!saveOK(o)){toast('Este jogo guardado já não é compatível com esta versão do jogo.','bad');return}
   PERIOD=o.period||'tarde';updPeriod();FORCE_NC=o.ncar||2;NOREF=true;start(o.start,o.end,o.rev,o.cust||undefined);
-  Object.assign(S,o.s);if(o.s.eng===undefined)S.eng=1;if(o.s.fuel===undefined)S.fuel=0.8;S.engS=0;ONBOARD=Array.isArray(o.onboard)?o.onboard.filter(p=>p&&Number.isFinite(p.d)&&Number.isFinite(p.x)&&Array.isArray(p.c)).slice(0,272):[];S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
+  Object.assign(S,o.s);if(o.s.eng===undefined)S.eng=1;if(!OFG)S.ofi=null;if(o.s.fuel===undefined)S.fuel=0.8;S.engS=0;ONBOARD=Array.isArray(o.onboard)?o.onboard.filter(p=>p&&Number.isFinite(p.d)&&Number.isFinite(p.x)&&Array.isArray(p.c)).slice(0,272):[];S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
   o.st.forEach((q,k)=>{STN[k].served=!!q[0];STN[k].skipped=!!q[1];STN[k].paxGone=q[2]});o.pn.forEach((q,k)=>{if(PN[k]){PN[k].done=!!q[0];PN[k].honk=!!q[1]}});
   if(Array.isArray(o.paxTaken))o.paxTaken.forEach((q,i)=>{const st=STN[i];if(!st||!q)return;st.alightDone=!!q.alighted;(st.pax3||[]).forEach((p,j)=>{p.in=!!(q.taken&&q.taken[j])})});
   S.free=!!o.free;S.via=o.via||null;S.viaEnd=o.viaEnd||null;S.swJ=!!o.swJ;S.swH=!!o.swH;S.swC=!!o.swC;S.divJ=S.divH=S.divC=false;
@@ -5294,6 +5314,9 @@ function ttRender(){const tabs=$('#ttTabs'),body=$('#ttBody');tabs.innerHTML='';
 function ttStart(n){const x=TTS.find(q=>q[0]===n);if(!x)return;const P=ttPlan(x),g=P.legs[0];audioInit();
   if(g.line!==LINE){try{sessionStorage.setItem('pendingTT',n)}catch(e){}running=false;setLine(g.line);return}
   const a=byNameE(g.a),z=byNameE(g.z),t={};for(const k in g.t){const s=byNameE(k);if(s&&!s.nostop)t[s.i]=g.t[k]}
+  // o primeiro da manhã de Guimarães para Fafe e o primeiro de Guimarães para a Trindade saem da oficina
+  {const tk=y=>{const v=T(y[4]);return v<4*3600?v+86400:v},first=d=>TTS.filter(y=>y[2]==='Guimarães'&&y[3]===d).sort((u,w)=>tk(u)-tk(w))[0];
+   if(x[2]==='Guimarães'&&(x[3]==='Fafe'||x[3]==='Porto-Trindade')&&first(x[3])===x){OFI_REQ=true;FORCE_NC=2}}
   $('#ovTT').hidden=true;start(a.i,z.i,g.rev,{t});S.ttn=n;
   toast('Comboio '+n+(x[5]==='S'?' (semidireto: não para nos apeadeiros)':'')+': '+x[2]+' → '+x[3]+', partida às '+fHM(t[a.i])+'.'+(x[1]==='X'?' Passa pela concordância de Lousado, com paragem no cais da curva.':''),'good')}
 document.querySelectorAll('#gqSel button').forEach(b=>{b.classList.toggle('on',b.dataset.q===GQK);b.onclick=()=>setGQ(b.dataset.q)});
