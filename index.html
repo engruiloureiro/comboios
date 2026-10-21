@@ -94,7 +94,7 @@ canvas{display:block;width:100%;height:100%}
 .notch.t{color:#8fd27f}.notch.b{color:#f0a05a}.notch.e{color:#ff6b5e}.notch.on{color:#fff}
 #handle{position:absolute;right:8px;width:38px;height:16px;border-radius:4px;background:linear-gradient(#e2e6e8,#8b949a);
   box-shadow:0 2px 3px rgba(0,0,0,.6);transform:translateY(-50%);transition:top .06s}
-#btns{grid-column:1 / span 2;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+#btns{grid-column:1 / span 2;display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
 #bRev.on{background:#b5561c;color:#fff}
 .btn{border:0;border-radius:8px;background:#414a51;color:var(--ink);font:600 15px/1.05 'Barlow Condensed',Arial,sans-serif;
   box-shadow:0 3px 0 #181c1f;cursor:pointer;touch-action:manipulation;padding:0 4px}
@@ -165,16 +165,18 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
       <div class="row"><span>Limite <b id="dLim">--</b></span><span id="dNextLim"></span></div>
       <div class="row"><span id="dSig">Sinal —</span><span id="dDelay">Pontual</span></div>
       <div class="row"><span id="dMsg"></span><span><b id="dScore">0</b> pts</span></div>
-      <div class="row"><span>Tempo de viagem <b id="dTrip">--:--</b></span><span></span></div>
+      <div class="row"><span>Tempo de viagem <b id="dTrip">--:--</b></span><span id="dFuel" title="Manómetro do gasóleo">Gasóleo <svg viewBox="0 0 44 26" width="40" height="24" style="vertical-align:-6px" aria-hidden="true"><path d="M4 22 A18 18 0 0 1 40 22" fill="none" stroke="#5a6268" stroke-width="4"/><path d="M4 22 A18 18 0 0 1 5.96 13.83" fill="none" stroke="#d9452e" stroke-width="4"/><line id="fuelN" x1="22" y1="22" x2="7" y2="22" stroke="#1b1b1b" stroke-width="2.2" stroke-linecap="round"/><circle cx="22" cy="22" r="2.4" fill="#333"/></svg> <b id="dFuelP">--</b></span></div>
     </div>
     <div id="lever" aria-label="Manípulo de tração e travão" role="slider" tabindex="0"><div id="notches"></div><div id="handle"></div></div>
     <div id="btns">
+      <button class="btn" id="bIgn">Ignição</button>
       <button class="btn" id="bDoor">Abrir portas</button>
       <button class="btn" id="bHorn">Buzina</button>
       <button class="btn" id="bVig">Homem-morto</button>
       <button class="btn" id="bWarp">Tempo ×1</button>
       <button class="btn" id="bRev" aria-pressed="false">Marcha: frente</button>
       <button class="btn" id="bSw">Agulha</button>
+      <button class="btn" id="bFuel">Abastecer</button>
     </div>
   </div>
 </div>
@@ -571,6 +573,11 @@ const trackX=p=>{if(S&&S.divC){const v=jcOff(p);if(v!==null)return v}if(S&&S.pvT
 let STOPS=STN.filter(s=>s.dep!==null),ORD=STN;
 // a Avenida de França é o único apeadeiro com chefe de estação
 const hasChefe=s=>s.ty!=='ap'||s.n==='Avenida de França';
+// postos de abastecimento de gasóleo, fora do cais de passageiros e com manobrista: Trindade, Guimarães, Fafe, Póvoa e Famalicão.
+// [estação, lado da estação (1 = depois do fim do cais, -1 = antes do início), distância ao cais, lado da via onde fica a bomba]
+const FUEL_L=400;let NOREF=false,XST=null;   // litros de gasóleo por automotora
+const DEPOTS=[['Porto-Trindade',1,160,-1,1],['Guimarães',-1,140,-1],['Fafe',-1,140,1],['Póvoa de Varzim',-1,140,1],['Famalicão',-1,140,-1]]
+  .map(([n,d,o,sd,cp])=>{const s=byNameE(n);return s?{st:s,p:d>0?s.pb+o:s.pa-o,sd,x:sd*3.4,cp:!!cp}:null}).filter(Boolean);   // cp: posto compacto (na trincheira da Trindade)
 // Túnel de Paçô Vieira (71 m, imediatamente antes da estação) e ponte de pedra sobre o Vizela
 const TUN=RPO?[{a:km(0.32),b:km(0.78),tc:0}]:[{a:PV.pos-160,b:PV.pos-89,tc:0}].concat(VZT?[VZT]:[],[{a:km(0.32),b:km(0.78),tc:0}]);
 const BRIDGESP=[{a:km(6.933),b:km(6.972),t:3,n:'Ponte sobre o rio Leça'},{a:km(26.221),b:km(26.324),t:2,n:'Ponte de ferro sobre o rio Ave (Vila do Conde)'},{a:km(57.45),b:km(57.489),t:3,n:'Ponte sobre o rio Este'}],BRIDGESG=[{a:kR(10.3),b:kR(10.34),t:1,n:'Ponte sobre o rio Leça'},{a:kR(26.9),b:kR(27.06),t:2,n:'Ponte de ferro sobre o rio Ave (Trofa)'},{a:kR(31.6),b:kR(31.64),t:1,n:'Passagem sobre a estrada'},{a:kR(37.935),b:kR(38.075),t:2,n:'Ponte de ferro de Caniços'},{a:kR(49.4),b:kR(49.44),t:1,n:'Passagem sobre a estrada'},{a:kmG(15.37),b:kmG(15.44),t:3,n:'Ponte sobre o rio Vizela'},{a:kmG(18.38),b:kmG(18.40),t:1,n:'Passagem sobre a estrada'},{a:GUI.pb+149.5,b:GUI.pb+159.5,t:1,green:true,rd:true,n:'Pontão de ferro sobre a estrada, à saída de Guimarães'}];
@@ -1035,7 +1042,14 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // abre caminho à via da outra linha na bifurcação: tira casas e árvores de cima dela
   for(let k=Math.floor(JSH/SEG);k<=Math.floor((JSH+JSHL)/SEG);k++){const o=jshOff(k*SEG);if(o===null)continue;
     spr[k]=spr[k].filter(q=>{const x=q.x||0;return Math.abs(x)<4||Math.sign(x)!==Math.sign(o)||Math.abs(x)>Math.abs(o)+(q.w||20)/2+12})}
-  for(const g of SIG){const k=Math.floor(g.p/SEG);if(k<TOTAL&&k>=0)spr[k].push({t:'sig',x:g.d==='R'?trackXR(g.p)+2.7:-2.7,g,d:g.d})}
+  // os sinais ficam à esquerda de todas as vias (no sentido da marcha), com folga para a caixa da automotora
+  // postos de gasóleo: tira casas e árvores de cima do recinto
+  for(const D of DEPOTS){const k=Math.floor(D.p/SEG);if(k<0||k>=TOTAL)continue;
+    for(let j=Math.max(0,k-4);j<=Math.min(TOTAL-1,k+4);j++)spr[j]=spr[j].filter(q=>!(Math.sign(q.x||0)===D.sd&&Math.abs(q.x||0)<20&&!/^(sig|apx|lim|avis|ea|silvo|pk|tpole|lamp|pn|pnu|buffer)$/.test(q.t)));
+    spr[k].push({t:'fuel',x:D.x,cp:D.cp})}
+  for(const g of SIG){const k=Math.floor(g.p/SEG);if(k>=TOTAL||k<0)continue;const T=(trk[k]||[]).concat(trkX[k]||[]),xr=trackXR(g.p);let x=g.d==='R'?xr+2.9:-2.9;
+    if(g.d==='F'){for(const o of T)if(o<0.3&&o>-40)x=Math.min(x,o-2.9)}else{for(const o of T)if(o>xr-0.3&&o<40)x=Math.max(x,o+2.9)}
+    spr[k].push({t:'sig',x,g,d:g.d})}
 })();
 
 /* ================= CENÁRIOS HISTÓRICOS 1970–1985 =================
@@ -1273,7 +1287,7 @@ const HIST_AUDIT={version:'2026-10-10',removed:0,added:0};
 const TRC=(()=>{const T=TUN.find(t=>Math.abs(t.a-km(0.32))<2);if(!T)return null;
   const a=BUFFER_R-20,b=T.a,hR=p=>p<SB.pb+8?0:4+9*sstep((p-SB.pb-8)/90),hL=()=>9.2;return{a,b,T,hR,hL}})();
 if(TRC){const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1),put=(p,o)=>spr[at(p)].push(o);
-  const keep=/^(sig|apx|topo|lim|avis|ea|silvo|tpole|pk|lamp|board|stop|bench|pax|bldg|shelter|kiosk|buffer|canopy|lnum|lclock|wcol|slamp)$/;
+  const keep=/^(sig|apx|fuel|topo|lim|avis|ea|silvo|tpole|pk|lamp|board|stop|bench|pax|bldg|shelter|kiosk|buffer|canopy|lnum|lclock|wcol|slamp)$/;
   for(let k=at(BUFFER_R-140);k<=at(TRC.b+140);k++){spr[k]=spr[k].filter(o=>keep.test(o.t))}
   // muros: x suave a partir das vias que existem em cada secção
   const ext=(k,s)=>{let m=s>0?2:-2;for(let q=Math.max(0,k-6);q<=Math.min(TOTAL-1,k+6);q++)for(const o of[0,...trk[q],...trkX[q]])if(Math.abs(o)<30)m=s>0?Math.max(m,o):Math.min(m,o);return m};
@@ -1296,7 +1310,7 @@ if(TRC){const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1),put=(p,o)=>spr[at(p)].pus
   // cais de topo, atrás dos para-choques, de onde saem os cais de cada linha
   put(BUFFER_R,{t:'trin',k:'conc',x:0});}
 // vias que se afastam da nossa (concordância de Lousado e pernas do triângulo): sem casas nem árvores em cima delas
-{const keep=/^(sig|apx|topo|lim|avis|ea|silvo|tpole|pk|pn|pnu|lamp|board|stop|bench|pax|bldg|shelter|kiosk|buffer)$/;
+{const keep=/^(sig|apx|fuel|topo|lim|avis|ea|silvo|tpole|pk|pn|pnu|lamp|board|stop|bench|pax|bldg|shelter|kiosk|buffer)$/;
  const clr=(p0,p1,f)=>{const k0=Math.max(0,Math.floor(p0/SEG)),k1=Math.min(TOTAL-1,Math.floor(p1/SEG)),O=k=>{const o=k>=k0&&k<=k1?f(k*SEG):null;return o===null||Math.abs(o)<2.5?null:o};
    for(let k=Math.max(0,k0-12);k<=Math.min(TOTAL-1,k1+12);k++)spr[k]=spr[k].filter(q=>{const x=q.x||0;if(Math.abs(x)<4.2||keep.test(q.t))return true;
      const n2=Math.ceil((q.len||q.w||20)/2/SEG)+1,hw=Math.max(q.dep||0,q.d||0,q.w||0,(q.ru||0)*2,q.t==='tree'?6:12)/2+5;let lo=1e9,hi=-1e9;
@@ -1331,7 +1345,7 @@ function farX(){const X=[],LMR={bigchurch:50,mosteiro:110,termas:70,stadium:130,
  if(RG&&GUI.i>=0){const g=fr3(GUI.pos);X.push([g.x+350,g.z-1450,380]);X.push([g.x+2900,g.z+700,1650])}return X}
 {const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1);
  const ext={campo:o=>(o.d||30)/2,arvores:o=>(o.rv||10)+3,woods:o=>o.dep||20,factory:o=>(o.w||30)/2+6,ware:o=>(o.w||30)/2+5,patio:o=>(o.d||30)/2,galpao:o=>(o.d||15)/2,trilho:o=>o.wd||3};
- const skipT=/^(sig|apx|topo|lim|avis|ea|silvo|tpole|pk|pn|pnu|pnx|lamp|slamp|board|stop|bench|pax|kiosk|buffer|pole|mast|over|foot|lnum|lclock|canopy|wcol|car|far|hivy|wallLow)$/;
+ const skipT=/^(sig|apx|fuel|topo|lim|avis|ea|silvo|tpole|pk|pn|pnu|pnx|lamp|slamp|board|stop|bench|pax|kiosk|buffer|pole|mast|over|foot|lnum|lclock|canopy|wcol|car|far|hivy|wallLow)$/;
  const near=(p,a,b)=>p>a&&p<b;
  for(let k=6;k<TOTAL-6;k+=12){const p=k*SEG;if(p<km(1.65)||p>BUFFER-120)continue;
    const loc=LOCAT(p);let prof=FARL[loc]||'rural';
@@ -1385,7 +1399,7 @@ function reset(startIdx,endIdx,rev,svc){
   S={pos:p0,v:0,aCmd:0,notch:3,clock:st.dep-70,doors:false,dwell:0,atSt:st,departed:false,
      emerg:false,emWhy:'',vigT:60,vigOn:false,vigLeft:0,horn:false,warp:1,bgOff:0,
      sc:{acc:0,pun:0,pn:0,pen:0},maxPts:0,delay:null,finishT:-1,over:false,beepT:0,emUsed:false,
-     nextSpawn:st.dep+40,leadT:st.dep-150,jI:0,bump:0,announced:null,prevPos:p0,startIdx,endSt:en,startSt:st,num:'9611',semi:false,ncar:nc};
+     nextSpawn:st.dep+40,leadT:st.dep-150,jI:0,bump:0,announced:null,prevPos:p0,startIdx,endSt:en,startSt:st,num:'9611',semi:false,ncar:nc,eng:0,engS:0,engL:0,fuel:0.5+Math.random()*0.45,ref:null,endWait:false};
   ALIGHT=[];ONBOARD=[];SMOKE=[];SMACC=0;for(const s of STN){s.alightDone=false;if(s.pax3)for(const px of s.pax3){px.in=false;px.board=undefined;px.cur=null}}
   // procura conforme a hora: cheio às horas de ponta (operários e estudantes), poucos a meio da tarde e à noite
   for(const s of STN){if(!s.pax3||s.dep===null)continue;const hr=((s.dep/3600)%24+24)%24;
@@ -1597,9 +1611,9 @@ function cpAudioUpd(dtA,on,inside){
   // silenciar os sons sintéticos que as gravações substituem
   for(const g of[A.eG,A.xG,A.tuG,A.gwG,A.tmG,A.venG,A.cmpG,A.rg1,A.rg2,A.wg,A.sg,A.hg])if(g)g.gain.setTargetAtTime(0,t,.05);
   const P=[200,385,570,755,940,1125,1310];
-  A.cpI.forEach(([s,g],k)=>{const w=k===0?(r<=200?1:tri(r,0,200,385)):k===6?(r>=1310?1:tri(r,1125,1310,1e9)):tri(r,P[k-1],P[k],P[k+1]);g.gain.setTargetAtTime(on?w*0.62*0.45:0,t,.06)});
+  A.cpI.forEach(([s,g],k)=>{const w=k===0?(r<=200?1:tri(r,0,200,385)):k===6?(r>=1310?1:tri(r,1125,1310,1e9)):tri(r,P[k-1],P[k],P[k+1]);g.gain.setTargetAtTime(on?w*0.62*0.45*(S.engL||0):0,t,.06)});
   A.cpEF.frequency.setTargetAtTime(inside?(camMode==='cab'?3600:2400):5200,t,.2);
-  if(on){const TH=[292,477,662,847,1032,1217];TH.forEach((x,k)=>{if(A.cpPrev<x&&r>=x)cpOne('up'+(k+1),0.55*0.45);if(A.cpPrev>=x&&r<x)cpOne('dn'+(k+1),0.5*0.45)})}A.cpPrev=r;
+  if(on&&S.eng>=1){const TH=[292,477,662,847,1032,1217];TH.forEach((x,k)=>{if(A.cpPrev<x&&r>=x)cpOne('up'+(k+1),0.55*0.45);if(A.cpPrev>=x&&r<x)cpOne('dn'+(k+1),0.5*0.45)})}A.cpPrev=r;
   // rodagem e chiar em curva (as faixas de velocidade são as do Bogies.xml, em m/s)
   const fade=(x,a,b,e)=>clamp(Math.min((x-a)/e,(b-x)/e),0,1);
   const sp=Math.min(1,v/6),tf=tunMix;
@@ -1609,7 +1623,7 @@ function cpAudioUpd(dtA,on,inside){
   const fl=(kmh<14?kmh/14*0.5:0.5+0.5*Math.min(1,(kmh-14)/86))*clamp(kap/0.005,0,1);
   A.cp_flange[1].gain.setTargetAtTime(on&&v>1?fl*0.35:0,t,.3);
   // compressor elétrico: de vez em quando, para repor o reservatório principal
-  A.cmpT-=dtA;if(A.cmpT<-14)A.cmpT=25+Math.random()*35;A.cp_compressor[1].gain.setTargetAtTime(on&&A.cmpT<0?(ext?0.25:0.12):0,t,.5);
+  A.cmpT-=dtA;if(A.cmpT<-14)A.cmpT=25+Math.random()*35;A.cp_compressor[1].gain.setTargetAtTime(on&&S.eng>=1&&A.cmpT<0?(ext?0.25:0.12):0,t,.5);
   // ar do travão: enquanto a pressão no cilindro sobe; ao aliviar, um sopro
   A.cp_air1[1].gain.setTargetAtTime(on&&S.bcpUp?0.35:0,t,.05);
   if(on&&A.cpBcp!==undefined){if(S.bcp<A.cpBcp-0.05&&!A.cpRel){A.cpRel=true;cpOne(S.bcp>30?'airbrake1':'airbrake2',0.4)}if(S.bcp>A.cpBcp+0.05)A.cpRel=false;
@@ -1631,7 +1645,7 @@ function audioUpdate(dtR){
   const L=A.load,inside=camMode==='cab'||camMode==='salao';
   for(const[s,det]of A.eS)s.playbackRate.setTargetAtTime((1+rn*0.72)*det,t,.08);
   A.eLP.frequency.setTargetAtTime((inside?2200:5000)+L*3000,t,.15);
-  A.eG.gain.setTargetAtTime(on?(0.3+0.2*rn+0.18*L)*(inside?1:0.8):0,t,.12);
+  A.eG.gain.setTargetAtTime(on?(0.3+0.2*rn+0.18*L)*(inside?1:0.8)*(S.engL||0):0,t,.12);
   A.xBP.frequency.setTargetAtTime(105+rn*130,t,.15);A.xG.gain.setTargetAtTime(on?L*(0.12+0.12*rn)*(inside?0.6:1.2):0,t,.15);
   A.tuS=(A.tuS||0)+(rn*(0.35+0.65*L)-(A.tuS||0))*Math.min(1,dtA*0.8);const tuf=1300+A.tuS*A.tuS*3200;
   A.tu.frequency.setTargetAtTime(tuf,t,.3);A.tb.frequency.setTargetAtTime(tuf*1.02,t,.3);A.tuG.gain.setTargetAtTime(on?(0.003+0.02*A.tuS)*(inside?1:0.6):0,t,.4);
@@ -1681,10 +1695,19 @@ const CPD={m:40000,F0:62000,P:525000,vmax:90,crr:0.0015,cda:7.2,tF:1,rpm0:200,rp
 function teAt(k){const T=CPD.TE;if(k<=0)return 1;for(let i=1;i<T.length;i++)if(k<=T[i][0]){const a=T[i-1],b=T[i];return(a[1]+(b[1]-a[1])*(k-a[0])/(b[0]-a[0]))/500}return T[T.length-1][1]/500}
 function step(dt,dr){
   S.clock+=dt;
+  // motor: ignição (arranque de 5 s), consumo de gasóleo conforme a carga e paragem por falta de combustível
+  if(S.engS>0){S.engS-=dr;if(S.engS<=0){S.engS=0;S.eng=1;toast('Motor a trabalhar.','good')}}
+  {const tg=S.eng>=1?1:S.engS>0&&S.engS<1.6?1-S.engS/1.6:0;S.engL=(S.engL||0)+clamp(tg-(S.engL||0),-dr*3,dr*1.2)}
+  if(S.eng>=1){S.fuel-=dt*(7+85*(S.fr||0))/3600/FUEL_L;
+    if(S.fuel<0.15&&!S.fuW1){S.fuW1=true;toast('Gasóleo na reserva (15 %).','bad')}if(S.fuel<0.05&&!S.fuW2){S.fuW2=true;toast('O gasóleo está quase a acabar!','bad')}
+    if(S.fuel<=0){S.fuel=0;S.eng=0;cpOne('shutdown',0.5);toast('O motor parou: acabou o gasóleo.','bad')}}
+  if(S.fuel>0.25){S.fuW1=S.fuW2=false}
+  if(S.fuel<=0&&S.v<0.05&&!S.ref){gameOver('A automotora ficou sem gasóleo.');return}
+  if(S.notch>6&&S.eng<1&&!S.engS&&!S.engHint){S.engHint=true;toast('O motor está desligado: ligue a ignição (tecla I).','bad')}if(S.notch<=6)S.engHint=false;
   // ---- dinâmica a partir dos dados do pacote CP 9600 (Engine.xml, TractiveEffortVsSpeed.csv, CP 9600 M.xml) ----
   // força resultante = tração − resistência ao avanço − travão − componente do peso na rampa; a = F/m; v = ∫a dt
   const nV=S.ncar||2,Mv=CPD.m*nV,Me=Mv*1.06,nMot=Math.ceil(nV/2),kmh0=S.v*3.6;
-  const th=S.doors||S.emerg?0:(S.notch>6?(S.notch-6)/5:0);
+  const th=S.doors||S.emerg||S.eng<1?0:(S.notch>6?(S.notch-6)/5:0);
   S.fr=S.fr||0;S.fr+=clamp(th-S.fr,-dt/CPD.tF,dt/CPD.tF);                               // TimeToGetToMaxForce = 1 s
   S.erpm=S.erpm||CPD.rpm0;S.erpm+=clamp(CPD.rpm0+(CPD.rpm1-CPD.rpm0)*th-S.erpm,-CPD.dRpm*dt,CPD.dRpm*dt); // MaxRpmChangePerSecond = 100
   S.rpm=(S.erpm-CPD.rpm0)/(CPD.rpm1-CPD.rpm0);
@@ -1720,7 +1743,7 @@ function step(dt,dr){
   // velocidade (CONVEL)
   const inDiv=SIDE.some(e=>S.pos>e.a&&S.pos<e.b);const limT=S.back||inDiv?Math.min(30,limitAt(S.pos)):limitAt(S.pos);let lim=limT;
   // precaução (amarelo) até ao sinal seguinte e marcha à vista depois de um sinal de paragem permissiva
-  if(S.sigLim)lim=Math.min(lim,S.sigLim.v);if(S.vista){lim=Math.min(lim,30);const e=S.vista.end;if(e!=null&&(REV?S.pos<e-TLEN(S.ncar):S.pos>e+TLEN(S.ncar))){S.vista=null;toast('Fim da marcha à vista.','')}}
+  if(S.ref)lim=Math.min(lim,30);if(S.sigLim)lim=Math.min(lim,S.sigLim.v);if(S.vista){lim=Math.min(lim,30);const e=S.vista.end;if(e!=null&&(REV?S.pos<e-TLEN(S.ncar):S.pos>e+TLEN(S.ncar))){S.vista=null;toast('Fim da marcha à vista.','')}}
   S.limNow=lim;
   for(const X of STN)if(X.divert&&!X.divAnn&&ahead(X)<1200&&ahead(X)>0){X.divAnn=true;toast('Cruzamento em '+X.n+': entrada pela via desviada, a 30 km/h nas agulhas.','')}S.over=false;
   S.derT=S.derT||0;if(kmh>limT+18){S.derT+=dt;if(S.derT>2.5){gameOver('A automotora descarrilou: entrou numa curva a '+Math.round(kmh)+' km/h com limite de '+limT+'.');return}}else S.derT=Math.max(0,S.derT-dt);
@@ -1743,6 +1766,14 @@ function step(dt,dr){
     if(st==='Y')toast((gS.k==='av'?'Sinal avançado em precaução':'Sinal amarelo: precaução')+', máximo '+S.sigLim.v+' km/h até ao sinal seguinte.','');
     else if(st==='YF')toast('Aviso de precaução: o sinal seguinte estará em precaução.','')}}
 
+  // manobra ao posto de gasóleo: ir até à bomba, desligar o motor, abastecer, ligar e voltar ao cais
+  if(S.ref){const Rf=S.ref,D=DEPOTS[Rf.d],p0=REV?S.startSt.stopR:S.startSt.stopF,dm=REV?-1:1;
+    if(Rf.ph==='ir'){if(atPump(D)&&S.v<0.05&&!Rf.told){Rf.told=true;toast('Parado junto à bomba: desligue o motor (I) e abasteça (G).','good')}
+      const away=(S.pos-p0)*dm;if(Rf.ah?away>(D.p-p0)*dm+TLEN(S.ncar)+250:away>60){S.ref=null;penal(50,'Partiu sem abastecer')}}
+    else if(Rf.ph==='enche'){S.fuel=Math.min(1,S.fuel+dt*200/60/FUEL_L);if(S.fuel>=0.999){S.fuel=1;fuelDone()}}
+    else if(Rf.ph==='volta'&&S.v<0.05&&Math.abs(S.pos-p0)<12){if(S.back){if(!Rf.tb){Rf.tb=true;toast('No cais: ponha o inversor em marcha à frente (tecla R).','')}}
+      else{S.ref=null;S.atSt=S.startSt;S.depHorn=false;toast('Automotora no cais, pronta para o serviço. Partida às '+fHM(S.startSt.dep)+'.','good')}}}
+
   // vigilância (tempo real)
   if(S.v>2&&!S.vigOn){S.vigT-=dr;if(S.vigT<=0){S.vigOn=true;S.vigLeft=7}}
   if(S.vigOn){S.vigLeft-=dr;S.beepT-=dr;if(S.beepT<=0){beep(660,.15,.1);S.beepT=.5}
@@ -1759,13 +1790,13 @@ function step(dt,dr){
 
   // 1 minuto antes da partida, nas estações principais: "Vai partir da linha número 1 o comboio com destino a …"
   if(S.atSt&&!S.departed&&S.atSt!==S.endSt&&ANN_ST.has(S.atSt.n)&&S.annSt!==S.atSt&&S.clock>=S.atSt.dep-60){S.annSt=S.atSt;announceDep(S.endSt.n)}
-  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(hasChefe(S.atSt)){whistle();toast(dark>0.5?'O chefe da estação apita e mostra a lanterna verde: buzine e parta!':'O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
+  if(S.atSt&&!S.departed&&!S.doors&&S.dwell<=0&&!S.whistled&&!S.ref&&S.clock>=S.atSt.dep&&!crossPending(S.atSt)){S.whistled=true;S.whT0=performance.now();if(hasChefe(S.atSt)){whistle();toast(dark>0.5?'O chefe da estação apita e mostra a lanterna verde: buzine e parta!':'O chefe da estação apita e levanta a bandeira vermelha enrolada: buzine e parta!','good')}else toast('Pode seguir: buzine antes de arrancar.','')}
   if(S.trip0==null&&S.v>0.3)S.trip0=S.clock;
   if(S.hornSeq){const el=(performance.now()-S.hornSeq)/1000;if(el>=1.5||paused){S.hornSeq=0;S.horn=false;hb.classList.remove('down')}else{S.horn=true;S.hornK=el<0.5?'horn_lo':'horn_hi'}}
   // o maquinista buzina antes de arrancar (depois de fechar as portas)
   if(S.atSt&&!S.departed&&!S.doors&&S.horn)S.depHorn=true;
   // partida
-  if(S.atSt&&!S.departed&&S.v>0.3&&!S.back){S.departed=true;const st=S.atSt,d=S.clock-st.dep;S.depSt=st;S.depOK=!!S.whistled&&!crossPending(st);
+  if(S.atSt&&!S.departed&&S.v>0.3&&!S.back&&!S.ref){S.departed=true;const st=S.atSt,d=S.clock-st.dep;S.depSt=st;S.depOK=!!S.whistled&&!crossPending(st);
     if(!S.depHorn)penal(25,'Faltou buzinar antes de partir de '+st.n);
     if(crossPending(st)){emergency('Partida sem cruzamento em '+st.n);penal(200)}
     // depois do apito do chefe (ou do 'pode seguir') a partida nunca é antecipada
@@ -1782,7 +1813,7 @@ function step(dt,dr){
 
   // embarque
   if(S.doors&&S.dwell>0){S.dwell-=dt;S.dwX=(S.dwX||0)+dt;if(S.dwell<=0.05&&PAXBUSY&&use3D&&S.dwX<30)S.dwell=0.05;if(S.atSt)S.atSt.paxGone=clamp(1-S.dwell/15,0,1);
-    if(S.dwell<=0){S.dwell=0;if(S.atSt===S.endSt&&S.via)toast('Lousado: feche as portas, avance com a composição toda para lá da agulha ('+(RP?'para sul':'para a Trofa')+'), pare, mude a agulha (tecla Z), carregue em Troca de cabine e siga em frente para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'),'');else if(S.atSt===S.endSt)S.finishT=3;else toast('Embarque concluído. Feche as portas.','')}}
+    if(S.dwell<=0){S.dwell=0;if(S.atSt===S.endSt&&S.via)toast('Lousado: feche as portas, avance com a composição toda para lá da agulha ('+(RP?'para sul':'para a Trofa')+'), pare, mude a agulha (tecla Z), carregue em Troca de cabine e siga em frente para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'),'');else if(S.atSt===S.endSt){if(S.eng>=1||S.engS>0){S.endWait=true;toast('Fim de serviço em '+S.endSt.n+': feche as portas e desligue o motor (tecla I).','good')}else S.finishT=3}else toast('Embarque concluído. Feche as portas.','')}}
 
   // comboios em sentido contrário (via dupla)
   if(S.pos<LOU.pos-(REV?800:1500)&&S.clock>S.nextSpawn&&!S.atSt){
@@ -1857,7 +1888,7 @@ function swBtn(){if(!running||!S)return;
   if(fw){toast(S.swJ?'Agulha de Lousado mudada para a Linha da Póvoa: siga em frente, a automotora toma a via desviada para Famalicão.':'Agulha reposta para a linha direta (Guimarães).','good');return}
   if(S.v>0.05){S.swJ=!S.swJ;toast('Pare antes de mudar a agulha.','');return}
   toast(S.swJ?'Agulha mudada para a '+(RP?'Linha de Guimarães':'Linha da Póvoa')+(past?'. Carregue em Troca de cabine e siga em frente.':'. Avance com a composição toda para lá da agulha ('+(RP?'para sul':'para o lado da Trofa')+'), pare, carregue em Troca de cabine e siga em frente.'):'Agulha reposta para a linha direta.','good')}
-function xferLine(x){const fw=!!(x&&x.fw),ch=!!(x&&x.ch);const o={sh:x&&x.sh,fw,ch,lsd:LSD&&LSD.pos,jcn:JCN,from:LINE,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:ch?'gp':RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,period:PERIOD,end:S.viaEnd||(fw?'Póvoa de Varzim':ch?(RP?'Guimarães':'Póvoa de Varzim'):RP?'Guimarães':'Porto-Trindade')};
+function xferLine(x){const fw=!!(x&&x.fw),ch=!!(x&&x.ch);const o={sh:x&&x.sh,fw,ch,lsd:LSD&&LSD.pos,jcn:JCN,from:LINE,pos:S.pos,v:S.v,notch:S.notch,free:!!S.free,to:ch?'gp':RP?'guimaraes':'povoa',clock:S.clock,sc:S.sc,maxPts:S.maxPts,ncar:S.ncar,fuel:S.fuel,eng:S.eng,period:PERIOD,end:S.viaEnd||(fw?'Póvoa de Varzim':ch?(RP?'Guimarães':'Póvoa de Varzim'):RP?'Guimarães':'Porto-Trindade')};
   try{sessionStorage.setItem('xfer',JSON.stringify(o))}catch(e){}running=false;
   // liberta o 3D e o som antes de recarregar, para a página nova os conseguir obter (sobretudo nos telemóveis)
   try{const x=gl&&gl.getExtension('WEBGL_lose_context');if(x)x.loseContext()}catch(e){}try{if(AC&&AC.state!=='closed')AC.close().catch(()=>{})}catch(e){}
@@ -1868,6 +1899,28 @@ function cabSwapOK(){return !!(LSD&&S&&running&&!S.back&&Math.abs(S.v)<0.05&&Mat
 function cabSwap(){const d=REV?-1:1;REV=!REV;DIRC=REV?'R':'F';S.pos=S.prevPos=S.pos-d*TLEN(S.ncar);S.back=false;S.cabOK=false;S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;while(S.jI>0&&JOINTS[S.jI-1]>S.pos)S.jI--;updRev();beep(300,.08,.1,'square');
   toast('Cabina trocada. '+(S.swJ?'Siga em frente: a agulha leva-o para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.'):'A agulha está na via direta: mude-a (Z) para seguir para a '+(RP?'Linha de Guimarães.':'Linha da Póvoa.')),'good')}
+function atPump(D){const dm=REV?-1:1,len=TLEN(S.ncar),a=S.pos,b=S.pos-dm*len;return D.p>Math.min(a,b)-5&&D.p<Math.max(a,b)+5}   // a mangueira chega a uns metros das pontas
+function nearPump(){return DEPOTS.find(D=>atPump(D))}
+function ignBtn(){if(!running||!S||S.engS>0)return;
+  if(S.eng>=1){if(S.v>0.1){toast('Pare a automotora antes de desligar o motor.','');return}
+    S.eng=0;cpOne('shutdown',0.55);
+    if(S.endWait){S.endWait=false;S.finishT=2.5;toast('Motor desligado. Serviço terminado.','good')}else toast('Motor desligado.','');return}
+  if(S.fuel<=0.001){toast('Depósito vazio: o motor não arranca.','bad');return}
+  if(S.ref&&S.ref.ph==='enche'){toast('Termine o abastecimento antes de ligar o motor.','');return}
+  S.engS=5.2;cpOne('startup',0.6);toast('Ignição: o motor está a arrancar…','')}
+function fuelDone(){const Rf=S.ref;if(!Rf)return;if(Rf.free){S.ref=null;toast('Abastecimento concluído: '+Math.round(S.fuel*100)+' %.','good');return}
+  Rf.ph='volta';S.sc.pun+=20;toast('Abastecimento concluído (+20). O manobrista faz sinal: ligue o motor e volte ao cais '+(Rf.ah?'em marcha atrás (tecla R)':'em marcha à frente')+'.','good')}
+function fuelBtn(){if(!running||!S)return;
+  if(S.ref&&S.ref.ph==='enche'){fuelDone();return}
+  const D=nearPump();if(!D){toast('Só se abastece junto à bomba dos postos de gasóleo (Trindade, Guimarães, Fafe, Póvoa e Famalicão).','');return}
+  if(S.v>0.05){toast('Pare a automotora junto à bomba.','');return}
+  if(S.eng>=1||S.engS>0){toast('Por segurança, desligue o motor (tecla I) antes de abastecer.','');return}
+  if(S.fuel>0.98){toast('O depósito está cheio.','');return}
+  if(S.ref&&S.ref.ph==='ir')S.ref.ph='enche';else if(!S.ref)S.ref={d:DEPOTS.indexOf(D),ph:'enche',free:true};else return;
+  toast('O manobrista liga a mangueira: a abastecer…','good')}
+function refMsg(){const Rf=S.ref,D=DEPOTS[Rf.d];if(Rf.ph==='enche')return'A abastecer: '+Math.round(S.fuel*100)+' %';
+  if(Rf.ph==='volta')return'Manobra: volte ao cais ('+Math.round(Math.abs(S.pos-(REV?S.startSt.stopR:S.startSt.stopF)))+' m)';
+  return atPump(D)?'Junto à bomba: desligue o motor (I) e abasteça (G)':'Manobra: bomba de gasóleo a '+Math.round(Math.abs(D.p-S.pos))+' m'}
 function updRev(){const b=$('#bRev');if(!b)return;if(S&&S.cabOK){b.textContent='Troca de cabine';b.classList.add('on');b.setAttribute('aria-pressed','false');return}b.textContent=S&&S.back?'Marcha: atrás':'Marcha: frente';b.classList.toggle('on',!!(S&&S.back));b.setAttribute('aria-pressed',S&&S.back?'true':'false')}
 function revBtn(){if(!running||!S)return;if(S.v>0.05){toast('Pare a automotora antes de mudar o inversor.','');return}if(S.notch>6){toast('Ponha o manípulo em 0 ou travão antes de mudar o inversor.','');return}
   if(cabSwapOK()){cabSwap();return}
@@ -2229,7 +2282,7 @@ function drawSprite(sp,q,al,F,tnow){
      const lampC=st==='R'?[200,39,32]:st==='Y'?[235,173,35]:[110,205,116];
      ctx.fillStyle=C(lampC,F);ell(xx,yy+0.05*s,.14*s,.14*s);
      // Articulação e lâmina armada para via livre ou fechada.
-     ctx.save();ctx.translate(xx,yy+0.52*s);ctx.rotate(semAngle(st));
+     ctx.save();ctx.translate(xx,yy+0.52*s);if(gx<cv.width/2)ctx.scale(-1,1);ctx.rotate(semAngle(st));
      ctx.fillStyle='#2a2522';ctx.fillRect(-.06*s,-.23*s,2.2*s,.44*s);
      const im=SIGIM.home;
      if(im&&im.complete&&im.naturalWidth)ctx.drawImage(im,0,-.17*s,1.95*s,.34*s);
@@ -2419,6 +2472,9 @@ function hud(dtR){
   {const o=STOPS[0],t0=o&&o.dep!=null&&!S.free?o.dep:S.trip0,t=t0==null?null:Math.floor(S.clock-t0);
    $('#dTrip').textContent=t===null||t<0?'--':(t>=3600?Math.floor(t/3600)+'h'+String(Math.floor(t/60)%60).padStart(2,'0')+'m':Math.floor(t/60)+'m')+String(t%60).padStart(2,'0')+'s'}
   $('#dLim').textContent=lim;
+  {const f=clamp(S.fuel||0,0,1),n=$('#fuelN');if(n)n.setAttribute('transform','rotate('+(f*180).toFixed(1)+' 22 22)');const fp=$('#dFuelP');if(fp){fp.textContent=Math.round(f*100)+' %';fp.style.color=f<0.15?'#c0392b':''}
+   const b=$('#bIgn');if(b){b.textContent=S.engS>0?'A arrancar…':S.eng>=1?'Motor ligado':'Ignição';b.classList.toggle('go',S.eng>=1);b.classList.toggle('warn',S.eng<1&&!S.engS&&!(S.ref&&S.ref.ph==='enche')&&!!S.atSt&&!S.departed&&!S.endWait)}
+   const bf=$('#bFuel');if(bf){const ok=nearPump()&&S.v<0.05,fill=S.ref&&S.ref.ph==='enche';bf.classList.toggle('go',!!ok&&!fill);bf.style.opacity=ok||fill?1:0.45;bf.textContent=fill?'Parar':'Abastecer'}}
   const nl=REV?nextLimitR(S.pos):nextLimit(S.pos);$('#dNextLim').innerHTML=nl?'<b>'+nl.v+'</b> em '+(Math.round(nl.d/10)*10)+' m':'';
   {const pn=REV?PN.slice().reverse().find(q=>q.pos<S.pos):PN.find(q=>q.pos>S.pos),pd=pn?Math.abs(pn.pos-S.pos):1e9;$('#dSig').innerHTML=pd<1500?(pd<(REV?pn.sR-pn.pos:pn.pos-pn.sF)+15&&!pn.honk?'<b style="color:#9a2a10">PN '+Math.round(pd)+' m, buzinar!</b>':'PN a <b>'+Math.round(pd)+' m</b>'):'Via livre'}
   const[g,gd]=nextSig();
@@ -2432,6 +2488,10 @@ function hud(dtR){
   else if(S.vigOn)st='Confirme vigilância: '+Math.ceil(S.vigLeft)+' s';
   else if(S.over)st='Excesso de velocidade';
   else if(S.doors&&S.notch>6)st='Tração cortada: portas abertas';
+  else if(S.engS>0)st='Motor a arrancar…';
+  else if(S.ref)st=refMsg();
+  else if(S.endWait)st='Fim de serviço: desligue o motor (I)';
+  else if(S.eng<1&&S.atSt&&!S.departed)st='Motor desligado: ignição (tecla I)';
   else if(ns&&!S.doors&&S.v===0&&ahead(ns)<=15&&ahead(ns)>=-20.5)st='Na plataforma: abra as portas';
   else if(S.atSt&&!S.departed&&!S.doors&&crossPending(S.atSt))st='Aguarde o cruzamento com a automotora contrária';
   else if(S.atSt&&!S.departed&&!S.doors)st=S.clock>=S.atSt.dep-20?'Sinal aberto: pode partir':'Aguarde a hora de partida';
@@ -2558,6 +2618,7 @@ function plateP(mb,c,n,w,h,uv,pts,e){const r=[n[2],0,-n[0]],P=(x,y)=>[c[0]+r[0]*
 const DIAM=[[0.5,0],[1,0.5],[0.5,1],[0,0.5]],TRIV=[[0,1],[0.5,0],[1,1]],TRAP=[[0,0],[1,0],[1,0.8],[0.5,1],[0,0.8]];
 const DISC=Array.from({length:24},(_,k)=>[0.5+0.5*Math.cos(k/24*6.2832),0.5+0.5*Math.sin(k/24*6.2832)]);
 const STAD=(()=>{const P=[];for(let k=0;k<=8;k++){const a=k/8*Math.PI;P.push([0.5+0.5*Math.cos(a),0.8+0.2*Math.sin(a)])}for(let k=0;k<=8;k++){const a=Math.PI+k/8*Math.PI;P.push([0.5+0.5*Math.cos(a),0.2+0.2*Math.sin(a)])}return P})();
+function brWL(br){if(br.wl===undefined){let m=1e9;for(let k=Math.floor(br.a/SEG);k<=Math.floor(br.b/SEG);k++)m=Math.min(m,hy[k]-BRD[k]);br.wl=m+2}return br.wl}
 function plateQ(mb,c,n,w,h,uv,e,two){const r=[n[2],0,-n[0]];const p0=[c[0]-r[0]*w/2,c[1]-h/2,c[2]-r[2]*w/2],p1=[c[0]+r[0]*w/2,c[1]-h/2,c[2]+r[2]*w/2];
   const p2=[p1[0],c[1]+h/2,p1[2]],p3=[p0[0],c[1]+h/2,p0[2]];mb.q(p0,p1,p2,p3,[1,1,1],-1,[uv.u0,uv.v1,uv.u1,uv.v0],e||0,1);
   if(two){const m=[-n[0],0,-n[2]];plateQ(mb,[c[0]+n[0]*0.01*-1,c[1],c[2]+n[2]*0.01*-1],m,w,h,uv,e,false)}}
@@ -2760,7 +2821,7 @@ function init3D(){
   for(const k of['i','v'])for(let n=1;n<=3;n++)atAlloc('apx:'+k+n,40,110,(x,w,h)=>{x.fillStyle='#f6f6f2';x.fillRect(0,0,w,h);x.strokeStyle='#888';x.lineWidth=2;x.strokeRect(1,1,w-2,h-2);x.fillStyle='#111';x.strokeStyle='#111';
     for(let j=0;j<n;j++){const y=h/2+(j-(n-1)/2)*30;if(k==='i'){x.beginPath();x.moveTo(2,y+14);x.lineTo(w-2,y-4);x.lineTo(w-2,y-14);x.lineTo(2,y+4);x.closePath();x.fill()}
       else{x.lineWidth=8;x.beginPath();x.moveTo(4,y-10);x.lineTo(w/2,y+7);x.lineTo(w-4,y-10);x.stroke()}}});
-  atTxt('sigP','P','#1d4fa0','#f6f6f2',64,80,62);atTxt('gry','','#7f817c','#7f817c',16,16,8);
+  atTxt('sigP','P','#1d4fa0','#f6f6f2',64,80,62);atTxt('gasoleo','GASÓLEO','#f4f4f0','#a61c1c',256,64,46);atTxt('gry','','#7f817c','#7f817c',16,16,8);
   atAlloc('sigPanel',48,120,(x,w,h)=>{x.fillStyle='#1d1d1f';x.fillRect(0,0,w,h);x.strokeStyle='#ecece6';x.lineWidth=3;const r=w/2-3;
     x.beginPath();x.arc(w/2,r+3,r,Math.PI,0);x.lineTo(w-3,h-r-3);x.arc(w/2,h-r-3,r,0,Math.PI);x.closePath();x.stroke();
     x.fillStyle='#0b0b0c';for(const yy of[0.213,0.5,0.787]){x.fillRect(w/2-11,h*yy-11,22,22)}});
@@ -2945,7 +3006,9 @@ function buildChunk(c){
       if(t===4&&i%4===0){for(const px of[-1,(xr-3.4)/2,xr-2.4]){const base=terrH(i,px,WX[i],WZ[i]);boxRF(mb,L(PI(i,px,0)),RV(i),FV(i),1.4,1.4,base-1,hy[i]-1.3,cc(200,198,192),6,4,4)}}
       if(t===4&&p>TRO.pos-215&&p<TRO.pos-25&&i%2===0){const base=terrH(i,2,WX[i],WZ[i]);boxRF(mb,L(PI(i,(xr-3.4)/2,0)),RV(i),FV(i),xr+1,SEG*2+0.05,base-0.5,hy[i]-1.35,cc(220,230,236),16,3,3,-0.5)}
       if(t===3&&!((RG||GP)&&(inRange(BRIDGES,p)||{}).histArch)&&i%4===0){const base=terrH(i,0,WX[i],WZ[i]);boxRF(mb,L(PI(i,(xr-3.4)/2,0)),RV(i),FV(i),xr+2,3,base-1,hy[i]-1.3,[1,1,1],13,6,6)}
-      if(t!==3&&t!==4&&!BR.rd&&BRD[i]>2){mb.q(LP(i,-90,-BRD[i]+0.6),LP(i,90,-BRD[i]+0.6),LP(j,90,-BRD[j]+0.6),LP(j,-90,-BRD[j]+0.6),[1,1,1],9,[0,p/20,6,(p+SEG)/20])}}
+      // rio debaixo da ponte: espelho de água horizontal, 2 m acima do fundo do vale (só nas pontes sobre rios; antes seguia o perfil
+      // do vale e, no último troço da ponte, subia até ao nível dos carris)
+      if(t!==4&&!BR.rd&&/rio|Caniços/.test(BR.n||'')){const w=brWL(BR);mb.q(LP(i,-90,w-hy[i]),LP(i,90,w-hy[i]),LP(j,90,w-hy[j]),LP(j,-90,w-hy[j]),[1,1,1],9,[0,p/20,6,(p+SEG)/20])}}
     if(riv[i]){const R=inRange(RIVER,p),sd=R.side,y=-2.6,xa=riverX(R,p),xb=riverX(R,p+SEG);mb.q(LP(i,sd*(xa-2),y),LP(i,sd*(xa+R.w+2),y),LP(j,sd*(xb+R.w+2),y),LP(j,sd*(xb-2),y),HON(p)?cc(157,176,155):[1,1,1],9,[0,p/20,3,(p+SEG)/20])}
     if(shed[i]){const g=cc(150,158,162);mb.q(LP(i,-17,13),LP(i,24,13),LP(j,24,13),LP(j,-17,13),g,11,[0,0,6,1],0.15,0.9);
       for(const xx of[-17,24])mb.q(LP(i,xx,0),LP(j,xx,0),LP(j,xx,12.5),LP(i,xx,12.5),cc(214,204,184),4,[p/12,1,(p+SEG)/12,0],-1);
@@ -4066,6 +4129,21 @@ function obj3(mb,sp,i,L){
       mb.q(P(-2.6,0),P(2.6,0),P(2.6,8),P(-2.6,8),cc(40,36,32),0);for(let q=0;q<8;q++){const a0=Math.PI*q/8,a1=Math.PI*(q+1)/8;mb.q(P(-2.6*Math.cos(a0),8+2.6*Math.sin(a0)),P(-2.6*Math.cos(a1),8+2.6*Math.sin(a1)),P(-2.6*Math.cos(a1),8),P(-2.6*Math.cos(a0),8),cc(40,36,32),0)}
       mb.q(P(-2,12.5),P(2,12.5),P(2,16),P(-2,16),cc(60,70,80),16,[0,0,1,1],-1)}
     const ck=ATL['clock'];plateQ(mb,add(add(fr0,mulv(F,0.05)),[0,yb+17,0]),F,2.4,2.4,ck,0,false);break}
+  case'fuel':{// posto de gasóleo: laje de betão, bomba com mangueira, depósito vertical com escada e placa, casota
+    const out=mulv(R,sd),nT=mulv(out,-1),Q=(a,f)=>add(c,add(mulv(out,a),mulv(F,f))),y=y0;
+    boxRF(mb,Q(1.4,0),R,F,3.6,10,y-0.05,y+0.1,cc(146,144,136),6,2,2);
+    boxRF(mb,Q(0.2,0),R,F,0.55,0.45,y+0.1,y+1.55,cc(214,212,204),0);boxRF(mb,Q(0.2,0),R,F,0.62,0.52,y+1.55,y+1.85,cc(176,36,30),0);
+    boxRF(mb,Q(-0.09,0),R,F,0.02,0.32,y+0.95,y+1.35,cc(40,44,46),0);
+    for(let k=0;k<6;k++)boxRF(mb,Q(-0.12-k*0.07,0.3),R,F,0.09,0.09,y+1.25-k*0.17,y+1.34-k*0.17,cc(26,26,26),0);
+    if(sp.cp){// na trincheira da Trindade: depósito deitado encostado ao muro, sobre dois berços de betão
+      for(const f of[-1.4,1.4])boxRF(mb,Q(2.6,4+f),R,F,1.2,0.4,y+0.1,y+0.6,cc(150,148,140),6);
+      boxRF(mb,Q(2.6,4),R,F,1.5,4.6,y+0.6,y+2.0,cc(204,206,200),0);boxRF(mb,Q(2.6,4),R,F,1.2,4.8,y+0.75,y+1.85,cc(196,198,192),0);
+      {const pc=Q(1.84,4);plateQ(mb,[pc[0],y+1.3,pc[2]],nT,1.7,0.42,ATL.gasoleo,0,false)}break}
+    const tc=Q(6.4,-2);cyl(mb,tc,y+0.1,y+0.7,1.6,1.6,14,cc(150,148,140),6);cyl(mb,tc,y+0.7,y+5.4,1.35,1.35,16,cc(204,206,200),0);cyl(mb,tc,y+5.4,y+5.9,1.35,0.25,16,cc(172,174,168),0);
+    for(let h=y+0.9;h<y+5.4;h+=0.35)boxRF(mb,add(tc,add(mulv(nT,1.42),mulv(F,0.7))),R,F,0.06,0.45,h,h+0.04,cc(60,60,60),0);
+    {const pc=add(tc,mulv(nT,1.37));plateQ(mb,[pc[0],y+3.6,pc[2]],nT,1.7,0.42,ATL.gasoleo,0,false)}
+    boxRF(mb,Q(4.6,4.2),R,F,2.4,2.6,y+0.1,y+2.5,cc(232,226,210),0);boxRF(mb,Q(4.6,4.2),R,F,2.8,3.0,y+2.5,y+2.7,cc(150,70,52),0);
+    boxRF(mb,Q(3.39,4.2),R,F,0.02,0.9,y+1.2,y+1.9,cc(60,70,78),0);break}
   case'buffer':{const y=hy[i]+0.2;boxRF(mb,c,R,F,2.9,1.4,y-0.3,y+1.15,[1,1,1],LBUF,1.45,1.45);boxRF(mb,add(c,mulv(F,-(REV?-1:1)*0)),R,F,2.6,1.6,y+0.62,y+0.95,cc(92,62,40),0,1,1);break}
   case'silo':for(let k=-1;k<=1;k++){cyl(mb,add(c,mulv(F,k*7)),y0,y0+34,3,3,12,cc(206,204,198),6)}boxRF(mb,c,R,F,8,24,y0+34,y0+39,cc(160,160,156),6);break;
   }
@@ -4568,7 +4646,7 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
        if(g.semWanted!==st){g.semFrom=(g.semVisual===undefined?semAngle(st):g.semVisual);g.semWanted=st;g.semTime=t}
        const a1=semAngle(st),fac=sstep(clamp((t-g.semTime)/1.2,0,1));
        const a=lerp(g.semFrom,a1,fac);g.semVisual=a;
-       const n=g.n3,r=[n[2],0,-n[0]],pivot=[g.w3[0]-eye[0],g.w3[1],g.w3[2]-eye[2]];
+       const n=g.n3,r=[-n[2],0,n[0]],pivot=[g.w3[0]-eye[0],g.w3[1],g.w3[2]-eye[2]];
        const along=[r[0]*Math.cos(a),-Math.sin(a),r[2]*Math.cos(a)];
        const across=[-r[0]*Math.sin(a),-Math.cos(a),-r[2]*Math.sin(a)];
        const P=(x,v,off)=>[pivot[0]+along[0]*x+across[0]*v+n[0]*off,pivot[1]+along[1]*x+across[1]*v,pivot[2]+along[2]*x+across[2]*v+n[2]*off];
@@ -4637,7 +4715,7 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   PAXBUSY=busy;
   // Escape discreto: partículas transparentes, pequenas e com ascensão contínua.
   {const sm=new MB(),tN=performance.now()/1000,sdt=paused?0:Math.min(.1,tN-(SMT||tN));SMT=tN;const ld=clamp(S.rpm||0,0,1);
-   if(running&&!paused){SMACC+=sdt*(.55+ld*1.0);while(SMACC>=1){SMACC-=1;
+   if(running&&!paused){SMACC+=sdt*(.55+ld*1.0)*(S.engL||0);while(SMACC>=1){SMACC-=1;
      for(const off of(S.ncar>2?[18.05,55.862]:[18.05])){const pp=S.pos-dir*off;SMOKE.push({p:wp(pp,trackX(pp),4.2),a:0,v:[(Math.random()-.5)*.07,1.35+ld*.25,(Math.random()-.5)*.07]})}}}
    for(const q of SMOKE){q.a+=sdt;for(let j=0;j<3;j++)q.p[j]+=q.v[j]*sdt}
    SMOKE=SMOKE.filter(q=>q.a<2.1).slice(-16);
@@ -4651,6 +4729,10 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   for(const s of STN){if(!hasChefe(s)||Math.abs(s.pos-centerP)>500)continue;const stp=REV?s.stopR-9:s.stopF+9,i=Math.floor(stp/SEG),r=s.pl[0],sd=Math.sign(r[0]);
     const pvt=s===PVA&&r[0]<-9,w=pvt?wp(stp,r[0]+sd*1.5,s.ph):PI(i,r[0]+sd*1.5,s.ph),Rv=pvt?[PVG.r[0],0,PVG.r[1]]:RV(i),Fv=pvt?[PVG.u[0],0,PVG.u[1]]:FV(i);const face=mulv(Rv,-sd),look=mulv(Fv,REV?-1:1);const fw=norm(add(mulv(face,0.8),mulv(look,0.6)));
     const at=S.atSt===s&&S.whT0?(performance.now()-S.whT0)/1000:-1;chefe(mb,[w[0]-eye[0],w[1],w[2]-eye[2]],fw,at)}
+  // manobrista dos postos de gasóleo: de braço levantado enquanto orienta a manobra
+  for(const D of DEPOTS){if(Math.abs(D.p-centerP)>450)continue;const mp=D.p+2,i=Math.floor(mp/SEG),x=D.x-D.sd*1.1,w=PI(i,x,0),y=terrH(i,x,w[0],w[2]);
+    const Rf=S&&S.ref&&DEPOTS[S.ref.d]===D?S.ref:null,fw=norm(add(mulv(RV(i),-D.sd),mulv(FV(i),S&&S.pos>mp?0.6:-0.6)));
+    chefe(mb,[w[0]-eye[0],y,w[2]-eye[2]],fw,Rf&&Rf.ph!=='enche'?3:-1)}
   for(const pn of PN){if(VINT)break;if(pn.ung||Math.abs(pn.pos-centerP)>900)continue;const blink=(t*2|0)%2;const i=Math.floor(pn.pos/SEG)-1;
     for(const sx of[-4.4,4.4]){const b=PI(i,sx,2.0),n=FV(i);for(const k of[-1,1]){const on=(k>0)===!!blink;const c=[b[0]-eye[0]+k*0.3*n[2],b[1],b[2]-eye[2]-k*0.3*n[0]];
       boxRF(mb,c,[1,0,0],[0,0,1],0.26,0.26,b[1]-0.13,b[1]+0.13,on?[1,0.15,0.1]:[0.25,0.05,0.05],0,0,0,on?1:0)}}}
@@ -5022,6 +5104,13 @@ function frame(now){
 function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.livB=false;if(use3D){TDEST=S.endSt.n.toUpperCase();prs=4242;buildTrainMeshes()}S.cust=svc&&typeof svc==='object'?svc:null;setNotch(3,true);$('#ovStart').hidden=true;$('#ovEnd').hidden=true;$('#card').hidden=true;
   running=true;paused=false;$('#bWarp').textContent='Tempo ×1';
   const st=STN[idx];toast((S.ncar>2?'Unidade dupla 9600 (4 caixas)':'Automotora 9600')+' para '+S.endSt.n+'. Partida de '+st.n+' às '+fHM(st.dep)+'. Arranque depois do apito do chefe da estação.','');
+  // continuação depois da mudança de linha ou jogo retomado: mantém o motor e o gasóleo
+  if(XST){S.fuel=XST.fuel;S.eng=XST.eng;XST=null}
+  // algumas viagens começam 10 min mais cedo com o depósito na reserva: manobra ao posto de gasóleo antes da partida
+  {const dI=DEPOTS.findIndex(D=>D.st===st);
+   if(!NOREF&&dI>=0&&Math.random()<0.3){const D=DEPOTS[dI],ah=(D.p-S.pos)*(REV?-1:1)>0;S.fuel=0.06+Math.random()*0.06;S.clock=Math.min(S.clock,st.dep-600);S.ref={d:dI,ph:'ir',ah};
+     setTimeout(()=>{if(S.ref)toast('Depósito de gasóleo na reserva. Antes da partida leve a automotora ao posto de abastecimento, '+(ah?'em frente':'em marcha atrás')+', a '+Math.round(Math.abs(D.p-S.pos))+' m: o manobrista orienta a manobra.','bad')},5200)}
+   else setTimeout(()=>{if(S&&S.eng<1&&!S.engS)toast('Antes de partir, ligue o motor: tecla I (Ignição).','')},5200);NOREF=false}
   setTimeout(()=>say((S.semi?'Comboio semirrápido com destino a ':'Comboio urbano com destino a ')+S.endSt.n+(S.semi?', com paragem em '+STOPS.slice(1,-1).map(x=>x.n.replace('Porto ','')).join(', '):'')+'. Partida às '+fHM(st.dep).replace(':',' e ')+'.'),900)}
 function finish(){running=false;S.horn=false;
   const sc=S.sc,t=Math.max(0,total()),r=t/S.maxPts,stars=r>0.85?3:r>0.65?2:r>0.4?1:0;
@@ -5043,7 +5132,7 @@ function updPeriod(){SHIFT=PSH[PERIOD];const f=t=>fHM(T(t)+SHIFT),lab={dia:'dia 
 document.querySelectorAll('#perSel button').forEach(b=>b.onclick=()=>{PERIOD=b.dataset.p;updPeriod()});
 document.querySelectorAll('#uniSel button').forEach(b=>b.onclick=()=>{UNITS=+b.dataset.u;document.querySelectorAll('#uniSel button').forEach(q=>q.classList.toggle('on',q===b));setStops(UNITS===2?4:2);if(!$('#ovCustom').hidden)custRender()});
 function saveObj(){return{v:1,line:LINE,free:!!S.free,via:S.via||null,viaEnd:S.viaEnd||null,swJ:!!S.swJ,swH:!!S.swH,swC:!!S.swC,ns:STN.length,ncar:S.ncar,cust:S.cust||null,t:Date.now(),period:PERIOD,start:S.startIdx,end:S.endSt.i,rev:REV,
-    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,trip0:S.trip0,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT},
+    s:{pos:S.pos,v:S.v,aCmd:S.aCmd,notch:S.notch,clock:S.clock,doors:S.doors,dwell:S.dwell,at:S.atSt?S.atSt.i:-1,departed:S.departed,sc:S.sc,maxPts:S.maxPts,delay:S.delay,warp:S.warp,whistled:S.whistled,trip0:S.trip0,rpm:S.rpm,jI:S.jI,back:!!S.back,nextSpawn:S.nextSpawn,vigT:S.vigT,eng:S.eng,fuel:S.fuel,ref:S.ref,endWait:!!S.endWait},
     onboard:ONBOARD.map(p=>({...p,c:p.c.slice()})),paxTaken:STN.map(s=>({taken:(s.pax3||[]).map(p=>!!p.in),alighted:!!s.alightDone})),
     st:STN.map(x=>[x.served?1:0,x.skipped?1:0,x.paxGone||0]),pn:PN.map(p=>[p.done?1:0,p.honk?1:0])}}
 function saveGame(){if(!S||!running){toast('Não há viagem em curso para guardar.','');return}
@@ -5061,8 +5150,8 @@ function loadGame(){applySave(readSave())}
 function applySave(o){if(!o)return;
   if(o.line&&o.line!==LINE){try{sessionStorage.setItem('pendingLoad',JSON.stringify(o))}catch(e){}running=false;setLine(o.line);return}
   if(!saveOK(o)){toast('Este jogo guardado já não é compatível com esta versão do jogo.','bad');return}
-  PERIOD=o.period||'tarde';updPeriod();FORCE_NC=o.ncar||2;start(o.start,o.end,o.rev,o.cust||undefined);
-  Object.assign(S,o.s);ONBOARD=Array.isArray(o.onboard)?o.onboard.filter(p=>p&&Number.isFinite(p.d)&&Number.isFinite(p.x)&&Array.isArray(p.c)).slice(0,272):[];S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
+  PERIOD=o.period||'tarde';updPeriod();FORCE_NC=o.ncar||2;NOREF=true;start(o.start,o.end,o.rev,o.cust||undefined);
+  Object.assign(S,o.s);if(o.s.eng===undefined)S.eng=1;if(o.s.fuel===undefined)S.fuel=0.8;S.engS=0;ONBOARD=Array.isArray(o.onboard)?o.onboard.filter(p=>p&&Number.isFinite(p.d)&&Number.isFinite(p.x)&&Array.isArray(p.c)).slice(0,272):[];S.prevPos=S.pos;S.atSt=o.s.at>=0?STN[o.s.at]:null;if(S.whistled)S.whT0=performance.now()-20000;
   o.st.forEach((q,k)=>{STN[k].served=!!q[0];STN[k].skipped=!!q[1];STN[k].paxGone=q[2]});o.pn.forEach((q,k)=>{if(PN[k]){PN[k].done=!!q[0];PN[k].honk=!!q[1]}});
   if(Array.isArray(o.paxTaken))o.paxTaken.forEach((q,i)=>{const st=STN[i];if(!st||!q)return;st.alightDone=!!q.alighted;(st.pax3||[]).forEach((p,j)=>{p.in=!!(q.taken&&q.taken[j])})});
   S.free=!!o.free;S.via=o.via||null;S.viaEnd=o.viaEnd||null;S.swJ=!!o.swJ;S.swH=!!o.swH;S.swC=!!o.swC;S.divJ=S.divH=S.divC=false;
@@ -5195,7 +5284,7 @@ document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{if(b.da
   const[a,z]=b.dataset.r.split('>').map(byNameE);start(a.i,z.i,z.i<a.i);S.via=null;S.viaEnd=null});
 if(!RETRY&&GP){let r=null;try{r=sessionStorage.getItem('pendingRoute');sessionStorage.removeItem('pendingRoute')}catch(e){}
   if(r)setTimeout(()=>{const[a,z]=r.split('>').map(byNameE);if(a&&z){$('#ovStart').hidden=true;start(a.i,z.i,z.i<a.i)}},0)}$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
-$('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;$('#bSw').onclick=swBtn;
+$('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;$('#bIgn').onclick=ignBtn;$('#bFuel').onclick=fuelBtn;$('#bSw').onclick=swBtn;
 $('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.','');return}setCam(CAMS[(CAMS.indexOf(camMode)+1)%CAMS.length])};
 {let drag=null,pinch=null;const vw=$('#view');
  vw.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,id:e.pointerId}});
@@ -5218,7 +5307,7 @@ const numKey=e=>{const m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code||'');return m?m
 document.addEventListener('keydown',e=>{if(!S)return;const n=numKey(e);const k=n?'#'+n:e.key.toLowerCase();
   if(k==='arrowup'||k==='#8'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='#2'){setNotch(S.notch-1);e.preventDefault()}
-  else if(k==='f')fullBtn();else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#3')hornOn(e,'horn');else if(k==='#4'){e.preventDefault();if(S&&running&&!S.hornSeq){S.hornSeq=performance.now();S.hornK='horn_lo';S.horn=true;hb.classList.add('down')}}else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click()});
+  else if(k==='f')fullBtn();else if(k==='e')doorBtn();else if(k==='c')$('#bCam').click();else if(k==='#7'||k===' ')hornOn(e);else if(k==='#1')hornOn(e,'horn_lo');else if(k==='#3')hornOn(e,'horn');else if(k==='#4'){e.preventDefault();if(S&&running&&!S.hornSeq){S.hornSeq=performance.now();S.hornK='horn_lo';S.horn=true;hb.classList.add('down')}}else if(k==='#9')$('#bVig').click();else if(k==='p')setPause(!paused);else if(k==='r')revBtn();else if(k==='z')swBtn();else if(k==='t')$('#bWarp').click();else if(k==='i')ignBtn();else if(k==='g')fuelBtn()});
 document.addEventListener('keyup',e=>{const n=numKey(e);if(n==='7'||n==='3'||n==='1'||e.key===' ')hornOff()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)setPause(true)});
 window.addEventListener('resize',resize);document.addEventListener('fullscreenchange',()=>setTimeout(resize,50));
@@ -5231,7 +5320,7 @@ if(G3){try{init3D();preparePax();use3D=true}catch(e){console.error(e);if(glRetry
 ['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,()=>{if(AC&&AC.state!=='running'&&AC.resume)AC.resume();else if(!AC&&running)audioInit()},{passive:true,capture:true}));
 if(!RETRY){let pl=null;try{pl=JSON.parse(sessionStorage.getItem('pendingLoad')||'null');sessionStorage.removeItem('pendingLoad')}catch(e){}
  if(pl&&(!pl.line||pl.line===LINE))setTimeout(()=>{applySave(pl);if(AC&&AC.state!=='running')toast('Jogo retomado. Toque no ecrã para ligar o som.','')},0)}
-if(!RETRY){let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');sessionStorage.removeItem('xfer')}catch(e){}
+if(!RETRY){let o=null;try{o=JSON.parse(sessionStorage.getItem('xfer')||'null');sessionStorage.removeItem('xfer')}catch(e){}if(o){NOREF=true;XST={fuel:o.fuel!=null?o.fuel:0.8,eng:o.eng!=null?o.eng:1}}
  if(o&&o.sh){PERIOD=o.period||PERIOD;updPeriod();const t={};t[0]=o.clock;FORCE_NC=o.ncar||2;start(0,STN.length-1,false,{t,free:true});
    S.free=o.free;S.pos=S.prevPos=o.pos;S.v=o.v;S.notch=o.notch;S.atSt=null;S.departed=true;S.doors=false;S.clock=o.clock;S.sc=o.sc;S.maxPts=o.maxPts||0;S.endSt=STN[STN.length-1];
    for(const st of STN)st.served=true;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;setNotch&&setNotch(o.notch,true);
