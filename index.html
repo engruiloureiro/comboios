@@ -554,6 +554,8 @@ if(RP&&FAM){const a=FAM.pa-60,b=FAM.pb+40,R=420,W=p=>p<a?(a-p)*(a-p)/(2*R):0;
   XTR.push({a:a-520,b:b+150,m:true,br:true,f:p=>p>b?-12.5+4.5*sstep((p-b)/150):-12.5-W(p)})}
 // Guimarães: via de topo que acaba num batente mesmo no fim do cais do edifício, a seguir ao armazém
 if((RG||GP)&&GUI.i>=0){const a=GUI.bc+46.4,m=GUI.bc+60,b=GUI.bc+160;XTR.push({a,b,m:false,f:p=>tProf(b-p,-4.4)})}
+// vias da oficina de Guimarães: saem da linha de cruzamento mais à direita (13,3 m) e entram pelos portões da nave (26,5 e 33,5 m)
+if((RG||GP)&&GUI.i>=0){const P0=GUI.pb;XTR.push({a:P0-40,b:P0+130,m:false,f:p=>13.3+tProf(p-(P0-40),13.2)},{a:P0-90,b:P0+130,m:false,f:p=>13.3+tProf(p-(P0-90),20.2)})}
 // concordância de Lousado vista das linhas de cada lado: sai à esquerda numa curva de raio KCR (na Linha da Póvoa a norte da
 // estação, na de Guimarães a nascente); o cais e o abrigo ficam a meio da curva, longe destas vias. Quem a toma passa ao mundo contínuo
 const JCN=LSD?(RP?LSD.pos-600:LSD.pos+600):null,JCR=KCR,JCL=12;
@@ -741,7 +743,7 @@ function minho(n){const c=[{m:'bloco',len:13.4,ht:[1,0],bog:[2.6,10.8],bm:'bbog'
 function paxTrain(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'coach',len:16.5,bog:[2.4,14.1]});return c}
 function freight(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'wag',len:8.2});return c}
 let LOCAT=()=>null;
-const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:-12,a:PVG.sC+60,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-5.5,a:BUFFER_R+9,len:TLEN(2),c:'u',lit:false},{o:9,a:BUFFER_R+6,len:TLEN(2),c:'u',lit:false},{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}].concat(LSD?[{o:4,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}]:[],GP?[{o:4,a:PV.pos+60,len:TLEN(2),c:'u',lit:true},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:13.3,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)}]:[]):[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:4,a:PV.pos+60,len:TLEN(2),c:'u',lit:true},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-5.5,a:BUFFER_R+9,len:TLEN(2),c:'u',lit:false},{o:9,a:BUFFER_R+6,len:TLEN(2),c:'u',lit:false},{o:12.5,a:SB.pa+4,len:TLEN(2),c:'u',lit:false},{o:12.5,a:SB.pa+50,len:TLEN(2),c:'u',lit:false},{o:13.3,a:GUI.pos-205,len:73,c:'loco',lit:true,cons:freight(7)},{o:4,a:TRF.pos-110,len:TLEN(2),c:'u',lit:false},{o:-27,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}];
+const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:-12,a:PVG.sC+60,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-5.5,a:BUFFER_R+9,len:TLEN(2),c:'u',lit:false},{o:9,a:BUFFER_R+6,len:TLEN(2),c:'u',lit:false},{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}].concat(LSD?[{o:4,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}]:[],GP?[{o:4,a:PV.pos+60,len:TLEN(2),c:'u',lit:true},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false}]:[]):[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:4,a:PV.pos+60,len:TLEN(2),c:'u',lit:true},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-5.5,a:BUFFER_R+9,len:TLEN(2),c:'u',lit:false},{o:9,a:BUFFER_R+6,len:TLEN(2),c:'u',lit:false},{o:12.5,a:SB.pa+4,len:TLEN(2),c:'u',lit:false},{o:12.5,a:SB.pa+50,len:TLEN(2),c:'u',lit:false},{o:4,a:TRF.pos-110,len:TLEN(2),c:'u',lit:false},{o:-27,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
 for(let p=OFF;p<END;p+=18)JOINTS.push(p+(rnd()-0.5)*0.4);
@@ -1371,7 +1373,7 @@ function farX(){const X=[],LMR={bigchurch:50,mosteiro:110,termas:70,stadium:130,
    clear(k-4,k+4,q=>Math.sign(q.x||0)===D.sd&&Math.abs(q.x||0)<20);spr[k].push({t:'fuel',x:D.x,cp:D.cp})}
  // oficina das automotoras em Guimarães, do lado direito no sentido de Fafe, com os portões virados para a estação
  const G=(RG||GP)&&byNameE('Guimarães');
- if(G){const p=G.pb+118,k=Math.floor(p/SEG);clear(k-9,k+5,q=>(q.x||0)>6&&(q.x||0)<52);spr[k].push({t:'oficina',x:30})}}
+ if(G){const p=G.pb+118,k=Math.floor(p/SEG);clear(k-9,k+5,q=>(q.x||0)>6&&(q.x||0)<52);clear(Math.floor((G.pb-95)/SEG),k-9,q=>(q.x||0)>10&&(q.x||0)<40);spr[k].push({t:'oficina',x:30})}}
 
 /* ================= HORÁRIO / ESTADO ================= */
 const fmt2=n=>String(n).padStart(2,'0');
@@ -4161,8 +4163,6 @@ function obj3(mb,sp,i,L){
     for(const a of[-3.5,3.5]){boxRF(mb,Q(a,-Lg/2-0.05),R,F,4.4,0.12,y,y+5.3,cc(44,78,58),0);boxRF(mb,Q(a,-Lg/2-0.08),R,F,0.08,0.14,y,y+5.3,cc(30,40,34),0)}
     {const pc=Q(0,-Lg/2-0.1);plateQ(mb,[pc[0],y+h+1.0,pc[2]],mulv(F,-1),5.6,0.7,ATL.oficina,0,false)}
     boxRF(mb,Q(0,-Lg/2-9),R,F,Wd+2,18,y-0.3,y+0.06,cc(150,148,140),6,2,2);
-    for(const a of[-3.5,3.5]){for(let f=-Lg/2+1;f>-Lg/2-30;f-=0.66)boxRF(mb,Q(a,f),R,F,1.9,0.22,y+0.06,y+0.16,cc(96,78,60),0);
-      for(const r of[-0.5,0.5])boxRF(mb,Q(a+r,-Lg/2-14),R,F,0.07,31,y+0.16,y+0.3,cc(120,112,104),0)}
     break}
   case'buffer':{const y=hy[i]+0.2;boxRF(mb,c,R,F,2.9,1.4,y-0.3,y+1.15,[1,1,1],LBUF,1.45,1.45);boxRF(mb,add(c,mulv(F,-(REV?-1:1)*0)),R,F,2.6,1.6,y+0.62,y+0.95,cc(92,62,40),0,1,1);break}
   case'silo':for(let k=-1;k<=1;k++){cyl(mb,add(c,mulv(F,k*7)),y0,y0+34,3,3,12,cc(206,204,198),6)}boxRF(mb,c,R,F,8,24,y0+34,y0+39,cc(160,160,156),6);break;
