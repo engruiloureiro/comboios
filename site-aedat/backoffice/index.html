@@ -1074,6 +1074,18 @@ function siteYoutubeId(url) {
   const m = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/i);
   return m ? m[1] : '';
 }
+/* O que se mete no leitor: um vídeo (ID) ou uma lista de reprodução / os vídeos de um canal (videoseries). */
+function siteYoutubeEmbed(url) {
+  url = String(url || '').trim();
+  if (!/youtu\.?be|^[\w-]{11}$/i.test(url)) return '';
+  const id = siteYoutubeId(url);
+  if (id) return id;
+  let m = url.match(/[?&]list=([\w-]{10,})/);
+  if (m) return 'videoseries?list=' + m[1];
+  m = url.match(/youtube\.com\/channel\/UC([\w-]{22})/i);
+  if (m) return 'videoseries?list=UU' + m[1];
+  return '';
+}
 
 (() => {
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1162,7 +1174,7 @@ function siteYoutubeId(url) {
     ul.innerHTML = ok.map(c => {
       const href = safeUrl(c.url); const nova = externa(href);
       const cor = /^[a-z]+$/.test(c.cor || '') ? c.cor : 'terra';
-      const vid = siteYoutubeId(c.video_url);
+      const vid = siteYoutubeEmbed(c.video_url);
       const extra = vid ? ' data-video="' + vid + '"' + (/\/shorts\//i.test(c.video_url) ? ' data-short="1"' : '') + ' data-desc="' + esc(c.descricao || '') + '" aria-haspopup="dialog"' : '';
       return '<li><a class="canal" data-cor="' + cor + '"' + extra + ' href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '><span class="canal__icon ' + (tone[cor] || '') + '" aria-hidden="true">' + ico(c.icone || 'i-link') + '</span>' +
         '<span class="canal__txt"><span class="canal__name">' + esc(c.rotulo) + '</span>' + (c.descricao ? '<span class="canal__desc">' + esc(c.descricao) + '</span>' : '') + '</span>' +
@@ -1192,7 +1204,7 @@ function siteYoutubeId(url) {
       '<p class="vpanel__eyebrow">Em vídeo · ' + esc(nome) + '</p>' +
       '<div class="vpanel__head"><span class="vpanel__yt" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7A8.5 8.5 0 0 0 60.5 1.7C55.2.3 34 .3 34 .3S12.8.3 7.5 1.7A8.5 8.5 0 0 0 1.5 7.7C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="currentColor"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span>' +
       '<div><p class="vpanel__name">' + esc(nome) + '</p>' + (desc ? '<p class="vpanel__desc">' + esc(desc) + '</p>' : '') + '</div></div>' +
-      '<div class="vpanel__frame"><iframe src="https://www.youtube-nocookie.com/embed/' + a.dataset.video + '?rel=0&modestbranding=1" title="Vídeo: ' + esc(nome) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>' +
+      '<div class="vpanel__frame"><iframe src="https://www.youtube-nocookie.com/embed/' + a.dataset.video + (a.dataset.video.indexOf('?') < 0 ? '?' : '&') + 'rel=0&modestbranding=1" title="Vídeo: ' + esc(nome) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>' +
       (temCanal ? '<a class="vpanel__more" href="' + esc(href) + '" target="_blank" rel="noopener">Ver o canal ' + esc(nome) + ' ' + ico('i-external') + '<span class="sr-only"> (abre num novo separador)</span></a>' : '');
     document.body.appendChild(painel);
     /* cabe sempre entre o cabeçalho e o fundo do ecrã; o vídeo encolhe se for preciso */

@@ -136,6 +136,7 @@ textarea.in{min-height:84px;resize:vertical}
 .item-row .in{min-height:38px;padding:7px 10px;font-size:14px}
 .ico-prev{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--sky-50);color:#1D6894}
 .canal-row{display:grid;grid-template-columns:1fr 1.4fr 1.6fr 140px 150px;gap:10px;align-items:end;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:12px}.canal-row__video{grid-column:1/-1}
+.in[aria-invalid=true]{border-color:var(--err);box-shadow:0 0 0 3px rgba(176,58,46,.15);background:var(--err-50)}
 .canal-row:last-child{border-bottom:0;margin-bottom:0}
 @media (max-width:980px){.canal-row{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.canal-row{grid-template-columns:1fr}}
@@ -215,7 +216,25 @@ function siteYoutubeId(url) {
   const m = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/i);
   return m ? m[1] : '';
 }
+/* O que se mete no leitor: um vídeo (ID) ou uma lista de reprodução / os vídeos de um canal (videoseries). */
+function siteYoutubeEmbed(url) {
+  url = String(url || '').trim();
+  if (!/youtu\.?be|^[\w-]{11}$/i.test(url)) return '';
+  const id = siteYoutubeId(url);
+  if (id) return id;
+  let m = url.match(/[?&]list=([\w-]{10,})/);
+  if (m) return 'videoseries?list=' + m[1];
+  m = url.match(/youtube\.com\/channel\/UC([\w-]{22})/i);
+  if (m) return 'videoseries?list=UU' + m[1];
+  return '';
+}
 
+function ytLimpo(v) {
+  v = String(v || '').trim(); if (!v) return null;
+  const m = v.match(/src=["']([^"']+)["']/i); if (m) v = m[1];
+  const id = siteYoutubeId(v); if (id) return (/\/shorts\//i.test(v) ? 'https://youtube.com/shorts/' : 'https://youtu.be/') + id;
+  return v;
+}
 
 const MENUS_ICONES = ['i-link','i-news','i-youtube','i-eu','i-external','i-file','i-folder','i-book','i-cap','i-school','i-users','i-id','i-presentation','i-backpack','i-org','i-pin','i-clock','i-shield','i-scale','i-check','i-chat','i-globe','i-flag','i-star','i-heart','i-award','i-pen','i-wrench','i-grid','i-database','i-briefcase','i-spark','i-cpu','i-cog','i-bolt','i-laptop','i-monitor','i-play','i-package','i-mail','i-utensils','i-info'];
 const CORES = [['terra','Terracota'],['sky','Azul'],['lilac','Lilás'],['sun','Amarelo'],['green','Verde'],['orange','Laranja']];
@@ -446,7 +465,7 @@ function vDestaque() {
     '</div></section>' +
     '<section class="card" style="margin-top:16px"><div class="card__head"><h2>Os nossos canais</h2><span class="muted">Jornal escolar, canal do YouTube, Erasmus+… Deixa o nome em branco para retirar um canal.</span></div><div class="card__body">' +
     [0, 1, 2, 3].map(i => { const c = cn[i] || {}; return '<div class="canal-row"><label class="field"><span>Canal ' + (i + 1) + ': nome</span><input class="in" id="c-r' + i + '" value="' + esc(c.rotulo) + '"></label><label class="field"><span>Descrição curta</span><input class="in" id="c-d' + i + '" value="' + esc(c.descricao) + '"></label><label class="field"><span>Ligação</span><input class="in" id="c-u' + i + '" value="' + esc(c.url === '#' ? '' : c.url) + '" placeholder="https://…"></label><label class="field"><span>Ícone</span>' + icoSelect('c-i' + i, c.icone || 'i-link') + '</label><label class="field"><span>Cor</span><select class="in" id="c-c' + i + '">' + CORES_CANAL.map(k => '<option value="' + k[0] + '"' + ((c.cor || 'terra') === k[0] ? ' selected' : '') + '>' + k[1] + '</option>').join('') + '</select></label>' +
-      '<label class="field canal-row__video"><span>Vídeo em destaque (YouTube, opcional)</span><input class="in" id="c-v' + i + '" value="' + esc(c.video_url) + '" placeholder="https://youtube.com/shorts/… ou https://youtu.be/…"><small>Com vídeo, o canal abre um painel com o vídeo em vez de sair do site.</small></label></div>'; }).join('') +
+      '<label class="field canal-row__video"><span>Vídeo em destaque (YouTube, opcional)</span><input class="in" id="c-v' + i + '" value="' + esc(c.video_url) + '" placeholder="Ligação do vídeo ou código &lt;iframe&gt; do YouTube"><small>No YouTube: Partilhar → Copiar, ou Partilhar → Incorporar → Copiar. Vídeo, Short ou lista de reprodução do YouTube. Com vídeo, o canal abre um painel em vez de sair do site. Deixa vazio para abrir só a ligação.</small></label></div>'; }).join('') +
     '</div></section><div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn--pri" type="submit">Guardar destaque, acessos e canais</button></div></form>';
 }
 
@@ -480,7 +499,7 @@ function vModal() {
       '<div class="row"><label class="field"><span>Categoria</span><input class="in" id="n-categoria" value="' + esc(n.categoria) + '" placeholder="Ex.: Projetos internacionais" list="cats"><datalist id="cats">' + [...new Set(S.noticias.map(x => x.categoria).filter(Boolean))].map(c => '<option value="' + esc(c) + '">').join('') + '</datalist></label>' +
       '<div class="field"><span>Cor da categoria</span><div class="swatches">' + CORES.map(c => '<label><input type="radio" name="n-cor" value="' + c[0] + '"' + ((n.cor || 'terra') === c[0] ? ' checked' : '') + '><span class="tone-' + c[0] + '">' + c[1] + '</span></label>').join('') + '</div></div></div>' +
       campoImagem('n-img', n.imagem_url, 'Imagem', 'No OneDrive: Partilhar → “Qualquer pessoa com a ligação pode ver” → Copiar ligação. Com vídeo, a imagem é opcional: sem ela usa-se a miniatura do YouTube.') +
-      '<label class="field"><span>Vídeo do YouTube (opcional)</span><input class="in" id="n-video" value="' + esc(n.video_url) + '" placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…" data-yt-preview="n-video-prev"><small>No YouTube: Partilhar → Copiar. O vídeo tem de ser público ou “não listado”.</small></label>' +
+      '<label class="field"><span>Vídeo do YouTube (opcional)</span><input class="in" id="n-video" value="' + esc(n.video_url) + '" placeholder="Ligação do vídeo ou código &lt;iframe&gt; do YouTube" data-yt-preview="n-video-prev"><small>No YouTube: Partilhar → Copiar, ou Partilhar → Incorporar → Copiar. O vídeo tem de ser público ou “não listado”.</small></label>' +
       '<div class="preview" id="n-video-prev"' + (n.video_url ? '' : ' hidden') + '><img alt="" src="' + (siteYoutubeId(n.video_url) ? 'https://i.ytimg.com/vi/' + siteYoutubeId(n.video_url) + '/hqdefault.jpg' : '') + '"><span class="st" aria-live="polite">' + (siteYoutubeId(n.video_url) ? 'Vídeo reconhecido.' : '') + '</span></div>' +
       '<div class="row"><label class="field"><span>Descrição da imagem (texto alternativo)</span><input class="in" id="n-alt" value="' + esc(n.imagem_alt) + '" placeholder="O que se vê na imagem"></label>' +
       '<div class="field"><span>Enquadramento</span><label class="check"><input type="checkbox" id="n-topo"' + (n.imagem_topo ? ' checked' : '') + '>Cartaz: mostrar a parte de cima da imagem (não cortar o título)</label></div></div>' +
@@ -518,7 +537,7 @@ function verificarImagem(input) {
 async function guardarNoticia() {
   const n = S.modal.dados;
   const d = { titulo: val('n-titulo'), resumo: val('n-resumo') || null, categoria: val('n-categoria') || null, cor: (document.querySelector('input[name="n-cor"]:checked') || {}).value || 'terra',
-    imagem_url: val('n-img') || null, imagem_alt: val('n-alt') || null, imagem_topo: chk('n-topo'), video_url: val('n-video') || null, ligacao_url: val('n-url') || null, ligacao_texto: val('n-ltexto') || 'Ver a notícia',
+    imagem_url: val('n-img') || null, imagem_alt: val('n-alt') || null, imagem_topo: chk('n-topo'), video_url: ytLimpo(val('n-video')), ligacao_url: val('n-url') || null, ligacao_texto: val('n-ltexto') || 'Ver a notícia',
     data_publicacao: val('n-data') || hoje(), publicado: chk('n-pub'), destaque: chk('n-dest'), idioma: chk('n-en') ? 'en' : null };
   if (!d.titulo) return toast('Indica o título da notícia.', true);
   if (d.video_url && !siteYoutubeId(d.video_url)) return toast('A ligação do vídeo não parece ser do YouTube. Copia-a em Partilhar → Copiar no YouTube.', true);
@@ -563,9 +582,16 @@ async function guardarDestaque() {
   const destaque = { eyebrow: val('d-eyebrow'), palavras: [val('d-p0'), val('d-p1'), val('d-p2')], intro: val('d-intro'), percurso_eyebrow: val('d-pe'), percurso_titulo: val('d-pt'), percurso_texto: val('d-px'), percurso_botao: val('d-pb'), imagem_url: val('d-img') || null };
   const acessos = [0, 1, 2, 3].map(i => ({ rotulo: val('a-r' + i), url: val('a-u' + i) || '#', icone: val('a-i' + i) })).filter(a => a.rotulo);
   if (destaque.palavras.some(p => !p)) return toast('Preenche as três palavras do título.', true);
-  const canais = [0, 1, 2, 3].map(i => ({ rotulo: val('c-r' + i), descricao: val('c-d' + i), url: val('c-u' + i) || '#', icone: val('c-i' + i), cor: val('c-c' + i), video_url: val('c-v' + i) || null })).filter(c => c.rotulo);
-  const mau = canais.find(c => c.video_url && !siteYoutubeId(c.video_url));
-  if (mau) return toast('O vídeo do canal “' + mau.rotulo + '” não é uma ligação do YouTube.', true);
+  const canais = [0, 1, 2, 3].map(i => ({ rotulo: val('c-r' + i), descricao: val('c-d' + i), url: val('c-u' + i) || '#', icone: val('c-i' + i), cor: val('c-c' + i), video_url: ytLimpo(val('c-v' + i)) })).filter(c => c.rotulo);
+  document.querySelectorAll('[id^="c-v"]').forEach(el => el.removeAttribute('aria-invalid'));
+  const iMau = [0, 1, 2, 3].find(i => val('c-r' + i) && val('c-v' + i) && !siteYoutubeEmbed(ytLimpo(val('c-v' + i))));
+  if (iMau !== undefined) {
+    const el = document.getElementById('c-v' + iMau);
+    el.setAttribute('aria-invalid', 'true'); el.focus(); el.scrollIntoView({ block: 'center' });
+    const v = val('c-v' + iMau), nome = 'Canal ' + (iMau + 1) + ' (“' + val('c-r' + iMau) + '”)';
+    if (/youtube\.com\/(@|c\/|user\/)/i.test(v)) return toast(nome + ': “' + v + '” é a ligação do canal, não de um vídeo. Põe-na no campo Ligação; no Vídeo em destaque cola um vídeo ou Short (Partilhar → Copiar), ou deixa vazio.', true);
+    return toast(nome + ': o vídeo em destaque tem “' + v + '”, que não é um vídeo do YouTube. Cola a ligação ou o código de incorporação (<iframe>) de um vídeo, Short ou lista, ou deixa o campo vazio.', true);
+  }
   const r = await sb.from('site_config').upsert([{ chave: 'destaque', valor: destaque }, { chave: 'acessos', valor: acessos }, { chave: 'canais', valor: canais }]);
   if (r.error) return falha(r.error, 'guardar o destaque');
   await carregarTudo(); render(); toast('Destaque, acessos e canais guardados.');
