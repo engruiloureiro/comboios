@@ -482,7 +482,29 @@ main:focus{outline:none}
 @media (max-width:759px){.canais{top:auto;bottom:18px}.canal{--w:50px;height:50px;padding-left:6px;border-radius:14px 0 0 14px}.canal__icon{width:38px;height:38px;border-radius:11px}.canal__icon .ic{width:21px;height:21px}}
 @media (hover:none){.canal:hover{--w:var(--w0,50px)}}
 @media (prefers-reduced-motion:reduce){.canal,.canal__txt{transition:none}}
-@media print{.canais{display:none}}
+/* painel "Em vídeo" (Taipa360) */
+.vpanel{position:fixed;right:74px;top:190px;z-index:31;width:min(360px,calc(100vw - 96px));max-height:calc(100vh - 24px);overflow:auto;background:#fff;border-top:5px solid var(--canal,#D9302A);border-radius:6px 6px 18px 18px;box-shadow:0 30px 60px -20px rgba(10,27,41,.55),0 0 0 1px rgba(15,42,62,.06);padding:16px 16px 18px;animation:vpIn .22s var(--ease) both}
+@keyframes vpIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.vpanel__close{position:absolute;right:10px;top:10px;display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:50%;background:var(--navy-50);color:var(--navy-800);cursor:pointer}
+.vpanel__close .ic{width:16px;height:16px;stroke-width:2.2}
+.vpanel__close:hover{background:var(--canal,#D9302A);color:#fff}
+.vpanel__eyebrow{margin:0 40px 12px 0;font-family:var(--font-head);font-weight:800;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--canal,#D9302A)}
+.vpanel__head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.vpanel__yt{display:grid;place-items:center;flex:none;width:56px;height:42px;border-radius:12px;background:var(--canal,#D9302A);color:var(--canal,#D9302A)}
+.vpanel__yt svg{width:56px;height:42px}
+.vpanel__yt svg path:first-child{fill:var(--canal,#D9302A)}
+.vpanel__name{margin:0;font-family:var(--font-head);font-weight:800;font-size:24px;line-height:1.05;letter-spacing:-.01em;text-transform:uppercase;color:#111}
+.vpanel__desc{margin:3px 0 0;font-size:13.5px;color:var(--ink-2)}
+.vpanel__frame{position:relative;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}
+.vpanel{max-height:var(--vp-livre,calc(100vh - 24px))}
+.vpanel--short .vpanel__frame{aspect-ratio:9/16;height:min(560px,calc(var(--vp-livre,100vh) - 200px));width:auto;max-width:100%;margin:0 auto}
+.vpanel__frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vpanel__more{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;min-height:44px;border-radius:999px;background:var(--canal,#D9302A);color:#fff;font-family:var(--font-head);font-weight:800;font-size:14.5px;text-decoration:none}
+.vpanel__more .ic{width:16px;height:16px}
+.vpanel__more:hover{filter:brightness(.92)}
+@media (max-width:759px){.vpanel{left:12px;right:12px;top:auto!important;bottom:12px;width:auto;max-height:calc(100vh - 90px)}.vpanel--short .vpanel__frame{height:min(520px,calc(var(--vp-livre,100vh) - 210px))}}
+@media (prefers-reduced-motion:reduce){.vpanel{animation:none}}
+@media print{.canais,.vpanel{display:none}}
 </style>
 </head>
 <body>
@@ -1140,11 +1162,57 @@ function siteYoutubeId(url) {
     ul.innerHTML = ok.map(c => {
       const href = safeUrl(c.url); const nova = externa(href);
       const cor = /^[a-z]+$/.test(c.cor || '') ? c.cor : 'terra';
-      return '<li><a class="canal" data-cor="' + cor + '" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '><span class="canal__icon ' + (tone[cor] || '') + '" aria-hidden="true">' + ico(c.icone || 'i-link') + '</span>' +
+      const vid = siteYoutubeId(c.video_url);
+      const extra = vid ? ' data-video="' + vid + '"' + (/\/shorts\//i.test(c.video_url) ? ' data-short="1"' : '') + ' data-desc="' + esc(c.descricao || '') + '" aria-haspopup="dialog"' : '';
+      return '<li><a class="canal" data-cor="' + cor + '"' + extra + ' href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '><span class="canal__icon ' + (tone[cor] || '') + '" aria-hidden="true">' + ico(c.icone || 'i-link') + '</span>' +
         '<span class="canal__txt"><span class="canal__name">' + esc(c.rotulo) + '</span>' + (c.descricao ? '<span class="canal__desc">' + esc(c.descricao) + '</span>' : '') + '</span>' +
         '<span class="canal__go" aria-hidden="true">' + ico('i-external') + '</span>' + (nova ? novaAba : '') + '</a></li>';
     }).join('');
   }
+
+  /* painel "Em vídeo": abre ao lado da barra quando o canal tem um vídeo em destaque */
+  let painel = null, painelDe = null;
+  function fecharPainel(devolverFoco) {
+    if (!painel) return;
+    painel.remove(); painel = null;
+    if (painelDe) { painelDe.setAttribute('aria-expanded', 'false'); if (devolverFoco) painelDe.focus(); }
+    painelDe = null;
+  }
+  function abrirPainel(a) {
+    const mesmo = painelDe === a;
+    fecharPainel(false);
+    if (mesmo) return;
+    const nome = a.querySelector('.canal__name').textContent, desc = a.dataset.desc || '', short = a.dataset.short === '1';
+    const href = a.getAttribute('href'), temCanal = href && href !== '#';
+    painel = document.createElement('div');
+    painel.className = 'vpanel' + (short ? ' vpanel--short' : '');
+    painel.setAttribute('role', 'dialog'); painel.setAttribute('aria-label', 'Em vídeo: ' + nome);
+    painel.style.setProperty('--canal', getComputedStyle(a).getPropertyValue('--canal') || '#D9302A');
+    painel.innerHTML = '<button type="button" class="vpanel__close" aria-label="Fechar">' + ico('i-close') + '</button>' +
+      '<p class="vpanel__eyebrow">Em vídeo · ' + esc(nome) + '</p>' +
+      '<div class="vpanel__head"><span class="vpanel__yt" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7A8.5 8.5 0 0 0 60.5 1.7C55.2.3 34 .3 34 .3S12.8.3 7.5 1.7A8.5 8.5 0 0 0 1.5 7.7C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="currentColor"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span>' +
+      '<div><p class="vpanel__name">' + esc(nome) + '</p>' + (desc ? '<p class="vpanel__desc">' + esc(desc) + '</p>' : '') + '</div></div>' +
+      '<div class="vpanel__frame"><iframe src="https://www.youtube-nocookie.com/embed/' + a.dataset.video + '?rel=0&modestbranding=1" title="Vídeo: ' + esc(nome) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>' +
+      (temCanal ? '<a class="vpanel__more" href="' + esc(href) + '" target="_blank" rel="noopener">Ver o canal ' + esc(nome) + ' ' + ico('i-external') + '<span class="sr-only"> (abre num novo separador)</span></a>' : '');
+    document.body.appendChild(painel);
+    /* cabe sempre entre o cabeçalho e o fundo do ecrã; o vídeo encolhe se for preciso */
+    const hdr = Math.max(0, document.querySelector('.site-header').getBoundingClientRect().bottom);
+    const livre = innerHeight - hdr - 24;
+    painel.style.setProperty('--vp-livre', livre + 'px');
+    if (innerWidth >= 760) {
+      const r = a.getBoundingClientRect();
+      painel.style.top = Math.max(hdr + 12, Math.min(r.top - 20, innerHeight - painel.offsetHeight - 12)) + 'px';
+    }
+    painelDe = a; a.setAttribute('aria-expanded', 'true');
+    painel.querySelector('.vpanel__close').addEventListener('click', () => fecharPainel(true));
+    painel.querySelector('.vpanel__close').focus();
+  }
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('.canal[data-video]');
+    if (a) { e.preventDefault(); abrirPainel(a); return; }
+    if (painel && !painel.contains(e.target)) fecharPainel(false);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && painel) fecharPainel(true); });
 
   function linkNoticia(n) {
     if (!n.ligacao_url) return '';

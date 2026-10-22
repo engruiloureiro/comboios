@@ -135,7 +135,8 @@ textarea.in{min-height:84px;resize:vertical}
 .item-row:last-child{border-bottom:0}
 .item-row .in{min-height:38px;padding:7px 10px;font-size:14px}
 .ico-prev{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--sky-50);color:#1D6894}
-.canal-row{display:grid;grid-template-columns:1fr 1.4fr 1.6fr 140px 150px;gap:10px;align-items:end;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:12px}.canal-row:last-child{border-bottom:0;margin-bottom:0}
+.canal-row{display:grid;grid-template-columns:1fr 1.4fr 1.6fr 140px 150px;gap:10px;align-items:end;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:12px}.canal-row__video{grid-column:1/-1}
+.canal-row:last-child{border-bottom:0;margin-bottom:0}
 @media (max-width:980px){.canal-row{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.canal-row{grid-template-columns:1fr}}
 .mini-checks{display:flex;gap:12px;font-size:12.5px;white-space:nowrap}
@@ -444,7 +445,8 @@ function vDestaque() {
     [0, 1, 2, 3].map(i => { const a = ac[i] || {}; return '<div class="row3" style="align-items:end"><label class="field"><span>Atalho ' + (i + 1) + ': nome</span><input class="in" id="a-r' + i + '" value="' + esc(a.rotulo) + '"></label><label class="field"><span>Ligação</span><input class="in" id="a-u' + i + '" value="' + esc(a.url === '#' ? '' : a.url) + '" placeholder="https://…"></label><label class="field"><span>Ícone</span>' + icoSelect('a-i' + i, a.icone || 'i-link') + '</label></div>'; }).join('') +
     '</div></section>' +
     '<section class="card" style="margin-top:16px"><div class="card__head"><h2>Os nossos canais</h2><span class="muted">Jornal escolar, canal do YouTube, Erasmus+… Deixa o nome em branco para retirar um canal.</span></div><div class="card__body">' +
-    [0, 1, 2, 3].map(i => { const c = cn[i] || {}; return '<div class="canal-row"><label class="field"><span>Canal ' + (i + 1) + ': nome</span><input class="in" id="c-r' + i + '" value="' + esc(c.rotulo) + '"></label><label class="field"><span>Descrição curta</span><input class="in" id="c-d' + i + '" value="' + esc(c.descricao) + '"></label><label class="field"><span>Ligação</span><input class="in" id="c-u' + i + '" value="' + esc(c.url === '#' ? '' : c.url) + '" placeholder="https://…"></label><label class="field"><span>Ícone</span>' + icoSelect('c-i' + i, c.icone || 'i-link') + '</label><label class="field"><span>Cor</span><select class="in" id="c-c' + i + '">' + CORES_CANAL.map(k => '<option value="' + k[0] + '"' + ((c.cor || 'terra') === k[0] ? ' selected' : '') + '>' + k[1] + '</option>').join('') + '</select></label></div>'; }).join('') +
+    [0, 1, 2, 3].map(i => { const c = cn[i] || {}; return '<div class="canal-row"><label class="field"><span>Canal ' + (i + 1) + ': nome</span><input class="in" id="c-r' + i + '" value="' + esc(c.rotulo) + '"></label><label class="field"><span>Descrição curta</span><input class="in" id="c-d' + i + '" value="' + esc(c.descricao) + '"></label><label class="field"><span>Ligação</span><input class="in" id="c-u' + i + '" value="' + esc(c.url === '#' ? '' : c.url) + '" placeholder="https://…"></label><label class="field"><span>Ícone</span>' + icoSelect('c-i' + i, c.icone || 'i-link') + '</label><label class="field"><span>Cor</span><select class="in" id="c-c' + i + '">' + CORES_CANAL.map(k => '<option value="' + k[0] + '"' + ((c.cor || 'terra') === k[0] ? ' selected' : '') + '>' + k[1] + '</option>').join('') + '</select></label>' +
+      '<label class="field canal-row__video"><span>Vídeo em destaque (YouTube, opcional)</span><input class="in" id="c-v' + i + '" value="' + esc(c.video_url) + '" placeholder="https://youtube.com/shorts/… ou https://youtu.be/…"><small>Com vídeo, o canal abre um painel com o vídeo em vez de sair do site.</small></label></div>'; }).join('') +
     '</div></section><div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn--pri" type="submit">Guardar destaque, acessos e canais</button></div></form>';
 }
 
@@ -561,7 +563,9 @@ async function guardarDestaque() {
   const destaque = { eyebrow: val('d-eyebrow'), palavras: [val('d-p0'), val('d-p1'), val('d-p2')], intro: val('d-intro'), percurso_eyebrow: val('d-pe'), percurso_titulo: val('d-pt'), percurso_texto: val('d-px'), percurso_botao: val('d-pb'), imagem_url: val('d-img') || null };
   const acessos = [0, 1, 2, 3].map(i => ({ rotulo: val('a-r' + i), url: val('a-u' + i) || '#', icone: val('a-i' + i) })).filter(a => a.rotulo);
   if (destaque.palavras.some(p => !p)) return toast('Preenche as três palavras do título.', true);
-  const canais = [0, 1, 2, 3].map(i => ({ rotulo: val('c-r' + i), descricao: val('c-d' + i), url: val('c-u' + i) || '#', icone: val('c-i' + i), cor: val('c-c' + i) })).filter(c => c.rotulo);
+  const canais = [0, 1, 2, 3].map(i => ({ rotulo: val('c-r' + i), descricao: val('c-d' + i), url: val('c-u' + i) || '#', icone: val('c-i' + i), cor: val('c-c' + i), video_url: val('c-v' + i) || null })).filter(c => c.rotulo);
+  const mau = canais.find(c => c.video_url && !siteYoutubeId(c.video_url));
+  if (mau) return toast('O vídeo do canal “' + mau.rotulo + '” não é uma ligação do YouTube.', true);
   const r = await sb.from('site_config').upsert([{ chave: 'destaque', valor: destaque }, { chave: 'acessos', valor: acessos }, { chave: 'canais', valor: canais }]);
   if (r.error) return falha(r.error, 'guardar o destaque');
   await carregarTudo(); render(); toast('Destaque, acessos e canais guardados.');

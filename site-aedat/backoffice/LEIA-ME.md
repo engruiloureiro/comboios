@@ -56,6 +56,10 @@ em baixo, à direita. No backoffice (**Destaque, acessos e canais**) defines, pa
 descrição curta, a ligação, o ícone e a cor (até 4 canais). Deixa o nome em branco para retirar um canal.
 As ligações abrem numa nova aba.
 
+**Vídeo em destaque (ex.: Taipa360):** se preencheres o campo *Vídeo em destaque* de um canal com a ligação de um vídeo
+ou Short do YouTube, ao carregar nesse canal abre-se um painel com o vídeo pronto a ver ("Em vídeo · Taipa360") e um botão
+*Ver o canal*. Para mostrar um vídeo novo, basta trocar essa ligação no backoffice.
+
 ## Vídeos do YouTube
 
 Cada notícia pode ter um vídeo. No YouTube, abre o vídeo → **Partilhar** → **Copiar** e cola a ligação no campo
