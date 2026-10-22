@@ -50,8 +50,9 @@ administrador do Microsoft 365 para ativar essa opção para a pasta das imagens
 
 ## Os nossos canais (Ecos de Taipa, Taipa360, Erasmus+)
 
-No topo da coluna da direita, por cima da Informação útil, há a secção **Os nossos canais**, com acesso direto ao jornal escolar, ao canal do
-YouTube e ao site Erasmus+. No backoffice (**Destaque, acessos e canais**) defines, para cada canal, o nome, uma
+Os canais (jornal escolar, canal do YouTube, site Erasmus+) aparecem numa **barra fixa na lateral direita**, logo abaixo do
+cabeçalho, que acompanha a página. Cada ícone abre ao passar o rato e mostra o nome e a descrição; no telemóvel a barra fica
+em baixo, à direita. No backoffice (**Destaque, acessos e canais**) defines, para cada canal, o nome, uma
 descrição curta, a ligação, o ícone e a cor (até 4 canais). Deixa o nome em branco para retirar um canal.
 As ligações abrem numa nova aba.
 
