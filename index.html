@@ -2,6 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="utf-8">
+<meta name="theme-color" content="#123c35">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Porto-Trindade – Guimarães – Fafe | Cenários históricos 1970–1985</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -144,6 +145,66 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .stars{font-size:32px;color:var(--warn);letter-spacing:4px;text-align:center;margin:4px 0 8px}
 #err{position:fixed;left:8px;right:8px;bottom:8px;background:#7a1a14;color:#fff;font:13px/1.3 monospace;padding:8px;border-radius:6px;z-index:20;display:none;white-space:pre-wrap}
 @media (prefers-reduced-motion: reduce){.btn.warn{animation:none}#toast{transition:none}}
+/* Linha gráfica do Agrupamento de Escolas D. António Taipa (verde, lima e papel; Arial e Georgia) */
+:root{--green:#123c35;--green-2:#1b4a41;--lime:#d8ed91;--paper:#f6f5ee;--line:#3d5d51;--muted:#c5d2c7;
+  --cab:#123c35;--cab-2:#1b4a41;--cab-edge:#0c2b26;--go:#d8ed91;--ink:#f6f5ee;--ink-dim:#a9bdb0;--azul:#123c35;--tile:#f6f5ee}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --cab:#0f332d; --cab-2:#173f37; } }
+:root[data-theme="dark"]{ --cab:#0f332d; --cab-2:#173f37; }
+body{font-family:Arial,Helvetica,sans-serif}
+::selection{background:var(--lime);color:var(--green)}
+button:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #cb6b36;outline-offset:3px}
+#app.over #dash{background:linear-gradient(rgba(18,60,53,.6),rgba(12,43,38,.92))}
+#dash{border-top:1px solid var(--line)}
+.lcd{background:var(--paper);color:var(--green);font-family:Arial,Helvetica,sans-serif;border-radius:14px;box-shadow:inset 0 0 0 1px #d8dfd2}
+.lcd b,.lcd .big{color:var(--green)}.lcd .row span{color:#5c6c63}
+#dMsg{color:#a2471e!important}
+.btn{border-radius:40px;background:var(--green-2);color:var(--paper);font:700 13px/1.1 Arial,Helvetica,sans-serif;box-shadow:inset 0 0 0 1px #4b685a}
+@media (min-width:700px){.btn{font-size:14px}}
+.btn:active,.btn.down{box-shadow:inset 0 0 0 1px var(--lime)}
+.btn.go{background:var(--lime);color:var(--green)}
+#bRev.on{background:#cb6b36}
+#lever{background:var(--cab-edge);border-radius:18px}
+.notch.t{color:var(--lime)}
+#handle{background:linear-gradient(var(--paper),#c6d3c0)}
+.ico{border-radius:50%;background:rgba(18,60,53,.78);width:34px;height:34px}
+#toast{background:rgba(18,60,53,.92);color:var(--paper);border-radius:30px;font-family:Arial,Helvetica,sans-serif;padding:8px 16px}
+#toast.good{background:var(--lime);color:var(--green)}
+#route{font-family:Arial,Helvetica,sans-serif;background:rgba(246,245,238,.94);border-radius:18px;color:var(--green)}
+#route .st{font-size:15px;color:var(--green)}#route .hd{color:#5c6c63;letter-spacing:2px;font-size:10px;font-weight:700}
+#route .bar{background:var(--green)}#route .bar.past{background:#cbd5c5}
+#route .tr,#me{background:var(--lime)}#me{background:none;border-top-color:var(--lime)}
+.azulejo{background:var(--paper);background-image:none;color:var(--green);border:0;border-radius:22px;box-shadow:0 6px 18px rgba(0,0,0,.25);
+  font-family:Arial,Helvetica,sans-serif;font-weight:500;letter-spacing:-.04em;text-align:left;padding:14px 22px}
+#card{text-align:center}
+#card small,.azulejo small{font-family:Arial,Helvetica,sans-serif;color:#5c6c63;letter-spacing:0;font-weight:400}
+.ov{background:rgba(18,60,53,.97);color:var(--paper);font-family:Arial,Helvetica,sans-serif}
+.panel{font-size:15px;line-height:1.65}
+.panel::before{content:"Erasmus+ · Agrupamento de Escolas D. António Taipa";display:flex;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lime);margin:0 0 18px}
+.panel .azulejo{background:none;box-shadow:none;color:var(--paper);padding:0;font-size:clamp(34px,6vw,50px);line-height:1.08;letter-spacing:-.06em;margin-bottom:22px}
+.panel .azulejo small{color:var(--lime);font-family:Georgia,serif;font-size:17px;letter-spacing:0;margin-top:10px}
+.panel p{color:#d2dfd6}.panel ul{color:var(--muted)}.panel li::marker{color:var(--lime)}
+.panel a{color:var(--lime)!important}
+#histResearch{background:rgba(246,245,238,.06)!important;border:1px solid var(--line)!important;border-radius:22px!important;color:var(--muted)!important}
+#histResearch summary{color:var(--lime)!important}
+.cta,.tt button,.tttab button,.cbar button{font-family:Arial,Helvetica,sans-serif}
+.cta{background:var(--lime)!important;color:var(--green);border-radius:22px;font-size:16px;padding:14px 22px;margin-top:10px;transition:transform .2s}
+.cta:hover{transform:translateY(-3px);background:#e6f5b9!important}
+.cta small{font-size:12px;opacity:.8}
+.cta.alt,#bLoadF,#bTT{background:transparent!important;color:var(--paper);box-shadow:inset 0 0 0 1px #6c8870}
+.cta.alt:hover,#bLoadF:hover,#bTT:hover{background:rgba(216,237,145,.1)!important}
+.per span{color:var(--muted);font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.per button{font:700 13px Arial,Helvetica,sans-serif;border-color:#6c8870;color:var(--paper);border-radius:30px;padding:6px 14px}
+.per button.on{background:var(--lime);color:var(--green);border-color:var(--lime)}
+.tt{font-family:Arial,Helvetica,sans-serif;font-size:13px}.tt th{color:var(--lime);border-bottom-color:var(--line)}
+.tt td.n{color:var(--lime)}.tt td.x{color:#6c8870}
+.tt button,.tttab button.on{background:var(--lime);color:var(--green);border-radius:30px}
+.tttab button,.cbar button{background:transparent;border:1px solid #6c8870;border-radius:30px}
+.tth{font-family:Arial,Helvetica,sans-serif;color:var(--lime)}
+.cgrid label{color:var(--muted)}.cgrid select,.cgrid input{font:700 15px Arial,Helvetica,sans-serif;border-radius:14px;background:var(--paper);color:var(--green)}
+#cList{border-radius:18px}#cList label b{color:var(--lime)}
+.stars{color:var(--lime)}
+.ttw{border-radius:18px}
+@media (prefers-reduced-motion: reduce){.cta{transition:none}}
 </style>
 </head>
 <body>
