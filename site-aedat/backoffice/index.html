@@ -499,6 +499,8 @@ main:focus{outline:none}
 .vpanel{max-height:var(--vp-livre,calc(100vh - 24px))}
 .vpanel--short .vpanel__frame{aspect-ratio:9/16;height:min(560px,calc(var(--vp-livre,100vh) - 200px));width:auto;max-width:100%;margin:0 auto}
 .vpanel__frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vpanel__open{position:absolute;inset:0;display:grid;place-items:center;color:#fff;text-decoration:none;background:#000}.vpanel__open img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}.vpanel__open .yt__play{position:relative;width:68px;height:48px}.vpanel__openlbl{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-family:var(--font-head);font-weight:800;font-size:14px;text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.vpanel__watch{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-size:12.5px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px}.vpanel__watch .ic{width:13px;height:13px}
 .vpanel__more{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;min-height:44px;border-radius:999px;background:var(--canal,#D9302A);color:#fff;font-family:var(--font-head);font-weight:800;font-size:14.5px;text-decoration:none}
 .vpanel__more .ic{width:16px;height:16px}
 .vpanel__more:hover{filter:brightness(.92)}
@@ -1182,6 +1184,15 @@ function siteYoutubeEmbed(url) {
     }).join('');
   }
 
+  /* O YouTube só aceita leitores incorporados em páginas servidas por http(s) (exige saber o site de origin;
+     em ficheiros abertos do computador dá o "Erro 153"). Nesse caso abre-se o vídeo no próprio YouTube. */
+  const podeIncorporar = /^https?:$/.test(location.protocol);
+  const ytSrc = (path, autoplay) => 'https://www.youtube-nocookie.com/embed/' + path + (path.indexOf('?') < 0 ? '?' : '&') +
+    (autoplay ? 'autoplay=1&' : '') + 'rel=0&modestbranding=1&playsinline=1' +
+    (podeIncorporar ? '&origin=' + encodeURIComponent(location.origin) + '&widget_referrer=' + encodeURIComponent(location.href.split('#')[0]) : '');
+  const ytVer = path => path.indexOf('videoseries?list=') === 0 ? 'https://www.youtube.com/playlist?list=' + path.split('list=')[1] : 'https://www.youtube.com/watch?v=' + path;
+  const ytCapa = path => path.indexOf('?') < 0 ? 'https://i.ytimg.com/vi/' + path + '/hqdefault.jpg' : '';
+
   /* painel "Em vídeo": abre ao lado da barra quando o canal tem um vídeo em destaque */
   let painel = null, painelDe = null;
   function fecharPainel(devolverFoco) {
@@ -1204,7 +1215,10 @@ function siteYoutubeEmbed(url) {
       '<p class="vpanel__eyebrow">Em vídeo · ' + esc(nome) + '</p>' +
       '<div class="vpanel__head"><span class="vpanel__yt" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7A8.5 8.5 0 0 0 60.5 1.7C55.2.3 34 .3 34 .3S12.8.3 7.5 1.7A8.5 8.5 0 0 0 1.5 7.7C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="currentColor"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span>' +
       '<div><p class="vpanel__name">' + esc(nome) + '</p>' + (desc ? '<p class="vpanel__desc">' + esc(desc) + '</p>' : '') + '</div></div>' +
-      '<div class="vpanel__frame"><iframe src="https://www.youtube-nocookie.com/embed/' + a.dataset.video + (a.dataset.video.indexOf('?') < 0 ? '?' : '&') + 'rel=0&modestbranding=1" title="Vídeo: ' + esc(nome) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>' +
+      (podeIncorporar ? '' : '<!--sem-incorporar-->') + '<div class="vpanel__frame">' + (!podeIncorporar
+        ? '<a class="vpanel__open" href="' + esc(ytVer(a.dataset.video)) + '" target="_blank" rel="noopener">' + (ytCapa(a.dataset.video) ? '<img src="' + esc(ytCapa(a.dataset.video)) + '" alt="">' : '') + '<span class="yt__play" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7A8.5 8.5 0 0 0 60.5 1.7C55.2.3 34 .3 34 .3S12.8.3 7.5 1.7A8.5 8.5 0 0 0 1.5 7.7C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#E1251B"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span><span class="vpanel__openlbl">Ver o vídeo no YouTube</span><span class="sr-only"> (abre num novo separador)</span></a></div>'
+        : '<iframe src="' + esc(ytSrc(a.dataset.video, false)) + '" title="Vídeo: ' + esc(nome) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>' +
+        '<a class="vpanel__watch" href="' + esc(ytVer(a.dataset.video)) + '" target="_blank" rel="noopener">Problemas a ver? Abrir no YouTube ' + ico('i-external') + '<span class="sr-only"> (abre num novo separador)</span></a>') +
       (temCanal ? '<a class="vpanel__more" href="' + esc(href) + '" target="_blank" rel="noopener">Ver o canal ' + esc(nome) + ' ' + ico('i-external') + '<span class="sr-only"> (abre num novo separador)</span></a>' : '');
     document.body.appendChild(painel);
     /* cabe sempre entre o cabeçalho e o fundo do ecrã; o vídeo encolhe se for preciso */
@@ -1294,9 +1308,10 @@ function siteYoutubeEmbed(url) {
   document.addEventListener('click', e => {
     const b = e.target.closest && e.target.closest('.yt[data-yt]');
     if (!b) return;
+    if (!podeIncorporar) { window.open(ytVer(b.dataset.yt), '_blank', 'noopener'); return; }
     const f = document.createElement('iframe');
     f.className = 'yt-frame';
-    f.src = 'https://www.youtube-nocookie.com/embed/' + b.dataset.yt + '?autoplay=1&rel=0&modestbranding=1';
+    f.src = ytSrc(b.dataset.yt, true);
     f.title = 'Vídeo: ' + (b.dataset.titulo || 'YouTube');
     f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
     f.allowFullscreen = true;
