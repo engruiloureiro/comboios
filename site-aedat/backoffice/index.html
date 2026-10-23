@@ -501,6 +501,17 @@ main:focus{outline:none}
 .vpanel__frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .vpanel__open{position:absolute;inset:0;display:grid;place-items:center;color:#fff;text-decoration:none;background:#000}.vpanel__open img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}.vpanel__open .yt__play{position:relative;width:68px;height:48px}.vpanel__openlbl{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-family:var(--font-head);font-weight:800;font-size:14px;text-shadow:0 1px 6px rgba(0,0,0,.8)}
 .vpanel__watch{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-size:12.5px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px}.vpanel__watch .ic{width:13px;height:13px}
+.vpanel__mini{position:absolute;right:48px;top:10px;display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:50%;background:var(--navy-50);color:var(--navy-800);cursor:pointer}.vpanel__mini .ic{width:17px;height:17px;stroke-width:2}.vpanel__mini:hover{background:var(--canal,#D9302A);color:#fff}
+.vpanel__bar{display:none}
+.vpanel--mini{top:auto!important;right:84px;bottom:20px;width:360px;max-height:none;padding:0;overflow:hidden;border-top-width:0;border-radius:14px;box-shadow:0 24px 50px -16px rgba(10,27,41,.6),0 0 0 1px rgba(15,42,62,.1);animation:vpMini .22s var(--ease) both}
+@keyframes vpMini{from{opacity:.4;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+.vpanel--mini .vpanel__eyebrow,.vpanel--mini .vpanel__head,.vpanel--mini .vpanel__watch,.vpanel--mini .vpanel__more,.vpanel--mini .vpanel__close,.vpanel--mini .vpanel__mini{display:none}
+.vpanel--mini .vpanel__bar{display:flex;align-items:center;gap:6px;padding:7px 8px 7px 14px;background:var(--canal,#D9302A);color:#fff}
+.vpanel__barname{flex:1;min-width:0;font-family:var(--font-head);font-weight:800;font-size:13.5px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vpanel__bar button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;cursor:pointer}.vpanel__bar button:hover{background:rgba(255,255,255,.3)}.vpanel__bar .ic{width:15px;height:15px;stroke-width:2.2}
+.vpanel--mini .vpanel__frame{border-radius:0}
+.vpanel--mini.vpanel--short{width:210px}.vpanel--mini.vpanel--short .vpanel__frame{height:auto;width:100%}
+@media (max-width:759px){.vpanel.vpanel--mini{left:12px;right:auto;bottom:12px;width:min(68vw,300px);max-height:none}.vpanel.vpanel--mini.vpanel--short{width:150px}}
 .vpanel__more{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;min-height:44px;border-radius:999px;background:var(--canal,#D9302A);color:#fff;font-family:var(--font-head);font-weight:800;font-size:14.5px;text-decoration:none}
 .vpanel__more .ic{width:16px;height:16px}
 .vpanel__more:hover{filter:brightness(.92)}
@@ -1201,8 +1212,18 @@ function siteYoutubeEmbed(url) {
     if (painelDe) { painelDe.setAttribute('aria-expanded', 'false'); if (devolverFoco) painelDe.focus(); }
     painelDe = null;
   }
+  /* mini leitor: o painel encolhe para o canto e o vídeo continua a tocar (o iframe não é recriado) */
+  let topoNormal = '';
+  function miniPainel(on) {
+    if (!painel || painel.classList.contains('vpanel--mini') === on) return;
+    if (on) { topoNormal = painel.style.top; painel.style.top = ''; } else painel.style.top = topoNormal;
+    painel.classList.toggle('vpanel--mini', on);
+    painel.setAttribute('aria-modal', 'false');
+    const f = painel.querySelector(on ? '.vpanel__expand' : '.vpanel__mini'); if (f) f.focus({ preventScroll: true });
+  }
   function abrirPainel(a) {
     const mesmo = painelDe === a;
+    if (mesmo && painel && painel.classList.contains('vpanel--mini')) { miniPainel(false); return; }
     fecharPainel(false);
     if (mesmo) return;
     const nome = a.querySelector('.canal__name').textContent, desc = a.dataset.desc || '', short = a.dataset.short === '1';
@@ -1211,7 +1232,9 @@ function siteYoutubeEmbed(url) {
     painel.className = 'vpanel' + (short ? ' vpanel--short' : '');
     painel.setAttribute('role', 'dialog'); painel.setAttribute('aria-label', 'Em vídeo: ' + nome);
     painel.style.setProperty('--canal', getComputedStyle(a).getPropertyValue('--canal') || '#D9302A');
-    painel.innerHTML = '<button type="button" class="vpanel__close" aria-label="Fechar">' + ico('i-close') + '</button>' +
+    painel.innerHTML = (podeIncorporar ? '<button type="button" class="vpanel__mini" aria-label="Mini leitor: continuar a ver no canto do ecrã" title="Mini leitor"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="11.5" y="11" width="7" height="5.5" rx="1" fill="currentColor" stroke="none"/></svg></button>' : '') +
+      '<button type="button" class="vpanel__close" aria-label="Fechar">' + ico('i-close') + '</button>' +
+      '<div class="vpanel__bar"><span class="vpanel__barname">' + esc(nome) + '</span><button type="button" class="vpanel__expand" aria-label="Ampliar o vídeo" title="Ampliar"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button><button type="button" class="vpanel__barclose" aria-label="Fechar o vídeo" title="Fechar">' + ico('i-close') + '</button></div>' +
       '<p class="vpanel__eyebrow">Em vídeo · ' + esc(nome) + '</p>' +
       '<div class="vpanel__head"><span class="vpanel__yt" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7A8.5 8.5 0 0 0 60.5 1.7C55.2.3 34 .3 34 .3S12.8.3 7.5 1.7A8.5 8.5 0 0 0 1.5 7.7C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="currentColor"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span>' +
       '<div><p class="vpanel__name">' + esc(nome) + '</p>' + (desc ? '<p class="vpanel__desc">' + esc(desc) + '</p>' : '') + '</div></div>' +
@@ -1231,12 +1254,16 @@ function siteYoutubeEmbed(url) {
     }
     painelDe = a; a.setAttribute('aria-expanded', 'true');
     painel.querySelector('.vpanel__close').addEventListener('click', () => fecharPainel(true));
+    painel.querySelector('.vpanel__barclose').addEventListener('click', () => fecharPainel(false));
+    painel.querySelector('.vpanel__expand').addEventListener('click', () => miniPainel(false));
+    const bm = painel.querySelector('.vpanel__mini'); if (bm) bm.addEventListener('click', () => miniPainel(true));
     painel.querySelector('.vpanel__close').focus();
   }
   document.addEventListener('click', e => {
     const a = e.target.closest && e.target.closest('.canal[data-video]');
     if (a) { e.preventDefault(); abrirPainel(a); return; }
-    if (painel && !painel.contains(e.target)) fecharPainel(false);
+    /* carregar fora do painel: com o leitor ativo passa a mini leitor; sem leitor, fecha */
+    if (painel && !painel.contains(e.target) && !painel.classList.contains('vpanel--mini')) { if (podeIncorporar) miniPainel(true); else fecharPainel(false); }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && painel) fecharPainel(true); });
 
