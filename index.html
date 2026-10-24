@@ -1747,7 +1747,7 @@ function svcBuild(){
   TRAINS=TRAINS.filter(t=>!t.cross&&!t.svc);SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}SVC=[];
   const late=S.clock>12*3600,pdir=REV?-1:1,org=S.startSt,fix=t=>late&&t<4*3600?t+86400:t;
   for(const x of TTS){if(S.ttn&&x[0]===S.ttn)continue;let P=null;try{P=ttPlan(x)}catch(e){}if(!P)continue;
-    for(const g of P.legs){if(!g||!g.t||(LINE!=='gp'&&g.line!==LINE))continue;
+    for(const g of P.legs){if(!g||!g.t)continue;   // também os da outra linha, no troço comum Trindade – Senhora da Hora (os troços em falta cortam-se abaixo)
       const L=Object.keys(g.t).map(n=>({s:byNameE(n),t:fix(g.t[n])})).filter(q=>q.s&&!q.s.nostop).sort((u,w)=>u.t-w.t);
       // troços contínuos neste mundo (no mundo contínuo as duas linhas só partilham parte das estações)
       const runs=[];let run=[];
