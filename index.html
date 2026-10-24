@@ -1457,6 +1457,11 @@ function reset(startIdx,endIdx,rev,svc){
    // se nenhum cruzamento calhou na via desviada, muitas vezes é a nossa automotora que entra num deles (ao acaso)
    const cx=TRAINS.filter(t=>t.cross&&t.cross!==PV&&!PARKED.some(q=>q.o===t.e.to&&q.a<t.e.b&&q.a+q.len>t.e.a));
    if(cx.length&&!SIDE.length&&rnd()<0.65){const t=cx[Math.floor(rnd()*cx.length)],X=t.cross,e=t.e;SIDE.push(e);X.divert=true;t.xo=p=>p<LOU.pos?(REV?0:4):0}}
+  // a partida nem sempre é da via principal: na estação de origem a automotora pode estar numa das vias desviadas (ao acaso)
+  S.depE=null;if(!S.ofi&&!S.ref&&!S.pvT){const L=TLEN(S.ncar),lo=Math.min(S.pos,S.pos-(REV?-1:1)*L),hi=Math.max(S.pos,S.pos-(REV?-1:1)*L);
+    const opts=st.ex.filter(e=>e.a<lo-15&&e.b>hi+15&&!PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a)&&exOff(e,S.pos)!==null);
+    if(opts.length&&Math.random()<0.5){S.depE=opts[Math.floor(Math.random()*opts.length)];SIDE.push(S.depE);
+      const ln=st===SB?3+st.ex.indexOf(S.depE):2+st.ex.indexOf(S.depE);setTimeout(()=>{if(S&&S.depE)toast('Hoje a partida de '+st.n+' é da linha '+ln+'.','')},9000)}}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   buildStrip();
 }
@@ -1744,7 +1749,7 @@ function crossSt(ps,cands,ranges,ta,tb){let X=null,bd=1e9;for(const c of cands){
 function svcTimeAt(v,X){const xp=svcStopP(X,v.dir,v.len),P=v.pts;for(let k=0;k<P.length;k++){if(P[k].s===X)return P[k].tA;const b=P[k+1];if(b&&(xp-P[k].p)*(xp-b.p)<=0)return P[k].tD+(b.tA-P[k].tD)*Math.abs(xp-P[k].p)/Math.max(1,Math.abs(b.p-P[k].p))}return 1e9}
 const svcRange=v=>[Math.min(...v.pts.map(q=>q.p))-40,Math.max(...v.pts.map(q=>q.p))+40];
 function svcBuild(){
-  TRAINS=TRAINS.filter(t=>!t.cross&&!t.svc);SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}SVC=[];
+  TRAINS=TRAINS.filter(t=>!t.cross&&!t.svc);SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}SVC=[];if(S.depE)SIDE.push(S.depE);
   const late=S.clock>12*3600,pdir=REV?-1:1,org=S.startSt,fix=t=>late&&t<4*3600?t+86400:t;
   for(const x of TTS){if(S.ttn&&x[0]===S.ttn)continue;let P=null;try{P=ttPlan(x)}catch(e){}if(!P)continue;
     for(const g of P.legs){if(!g||!g.t)continue;   // também os da outra linha, no troço comum Trindade – Senhora da Hora (os troços em falta cortam-se abaixo)
