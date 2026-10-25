@@ -482,6 +482,23 @@ main:focus{outline:none}
 @media (max-width:759px){.canais{top:auto;bottom:18px}.canal{--w:50px;height:50px;padding-left:6px;border-radius:14px 0 0 14px}.canal__icon{width:38px;height:38px;border-radius:11px}.canal__icon .ic{width:21px;height:21px}}
 @media (hover:none){.canal:hover{--w:var(--w0,50px)}}
 @media (prefers-reduced-motion:reduce){.canal,.canal__txt{transition:none}}
+/* notícias em formato revista: manchete, até 4 destaques e "Mais notícias" */
+.news-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}
+.news-meta .tag{margin:0}
+.news-date{font-size:13px;font-weight:600;color:var(--ink-3);letter-spacing:.01em}
+.news-grid--quatro .card__title{font-size:19px}
+.news-grid--quatro .card__media{aspect-ratio:16/10}
+.news-grid--quatro .card__body{padding:20px 22px 22px}
+.news-grid--quatro .card__text{font-size:15px}
+.news-more{margin-top:28px;padding:22px 26px 10px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-1)}
+.news-more__title{margin:0 0 6px;font-family:var(--font-head);font-weight:800;font-size:20px;color:var(--navy-900)}
+.news-more__list{list-style:none;margin:0;padding:0}
+.news-more__list li{display:grid;gap:6px;padding:14px 0;border-top:1px solid var(--line)}
+.news-more__list li:first-child{border-top:0}
+.news-more__t{font-family:var(--font-head);font-weight:700;font-size:16.5px;line-height:1.35;color:var(--navy-900)}
+.news-more__link{text-decoration:none;color:inherit}
+.news-more__link:hover .news-more__t{color:var(--terra-600);text-decoration:underline;text-underline-offset:3px}
+@media (min-width:1000px){.news-more__list{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}.news-more__list li:nth-child(2){border-top:0}}
 /* painel "Em vídeo" (Taipa360) */
 .vpanel{position:fixed;right:74px;top:190px;z-index:31;width:min(360px,calc(100vw - 96px));max-height:calc(100vh - 24px);overflow:auto;background:#fff;border-top:5px solid var(--canal,#D9302A);border-radius:6px 6px 18px 18px;box-shadow:0 30px 60px -20px rgba(10,27,41,.55),0 0 0 1px rgba(15,42,62,.06);padding:16px 16px 18px;animation:vpIn .22s var(--ease) both}
 @keyframes vpIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
@@ -1286,21 +1303,36 @@ function siteYoutubeEmbed(url) {
   function aplicarNoticias(lista) {
     if (!lista.length) return;
     const destaque = lista.find(n => n.destaque) || lista[0];
-    const outras = lista.filter(n => n !== destaque).slice(0, 2);
+    const resto = lista.filter(n => n !== destaque);
+    const outras = resto.slice(0, 4), mais = resto.slice(4, 9);
+    const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    const dataPT = d => { const p = String(d || '').split('-'); return p.length === 3 ? (+p[2]) + ' ' + meses[+p[1] - 1] + ' ' + p[0] : ''; };
+    const quando = n => n.data_publicacao ? '<time class="news-date" datetime="' + esc(n.data_publicacao) + '">' + dataPT(n.data_publicacao) + '</time>' : '';
     const f = document.querySelector('.feature');
     if (f) f.innerHTML =
       (temMedia(destaque) ? '<div class="feature__media">' + media(destaque) + '</div>' : '') +
-      '<div class="feature__body">' + (destaque.categoria ? '<p class="tag tone-' + esc(destaque.cor || 'terra') + '">' + esc(destaque.categoria) + '</p>' : '') +
+      '<div class="feature__body"><div class="news-meta">' + (destaque.categoria ? '<p class="tag tone-' + esc(destaque.cor || 'terra') + '">' + esc(destaque.categoria) + '</p>' : '') + quando(destaque) + '</div>' +
       '<h3 class="feature__title"' + lang(destaque) + '>' + esc(destaque.titulo) + '</h3>' +
       (destaque.resumo ? '<p class="feature__text"' + lang(destaque) + '>' + esc(destaque.resumo) + '</p>' : '') +
       '<div class="feature__foot">' + linkNoticia(destaque) + '</div></div>';
     const grid = document.querySelector('.news-grid');
+    if (grid) grid.classList.toggle('news-grid--quatro', outras.length > 2);
     if (grid) grid.innerHTML = outras.map(n =>
       '<article class="card">' + (temMedia(n) ? '<div class="card__media' + (n.imagem_topo ? ' card__media--top' : '') + '">' + media(n) + '</div>' : '') +
-      '<div class="card__body">' + (n.categoria ? '<p class="tag tone-' + esc(n.cor || 'sky') + '">' + esc(n.categoria) + '</p>' : '') +
+      '<div class="card__body"><div class="news-meta">' + (n.categoria ? '<p class="tag tone-' + esc(n.cor || 'sky') + '">' + esc(n.categoria) + '</p>' : '') + quando(n) + '</div>' +
       '<h3 class="card__title"' + lang(n) + '>' + esc(n.titulo) + '</h3>' +
       (n.resumo ? '<p class="card__text"' + lang(n) + '>' + esc(n.resumo) + '</p>' : '') +
       '<div class="card__foot">' + linkNoticia(n) + '</div></div></article>').join('');
+    /* "Mais notícias": lista compacta, estilo jornal */
+    let bloco = document.querySelector('.news-more');
+    if (!mais.length) { if (bloco) bloco.remove(); return; }
+    if (!bloco && grid) { bloco = document.createElement('section'); bloco.className = 'news-more'; bloco.setAttribute('aria-labelledby', 'mais-noticias'); grid.after(bloco); }
+    if (bloco) bloco.innerHTML = '<h3 class="news-more__title" id="mais-noticias">Mais notícias</h3><ul class="news-more__list">' + mais.map(n => {
+      const href = n.ligacao_url ? safeUrl(n.ligacao_url) : ''; const nova = href && externa(href);
+      const tit = '<span class="news-more__t"' + lang(n) + '>' + esc(n.titulo) + '</span>';
+      return '<li><div class="news-meta">' + (n.categoria ? '<span class="tag tone-' + esc(n.cor || 'sky') + '">' + esc(n.categoria) + '</span>' : '') + quando(n) + '</div>' +
+        (href ? '<a class="news-more__link card-link" href="' + esc(href) + '"' + (nova ? ' target="_blank" rel="noopener"' : '') + '>' + tit + ' <span aria-hidden="true">' + (nova ? '↗' : '→') + '</span>' + (nova ? novaAba : '') + '</a>' : tit) + '</li>';
+    }).join('') + '</ul>';
   }
 
   function iconeAviso(p) {
