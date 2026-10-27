@@ -756,6 +756,26 @@ const SIG=[],SIGB={F:[],R:[]};
    // sinais de saída das estações de cruzamento: fechados até o chefe dar a partida (e o cruzamento estar feito)
    if(s!==GMR)SIG.push({p:Math.max(s.pb+8,s.stopF+16),d:'F',k:'sai',st:s});SIG.push({p:Math.min(s.pa-8,s.stopR-16),d:'R',k:'sai',st:s})}}
 /* aspetos: G via livre, YF aviso de precaução (amarelo intermitente), Y precaução, R paragem */
+// vias de uma estação com cais ao lado (aresta do cais a cerca de 1,8 m do eixo) e linha em que a nossa automotora chega ou parte
+// (Trindade e Guimarães): sorteada de entre as que têm cais e estão livres, a mesma em toda a viagem
+const LNNO={'0':1,'4':2,'-5.5':3,'9':4,'-11.5':5,'15':6};
+const platAdj=(s,off)=>s.pl.filter(r=>{const a=Math.abs(r[0]-off),b=Math.abs(r[1]-off);return a>1.4&&a<2.1||b>1.4&&b<2.1});
+const widest=(s,off)=>platAdj(s,off).sort((a,b)=>Math.abs(b[1]-b[0])-Math.abs(a[1]-a[0]))[0]||null;
+const lineNo=(s,e,mo)=>s===SB?LNNO[String(e?e.to:mo)]||1:(e?s.ex.indexOf(e)+2:1);
+function pickLine(s,rev){const mo=rev?trackXR(s.stopR):0,c=[];
+  if(platAdj(s,mo).length)c.push(null);
+  for(const e of s.ex)if(Math.abs(e.from-mo)<0.01&&platAdj(s,e.to).length&&!PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a))c.push(e);
+  const e=c.length?c[Math.floor(Math.random()*c.length)]:null;return{e,no:lineNo(s,e,mo)}}
+function applyPicks(){if(!S||!S.picks)return;for(const[st,q]of S.picks){SIDE=SIDE.filter(x=>!st.ex.includes(x));st.divert=false;if(q.e){SIDE.push(q.e);if(st===GUI)st.divert=true}}}
+// lado das portas (0 esquerdo, 1 direito): o do cais mais largo ao lado da via em que o comboio parou
+function doorSide(st){const dm=REV?-1:1,off=trackX(S.pos-dm*TLEN(S.ncar)/2),r=widest(st,off);
+  if(r){const sg=Math.sign((r[0]+r[1])/2-off);return(REV?-sg:sg)<0?0:1}
+  return(REV?st.doorR:st.door)<0?0:1}
+// indicador de via: número da via a que o sinal de entrada dirige a nossa automotora (Guimarães e Trindade)
+function indLine(g){if(!S||!S.picks||g.d!==DIRC)return 0;
+  if(g.k==='ent'&&g.st){const q=S.picks.get(g.st);return q&&q.arr?q.no:0}
+  if(g.k==='blk'&&g.pr&&REV&&g.p===SB.pb+90){const q=S.picks.get(SB);return q&&q.arr?q.no:0}
+  return 0}
 // cancelas das passagens de nível com guarda: fechadas com um comboio em cima ou a chegar (cerca de 18 s de aviso, no mínimo 120 m)
 function pnClosed(pn){if(!S)return false;
   const chk=(front,len,dir,v)=>{const d=(pn.pos-front)*dir;if(d<=0&&d>-(len+12))return true;return v>0.5&&d>0&&d<Math.max(120,v*18)};
@@ -1489,11 +1509,15 @@ function reset(startIdx,endIdx,rev,svc){
    // se nenhum cruzamento calhou na via desviada, muitas vezes é a nossa automotora que entra num deles (ao acaso)
    const cx=TRAINS.filter(t=>t.cross&&t.cross!==PV&&!PARKED.some(q=>q.o===t.e.to&&q.a<t.e.b&&q.a+q.len>t.e.a));
    if(cx.length&&!SIDE.length&&rnd()<0.65){const t=cx[Math.floor(rnd()*cx.length)],X=t.cross,e=t.e;SIDE.push(e);X.divert=true;t.xo=p=>p<LOU.pos?(REV?0:4):0}}
-  // a partida nem sempre é da via principal: na estação de origem a automotora pode estar numa das vias desviadas (ao acaso)
-  S.depE=null;if(!S.ofi&&!S.ref&&!S.pvT){const L=TLEN(S.ncar),lo=Math.min(S.pos,S.pos-(REV?-1:1)*L),hi=Math.max(S.pos,S.pos-(REV?-1:1)*L);
-    const opts=st.ex.filter(e=>e.a<lo-15&&e.b>hi+15&&!PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a)&&exOff(e,S.pos)!==null&&st.pl.some(r=>{const o=exOff(e,S.pos);return Math.min(Math.abs(r[0]-o),Math.abs(r[1]-o))<2.2}));
-    if(opts.length&&Math.random()<0.5){S.depE=opts[Math.floor(Math.random()*opts.length)];SIDE.push(S.depE);
-      const ln=st===SB?3+st.ex.indexOf(S.depE):2+st.ex.indexOf(S.depE);setTimeout(()=>{if(S&&S.depE)toast('Hoje a partida de '+st.n+' é da linha '+ln+'.','')},9000)}}
+  // linha da nossa automotora na Trindade e em Guimarães: sorteada de entre as vias com cais (partida na origem; chegada ou paragem nas outras)
+  S.depE=null;S.picks=new Map();
+  if(!S.free&&!S.pvT){
+    const ok=X=>X&&X.i>=0&&X.ex&&X.ex.length&&X!==FAF;
+    for(const X of[SB,GUI]){if(!ok(X))continue;
+      if(X===st){if(S.ofi||S.ref)continue;const q=pickLine(X,REV);q.arr=false;S.picks.set(X,q);S.depE=q.e;
+        setTimeout(()=>{if(S&&S.picks&&S.picks.get(X)===q)toast('Hoje a partida de '+X.n+' é da linha '+q.no+'.','')},9000)}
+      else if(STOPS.includes(X)){const q=pickLine(X,REV);q.arr=true;S.picks.set(X,q)}}
+    applyPicks()}
   S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
   buildStrip();
 }
@@ -1781,7 +1805,7 @@ function crossSt(ps,cands,ranges,ta,tb){let X=null,bd=1e9;for(const c of cands){
 function svcTimeAt(v,X){const xp=svcStopP(X,v.dir,v.len),P=v.pts;for(let k=0;k<P.length;k++){if(P[k].s===X)return P[k].tA;const b=P[k+1];if(b&&(xp-P[k].p)*(xp-b.p)<=0)return P[k].tD+(b.tA-P[k].tD)*Math.abs(xp-P[k].p)/Math.max(1,Math.abs(b.p-P[k].p))}return 1e9}
 const svcRange=v=>[Math.min(...v.pts.map(q=>q.p))-40,Math.max(...v.pts.map(q=>q.p))+40];
 function svcBuild(){
-  TRAINS=TRAINS.filter(t=>!t.cross&&!t.svc);SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}SVC=[];if(S.depE)SIDE.push(S.depE);
+  TRAINS=TRAINS.filter(t=>!t.cross&&!t.svc);SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}SVC=[];
   const late=S.clock>12*3600,pdir=REV?-1:1,org=S.startSt,fix=t=>late&&t<4*3600?t+86400:t;
   for(const x of TTS){if(S.ttn&&x[0]===S.ttn)continue;let P=null;try{P=ttPlan(x)}catch(e){}if(!P)continue;
     for(const g of P.legs){if(!g||!g.t)continue;   // também os da outra linha, no troço comum Trindade – Senhora da Hora (os troços em falta cortam-se abaixo)
@@ -1825,9 +1849,10 @@ function svcBuild(){
   // às vezes é a nossa automotora que entra na via desviada
   for(const v of crs){const X=v.cross;if(!X.divert&&X!==PV&&Math.random()<0.5){SIDE.push(X.ex[0]);X.divert=true}}
   if(crs.length&&!SIDE.length&&Math.random()<0.65){const ok=crs.filter(v=>v.cross!==PV);if(ok.length){const X=ok[Math.floor(Math.random()*ok.length)].cross;SIDE.push(X.ex[0]);X.divert=true}}
+  applyPicks();   // a nossa linha na Trindade e em Guimarães manda sobre os cruzamentos sorteados
   // vias de cada automotora: na Trindade parte da linha 3 e chega à linha 4; na via única as que vêm para o Porto passam pela via
   // desviada das estações, e as outras só no cruzamento connosco (se a nossa ficar na principal)
-  for(const v of SVC){const L=[];if(v.pts.some(q=>q.s===SB)&&SB.ex.length>=3)L.push(v.dir>0?SB.ex[0]:SB.ex[2]);
+  for(const v of SVC){const L=[];if(v.pts.some(q=>q.s===SB)&&SB.ex.length>=3){const pk=S.picks&&S.picks.get(SB),o4=v.dir>0?[SB.ex[0],SB.ex[1]]:[SB.ex[2],SB.ex[3]||SB.ex[2]];L.push(o4.find(e=>!(pk&&pk.e===e))||o4[0])}
     for(const q of v.pts){const X=q.s;if(!X.ex.length||X.pos<=DBL.b+100||X===LSD||X===PVA||X===FAF||loopBusy(X.ex[0]))continue;
       if(v.dir<0?!(v.cross===X&&X.divert):(v.cross===X&&!X.divert))L.push(X.ex[0])}
     v.loops=L;v.xo=p=>{for(const e of v.loops)if(p>e.a&&p<e.b){const o=exOff(e,p);if(o!==null)return o}return v.dir>0?0:trackXR(p)}}
@@ -1894,7 +1919,7 @@ function step(dt,dr){
   S.aCmd=a;S.Ft=Ft;
   S.v=Math.max(0,S.v+a*dt);
   // portas de fole: abrem do lado do cais (animação original: 32 fotogramas a 30 por segundo)
-  {S.dOpen=S.dOpen||[0,0];const st=S.atSt,dside=st?((REV?st.doorR:st.door)<0?0:1):-1;
+  {S.dOpen=S.dOpen||[0,0];const st=S.atSt,dside=st?doorSide(st):-1;
    for(const k of[0,1]){const tg=S.doors&&k===dside?1:0;S.dOpen[k]+=clamp(tg-S.dOpen[k],-dt/1.07,dt/1.07)}}
   if(S.doors)S.v=0;
   S.prevPos=S.pos;S.pos+=mv*S.v*dt;
@@ -1932,6 +1957,7 @@ function step(dt,dr){
     if(st==='R'){if(perm&&S.permG===gS){S.vista={g:gS,end:null};toast('Marcha à vista até a cauda passar o sinal seguinte.','')}
       else{emergency(perm?'Sinal de paragem permissiva ultrapassado sem os 30 s de paragem':'Passagem de sinal em paragem absoluta');penal(200)}}
     if(gS.k==='ent'&&gS.st===FAF&&st==='G')toast('Fafe: sinal de entrada aberto, via I (cais de passageiros). Pare com a frente da automotora na marca do cais.','good');
+    {const il=st!=='R'?indLine(gS):0;if(il)setTimeout(()=>toast('Indicador de via: via '+il+(st==='Y'?' (via desviada, máximo 30 km/h)':'')+'. Entre devagar e pare na marca do cais.','good'),900)}
     S.sigLim=st==='Y'?{v:gS.k==='blk'&&gS.pr||gS.k==='ent'?30:45}:null;
     if(st==='Y')toast((gS.k==='av'?'Sinal avançado em precaução':gS.k==='ent'?'Sinal de entrada em precaução: via desviada':'Sinal amarelo: precaução')+', máximo '+S.sigLim.v+' km/h até ao sinal seguinte.','');
     else if(st==='YF')toast('Aviso de precaução: o sinal seguinte estará em precaução.','')}}
@@ -2123,7 +2149,7 @@ function doorBtn(){
   if(s===S.endSt){const d=S.clock-s.dep,pts=Math.round(Math.abs(d)<=60?100:Math.max(0,100-(Math.abs(d)-60)/2));S.sc.pun+=pts;S.delay=d;sub+='  |  chegada '+(Math.abs(d)<31?'à hora':fDelay(d))}
   else sub+='  |  parte às '+fHM(s.dep);
   $('#cardName').textContent=s.n;$('#cardSub').textContent=sub;$('#card').hidden=false;
-  toast('Portas abertas do lado '+((REV?s.doorR:s.door)<0?'esquerdo':'direito')+'. Precisão +'+acc,'good');
+  toast('Portas abertas do lado '+(doorSide(s)===0?'esquerdo':'direito')+'. Precisão +'+acc,'good');
   setTimeout(()=>say(s===S.endSt?s.n+'. Obrigado por viajar connosco.':s.n.replace(' - ',', ')+'.'),600);
   buildStrip();
 }
@@ -3009,7 +3035,7 @@ function init3D(){
     x.save();x.beginPath();x.arc(48,48,41,0,7);x.clip();x.strokeStyle='#111';x.lineWidth=18;x.beginPath();x.moveTo(10,10);x.lineTo(86,86);x.stroke();x.restore()});
   atAlloc('avR',96,96,(x,w,h)=>{x.fillStyle='#7f817c';x.fillRect(0,0,w,h);x.fillStyle='#f4f4ee';x.beginPath();x.arc(48,48,48,0,7);x.fill();x.fillStyle='#c8231d';x.beginPath();x.arc(48,48,41,0,7);x.fill()});
   atAlloc('avT',36,104,(x,w,h)=>{x.fillStyle='#333';x.fillRect(0,0,w,h);const pg=(m)=>{x.beginPath();x.moveTo(m,h-m);x.lineTo(w-m,h-m);x.lineTo(w-m,h*0.2+m*0.4);x.lineTo(w/2,m);x.lineTo(m,h*0.2+m*0.4);x.closePath();x.fill()};
-    x.fillStyle='#f4f4ee';pg(3);x.fillStyle='#2bb24a';x.fillRect(7,28,w/2-7,(h-36)/2);x.fillRect(w/2,28+(h-36)/2,w/2-7,(h-36)/2)});atTxt('mabor','MABOR','#1a3a8a','#f4f4f0',320,56,48);atTxt('wtPV','PÓVOA','#111','#d6d8d6',300,64,52);atTxt('ud','U.D.','#f4f4f0','#111',96,56,40);for(const n of['1','2'])atTxt('lin'+n,'LINHA '+n,'#f4f4f0','#111',160,48,34);for(let n=1;n<=6;n++)atTxt('lnw'+n,'LINHA '+n,'#f4f2ea','#111',192,52,40);for(const d of['GUIMARÃES','PÓVOA DE VARZIM','FAMALICÃO','FAFE'])atTxt('ld:'+d,d,'#f4f2ea','#111',256,60,40);
+    x.fillStyle='#f4f4ee';pg(3);x.fillStyle='#2bb24a';x.fillRect(7,28,w/2-7,(h-36)/2);x.fillRect(w/2,28+(h-36)/2,w/2-7,(h-36)/2)});atTxt('mabor','MABOR','#1a3a8a','#f4f4f0',320,56,48);atTxt('wtPV','PÓVOA','#111','#d6d8d6',300,64,52);atTxt('ud','U.D.','#f4f4f0','#111',96,56,40);for(const n of['1','2'])atTxt('lin'+n,'LINHA '+n,'#f4f4f0','#111',160,48,34);for(let n=1;n<=6;n++)atTxt('lnw'+n,'LINHA '+n,'#f4f2ea','#111',192,52,40);for(let n=1;n<=6;n++)atTxt('ind'+n,String(n),'#ffe9a0','#0c0c0d',64,64,50);for(const d of['GUIMARÃES','PÓVOA DE VARZIM','FAMALICÃO','FAFE'])atTxt('ld:'+d,d,'#f4f2ea','#111',256,60,40);
   atTxt('trinHead','T  R  I  N  D  A  D  E','#f4f4f0','#2a2e30',704,40,32);atTxt('trinAd','super bock','#d65628','#fff',256,96,60);
   atAlloc('sdhV',48,192,(x,w,h)=>{x.fillStyle='#f4f2ea';x.fillRect(0,0,w,h);x.strokeStyle='#111';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3);x.save();x.translate(w/2+8,h/2);x.rotate(-Math.PI/2);x.fillStyle='#111';fitText(x,'Sr.ª DA HORA',h-16,26,'700',FONT);x.textAlign='center';x.textBaseline='middle';x.fillText('Sr.ª DA HORA',0,-8);x.restore()});
   atAlloc('cpLogo',96,64,(x,w,h)=>{x.fillStyle='#dedcd6';x.fillRect(0,0,w,h);x.strokeStyle='#8c8a84';x.lineWidth=7;x.beginPath();x.arc(30,32,16,0.6,5.7);x.stroke();x.beginPath();x.moveTo(52,52);x.lineTo(52,14);x.arc(62,24,10,-Math.PI,Math.PI*0.5);x.stroke()});atTxt('n9611','9611','#d63a28','#f4f4f0',128,40,30);atTxt('n9611s','9611','#2a2a2a','rgb(214,215,212)',128,36,26);atAlloc('clock',128,128,(x,w,h)=>{x.fillStyle='#f6f3ea';x.beginPath();x.arc(64,64,60,0,7);x.fill();x.strokeStyle='#222';x.lineWidth=5;x.stroke();for(let k=0;k<12;k++){const a=k/12*6.283;x.fillStyle='#222';x.fillRect(64+Math.sin(a)*48-2,64-Math.cos(a)*48-5,4,10)}x.lineWidth=6;x.beginPath();x.moveTo(64,64);x.lineTo(64+34,64-8);x.moveTo(64,64);x.lineTo(60,20);x.stroke()});atStop();atDest('GUIMARÃES');for(const s of STN)atDest(s.n.toUpperCase());atDest('PORTO S. BENTO');atDest('LOUSADO');atTxt('cp','CP','#f4c318','#1a1a1a',128,64,50);
@@ -4846,7 +4872,10 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
         mb.q(A0,A1,E1,E0,col,0);mb.q(add(A0,hh),add(A1,hh),add(E1,hh),add(E0,hh),col,0);mb.q(A0,E0,add(E0,hh),add(A0,hh),col,0);mb.q(E1,A1,add(A1,hh),add(E1,hh),col,0)};
       for(let q=0;q<7;q++)seg(0.35+q*0.75,0.35+(q+1)*0.75,0.12,0.14,q%2?cc(240,240,236):cc(200,40,30));
       seg(-0.7,0.1,0.26,0.3,cc(40,40,40))}}
-  for(const g of SIG){if(!g.w3||Math.abs(g.p-centerP)>1600)continue;const st=g.d===DIRC?sigState(g):(g.k==='exit'?'R':'G');
+  // indicador de via: placa com o número da via, acesa à noite, por baixo do braço (semáforo) ou por cima do painel luminoso
+  const indPlate=(g,il,dy)=>{if(!il||!ATL['ind'+il])return;const n=g.n3,c=[g.w3[0]-eye[0]+n[0]*0.14,g.w3[1]+dy,g.w3[2]-eye[2]+n[2]*0.14];
+    boxRF(mb,[c[0]-n[0]*0.03,0,c[2]-n[2]*0.03],[n[2],0,-n[0]],n,0.52,0.05,c[1]-0.27,c[1]+0.27,cc(24,24,26),0);plateQ(mb,c,n,0.46,0.46,ATL['ind'+il],dark>.25?0.9:0.15,false)};
+  for(const g of SIG){if(!g.w3||Math.abs(g.p-centerP)>1600)continue;const st=g.d===DIRC?sigState(g):(g.k==='exit'?'R':'G');const il=g.d===DIRC&&st!=='R'?indLine(g):0;
      if(g.disc){// avançado: o disco roda 90º; de frente = precaução (amarelo com faixa preta) ou paragem diferida (vermelho);
        // de perfil, o alvo trapezoidal branco e verde fica de frente = via livre
        const want=st==='G'?Math.PI/2:0;if(g.dWant!==want){g.dFrom=g.dVis===undefined?want:g.dVis;g.dWant=want;g.dT=t}
@@ -4877,6 +4906,7 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
        const R0=[n[2],0,-n[0]],ctr=[pivot[0]+n[0]*.24,pivot[1]+.33,pivot[2]+n[2]*.24];
        for(let k=0;k<16;k++){const x=k*6.2832/16,y=(k+1)*6.2832/16,pt=v=>[ctr[0]+R0[0]*Math.cos(v)*.13,ctr[1]+Math.sin(v)*.13,ctr[2]+R0[2]*Math.cos(v)*.13];
          mb.t(ctr,pt(x),pt(y),n,n,n,lamp,[0,0],[1,0],[0,1],0,dark>.25?0.8:0.15,1)}
+       indPlate(g,il,-1.0);
        continue;
      }
     const cols={G:[0.15,1,0.45],Y:[1,0.72,0.1],YF:[1,0.72,0.1],R:[1,0.12,0.08]},pos={G:2,R:1,Y:0,YF:0};
@@ -4885,7 +4915,8 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
       // lâmpada redonda: disco de 18 sectores
       const P=a=>[c[0]+r[0]*Math.cos(a)*s,y+Math.sin(a)*s,c[2]+r[2]*Math.cos(a)*s],NS=18;
       for(let q=0;q<NS;q++){const a0=q/NS*6.2832,a1=(q+1)/NS*6.2832;mb.q([c[0],y,c[2]],P(a0),P(a1),P(a1),col,0,0,on?1:0,1)}
-    }}
+    }
+    indPlate(g,il,1.95)}
   // passageiros: esperam no cais, caminham até à porta mais próxima e entram; os que chegam saem pelas portas e afastam-se
   const now=performance.now()/1000,pdt=paused?0:Math.min(0.1,now-(PAXT||now));PAXT=now;let busy=false;const dir=REV?-1:1;
   // Modelos 3D anatómicos: substituem as antigas figuras de quatro blocos.
@@ -4902,12 +4933,12 @@ function buildDyn(eye,centerP){const mb=new MB();const t=performance.now()/1000;
   const DOORD0=[7.12,17.66,20.16,30.69],DOORD=S.ncar>2?DOORD0.concat(DOORD0.map(d=>d+37.812)):DOORD0;
   const step2=(P,T,v)=>{const dx=T[0]-P[0],dz=T[2]-P[2],L2=Math.hypot(dx,dz);if(L2<0.05)return true;const k=Math.min(1,v*pdt/L2);P[0]+=dx*k;P[2]+=dz*k;return L2<0.35};
   for(const s of STN){if(Math.abs(s.pos-centerP)>700||!s.pax3)continue;const here=S.atSt===s&&S.doors;
-    if(here&&!s.alightDone){s.alightDone=true;const r0=s.pl.find(r=>Math.abs(Math.abs(r[0]-trackX(S.pos))-1.8)<0.05);
-      if(r0){const side=Math.sign(r0[0]-trackX(S.pos)),y=s.pax3.length?s.pax3[0].p[1]:hy[Math.floor(S.pos/SEG)]+s.ph,n=Math.min(ONBOARD.filter(p=>p.sit>=1).length,s===S.endSt?ONBOARD.length:1+Math.floor(Math.random()*(s.big?4:2)));
+    if(here&&!s.alightDone){s.alightDone=true;const r0=widest(s,trackX(S.pos));
+      if(r0){const side=Math.sign((r0[0]+r0[1])/2-trackX(S.pos)),y=s.pax3.length?s.pax3[0].p[1]:hy[Math.floor(S.pos/SEG)]+s.ph,n=Math.min(ONBOARD.filter(p=>p.sit>=1).length,s===S.endSt?ONBOARD.length:1+Math.floor(Math.random()*(s.big?4:2)));
         for(let q=0;q<n;q++){const ix=ONBOARD.findIndex(p=>p.sit>=1),pass=ONBOARD.splice(ix,1)[0],d=DOORD[q%DOORD.length],P=doorAt(d,side,y),pp=S.pos-dir*d,T=wp(pp+(Math.random()-0.5)*14,trackX(pp)+side*(TW/2+3+Math.random()*(Math.abs(r0[1]-r0[0])-3.5)),0);T[1]=y;
           ALIGHT.push({P,T,delay:0.6+q*0.9+Math.random(),c:pass.c,k:pass.k,ph:Math.random()*6,st:s})}}}
     for(const px of s.pax3){if(px.in)continue;if(!px.cur)px.cur=px.p.slice();
-      if(here&&px.board===undefined){if(!s.pl.some(r=>Math.abs(Math.abs(r[0]-trackX(S.pos))-1.8)<.05&&px.x>=Math.min(r[0],r[1])&&px.x<=Math.max(r[0],r[1]))){px.board=null;continue}const side=Math.sign(px.x-trackX(px.pp));let best=null,bd=1e9;px.entryD=0;px.entrySide=side;
+      if(here&&px.board===undefined){const rp=widest(s,trackX(S.pos));if(!(rp&&px.x>=Math.min(rp[0],rp[1])&&px.x<=Math.max(rp[0],rp[1]))){px.board=null;continue}const side=Math.sign(px.x-trackX(px.pp));let best=null,bd=1e9;px.entryD=0;px.entrySide=side;
         for(const d of DOORD){const w=doorAt(d,side,px.p[1]),dd=Math.hypot(w[0]-px.cur[0],w[2]-px.cur[2]);if(dd<bd){bd=dd;best=w;px.entryD=d}}
         px.board=bd<48&&side!==0?best:null;px.delay=Math.random()*3;px.ph=Math.random()*6}
       let walk=false;if(px.board&&here){busy=true;px.delay-=pdt;if(px.delay<=0){walk=true;px.ph+=pdt*7;if(step2(px.cur,px.board,1.6)){const seat=reserveSeat(px);if(seat){ONBOARD.push(seat);px.in=true}else px.board=null}}}
@@ -5126,7 +5157,7 @@ function chefe(mb,o,fw,at){// de dia, bandeira vermelha enrolada; de noite, lant
  paxTube(mb,add(rh,mulv(axis,.12)),add(rh,mulv(axis,.53)),.030,.025,red,12);
  for(const d of[.18,.31,.44])paxTube(mb,add(rh,mulv(axis,d)),add(rh,mulv(axis,d+.012)),.031,.031,cc(132,20,24),12);
 }
-function preparePax(){for(const s of STN){s.pax3=[];const ours=s.pl.filter(r=>Math.abs(r[0])===1.8||(s===PVA&&r[0]===-26.8)||Math.abs(Math.abs(r[0]-4)-1.8)<0.01);
+function preparePax(){for(const s of STN){s.pax3=[];const lns=[0,4,...s.ex.map(e=>e.to)],ours=s.pl.filter(r=>Math.abs(r[0])===1.8||(s===PVA&&r[0]===-26.8)||Math.abs(Math.abs(r[0]-4)-1.8)<0.01||(s!==PVA&&lns.some(o=>{const a=Math.abs(r[0]-o),b=Math.abs(r[1]-o);return a>1.4&&a<2.1||b>1.4&&b<2.1})));
   for(const r of ours){const sd=Math.sign(r[0]||1),n=(s.ty==='term'?12:6)+Math.floor(h2(s.i,r[0]*10|0)*(s.big?12:6));
     for(let k=0;k<n;k++){const pa=Math.max(s.pa+4,s.bc-30),pp=pa+h2(s.i*7+k,3)*(s.bc+28-pa),x=r[0]+sd*(1+h2(k,s.i)*(Math.abs(r[1]-r[0])-1.6));const i=Math.floor(pp/SEG);
       const w=s===PVA&&x<-9?wp(pp,x,s.ph):PI(i,x,s.ph);const pc=[[134,72,64],[65,88,116],[150,125,76],[67,99,80],[123,80,97],[58,74,92],[159,109,65],[83,83,77]][k%8];
