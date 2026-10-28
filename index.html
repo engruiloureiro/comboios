@@ -1665,7 +1665,7 @@ function vozLoad(){if(VOZP||!AC)return VOZP;VOZP=Promise.all(['anuncio','povoa',
 function vozPlay(keys){const t0=AC.currentTime+1.6;let t=t0;for(const k of keys){const b=VOZB[k];if(!b)continue;const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;g.gain.value=0.95;s.connect(g);g.connect(A.bus);
   if(A.rev){const r=AC.createGain();r.gain.value=0.22;g.connect(r);r.connect(A.rev)}s.start(t);t+=b.duration+0.12}}
 // o comboio para em todas as estações e apeadeiros do percurso que ainda faltam?
-function paraTodas(){const rest=ORD.filter(s=>(REV?s.i<S.atSt.i&&s.i>=S.endSt.i:s.i>S.atSt.i&&s.i<=S.endSt.i));return rest.every(s=>s.nostop||s.dep!==null)}
+function paraTodas(){if(!S.atSt)return false;const rest=ORD.filter(s=>(REV?s.i<S.atSt.i&&s.i>=S.endSt.i:s.i>S.atSt.i&&s.i<=S.endSt.i));return rest.every(s=>s.nostop||s.dep!==null)}
 function announceDep(dest){if(muted)return;try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}
   const dk=VOZD[dest];if(dk&&AC){vozLoad();const go=()=>{if(!VOZB.anuncio||!VOZB[dk])return announceTTS(dest);annGong();vozPlay(['anuncio',dk].concat(paraTodas()&&VOZB.todos?['todos']:[]))};
     if(VOZB.anuncio&&VOZB[dk])go();else VOZP.then(go);return}
