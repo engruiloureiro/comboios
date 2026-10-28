@@ -1839,7 +1839,7 @@ function svcBuild(){
   if(PP.length>1)for(const v of SVC){if(v.dir===pdir)continue;const t0=Math.max(v.pts[0].tA+v.delay,PP[0].t-900),t1=Math.min(v.pts[v.pts.length-1].tD+v.delay,PP[PP.length-1].t+300);
     let pd=null,ps=null;for(let t=t0;t<=t1;t+=10){const a=svcAt(v,t-v.delay);if(!a){pd=null;continue}const d=Pp(t)-a.p;if(pd!==null&&Math.sign(d)!==Math.sign(pd)&&d!==0){ps=(Pp(t)+a.p)/2;break}pd=d}
     (S.xd=S.xd||[]).push({id:v.id,ps:ps&&Math.round(ps),t0,t1});
-    if(ps===null||ps<DBL.b)continue;const X=crossSt(ps,cand,[svcRange(v)],PT,c=>svcTimeAt(v,c)+v.delay,c=>svcTimeAt(v,c)+v.delay>S.clock-30);if(!X)continue;   // só estações a que a outra ainda não chegou
+    if(ps===null||ps<DBL.b)continue;const X=crossSt(ps,cand,[svcRange(v)],PT,c=>svcTimeAt(v,c)+v.delay,c=>svcTimeAt(v,c)+v.delay>S.clock-300);if(!X)continue;   // só estações por onde a outra não passou há mais de 5 min
     (S.xd[S.xd.length-1]||{}).X=X.n;
     const q=svcStopAt(v,X);if(!q)continue;v.cross=X;v.st='app';v.rel=false;v.xs.push({X,q,P:true});crs.push(v)}
   // cruzamentos entre as outras automotoras, pelo horário (sem os atrasos): esperam umas pelas outras na estação de cruzamento
