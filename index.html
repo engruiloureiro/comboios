@@ -771,11 +771,11 @@ function pickLine(s,rev){const mo=rev?trackXR(s.stopR):0,c=[];
   for(const e of s.ex)if(Math.abs(e.from-mo)<0.01&&platAdj(s,e.to).length&&!PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a))c.push(e);
   const e=c.length?c[Math.floor(Math.random()*c.length)]:null;return{e,no:lineNo(s,e,mo)}}
 function applyPicks(){if(!S||!S.picks)return;for(const[st,q]of S.picks){SIDE=SIDE.filter(x=>!st.ex.includes(x));st.divert=false;if(q.e){SIDE.push(q.e);if(st===GUI)st.divert=true}}}
-// portas da automotora (distância à frente) e verificação de que todas ficam dentro do cais: com a última porta ainda no cais, embarca-se e desembarca-se
+// portas da automotora (distância à frente): embarca-se e desembarca-se desde que a última porta (ou a primeira) fique dentro do cais
 const DOORS=[7.12,17.66,20.16,30.69];
 function doorsInPlat(s){if(!S||!s||!s.pl||!s.pl.length||S.v>0.5)return false;const dm=REV?-1:1,off=trackX(S.pos-dm*TLEN(S.ncar)/2),r=widest(s,off);if(!r)return false;
   const b0=s.bc0??s.bc,lo=r[2]!==undefined?b0+r[2]:s.pa,hi=r[3]!==undefined?b0+r[3]:s.pb,D=S.ncar>2?DOORS.concat(DOORS.map(d=>d+37.812)):DOORS;
-  return D.every(d=>{const p=S.pos-dm*d;return p>=lo+0.3&&p<=hi-0.3})}
+  const inP=d=>{const p=S.pos-dm*d;return p>=lo&&p<=hi};return inP(D[D.length-1])||inP(D[0])}   // aceita enquanto a última (ou a primeira) porta ainda estiver no cais
 // lado das portas (0 esquerdo, 1 direito): o do cais mais largo ao lado da via em que o comboio parou
 function doorSide(st){const dm=REV?-1:1,off=trackX(S.pos-dm*TLEN(S.ncar)/2),r=widest(st,off);
   if(r){const sg=Math.sign((r[0]+r[1])/2-off);return(REV?-sg:sg)<0?0:1}
@@ -2026,7 +2026,7 @@ function step(dt,dr){
   // estações sem paragem e paragens falhadas
   for(const s of ORD){if(s.served)continue;
     if(s.dep===null&&(REV?S.pos<s.pa:S.pos>s.pb)){s.served=true;buildStrip();continue}
-    if(s.dep!==null&&s!==S.endSt&&ahead(s)<-40){s.served=true;s.skipped=true;penal(150,'Paragem em '+s.n+' falhada');buildStrip()}
+    if(s.dep!==null&&s!==S.endSt&&ahead(s)<-40&&!doorsInPlat(s)){s.served=true;s.skipped=true;penal(150,'Paragem em '+s.n+' falhada');buildStrip()}
     break}
 
   // embarque
