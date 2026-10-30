@@ -813,7 +813,7 @@ function minho(n){const c=[{m:'bloco',len:13.4,ht:[1,0],bog:[2.6,10.8],bm:'bbog'
 function paxTrain(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'coach',len:16.5,bog:[2.4,14.1]});return c}
 function freight(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'wag',len:8.2});return c}
 let LOCAT=()=>null;
-const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:-12,a:PVG.sC+60,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}].concat(LSD?[{o:4,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}]:[],GP?[{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false}]:[]):[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:SB.pa+29,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:SB.pa+75,len:TLEN(2),c:'u',lit:false},{o:-27,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}];
+const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:-12,a:PVG.sC+60,len:TLEN(2),c:'u',lit:false},{o:-11.5,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}].concat(LSD?[{o:4,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}]:[],GP?[{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false}]:[]):[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:13.3,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:-11.5,sb:1,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:-11.5,sb:1,a:SB.pa+29,len:TLEN(2),c:'u',lit:false},{o:-11.5,sb:1,a:SB.pa+75,len:TLEN(2),c:'u',lit:false},{o:-27,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
 for(let p=OFF;p<(FAF?BUFFER:END);p+=18)JOINTS.push(p+(rnd()-0.5)*0.4);
@@ -1504,6 +1504,7 @@ function reset(startIdx,endIdx,rev,svc){
   S.sigLim=null;S.vista=null;S.permG=null;S.permG0=null;S.permT=0;
   S.back=false;updRev();while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;S.pvT=!!(PVA&&PVA.pvTerm);
   S.maxPts=(STOPS.length-1)*100+STOPS.length*100+PN.filter(p=>!p.done).length*15;
+  {const ls=[-5.5,-11.5,9,15],lq=ls[Math.floor(Math.random()*4)];for(const q of PARKED)if(q.sb)q.o=lq}   // as unidades paradas na Trindade ficam numa via diferente em cada viagem
   TRAINS=PARKED.map(t=>({...t,v:0}));
   // cruzamentos nas estações com via de resguardo dos troços de via única
   SIDE=[];for(const s of STN){s.divert=false;s.divAnn=false}
