@@ -459,7 +459,7 @@ function setStops(nc){const h=TLEN(nc)/2;for(const s of STN){s.stopF=s.bc+h;s.st
 const LAY={
  VG:{pl:[[-1.8,-6.5],[5.8,9.8]],ex:[[0,4],[0,-9.5]]},
  VFM:{pl:[[1.8,7.5],[-5.8,-9.2]],ex:[[0,-4],[0,-11]]},
- VT:{pl:[[-1.8,-3.7],[5.8,7.2],[-7.3,-9.7],[10.8,13.2]],ex:[[0,-5.5],[0,-11.5],[4,9],[4,15]]},
+ VT:{pl:[[-1.8,-3.7],[5.8,7.2],[-7.3,-9.7],[10.8,13.2]],ex:[[0,-5.5],[0,-11.5],[4,9],[4,15],[4,-5.5],[4,-11.5],[4,0],[0,9],[0,15],[0,4]]},   // as quatro primeiras saem da sua via principal; as outras seis atravessam para a outra
  VF:{pl:[[-1.8,-7.5],[5.8,9.2]],ex:[[0,4],[0,11]]},
  SX:{pl:[[-1.8,-5.2],[5.8,8.6]],ex:[[0,4]]},
  SL:{pl:[[-1.8,-4.6]],ex:[]},
@@ -497,6 +497,10 @@ for(const s of STN){
 }
 // Paçô Vieira: o túnel (via única) acaba pouco antes do cais; a via de cruzamento só começa à saída do túnel
 PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
+// Paçô Vieira: a agulha da saída do túnel ficava colada ao cais; o cais e o edifício recuam 45 m para nascente
+PV.bc+=45;PV.pa+=45;PV.pb+=45;PV.stopF+=45;PV.stopR+=45;
+// Trindade: as agulhas de atravessamento ficam escalonadas para nascente, para não amontoar as alavancas
+SB.ex.forEach((e,k)=>{if(k>=4)e.b=SB.pb+110+34*(k-3)});
 // Fafe, planta de 1980 («Sinalização da estação de Fafe»): a agulha 1 está no km 80,472 (113 m antes do edifício, que fica no km 80,584) e a via I
 // acaba nos para-choques do km 80,7475. A via II (laço) volta a juntar-se à I na agulha 9; a III segue a direito até à placa giratória (via V);
 // a norte ficam as VI, VII e VIII; a sul, depois do cais, a IV com o cais e o armazém de mercadorias. O cais de passageiros é só o da via I.
@@ -767,6 +771,11 @@ function pickLine(s,rev){const mo=rev?trackXR(s.stopR):0,c=[];
   for(const e of s.ex)if(Math.abs(e.from-mo)<0.01&&platAdj(s,e.to).length&&!PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a))c.push(e);
   const e=c.length?c[Math.floor(Math.random()*c.length)]:null;return{e,no:lineNo(s,e,mo)}}
 function applyPicks(){if(!S||!S.picks)return;for(const[st,q]of S.picks){SIDE=SIDE.filter(x=>!st.ex.includes(x));st.divert=false;if(q.e){SIDE.push(q.e);if(st===GUI)st.divert=true}}}
+// portas da automotora (distância à frente) e verificação de que todas ficam dentro do cais: com a última porta ainda no cais, embarca-se e desembarca-se
+const DOORS=[7.12,17.66,20.16,30.69];
+function doorsInPlat(s){if(!S||!s||!s.pl||!s.pl.length||S.v>0.5)return false;const dm=REV?-1:1,off=trackX(S.pos-dm*TLEN(S.ncar)/2),r=widest(s,off);if(!r)return false;
+  const b0=s.bc0??s.bc,lo=r[2]!==undefined?b0+r[2]:s.pa,hi=r[3]!==undefined?b0+r[3]:s.pb,D=S.ncar>2?DOORS.concat(DOORS.map(d=>d+37.812)):DOORS;
+  return D.every(d=>{const p=S.pos-dm*d;return p>=lo+0.3&&p<=hi-0.3})}
 // lado das portas (0 esquerdo, 1 direito): o do cais mais largo ao lado da via em que o comboio parou
 function doorSide(st){const dm=REV?-1:1,off=trackX(S.pos-dm*TLEN(S.ncar)/2),r=widest(st,off);
   if(r){const sg=Math.sign((r[0]+r[1])/2-off);return(REV?-sg:sg)<0?0:1}
@@ -2146,9 +2155,9 @@ function doorBtn(){
     return;
   }
   if(S.v>0.05){toast('Pare o comboio antes de abrir as portas.','');return}
-  const near=STN.find(s=>ahead(s)<=15&&ahead(s)>=-20.5);
+  const near=STN.find(s=>ahead(s)<=15&&ahead(s)>=-20.5||doorsInPlat(s));
   if(near&&near.dep===null){toast('Este comboio não tem paragem em '+near.n+'.','');return}
-  const s=STOPS.find(s=>!s.served&&ahead(s)<=15&&ahead(s)>=-20.5);
+  const s=STOPS.find(s=>!s.served&&(ahead(s)<=15&&ahead(s)>=-20.5||doorsInPlat(s)));
   if(!s){toast(S.atSt?'Embarque já feito. Feche as portas e siga.':'Não está junto à placa de paragem de uma plataforma.','');return}
   const err=-ahead(s),ae=Math.abs(err),acc=ae<1?100:Math.max(10,Math.round(100-(ae-1)*(err>0?4.2:5.5)));
   s.served=true;S.atSt=s;S.departed=false;S.doors=true;S.dwell=dwellFor(s);S.dwell0=S.dwell;S.dwX=0;S.whistled=false;S.depHorn=false;S.sc.acc+=acc;doorOpenSnd();
