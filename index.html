@@ -497,8 +497,6 @@ for(const s of STN){
 }
 // Paçô Vieira: o túnel (via única) acaba pouco antes do cais; a via de cruzamento só começa à saída do túnel
 PV.ex[0].a=PV.pos-80;PV.ex[0].b=PV.pos+230;
-// Crestins (Linha da Póvoa): o horário de 1978 cruza aqui as automotoras quase de hora a hora, por isso tem uma via de cruzamento (do lado oposto ao cais)
-{const C=RP?byNameE('Crestins'):null;if(C&&C.i>=0)C.ex=[{from:0,to:4,a:C.pa-110,b:C.pb+110}]}
 // Paçô Vieira: a agulha da saída do túnel ficava colada ao cais; o cais e o edifício recuam 45 m para nascente
 PV.bc+=45;PV.pa+=45;PV.pb+=45;PV.stopF+=45;PV.stopR+=45;
 // Trindade: as agulhas de atravessamento ficam escalonadas para nascente, para não amontoar as alavancas
