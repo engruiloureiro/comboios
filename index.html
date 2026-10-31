@@ -1843,7 +1843,7 @@ function svcBuild(){
   const PP=STOPS.filter(s=>s.dep!=null).map(s=>({p:REV?s.stopR:s.stopF,t:s.dep}));
   const PT=X=>{const xp=REV?X.stopR:X.stopF;for(let k=0;k<PP.length;k++){const b=PP[k+1];if(Math.abs(PP[k].p-xp)<1)return PP[k].t;if(b&&(xp-PP[k].p)*(xp-b.p)<=0)return PP[k].t+(b.t-PP[k].t)*Math.abs(xp-PP[k].p)/Math.max(1,Math.abs(b.p-PP[k].p))}return 1e9};
   const Pp=t=>{if(!PP.length)return S.pos;if(t<=PP[0].t)return PP[0].p;for(let k=1;k<PP.length;k++)if(t<=PP[k].t){const a=PP[k-1],b=PP[k];return a.p+(b.p-a.p)*(t-a.t)/Math.max(1,b.t-a.t)}return PP[PP.length-1].p};
-  const okX=X=>X.ex.length&&X.pos>DBL.b+100&&X!==LSD&&X!==PVA&&!loopBusy(X.ex[0]);
+  const okX=X=>X===SDH&&SDH!==DUM&&SDH.pos<=DBL.b||X.ex.length&&X.pos>DBL.b+100&&X!==LSD&&X!==PVA&&!loopBusy(X.ex[0]);   // na Senhora da Hora já há via dupla: cada uma espera na sua via
   // Fafe, terminal, só serve de estação de cruzamento com a nossa automotora (uma espera pela outra; a que chega vai para a via II)
   const cand=STOPS.filter(okX),candAll=STN.filter(X=>okX(X)&&X!==FAF),crs=[];for(const v of SVC)v.xs=[];
   if(PP.length>1)for(const v of SVC){if(v.dir===pdir)continue;const t0=Math.max(v.pts[0].tA+v.delay,PP[0].t-900),t1=Math.min(v.pts[v.pts.length-1].tD+v.delay,PP[PP.length-1].t+300);
@@ -1860,8 +1860,8 @@ function svcBuild(){
     const qu=svcStopAt(u,X),qw=svcStopAt(w,X);if(!qu||!qw)continue;u.xs.push({X,q:qu,o:w,oq:qw});w.xs.push({X,q:qw,o:u,oq:qu})}
   for(const v of SVC){if(v.cross)v.kX=v.pts.indexOf(v.xs.find(c=>c.P).q);for(const c of v.xs)if(!c.P&&S.clock-v.delay>c.q.tD)c.rel=true}   // cruzamentos já passados
   // às vezes é a nossa automotora que entra na via desviada
-  for(const v of crs){const X=v.cross;if(!X.divert&&X!==PV&&X!==FAF&&Math.random()<0.5){SIDE.push(X.ex[0]);X.divert=true}}
-  if(crs.length&&!SIDE.length&&Math.random()<0.65){const ok=crs.filter(v=>v.cross!==PV&&v.cross!==FAF);if(ok.length){const X=ok[Math.floor(Math.random()*ok.length)].cross;SIDE.push(X.ex[0]);X.divert=true}}
+  for(const v of crs){const X=v.cross;if(!X.divert&&X!==PV&&X!==FAF&&X.ex.length&&X.pos>DBL.b+100&&Math.random()<0.5){SIDE.push(X.ex[0]);X.divert=true}}
+  if(crs.length&&!SIDE.length&&Math.random()<0.65){const ok=crs.filter(v=>v.cross!==PV&&v.cross!==FAF&&v.cross.ex.length&&v.cross.pos>DBL.b+100);if(ok.length){const X=ok[Math.floor(Math.random()*ok.length)].cross;SIDE.push(X.ex[0]);X.divert=true}}
   applyPicks();   // a nossa linha na Trindade e em Guimarães manda sobre os cruzamentos sorteados
   // vias de cada automotora: na Trindade parte da linha 3 e chega à linha 4; na via única as que vêm para o Porto passam pela via
   // desviada das estações, e as outras só no cruzamento connosco (se a nossa ficar na principal)
