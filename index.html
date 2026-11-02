@@ -766,10 +766,17 @@ const LNNO={'0':1,'4':2,'-5.5':3,'9':4,'-11.5':5,'15':6};
 const platAdj=(s,off)=>s.pl.filter(r=>{const a=Math.abs(r[0]-off),b=Math.abs(r[1]-off);return a>1.4&&a<2.1||b>1.4&&b<2.1});
 const widest=(s,off)=>platAdj(s,off).sort((a,b)=>Math.abs(b[1]-b[0])-Math.abs(a[1]-a[0]))[0]||null;
 const lineNo=(s,e,mo)=>s===SB?LNNO[String(e?e.to:mo)]||1:(e?s.ex.indexOf(e)+2:1);
-function pickLine(s,rev){const mo=rev?trackXR(s.stopR):0,c=[];
-  if(platAdj(s,mo).length)c.push(null);
-  for(const e of s.ex)if(Math.abs(e.from-mo)<0.01&&platAdj(s,e.to).length&&!PARKED.some(q=>q.o===e.to&&q.a<e.b&&q.a+q.len>e.a))c.push(e);
-  const e=c.length?c[Math.floor(Math.random()*c.length)]:null;return{e,no:lineNo(s,e,mo)}}
+// vias com cais a que a nossa automotora pode ir (as unidades paradas na Trindade mudam de via, as outras bloqueiam)
+function lineOpts(s,rev){const mo=rev?trackXR(s.stopR):0,c=[];
+  if(platAdj(s,mo).length)c.push({e:null,no:lineNo(s,null,mo)});
+  for(const e of s.ex)if(Math.abs(e.from-mo)<0.01&&platAdj(s,e.to).length&&!PARKED.some(q=>!q.sb&&q.o===e.to&&q.a<e.b&&q.a+q.len>e.a))c.push({e,no:lineNo(s,e,mo)});
+  return c.filter((q,i)=>c.findIndex(r=>r.no===q.no)===i)}
+let WANT_LINE=null;   // linha de partida escolhida pelo maquinista (null = ao acaso)
+function pickLine(s,rev,want){const c=lineOpts(s,rev);
+  const q=(want&&c.find(r=>r.no===want))||(c.length?c[Math.floor(Math.random()*c.length)]:{e:null,no:lineNo(s,null,rev?trackXR(s.stopR):0)});
+  if(q.e){const ls=[-5.5,-11.5,9,15],busy=PARKED.filter(p=>p.sb).some(p=>p.o===q.e.to);   // se a via sorteada tem unidades paradas, estas passam para outra
+    if(busy){const free=ls.filter(o=>o!==q.e.to&&![...(S.picks||new Map()).values()].some(r=>r.e&&r.e.to===o));const o=free[Math.floor(Math.random()*free.length)];for(const p of PARKED)if(p.sb&&p.o===q.e.to)p.o=o}}
+  return{e:q.e,no:q.no}}
 function applyPicks(){if(!S||!S.picks)return;for(const[st,q]of S.picks){SIDE=SIDE.filter(x=>!st.ex.includes(x));st.divert=false;if(q.e){SIDE.push(q.e);if(st===GUI)st.divert=true}}}
 // portas da automotora (distância à frente): embarca-se e desembarca-se desde que a última porta (ou a primeira) fique dentro do cais
 const DOORS=[7.12,17.66,20.16,30.69];
@@ -1521,10 +1528,10 @@ function reset(startIdx,endIdx,rev,svc){
    if(cx.length&&!SIDE.length&&rnd()<0.65){const t=cx[Math.floor(rnd()*cx.length)],X=t.cross,e=t.e;SIDE.push(e);X.divert=true;t.xo=p=>p<LOU.pos?(REV?0:4):0}}
   // linha da nossa automotora na Trindade e em Guimarães: sorteada de entre as vias com cais (partida na origem; chegada ou paragem nas outras)
   S.depE=null;S.picks=new Map();
-  if(!S.free&&!S.pvT){
+  if(!S.free){
     const ok=X=>X&&X.i>=0&&X.ex&&X.ex.length&&X!==FAF;
     for(const X of[SB,GUI]){if(!ok(X))continue;
-      if(X===st){if(S.ofi||S.ref)continue;const q=pickLine(X,REV);q.arr=false;S.picks.set(X,q);S.depE=q.e;
+      if(X===st){if(S.ofi||S.ref)continue;const q=pickLine(X,REV,WANT_LINE);WANT_LINE=null;q.arr=false;S.picks.set(X,q);S.depE=q.e;
         setTimeout(()=>{if(S&&S.picks&&S.picks.get(X)===q)toast('Hoje a partida de '+X.n+' é da linha '+q.no+'.','')},9000)}
       else if(STOPS.includes(X)){const q=pickLine(X,REV);q.arr=true;S.picks.set(X,q)}}
     applyPicks()}
@@ -5550,8 +5557,14 @@ function ttRender(){const tabs=$('#ttTabs'),body=$('#ttBody');tabs.innerHTML='';
     tb.innerHTML=hh;w.append(tb);body.append(w)}
   body.querySelectorAll('tr[data-n]').forEach(r=>r.onclick=()=>ttStart(r.dataset.n))}
 // conduz um comboio do horário; se for da outra linha, muda de linha e arranca depois de recarregar
-function ttStart(n){const x=TTS.find(q=>q[0]===n);if(!x)return;const P=ttPlan(x),g=P.legs[0];audioInit();
+function ttStart(n,ln){const x=TTS.find(q=>q[0]===n);if(!x)return;const P=ttPlan(x),g=P.legs[0];audioInit();
   if(g.line!==LINE){try{sessionStorage.setItem('pendingTT',n)}catch(e){}running=false;setLine(g.line);return}
+  // partida da Trindade ou de Guimarães: o maquinista escolhe a linha
+  if(ln===undefined){const o=byNameE(g.a);if(o&&(o===SB||o===GUI)&&o.ex&&o.ex.length){const c=lineOpts(o,g.rev).map(q=>q.no).sort((u,w)=>u-w);
+    if(c.length>1){let d=$('#ovLN');if(!d){d=document.createElement('div');d.id='ovLN';d.className='ov';document.body.append(d)}
+      d.innerHTML='<div class="panel" style="max-width:420px"><div class="azulejo">Linha de partida<small>Comboio '+n+' · '+o.n+'</small></div><p style="margin:14px 0 10px">De que linha quer partir?</p><div style="display:flex;flex-wrap:wrap;gap:8px">'+c.map(k=>'<button data-l="'+k+'" style="min-width:64px;padding:10px 14px">Linha '+k+'</button>').join('')+'<button data-l="0" style="padding:10px 14px">Ao acaso</button></div><p style="margin-top:14px"><button data-l="x">Voltar</button></p></div>';
+      d.hidden=false;d.querySelectorAll('button').forEach(b=>b.onclick=()=>{d.hidden=true;if(b.dataset.l!=='x')ttStart(n,+b.dataset.l)});return}}}
+  WANT_LINE=ln||null;
   const a=byNameE(g.a),z=byNameE(g.z),t={};for(const k in g.t){const s=byNameE(k);if(s&&!s.nostop)t[s.i]=g.t[k]}
   // o primeiro da manhã de Guimarães para Fafe e o primeiro de Guimarães para a Trindade saem da oficina
   {const tk=y=>{const v=T(y[4]);return v<4*3600?v+86400:v},first=d=>TTS.filter(y=>y[2]==='Guimarães'&&y[3]===d).sort((u,w)=>tk(u)-tk(w))[0];
