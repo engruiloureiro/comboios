@@ -161,7 +161,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <canvas id="gl"></canvas>
     <canvas id="cv"></canvas>
     <div id="strip"><div class="line"></div><div id="dots"></div><div id="me"></div></div>
-    <div class="tr"><button class="ico" id="bCam" aria-label="Mudar de vista">🎥</button><button class="ico" id="bQS" aria-label="Guardar o jogo">💾</button><button class="ico" id="bMute" aria-label="Ligar ou desligar som">🔊</button><button class="ico" id="bFull" aria-label="Ecrã inteiro">⛶</button><button class="ico" id="bPause" aria-label="Pausa">❚❚</button></div>
+    <div class="tr"><button class="ico" id="bCam" aria-label="Mudar de vista">🎥</button><button class="ico" id="bExp" aria-label="Modo de exploração da Trindade (tecla V)" title="Explorar a Trindade a pé (V)">🚶</button><button class="ico" id="bQS" aria-label="Guardar o jogo">💾</button><button class="ico" id="bMute" aria-label="Ligar ou desligar som">🔊</button><button class="ico" id="bFull" aria-label="Ecrã inteiro">⛶</button><button class="ico" id="bPause" aria-label="Pausa">❚❚</button></div>
     <div id="route" aria-hidden="true"><div class="hd" id="routeHd"></div><div class="rl"><div class="bar past" id="routePast"></div><div class="bar" id="routeBar"></div><div id="routeSt"></div><div class="tr" id="routeTr"></div></div></div>
     <div id="toast" role="status" aria-live="polite"></div>
     <div id="mini" aria-live="off"></div>
@@ -202,7 +202,8 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
         <p><b>Época do serviço: outono de 1985.</b> A paisagem usa testemunhos das décadas de 1970 e 1980. Os modelos e sons das automotoras são os do ficheiro original; fumo, embarque, passageiros sentados e chefe de estação foram revistos.</p>
         <p>Reconstituição interpretativa, apoiada em documentação e fotografias. Não é uma reprodução topográfica integral: os PK, as curvas, as cotas e os planos de vias mantêm a aproximação do simulador original. Edifícios secundários, muros, vegetação e parcelas sem levantamento histórico têm implantação aproximada. Fotografias recentes foram usadas apenas para reconhecer estruturas sobreviventes.</p>
         <table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="text-align:left;padding:7px;border-bottom:1px solid #687261">Troço</th><th style="text-align:left;padding:7px;border-bottom:1px solid #687261">Critério aplicado</th></tr></thead><tbody>
-        <tr><td style="padding:7px;vertical-align:top">Trindade–Boavista</td><td style="padding:7px">Recinto descoberto em trincheira, muro alto com vegetação, casario acima da via, edifício baixo e anexos ferroviários. Fotografias de 1972 e 1979 [1–2].</td></tr>
+        <tr><td style="padding:7px;vertical-align:top">Porto-Trindade (1985)</td><td style="padding:7px">Cinco vias de cais (cais lateral junto ao muro de cantaria, cais-ilha largo, cais-ilha estreito e cais do lado do feixe) e feixe de resguardo, tirados da vista geral de 1972; garganta a acabar no portal do túnel (≈500 m até à Lapa), com o viaduto da rua por cima; edifício de 1947–49 com duas portas largas e duas janelas altas, logótipo CP e TRINDADE, e o posto Mobil ao lado (fotografia de 1985); torre da igreja e hospital da Ordem por trás do topo das vias. Numeração das linhas e interior do edifício: reconstrução interpretativa. Pormenor: docs/trindade-1985.md e o botão «Visitar a Trindade de 1985» [1–2].</td></tr>
+        <tr><td style="padding:7px;vertical-align:top">Trindade–Boavista</td><td style="padding:7px">Túnel até à Lapa, depois trincheira com muros até à Avenida de França (já à superfície em 1979, com as vias da Boavista ao lado) [1–2].</td></tr>
         <tr><td style="padding:7px;vertical-align:top">Senhora da Hora–Maia–Muro</td><td style="padding:7px">Transição suburbana com campos e quintais; menor continuidade de prédios. Castêlo da Maia com sebes, arvoredo alto e coluna hidráulica, visíveis em 1972 [3–5]. As parcelas são uma interpretação de ambiente.</td></tr>
         <tr><td style="padding:7px;vertical-align:top">Trofa–Lousado</td><td style="padding:7px">Ambiente ferroviário e industrial, pátios, oficinas e campos entre núcleos construídos. Preservada a Mabor e a configuração operacional existente [6–7]. O diagrama [14] é uma referência histórica sem data garantida.</td></tr>
         <tr><td style="padding:7px;vertical-align:top">Santo Tirso–Vila das Aves</td><td style="padding:7px">Fábricas reconhecíveis, pátios e casas operárias, alternando com margens arborizadas e terrenos agrícolas. Distinção dos núcleos de Santo Thyrso e Rio Vizela [8–9]. Os letreiros e portões são interpretativos.</td></tr>
@@ -258,6 +259,7 @@ button:focus-visible{outline:2px solid #fff;outline-offset:2px}
     <button class="cta" id="bStart7" style="background:#6a321a" data-r="Fafe>Porto-Trindade">Fafe → Porto-Trindade<small></small></button>
     </div>
     <button class="cta" id="bTT" style="background:#2f4f6a">Horário de 1985<small>Escolha um comboio do horário: Guimarães e Fafe, Póvoa e Famalicão, Guimarães ↔ Póvoa</small></button>
+    <button class="cta" id="bVisit" style="background:#5a4a2a">Visitar a Trindade de 1985<small>Modo de exploração histórica: andar pelos cais, pelo cais de topo e pela rua, com as fotografias de referência</small></button>
     <button class="cta alt" id="bCustom">Horário à medida<small>Escolha a partida, o destino, a hora e as paragens</small></button>
     <p style="font-size:12px;color:#aab">Sinalização mecânica experimental nas estações: texturas RD.AP.SignalPack01 (GPLv3), adaptadas ao motor gráfico WebGL. Não constitui levantamento histórico rigoroso da sinalização portuguesa.</p>
      <p style="font-size:14px;color:#aab">Horário e parte do traçado reconstituídos: não há registo público do horário de 1985 nem do traçado detalhado.</p>
@@ -1617,6 +1619,16 @@ function audioInit(){
     const xBP=AC.createBiquadFilter();xBP.type='bandpass';xBP.Q.value=1.1;xBP.frequency.value=150;const xG=AC.createGain();xG.gain.value=0;
     const eS=[];A.eIn=AC.createGain();A.eIn.connect(shaper);A.eIn.connect(xBP);
     shaper.connect(eLP);eLP.connect(eG);out(eG);xBP.connect(xG);out(xG);A.eS=eS;A.eLP=eLP;A.eG=eG;A.xG=xG;A.xBP=xBP;
+    // outras automotoras (9600 do horário e unidades paradas): motor diesel ao longe, com intensidade pela distância e panorâmica
+    // pelo lado em que estão; e ambiente do terminal (vozes indistintas e cidade ao longe), conforme a hora e o movimento
+    {const o1=AC.createOscillator(),o2=AC.createOscillator();o1.type='sawtooth';o2.type='square';o1.frequency.value=31;o2.frequency.value=62.5;
+     const nf=AC.createBiquadFilter();nf.type='bandpass';nf.frequency.value=140;nf.Q.value=1.4;const ns=src();ns.connect(nf);
+     const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=320;const g1=AC.createGain();g1.gain.value=0;const g2=AC.createGain();g2.gain.value=0.35;
+     o1.connect(lp);o2.connect(g2);g2.connect(lp);nf.connect(lp);lp.connect(g1);const pan=AC.createStereoPanner?AC.createStereoPanner():null;
+     if(pan){g1.connect(pan);pan.connect(bus);pan.connect(conv)}else out(g1);o1.start();o2.start();A.oth={o1,o2,lp,g:g1,pan};
+     const vb=AC.createBiquadFilter();vb.type='bandpass';vb.frequency.value=620;vb.Q.value=0.9;const vg=AC.createGain();vg.gain.value=0;const lfo=AC.createOscillator(),lg=AC.createGain();lfo.frequency.value=0.37;lg.gain.value=0.4;
+     const vm=AC.createGain();vm.gain.value=0.6;lfo.connect(lg);lg.connect(vm.gain);src().connect(vb);vb.connect(vm);vm.connect(vg);out(vg);lfo.start();
+     const cb=AC.createBiquadFilter();cb.type='lowpass';cb.frequency.value=380;const cg=AC.createGain();cg.gain.value=0;src().connect(cb);cb.connect(cg);out(cg);A.amb={vg,cg}}
     // turbocompressor Holset e, na transmissão diesel-elétrica, gerador principal e dois motores de tração Alsthom TA671
     {const tu=AC.createOscillator();tu.type='sine';const tn=src(),tb=AC.createBiquadFilter();tb.type='bandpass';tb.Q.value=9;const tg=AC.createGain();tg.gain.value=0;
      tu.connect(tg);tn.connect(tb);tb.connect(tg);out(tg);tu.start();A.tu=tu;A.tb=tb;A.tuG=tg;
@@ -1825,6 +1837,15 @@ function audioUpdate(dtR){
   A.wg.gain.setTargetAtTime(on?Math.max(0,(v-15))*0.002*(1+tf):0,t,.3);
   A.fg.gain.setTargetAtTime(on?0.05:0,t,.5);
   A.revG.gain.setTargetAtTime(on?tf*0.55:0,t,.3);
+  // outras automotoras e ambiente da Trindade (o ouvinte está na câmara: a cabina ou, no modo de exploração, o visitante)
+  if(A.oth){const lp0=EXP.on?EXP.p:S.pos,lx=EXP.on?EXP.x:trackX(S.pos),yaw=EXP.on?EXP.yaw:(REV?Math.PI:0);let sum=0,pn=0,mv=0;
+    for(const tr of TRAINS){if(tr.lead||typeof tr.a!=='number'||(tr.svc&&!tr.on))continue;const run=tr.svc?(tr.mov?1:0.5):(tr.sb||tr.gu||tr.pv?0.08:0.3);if(run<=0)continue;
+      const cpp=tr.a+tr.len/2,ox=tr.xo?tr.xo(cpp):(tr.o||0),dp=cpp-lp0,dx=ox-lx,d=Math.hypot(dp,dx);if(d>600)continue;const a=run/(1+(d/28)*(d/28));sum+=a;
+      pn+=a*clamp((-Math.sin(yaw)*dp+Math.cos(yaw)*dx)/Math.max(8,d),-1,1);if(tr.mov)mv+=a}
+    const o=A.oth;o.g.gain.setTargetAtTime(on?Math.min(0.22,sum*0.22)*(1+tf*0.6):0,t,.25);if(o.pan)o.pan.pan.setTargetAtTime(sum>0?clamp(pn/sum,-0.85,0.85):0,t,.3);
+    o.o1.frequency.setTargetAtTime(31+(sum>0?mv/sum:0)*14,t,.5);o.o2.frequency.setTargetAtTime(62.5+(sum>0?mv/sum:0)*28,t,.5);
+    const hr=(S.clock/3600)%24,dens=hr<6?0.1:hr<9.5?1:hr<17?0.55:hr<20?1:hr<23?0.4:0.1,near=1-sstep((lp0-SB.pb)/250),open=1-tf;
+    A.amb.vg.gain.setTargetAtTime(on?0.035*dens*near*open*(inside&&!EXP.on?0.35:1):0,t,.6);A.amb.cg.gain.setTargetAtTime(on?0.05*near*open*(inside&&!EXP.on?0.4:1):0,t,.8)}
   const c=Math.abs(curve[clamp(Math.floor(S.pos/SEG),0,TOTAL-1)]);
   A.sg.gain.setTargetAtTime(on&&c>0.07&&v>3&&v<14?0.01*(c-0.07)/0.05:0,t,.3);
   if(S.horn&&!S.hornT0)S.hornT0=performance.now();if(!S.horn)S.hornT0=0;const hd=S.hornT0?(performance.now()-S.hornT0)/1000:0;
@@ -5284,7 +5305,7 @@ function paxHuman(mb,O,fw,outfit,walk,phase,id,details){
   const F=norm([fw[0],0,fw[2]]),R=norm(cross(F,[0,1,0]));
   const P=(x,y,z)=>[O[0]+(R[0]*x+F[0]*z)*s,O[1]+y*s,O[2]+(R[2]*x+F[2]*z)*s];
   const dark=cc(37+Math.floor(rv(6)*24),40+Math.floor(rv(7)*22),45+Math.floor(rv(8)*24));
-  const hair=[cc(34,29,26),cc(70,50,39),cc(102,77,56),cc(141,117,77),cc(80,77,72)][Math.floor(rv(9)*5)];
+  const hair=[cc(34,29,26),cc(70,50,39),cc(102,77,56),cc(141,117,77),cc(80,77,72),cc(150,148,142),cc(196,194,188)][Math.floor(rv(9)*(child?5:7))];   // grisalhos e brancos: mais velhos
   const skin=SKIN[Math.floor(rv(10)*SKIN.length)];
   const shirt=outfit||cc(95,82,77),co=shirt.map(a=>a*(0.90+rv(12)*0.14));
   const trou=rv(13)<0.35?cc(63,73,92):rv(13)<0.67?cc(78,73,68):cc(44,48,54);
@@ -5336,10 +5357,14 @@ function paxHuman(mb,O,fw,outfit,walk,phase,id,details){
     for(const x of[-0.038,0.038]){
       sph(mb,P(x,1.676,0.094),0.010*s,0.008*s,0.008*s,eyeCol);
     }
-    if(rv(19)<0.13){ // mala de mão, pasta ou saco
-      const sd=rv(20)<0.5?-1:1;
-      sph(mb,P(sd*0.33,0.78,0.045),0.135*s,0.17*s,0.075*s,cc(80,58,45));
-      paxTube(mb,P(sd*0.32,0.92,0.055),P(sd*0.32,0.81,0.055),0.013*s,0.013*s,cc(33,30,26),5);
+    if(rv(19)<0.30&&!child){ // mala de mão ou pasta, mala de viagem, ou saco de plástico das compras
+      const sd=rv(20)<0.5?-1:1,k=rv(22);
+      if(k<0.45){sph(mb,P(sd*0.33,0.78,0.045),0.135*s,0.17*s,0.075*s,cc(80,58,45));
+        paxTube(mb,P(sd*0.32,0.92,0.055),P(sd*0.32,0.81,0.055),0.013*s,0.013*s,cc(33,30,26),5)}
+      else if(k<0.75){const c=P(sd*0.36,0,0.04),col=[cc(92,62,44),cc(60,64,72),cc(120,96,64),cc(110,40,36)][Math.floor(rv(23)*4)];
+        boxRF(mb,c,F,R,0.46*s,0.17*s,O[1]+0.08*s,O[1]+0.66*s,col,0);paxTube(mb,P(sd*0.36,0.66,0.04),P(sd*0.36,0.86,0.045),0.012*s,0.012*s,cc(33,30,26),5)}
+      else{sph(mb,P(sd*0.31,0.70,0.05),0.12*s,0.16*s,0.09*s,rv(24)<0.5?cc(232,230,224):cc(214,200,150));
+        paxTube(mb,P(sd*0.31,0.88,0.05),P(sd*0.31,0.80,0.05),0.01*s,0.01*s,cc(220,220,214),5)}
     }
     if(rv(21)<0.10){ // boina, comum em passageiros da época
       sph(mb,P(0,1.795,-0.01),0.133*s,0.042*s,0.137*s,dark);
@@ -5833,6 +5858,81 @@ function setPause(p){if(!running&&p)return;paused=p;$('#ovPause').hidden=!p;if(p
 $('#bPause').onclick=()=>setPause(!paused);$('#bResume').onclick=()=>setPause(false);
 // teclas (também no teclado numérico): 8 acelera, 2 trava, 9 homem-morto, 7/4/1 buzinas
 const numKey=e=>{const m=/^(?:Digit|Numpad)([0-9])$/.exec(e.code||'');return m?m[1]:null};
+
+/* ---- Modo de Exploração Histórica: visita a pé à Trindade de 1985 (não mexe na condução: a automotora fica onde está e o
+   relógio continua, com as outras automotoras a circular). Anda-se só onde o público andava: cais, cais de topo, saídas e rua;
+   não se atravessam as vias. Os pontos de vista das fotografias põem a câmara onde o fotógrafo estava (aproximado) ---- */
+const EXP={on:false,p:300,x:-4.2,yaw:Math.PI,pitch:0,keys:{},t:0,view:null,info:true};
+const EXPV=[
+ {n:'Fachada, 1985',src:'Porto de Antanho (cortesia de Paulinho da Viola)',url:'https://portodeantanho.blogspot.com/2024/03/25234-bairro-do-laranjal-rua-do.html',p:171,x:-34,yaw:Math.atan2(17,15),pitch:0.12,
+  t:'Fachada para a rua: as duas portas largas e as duas janelas altas do vestíbulo das bilheteiras, numa moldura saliente; o logótipo da CP e TRINDADE em relevo; à esquerda o posto de combustível (Mobil em 1985). Rua de cubos de granito.'},
+ {n:'Cais, 1970',src:'filhodaCP, Flickr (automotora Allan 9300, 1970)',url:'https://www.flickr.com/photos/filhodacp/44557848851/',p:300,x:-4.2,yaw:0.04,pitch:0.04,
+  t:'Do cais-ilha largo, olhando para o túnel: cais baixos de betão, candeeiros altos ao meio, as vias a curvar para a garganta e, ao fundo, a trincheira com o casario por cima. Em 1985 as automotoras eram já as 9600; as 9300 tinham saído do Porto em 1975.'},
+ {n:'Partida, 1977',src:'Porto de Antanho',url:'https://portodeantanho.blogspot.com/2024/03/25234-bairro-do-laranjal-rua-do.html',p:398,x:-3.6,yaw:0.16,pitch:0.08,
+  t:'Fim dos cais, para o lado da garganta: à direita o grande muro de cantaria sobre a rocha, à esquerda os prédios dos anos 60 e 70, e por cima da garganta o viaduto de betão da rua.'},
+ {n:'Topo das vias, 1965/1990',src:'Wikimedia Commons (1965; 1990, CC)',url:'https://commons.wikimedia.org/wiki/Category:Porto_Trindade_train_station',p:330,x:-11.4,yaw:Math.PI,pitch:0.05,
+  t:'Dos cais para os para-choques: o cais de topo coberto, o edifício e, por cima, o hospital da Ordem da Trindade e a torre sineira da igreja, nas traseiras da qual ficava a estação.'},
+ {n:'Vista geral, 1972',src:'filhodaCP, Flickr',url:'https://www.flickr.com/photos/filhodacp/44960167654/',fix:[TRV.port-4,-4,17.5,BUFFER_R+60,-10,0],
+  t:'Do cimo do portal do túnel: o leque das agulhas, os cinco cais (lateral junto ao muro, cais-ilha largo, cais-ilha estreito e o cais do lado do feixe), o feixe de resguardo à direita e, ao fundo, o edifício. (Ponto de vista fixo: não se pode lá ir a pé.)'},
+ {n:'Portal do túnel, 1969',src:'filhodaCP, Flickr',url:'https://www.flickr.com/photos/filhodacp/43000801202/',fix:[TRV.lad-110,-14,2.2,TRV.port+60,4,6],
+  t:'A garganta e o portal do túnel da Trindade (da Lapa), aberto num muro de cantaria, com o viaduto da rua à frente. O túnel tem cerca de 500 m e sai junto à Lapa. (Ponto de vista fixo, dentro do recinto ferroviário.)'}];
+const EXPZ=[[p=>p<185,'Rua em frente da estação','A estação foi aberta em 1938 com um edifício provisório; o atual é de 1947–49: «construção sóbria, de certa elegância e proporções, com duas largas portas para a entrada dos passageiros; duas janelas altas iluminam o vestíbulo, onde ficam as bilheteiras e o despacho de bagagens; num corpo ligado, o chefe da estação, o telégrafo, a cantina e as saídas» (Diário de Lisboa, 1947). A distribuição interior não está documentada e não foi reconstruída.'],
+  [p=>p<BUFFER_R+1,'Cais de topo','Atrás dos para-choques, o cais de topo coberto liga as cinco linhas às portas do vestíbulo e às saídas. Em 1985 partiam e chegavam aqui 133 comboios por dia de segunda a sábado e 50 aos domingos (Via Libre, 1985).'],
+  [p=>true,'Cais','Cinco linhas de cais, numeradas aqui a partir do lado do edifício (numeração interpretativa). As automotoras 9600 (Alsthom, 1976–77) faziam o serviço das linhas de Guimarães e da Póvoa; as unidades de reserva ficavam no feixe de resguardo, do lado oposto ao muro.']];
+function expSurf(p,x){const BC=(Math.floor(BUFFER_R/SEG)+1)*SEG+0.2,ph=SB.ph;
+  if(p>=BUFFER_R+1.5&&p<=SB.pb-0.6)for(const r of SB.pl){const lo=Math.min(r[0],r[1])+0.4,hi=Math.max(r[0],r[1])-0.4;if(x>=lo&&x<=hi)return ph}
+  if(p>=BUFFER_R-13.6&&p<=BC-0.35&&x>=-25.0&&x<=TRV.wallX-0.6)return ph;
+  if(p>=187.5&&p<BUFFER_R-13.5&&x>=7.6&&x<=13.4)return 0.3;
+  if(p>=167.5&&p<=184.6&&x>=-100&&x<=60)return 0.3;
+  if(p>184.6&&p<=187.6&&x>=-10.8&&x<=60)return 0.3;
+  if(p>184.6&&p<=199&&x>=-50.5&&x<=-31.5&&!(x>-37.5&&p>193.5))return 0.3;
+  return null}
+function expOn(v){if(!S)return;if(v&&S.pos>SB.pb+400){toast('O modo de exploração é para a estação da Trindade: venha com a automotora até lá.','');return}
+  if(!!v===EXP.on)return;EXP.on=!!v;EXP.view=null;EXP.t=performance.now();$('#bExp').classList.toggle('on',EXP.on);
+  // vista exterior enquanto se anda a pé (desenha a automotora por fora, sem a moldura da cabina nem o som abafado do interior)
+  if(EXP.on){EXP.cam0=camMode;camMode='chase'}else if(EXP.cam0){camMode=EXP.cam0}
+  if(EXP.on){if(!expSurf(EXP.p,EXP.x)){const w=TRV.plats[1];EXP.p=Math.min(SB.pb-20,Math.max(BUFFER_R+20,S.pos+(REV?20:-30)));EXP.x=w.c;EXP.yaw=Math.PI}
+    window.__free=expCam;expPanel()}else{window.__free=null;const d=$('#expPanel');if(d)d.hidden=true}}
+function expCam(){const now=performance.now(),dt=Math.min(0.1,(now-EXP.t)/1000);EXP.t=now;const K=EXP.keys;
+  if(EXP.view){const v=EXP.view;if(!(K.w||K.s||K.a||K.d)){const e=wp(v[0],v[1],v[2]),t=wp(v[3],v[4],v[5]);return{eye:e,fd:norm(sub(t,e)),fov:1.0,near:0.2}}EXP.view=null}
+  const sp=(K.shift?3.2:1.4)*dt,fw=(K.w?1:0)-(K.s?1:0),st=(K.d?1:0)-(K.a?1:0);EXP.yaw+=((K.arrowright?1:0)-(K.arrowleft?1:0))*1.4*dt;EXP.pitch=clamp(EXP.pitch+((K.arrowup?1:0)-(K.arrowdown?1:0))*0.9*dt,-1.2,1.2);
+  if(fw||st){const c=Math.cos(EXP.yaw),s2=Math.sin(EXP.yaw),dp=(fw*c-st*s2)*sp,dx=(fw*s2+st*c)*sp;
+    if(expSurf(EXP.p+dp,EXP.x+dx)!==null){EXP.p+=dp;EXP.x+=dx}else if(expSurf(EXP.p+dp,EXP.x)!==null)EXP.p+=dp;else if(expSurf(EXP.p,EXP.x+dx)!==null)EXP.x+=dx;expInfo()}
+  const h=(expSurf(EXP.p,EXP.x)??0.3)+1.62+Math.sin(now/180)*0.012*(fw||st?1:0);const e=wp(EXP.p,EXP.x,h),c=Math.cos(EXP.yaw),s2=Math.sin(EXP.yaw),t=wp(EXP.p+c*10,EXP.x+s2*10,h+10*Math.tan(EXP.pitch));
+  return{eye:e,fd:norm(sub(t,e)),fov:1.15,near:0.1}}
+function expInfo(){const d=$('#expInfo');if(!d)return;const z=EXPZ.find(q=>q[0](EXP.p));if(d.dataset.z!==z[1]){d.dataset.z=z[1];d.innerHTML='<b>'+z[1]+'</b><br>'+z[2]}}
+function expPanel(){let d=$('#expPanel');if(!d){d=document.createElement('div');d.id='expPanel';
+    d.style.cssText='position:fixed;left:8px;bottom:8px;max-width:min(440px,calc(100vw - 16px));max-height:52vh;overflow:auto;background:rgba(24,26,24,.86);color:#eee;padding:8px 10px;border-radius:8px;font-size:13px;line-height:1.35;z-index:50';
+    document.body.append(d)}
+  d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b style="font-size:16px">Trindade, 1985 — visita</b><span><button id="expHide">Info</button> <button id="expExit">Sair (V)</button></span></div>'+
+   '<div id="expBody"><p style="margin:6px 0">W A S D para andar (Shift: depressa), arraste com o rato ou o dedo para olhar (ou setas). Só se anda nos cais, no cais de topo, nas saídas e na rua.</p>'+
+   '<div id="expInfo" style="margin:6px 0;padding:6px;background:rgba(255,255,255,.06);border-radius:6px"></div>'+
+   '<div style="margin:6px 0"><b>Pontos de vista das fotografias</b> (comparação com a reconstrução)</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+
+   EXPV.map((v,k)=>'<button data-v="'+k+'">'+v.n+'</button>').join('')+'</div><div id="expV" style="margin-top:6px"></div>'+
+   '<p style="margin:8px 0 0;font-size:12px;color:#bbb">As fotografias não estão incluídas no jogo (direitos dos autores): abrem-se nos sítios de origem. Fontes e partes reconstruídas por aproximação: docs/trindade-1985.md.</p>'+
+   '<div style="display:flex;gap:6px;margin-top:6px" id="expPad"><button data-k="w">▲</button><button data-k="s">▼</button><button data-k="a">◀</button><button data-k="d">▶</button></div></div>';
+  d.hidden=false;expInfo();
+  $('#expExit').onclick=()=>expOn(false);$('#expHide').onclick=()=>{const b=$('#expBody');b.hidden=!b.hidden};
+  d.querySelectorAll('button[data-v]').forEach(b=>b.onclick=()=>{const v=EXPV[+b.dataset.v];
+    if(v.fix)EXP.view=v.fix;else{EXP.view=null;EXP.p=v.p;EXP.x=v.x;EXP.yaw=v.yaw;EXP.pitch=v.pitch;expInfo()}
+    $('#expV').innerHTML='<b>'+v.n+'</b> — '+v.t+'<br><a href="'+v.url+'" target="_blank" rel="noopener noreferrer" style="color:#9cf">Ver a fotografia original ('+v.src+') ↗</a>'});
+  d.querySelectorAll('button[data-k]').forEach(b=>{const k=b.dataset.k;b.onpointerdown=e=>{e.preventDefault();EXP.keys[k]=true};b.onpointerup=b.onpointerleave=()=>{EXP.keys[k]=false}})}
+{const b=$('#bExp');if(b)b.onclick=()=>expOn(!EXP.on)}
+document.addEventListener('keydown',e=>{if(!S)return;const k=e.key.toLowerCase();
+  if(k==='v'&&!e.ctrlKey&&!e.metaKey){expOn(!EXP.on);e.preventDefault();e.stopImmediatePropagation();return}
+  if(!EXP.on)return;if(k==='escape'){expOn(false);return}
+  if(['w','a','s','d','shift','arrowup','arrowdown','arrowleft','arrowright'].includes(k)){EXP.keys[k]=true;e.preventDefault();e.stopImmediatePropagation()}},true);
+document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(EXP.keys[k]){EXP.keys[k]=false}},true);
+{let drag=null;const el=$('#view')||document.body;
+  el.addEventListener('pointerdown',e=>{if(EXP.on&&!e.target.closest('button,#expPanel'))drag=[e.clientX,e.clientY]});
+  addEventListener('pointermove',e=>{if(!drag||!EXP.on)return;const dx=e.clientX-drag[0],dy=e.clientY-drag[1];drag=[e.clientX,e.clientY];
+    if(EXP.view){EXP.view=null}EXP.yaw+=dx*0.005;EXP.pitch=clamp(EXP.pitch-dy*0.004,-1.2,1.2)});
+  addEventListener('pointerup',()=>{drag=null})}
+{const b=$('#bVisit');if(b)b.onclick=()=>{const b4=$('#bStart4');
+  // na Linha da Póvoa (e no mundo contínuo) a visita começa com o primeiro comboio do horário que parte da Trindade
+  const bt=[...document.querySelectorAll('button.cta')].find(q=>q.offsetParent&&/^Porto-Trindade →/.test(q.textContent.trim()));
+  if(b4&&b4.offsetParent)b4.click();else if(bt)bt.click();else{const x=TTS.find(q=>{try{const P=ttPlan(q);return P.legs[0]&&P.legs[0].line===LINE&&P.legs[0].a==='Porto-Trindade'}catch(e){return false}});if(x)ttStart(x[0],0);else return}
+  setTimeout(()=>{EXP.p=300;EXP.x=-4.2;EXP.yaw=Math.PI;EXP.pitch=0.03;expOn(true)},600)}}
 document.addEventListener('keydown',e=>{if(!S)return;const n=numKey(e);const k=n?'#'+n:e.key.toLowerCase();
   if(k==='arrowup'||k==='#8'){setNotch(S.notch+1);e.preventDefault()}
   else if(k==='arrowdown'||k==='#2'){setNotch(S.notch-1);e.preventDefault()}
