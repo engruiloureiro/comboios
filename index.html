@@ -5283,7 +5283,7 @@ function cpLiveryB(G,imgs,TRI,mk){
   if(ei>=0&&TRI[ei]){const ce=paint(ei);CP.TXB[ei]=mk(ce);CP.livCanvas.extras=ce}
   // avental da frente (chapa inclinada por baixo da caixa, textura dos baixos): vermelho na pintura de origem (fotografias fornecidas:
   // UDD junto à oficina); o resto dos baixos (limpa-vias, estrados, equipamentos) não muda
-  const ui=ix('1_1000_underside.png');if(ui>=0&&TRI[ui]){const R=raster(ui,(d,k,P,n,o)=>{if(!(n[2]>0.5&&n[1]<-0.2&&P[2]>zF-1))return;const f=clamp(Math.max(o[k],o[k+1],o[k+2])/30,0.55,1.05)*0.92;
+  const ui=ix('1_1000_underside.png');if(ui>=0&&TRI[ui]){const R=raster(ui,(d,k,P,n,o)=>{if(!(n[2]>0.5&&n[1]<-0.2&&P[2]>zF-1)&&!(Math.abs(P[0])>1.2&&P[0]*n[0]>0.9&&P[2]>zF-1.6))return;/* e as faces laterais do avental, junto às quinas */const f=clamp(Math.max(o[k],o[k+1],o[k+2])/30,0.55,1.05)*0.92;
       d[k]=C.RED[0]*f;d[k+1]=C.RED[1]*f;d[k+2]=C.RED[2]*f});R.x.putImageData(R.D,0,0);CP.TXB[ui]=mk(R.c);CP.livCanvas.underside=R.c}
   // reboque: a mesma pintura com a faixa amarela da 1.ª classe (textura à parte; a da motora não muda)
   if(FCk.length){const c2=document.createElement('canvas');c2.width=cm.width;c2.height=cm.height;const x2=c2.getContext('2d');x2.drawImage(cm,0,0);const D2=x2.getImageData(0,0,c2.width,c2.height);
