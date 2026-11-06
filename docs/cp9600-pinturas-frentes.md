@@ -8,6 +8,7 @@
 | Wikimedia Commons — «26.11.90 Porto Trindade Class 9600s» (1990) | A mesma pintura de origem em 1990; portas com a metade de baixo vermelha |
 | Wikimedia Commons — «Bf Guimarães, Meterspur-VT» (1996) | Pintura posterior: vermelho em cima, faixa cinzenta em baixo, frente toda vermelha sem riscas, logótipo «cp» vermelho na faixa — **é a textura original do modelo do jogo** |
 | Aventar (c. 1980) e Flickr «Estação da Senhora da Hora, 1991» | Pintura de origem; frente com porta central |
+| Fotografias fornecidas pelo utilizador (sem data nem local): UDD tripla junto a uma oficina; UDD numa estação urbana | Pintura de origem: cúpula da frente escura, riscas «/» paralelas, avental vermelho, logótipo «cp» preto na faixa junto à porta da cabina, placas amarelas na faixa, faixa amarela por cima das janelas num dos veículos |
 | Wikipédia (pt) — Série 9600 da CP | 22 unidades 9601–9622, Alsthom, entregues em 1976–77; serviço até 2002 |
 | Wikimedia Commons — «CP 9600 Series railcar, at Porto Boavista depot, in 1977» | Indisponível (o servidor limitou os pedidos) |
 
@@ -26,16 +27,41 @@
 - **B** — pintura de origem (1976–1993), em `cpLiveryB()`: textura independente gerada a partir da **geometria**. Para cada
   triângulo da caixa percorrem-se os texéis no espaço UV e calcula-se o ponto 3D; só mudam texéis de tinta da pintura A:
   - laterais: a própria faixa da pintura A dá o limite (vermelho → creme, cinzento → vermelho) — limite exato, UV respeitadas;
-  - frente (normal para +z): creme acima do limite, riscas a 45° de 0,28 m até 1,05 m abaixo, vermelho por baixo;
+  - frente (normal para +z): creme acima do limite, riscas a 45° de 0,31 m até 1,05 m abaixo, vermelho por baixo;
   - últimos ~1,5 m das laterais junto à cabina: riscas a continuar as da frente (dobram a esquina, como em 1979/1990);
   - superfícies viradas para cima: cinzento-escuro (tejadilho e cúpula da frente);
-  - o logótipo «cp» lateral da pintura A não aparece nas fotografias da pintura de origem: pinta-se como a faixa;
+  - logótipo, placas e faixa da 1.ª classe: ver 3.1;
   - o sombreado original conserva-se; janelas, juntas, faróis, farolins, engates, bogies e vidros não mudam;
   - as laterais «possuem» os seus texéis (o atlas reutiliza zonas da textura noutras superfícies); triângulos degenerados ignorados;
   - porta frontal e portas laterais (cor lisa no modelo): **cópias derivadas** das malhas com UV planas e textura própria
     (metade de baixo vermelha; riscas na porta da cabina); malhas, animações e texturas originais intactas.
-- Se a geração falhar, desenha-se a pintura A (sem erro). Custo: ~0,4–0,6 s no arranque (sem GPU), texturas extra ≈ 28 MB de
-  memória gráfica (2048² e 1024² com mipmaps, mais as das portas).
+- Se a geração falhar, desenha-se a pintura A (sem erro).
+
+### 3.1 Afinação com as fotografias de referência (fornecidas: UDD em frente a uma oficina, e UDD numa estação; sem data nem local indicados)
+Comparação ponto a ponto (fotografias como referência, capturas do jogo para ver as diferenças) e correções, **só na textura B e
+nos materiais** — geometria, portas, janelas, bogies, engates e todos os outros sistemas intactos:
+| Ponto | Fotografia | Antes | Agora |
+|---|---|---|---|
+| Cúpula da frente (acima das janelas, com o farol) | cinzento muito escuro | creme | escura a partir de 3,22 m (logo acima da porta) |
+| Ombreiras das janelas, frisos, borda do tejadilho | creme / alumínio | restos vermelhos (vermelho na sombra da textura A não era reconhecido) | creme; frisos cinzentos acima da faixa ficam como estão |
+| Posse dos texéis das laterais | — | o código estava dentro de um comentário (sem efeito) | corrigido |
+| Riscas da frente | «/» paralelas, vermelho e branco iguais, ~0,6 m | 0,56 m | 0,62 m, mesma direção |
+| Avental por baixo da frente | vermelho | preto (textura dos baixos) | vermelho, sombreado conservado; limpa-vias e equipamentos não mudam |
+| Logótipo «cp» | preto sobre o vermelho, perto da porta da cabina | apagado | preto, com a forma e o lugar do logótipo da textura A (z ≈ 6,8 m, junto à porta da cabina, como na fotografia) |
+| Placa amarela | na faixa, a seguir à porta do meio, a meia altura | inexistente | placa amarela 0,6 × 0,15 m com orla; a inscrição (ilegível nas fotografias) só é sugerida com traços escuros |
+| Faixa amarela da 1.ª classe | por cima das janelas, entre as duas portas de passageiros, num dos veículos | inexistente | só no **reboque**, textura própria (a da motora não muda) |
+| Desgaste | ligeiro, mais sujo em baixo | nenhum | ±2,5 % de variação de tom, fundo da caixa até 12 % mais escuro, leves escorridos sob as janelas |
+
+### 3.2 Materiais (as duas pinturas)
+Código de material por superfície, lido só pelo shader da automotora (o resto do cenário não passa por este ramo):
+- chapa pintada: reflexo do sol fraco e largo + ponto pequeno, reflexo do céu só em ângulos rasantes, atenuado nas cores escuras
+  (o branco não brilha em excesso, não parece plástico);
+- metal (puxadores, molduras): brilho mais forte e reflexo do céu;
+- borracha: escura e mate;
+- vidro: transparência como antes, reflexo moderado do céu, mais opaco visto de lado.
+A textura A não foi tocada; a pintura A só ganha estes materiais.
+
+Custo: ~0,6–0,8 s no arranque (sem GPU); texturas extra ≈ 50 MB de memória gráfica (B da caixa e dos pormenores, reboque, baixos e portas).
 
 ## 4. Identidade das unidades e distribuição
 - `UDD9600`: as 22 unidades reais 9601–9622, cada uma com `pintura1985` (B), `pinturaPos1993` (A), `pinturaLivre`
@@ -76,9 +102,12 @@ combinações A2 e B2 da tabela de testes não existem.
 | Três linhas (Guimarães, Póvoa, Póvoa↔Guimarães): arranque, 5 min de simulação, gravação | sem erros JavaScript |
 | Continuidade geométrica do corredor (`testes/continuidade.js`) | OK (nada mudou) |
 | Cabina (vista interior) | sem superfícies a tapar a vista |
+| Afinação 3.1/3.2 — pintura A antes/depois | textura igual; só o reflexo dos materiais muda (`pintura_A_antes_depois_materiais.jpg`) |
+| Afinação 3.1 — B: frente, cúpula, avental, lado, logótipo, placa, reboque com faixa da 1.ª classe, noite | `pintura_B_*.jpg` |
+| Afinação — modos 1985 / livre / pós-1993, dupla, túnel, câmaras, gravação | como antes (motora B e reboque com a faixa da 1.ª classe) |
+| Afinação — três linhas, 5 min, e `testes/continuidade.js` | sem erros; OK |
 
 ## 7. Por fazer
 - Frente sem porta: só com fotografia ou desenho que mostre essa versão.
-- Logótipos e marcas da pintura de origem (número da unidade, faixa amarela da 1.ª classe vista em 1979/1990): por documentar
-  com melhor resolução.
+- Inscrições das placas amarelas e número da unidade: ilegíveis nas fotografias disponíveis (as placas são genéricas).
 - Cor exata do creme e do vermelho: estimada pelas fotografias (desbotadas).
