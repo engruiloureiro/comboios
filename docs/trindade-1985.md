@@ -135,8 +135,8 @@ posto Mobil anexo em 1985 · rua de cubos de granito · estação nas traseiras 
 - O encravamento é simplificado (garganta como um todo, sem rotas individuais nem sinais por linha).
 - As outras automotoras continuam a seguir o horário por tempo; quando seguram por encravamento, param sem desacelerar
   (no túnel ou no cais, fora de vista na maior parte dos casos).
-- A saída para a Lapa e a Avenida de França mantém o traçado anterior depois do túnel (trincheira até ao k 1,55);
-  a Lapa (boca poente do túnel) e as passagens superiores entre a Lapa e a Avenida de França não foram reconstruídas.
+- A saída para a Lapa e a Avenida de França foi reconstruída depois, com o resto do corredor até à Senhora da Hora:
+  ver `docs/corredor-trindade-sdh.md`.
 - O ambiente sonoro é sintetizado (sem gravações de época).
 - Os passageiros não fazem fila nas bilheteiras nem consultam horários (o interior não existe).
 
