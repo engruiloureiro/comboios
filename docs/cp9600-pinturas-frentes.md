@@ -74,6 +74,10 @@ Custo: ~0,6–0,8 s no arranque (sem GPU); texturas extra ≈ 50 MB de memória 
   da chegada; as paradas, a partir do lugar. Motora e reboque da mesma UDD têm sempre a mesma pintura; numa dupla cada UDD tem
   a sua.
 - Gravação: `udd` e `liv` no JSON; jogos antigos sem estes campos ficam com a 9611 e o modo do menu.
+- Pintura da automotora que conduzes (menu «A minha automotora»): «Como os outros» (segue o modo), «Pintura de origem» (B) ou
+  «Pós-1993» (A). Aplica-se às unidades da tua composição; fica gravada em `pliv` no JSON (jogos antigos seguem o modo).
+- Variedade: com «Variantes livres» os outros comboios recebem as duas pinturas (determinístico por unidade e por comboio).
+  Em «1985 (de origem)» todas são B, porque A só existe desde 1993.
 
 ## 5. Frente sem porta (fase B — **pendente**, por falta de documentação)
 Investigação do objeto `1_1000_portaF`:
