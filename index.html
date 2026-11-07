@@ -471,7 +471,7 @@ const LAY={
  // (reconstrução interpretativa: não se encontrou o quadro de vias de 1985).
  // Agulhas: as partidas (via 0) abrem um leque para o lado −x a partir de b=TRV.lad; as chegadas (via 4) atravessam a via de
  // partidas 30 m mais à frente e caem na mesma diagonal (travessia + leque, como na garganta junto ao portal do túnel)
- VT:{pl:[[-1.8,-6.6],[5.8,8.0],[-10.2,-12.6],[-20.4,-25.0]],ex:[[0,-8.4],[0,-14.4],[4,-8.4],[4,-14.4],[0,-18.6],[4,-18.6],[0,4],[4,0]]},
+ VT:{pl:[[-1.8,-6.6],[5.8,8.0,-95,75],[-10.2,-12.6,-95,92],[-20.4,-25.0]],ex:[[0,-8.4],[0,-14.4],[4,-8.4],[4,-14.4],[0,-18.6],[4,-18.6],[0,4],[4,0]]},
  VF:{pl:[[-1.8,-7.5],[5.8,9.2]],ex:[[0,4],[0,11]]},
  SX:{pl:[[-1.8,-5.2],[5.8,8.6]],ex:[[0,4]]},
  SL:{pl:[[-1.8,-4.6]],ex:[]},
@@ -569,6 +569,17 @@ const LPC=LSD?LSD.pos-80:0;
 if(LSD){LSD.bc=LPC+(RP?-12:12);LSD.bx=RP?-12.5:-3.5;
   if(RG){const e=LSD.ex[0];e.a=LSD.pos-300;e.b=LSD.pos+150}}
 const BUFFER_R=SB.pa-25;
+// Trindade: as vias de cais abrem-se em leque para o topo (fotografias dos anos 80 e 90: as vias do lado do muro curvam para a
+// esquerda de quem olha da garganta). Cada via desloca-se de lado como um bloco rígido (±1,85 m: carris, bitola e bordos dos cais
+// não mudam) e o espaço entre vias — os cais-ilha e as entrevias — alarga. Linhas 1 e 2 e o feixe ficam no sítio; as linhas 3, 4 e 5
+// afastam-se até 2,4 / 4,6 / 6,0 m junto ao topo. Começa depois das agulhas (p < 450) e anula-se entre o cais de topo e a fachada
+// do edifício (p 205 → 190), que não se deforma. Só afeta PI e wp (desenho e posições no mundo); trackX, paragens, encravamento e
+// colisões continuam nas coordenadas da via.
+const FAN={a:225,b:450,f0:190,f1:205,d:[[-18.6,0],[-14.4,0],[-8.4,2.4],[0,4.6],[4,6.0]],W:1.85};
+FAN.t=p=>p>=FAN.b?0:p>FAN.a?sstep((FAN.b-p)/(FAN.b-FAN.a)):p>=FAN.f1?1:p>FAN.f0?sstep((p-FAN.f0)/(FAN.f1-FAN.f0)):0;
+FAN.g=x=>{const D=FAN.d,w=FAN.W,n=D.length;if(x<=D[0][0]+w)return D[0][1];if(x>=D[n-1][0]-w)return D[n-1][1];
+  for(let k=0;k<n-1;k++){const[xa,da]=D[k],[xb,db]=D[k+1];if(x<xb){if(x<=xa+w)return da;if(x>=xb-w)return db;return da+(db-da)*sstep((x-(xa+w))/((xb-w)-(xa+w)))}}return D[n-1][1]};
+const fanX=(p,o)=>{if(p>=FAN.b||p<=FAN.f0)return o;return o+FAN.t(p)*FAN.g(o)};
 // entre a Trofa e Lousado a via estreita partilha a via da Linha do Minho: carris de bitola larga por fora dos de via métrica
 const DUAL=GP?{a:FAM.pb+260,b:km(KC0)}:RP?{a:FAM.pb+260,b:BUFFER+60}:{a:TRF.pa-160,b:LSD.pos-480};
 // bifurcação da Senhora da Hora: ~500 m a norte da estação, agulha para a direita para a Linha de Guimarães; em frente segue a da Póvoa
@@ -1216,11 +1227,11 @@ function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
   // cais da Trindade (1985): sem palas ao longo dos cais (fotografias de 1970, 1972, 1977 e 1990); candeeiros altos ao meio dos
   // cais, relógio com os números das linhas na cabeça de cada cais, placa com o número sobre cada para-choques e tabuletas
   // suspensas viradas para cada linha. Só a cabeceira tem cobertura (pala do cais de topo, ver trinObj 'conc')
-  {const PLT=[{c:6.9,a:5,b:null},{c:-4.2,a:4,b:3},{c:-11.4,a:3,b:2},{c:-22.7,a:1,b:null}];TRV.plats=PLT;
+  {const PLT=[{c:6.9,a:5,b:null,end:SB.bc+75},{c:-4.2,a:4,b:3,end:SB.pb},{c:-11.4,a:3,b:2,end:SB.bc+92},{c:-22.7,a:1,b:null,end:SB.pb}];TRV.plats=PLT;
    for(const L of TRV.lines)put(BUFFER_R+5,{t:'lnum',k:'buf',x:L.x,n:L.n});
    for(const P of PLT){put(BUFFER_R+14,{t:'lclock',x:P.c,n:String(P.a),n2:P.b?String(P.b):''});
-     for(let p=BUFFER_R+26;p<SB.pb-4;p+=26)put(p,{t:'lamp',x:P.c,y:SB.ph,trin:true});
-     for(const p of[SB.pa+30,SB.pa+90,SB.pa+150])if(p<SB.pb-10){put(p,{t:'lnum',k:'plat',x:P.c,n:P.a,face:P.a===5?-1:1});if(P.b)put(p,{t:'lnum',k:'plat',x:P.c,n:P.b,face:-1})}
+     for(let p=BUFFER_R+26;p<P.end-4;p+=26)put(p,{t:'lamp',x:P.c,y:SB.ph,trin:true});
+     for(const p of[SB.pa+30,SB.pa+90,SB.pa+150])if(p<P.end-10){put(p,{t:'lnum',k:'plat',x:P.c,n:P.a,face:P.a===5?-1:1});if(P.b)put(p,{t:'lnum',k:'plat',x:P.c,n:P.b,face:-1})}
      for(const p of[BUFFER_R+40,BUFFER_R+95])put(p,{t:'bench',x:P.c+(P.b?0.9:0),y:SB.ph,face:1})}}
   // fábricas têxteis do vale do Ave
   if(RG||GP)for(const k0 of[36.9,37.5,38.6,39.3,41.6,42.9])put(kR(k0),{t:'factory',x:(k0*7|0)%2?70:-44,w:40,h:8,chim:true});
@@ -3037,8 +3048,8 @@ for(let i=0;i<TOTAL;i++){const h=(HDG[i]+HDG[i+1])/2;WX[i+1]=WX[i]+Math.sin(h)*S
 function fr3(p){const i=clamp(Math.floor(p/SEG),0,TOTAL-1),f=clamp(p/SEG-i,0,1);const h=HDG[i]+(HDG[i+1]-HDG[i])*f;
   return{x:WX[i]+(WX[i+1]-WX[i])*f,z:WZ[i]+(WZ[i+1]-WZ[i])*f,y:hy[i]+(hy[i+1]-hy[i])*f,h,fx:Math.sin(h),fz:-Math.cos(h),rx:Math.cos(h),rz:Math.sin(h)}}
 function wp(p,o,up){if(PVG&&PVG.N&&o<-9&&p>PVG.sC&&p<PVG.sC+300){const F=fr3(PVG.sC),d=p-PVG.sC;return[F.x+PVG.u[0]*d+PVG.r[0]*o,hy[PVG.iC]+up,F.z+PVG.u[1]*d+PVG.r[1]*o]}
-  const F=fr3(p);return[F.x+F.rx*o,F.y+up,F.z+F.rz*o]}
-const PI=(i,o,y)=>{const h=HDG[i];return[WX[i]+Math.cos(h)*o,hy[i]+y,WZ[i]+Math.sin(h)*o]};window.__wp=(p,o,u)=>wp(p,o,u);
+  o=fanX(p,o);const F=fr3(p);return[F.x+F.rx*o,F.y+up,F.z+F.rz*o]}
+const PI=(i,o,y)=>{const h=HDG[i];if(i<91)o=fanX(i*SEG,o);return[WX[i]+Math.cos(h)*o,hy[i]+y,WZ[i]+Math.sin(h)*o]};window.__wp=(p,o,u)=>wp(p,o,u);
 const RV=i=>{const h=HDG[i];return[Math.cos(h),0,Math.sin(h)]},FV=i=>{const h=HDG[i];return[Math.sin(h),0,-Math.cos(h)]};
 
 /* ---- ruído ---- */
@@ -4057,7 +4068,12 @@ function trinHead(mb,sp,i,L,tree){
   const R=RV(i),F=FV(i),p0=i*SEG,GL=cc(46,56,68);
   // ponto (x, p, y) no referencial da secção a que p pertence: os objetos compridos seguem a curva do eixo (a Trindade é curva)
   const W=(x,pp,yy)=>{const j=clamp(Math.floor(pp/SEG),0,TOTAL-1),w=PI(j,x,0),Fj=FV(j),d=pp-j*SEG;return[w[0]+Fj[0]*d,yy,w[2]+Fj[2]*d]};
-  const box=(x0,x1,a,b,y0,y1,col,l,tu,tv)=>boxRF(mb,L(W((x0+x1)/2,(a+b)/2,0)),R,F,Math.abs(x1-x0),Math.abs(b-a),y0,y1,col,l||0,tu,tv);
+  // caixa pelos oito cantos: cada canto no referencial da sua secção (acompanha a curva e o leque das vias)
+  const box=(x0,x1,a,b,y0,y1,col,l,tu,tv)=>{const xa=Math.min(x0,x1),xb=Math.max(x0,x1),pa=Math.min(a,b),pb=Math.max(a,b),P=(sx,sz,y)=>L(W(sx<0?xa:xb,sz<0?pa:pb,y));
+    const uw=(xb-xa)/(tu||1e9),ud=(pb-pa)/(tu||1e9),vh=(y1-y0)/(tv||1e9);l=l||0;
+    mb.q(P(-1,-1,y0),P(1,-1,y0),P(1,-1,y1),P(-1,-1,y1),col,l,[0,vh,uw,0]);mb.q(P(1,1,y0),P(-1,1,y0),P(-1,1,y1),P(1,1,y1),col,l,[0,vh,uw,0]);
+    mb.q(P(1,-1,y0),P(1,1,y0),P(1,1,y1),P(1,-1,y1),col,l,[0,vh,ud,0]);mb.q(P(-1,1,y0),P(-1,-1,y0),P(-1,-1,y1),P(-1,1,y1),col,l,[0,vh,ud,0]);
+    mb.q(P(-1,-1,y1),P(1,-1,y1),P(1,1,y1),P(-1,1,y1),col,l,[0,0,1,1])};
   // face vertical no plano p=pp, virada para −F (s=−1) ou +F (s=1)
   const fq=(x0,x1,pp,y0,y1,s,col,l,uv)=>{const a=s<0?x0:x1,b=s<0?x1:x0,o=s*0.02;mb.q(L(W(a,pp+o,y0)),L(W(b,pp+o,y0)),L(W(b,pp+o,y1)),L(W(a,pp+o,y1)),col,l||0,uv)};
   // face vertical no plano x=xx, virada para +R (s=1) ou −R
@@ -6304,7 +6320,7 @@ const EXPZ=[[p=>p<185,'Rua em frente da estação','A estação foi aberta em 19
   [p=>p<BUFFER_R+1,'Cais de topo','Atrás dos para-choques, o cais de topo coberto liga as cinco linhas às portas do vestíbulo e às saídas. Em 1985 partiam e chegavam aqui 133 comboios por dia de segunda a sábado e 50 aos domingos (Via Libre, 1985).'],
   [p=>true,'Cais','Cinco linhas de cais, numeradas aqui a partir do lado do edifício (numeração interpretativa). As automotoras 9600 (Alsthom, 1976–77) faziam o serviço das linhas de Guimarães e da Póvoa; as unidades de reserva ficavam no feixe de resguardo, do lado oposto ao muro.']];
 function expSurf(p,x){const BC=(Math.floor(BUFFER_R/SEG)+1)*SEG+0.2,ph=SB.ph;
-  if(p>=BUFFER_R+1.5&&p<=SB.pb-0.6)for(const r of SB.pl){const lo=Math.min(r[0],r[1])+0.4,hi=Math.max(r[0],r[1])-0.4;if(x>=lo&&x<=hi)return ph}
+  if(p>=BUFFER_R+1.5&&p<=SB.pb-0.6)for(const r of SB.pl){if(r[3]!==undefined&&p>SB.bc+r[3]-0.6)continue;const lo=Math.min(r[0],r[1])+0.4,hi=Math.max(r[0],r[1])-0.4;if(x>=lo&&x<=hi)return ph}
   if(p>=BUFFER_R-13.6&&p<=BC-0.35&&x>=-25.0&&x<=TRV.wallX-0.6)return ph;
   if(p>=187.5&&p<BUFFER_R-13.5&&x>=7.6&&x<=13.4)return 0.3;
   if(p>=167.5&&p<=184.6&&x>=-100&&x<=60)return 0.3;

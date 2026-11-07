@@ -197,10 +197,24 @@ para passageiros na Trindade em 1985 · horário de 1985 e ocupação das linhas
 - `trinHead`: `W()` passa a usar o referencial da secção de cada ponto (os objetos compridos seguem a curva).
 - A linha telegráfica acaba na garganta (os postes que ficavam no meio do feixe saem).
 
+### 10.3a Segunda fase: leque das vias de cais e cais diferentes
+- **Leque** (`FAN`, `fanX`): depois das agulhas (p < 450) as vias de cais afastam-se progressivamente até ao topo — linhas 1 e 2
+  e feixe no sítio, linhas 3, 4 e 5 até 2,4 / 4,6 / 6,0 m para o lado do muro (as vias do lado do muro curvam para a esquerda de
+  quem olha da garganta, como na fotografia panorâmica). Cada via desloca-se como bloco rígido (±1,85 m): carris, bitola de
+  1000 mm e distância dos bordos dos cais à via não mudam; o que alarga são os cais-ilha (a ilha larga passa de 4,8 para 7,0 m no
+  topo, a estreita de 2,4 para 4,6 m) e a entrevia das linhas 4–5. Cada via fica com curvas próprias (raios diferentes). O cais de
+  topo fica em trapézio; o edifício e a rua não se deformam (o leque anula-se entre p = 205 e 190).
+- É uma transformação só do desenho e das posições no mundo (`PI` e `wp`): circulação, agulhas, paragens, para-choques,
+  encravamento, colisões e gravação continuam nas coordenadas da via — nada da lógica foi alterado.
+- **Cais com comprimentos diferentes**: cais lateral (linha 5) acaba 75 m depois do centro de paragem, cais-ilha estreito aos 92 m,
+  os outros dois aos 109 m; candeeiros, letreiros e o modo de exploração acompanham o fim de cada cais.
+- `trinHead`: as caixas passam a ser construídas pelos oito cantos (acompanham a curva e o leque).
+
 ### 10.4 Interpretação e limitações
 - Não há planta de vias: raios, posições das agulhas, número de vias do feixe (4) e comprimentos são leituras das fotografias.
-- O motor desenha as vias no referencial de um único eixo: todas as vias de cais curvam juntas (o leque está na garganta e no
-  feixe). Não é possível um cais curvar ao contrário dos outros sem refazer o sistema de cais e paragens; não foi feito.
+- O leque é uma deformação lateral do desenho (as vias de cais continuam a ser, na lógica, paralelas ao eixo): as linhas 1 e 2
+  não abrem (o edifício de passageiros fica por trás delas e não se pode deformar), e a amplitude do leque (até 6 m) é uma
+  leitura das fotografias, não uma medição.
 - As vias do feixe são desenhadas com os carris afastados na perpendicular do eixo: com o desvio máximo (≈ 15°, na ponta da via 3)
   a bitola aparente fica até ~3 % mais estreita. As travessas da textura do balastro ficam ligeiramente oblíquas.
 - Torre da Câmara, edifício de tijolo, casa de apoio, rua e semáforos: volumes simplificados, posições aproximadas.
@@ -218,5 +232,6 @@ para passageiros na Trindade em 1985 · horário de 1985 e ocupação das linhas
 | `testes/suburbano.js` (Trindade ↔ Senhora da Hora, dois sentidos) | sem incidentes; 0 sobreposições |
 | `testes/bifurcacao.js` (Maia, Custóias e regressos) | sem incidentes; regresso parado na Trindade |
 | Três linhas: arranque, 5 min, gravação | sem erros JavaScript |
+| Segunda fase (leque, cais diferentes): chegadas e partidas das linhas 1–5, suburbano, bifurcação, continuidade, três linhas, objetos nas vias | iguais à primeira fase. Na chegada forçada à linha 5 o teste embate por vezes na 7918, parada nessa linha pelo horário; a versão anterior faz o mesmo (o teste força a linha sem ver se está livre) |
 | Desempenho (4 troços da Trindade) | 344 → 365 mil vértices (+6 %); construção ≤ 71 ms por troço |
 | Capturas | `docs/capturas/trindade/` (vista histórica, cais e palas, feixe) |
