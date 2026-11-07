@@ -154,3 +154,69 @@ cobertura de duas águas em 1985 · estado do feixe e da antiga zona das locomot
 posto de gasóleo das automotoras · interior do edifício (bilheteiras, sala de espera) · letreiros e informação aos
 passageiros · bancos e candeeiros exatos dos anos 80 · iluminação noturna · uso de comboios rebocados (locomotivas 9000)
 para passageiros na Trindade em 1985 · horário de 1985 e ocupação das linhas.
+
+## 10. Reconstrução a partir das fotografias dos anos 80 e 90 (novembro de 2026)
+
+### 10.1 Referências
+| Referência | O que mostra |
+|---|---|
+| Fotografia fornecida 1 (sem autor nem data; anos 90 pelas automotoras) | Vista de cima da garganta para o topo: talude de rocha com vegetação à esquerda; cais com 9600 à esquerda e ao centro; à direita, vias que curvam para fora, para uma zona de parqueamento com duas UDD encostadas, casa de apoio, pilhas de carris e travessas, muro comprido e talude de erva |
+| Fotografia fornecida 2 (panorâmica, sem autor nem data; anos 80) | Cais curvos à esquerda com palas curtas junto ao topo; leque de agulhas ao centro; cais comprido e curvo; à direita uma via curva com carruagens encostadas, muro de pedra com casas antigas, jardim, árvores, edifício de tijolo, rua mais alta com semáforos; no horizonte a torre dos Paços do Concelho e a torre da Igreja da Trindade |
+| Captura de ecrã fornecida 3 | **Não é a Trindade**: o painel diz «Avenida de França»; mostra o corredor entre a Avenida de França e a Lapa, com a zona plana das vias da Boavista (a área cinzenta). Serviu só para identificar o aspeto genérico a evitar |
+
+### 10.2 Análise do código (antes de alterar)
+- Geometria: eixo paramétrico `COR` (rumo por troços); a estação era uma **reta** de p = 200 a 758 (rumo −35°). Vias e cais são
+  faixas a x constante no referencial do eixo (`LAY.VT`, `TRV`); agulhas (`SB.ex`) com perfil `tProf`; vias extra (`XTR`) com
+  desvio lateral livre `f(p)`. Circulação, paragens, para-choques e encravamento usam `TRV.lines` (5 vias de cais).
+- Resguardo: duas vias retas paralelas (−28,6 e −32,6) a sair da diagonal da garganta até aos para-choques; unidades em `PARKED`
+  com x constante.
+- Envolvente: bloco `TRC` (muros, casario, edifício, rua, hospital, torre); objetos `trin` desenhados em `trinObj`/`trinHead`.
+  `W()` de `trinHead` prolongava a direção da secção do objeto (os objetos compridos não seguiam curvas).
+
+### 10.3 O que mudou (`index.html`)
+- **Eixo curvo** (fase 2): de p = 200 a 500 a estação é uma curva de raio ≈ 955 m (18°), que curva para a esquerda de quem
+  olha da garganta para os para-choques, como nas duas fotografias. O rumo à saída (p = 500) é o de antes: o corredor até à
+  Senhora da Hora não muda de rumo (só se desloca alguns metros). Vias, cais, para-choques, sinais e paragens acompanham a curva
+  sem mudar a lógica (os cais continuam definidos no referencial do eixo).
+- **Feixe de parqueamento** (fase 2): o resguardo reto sai; `TRV.park` são quatro vias de topo que saem da via 1 depois do fim
+  dos cais (agulha a p = 535), abrem em leque com agulhas 1:7,5 em p = 450, 425 e 400 e curvam para fora (raio ≈ 1,25 km por
+  cima do leque); acabam em pontos diferentes (p = 300, 265, 285, 320), com para-choques. Sem cais. Três unidades encostadas
+  (vias 1, 3 e 4; a 2 livre), paradas, apagadas, sem passageiros e fora do horário (`TRV.parkUnits`), a seguir a curva da via.
+  Cada via tem `manobra` (entrada, fim, ocupada) preparado para manobras futuras; não há manobras nesta fase.
+- **Cais** (fase 3): curvos com o eixo; palas curtas de chapa sobre os dois cais-ilha junto ao topo (40 e 31 m), sobre pilares
+  centrais. Mantêm-se o cais de topo com pala, a cobertura do cais da linha 1, candeeiros, bancos e letreiros.
+- **Envolvente do lado do feixe** (fase 4): muro da rua afastado (x = −63) e baixo (≈ 3,6 m) até ao fim do feixe, com
+  gradeamento de ferro; rua alcatroada por cima com semáforos junto ao topo; prédios por trás da rua, com menos prédios altos;
+  jardim e muro baixo junto ao topo; árvores; edifício de tijolo de 3 pisos; casa de apoio de telha no fim do feixe; pilhas de
+  carris e travessas junto à garganta; torre dos Paços do Concelho no horizonte (posição e escala aproximadas); torre de
+  escritórios dos anos 60 e bloco comprido de 8 pisos por trás do topo. Menos prédios altos nos dois lados (casario de 2–4 pisos).
+- **Materiais** (fase 5): no feixe, balastro mais sujo, carris sem brilho e com ferrugem, erva rasteira e tufos amarelados
+  entre os carris; relva com manchas de terra batida e balastro espalhado até ao muro.
+- **Câmara** «Vista Histórica da Trindade» (botão 🎥 / tecla C): do alto, por cima da garganta, do lado do feixe, a olhar para
+  o topo. Só aparece no ciclo das vistas quando a automotora está perto da Trindade (o cenário só existe à volta dela).
+- `trinHead`: `W()` passa a usar o referencial da secção de cada ponto (os objetos compridos seguem a curva).
+- A linha telegráfica acaba na garganta (os postes que ficavam no meio do feixe saem).
+
+### 10.4 Interpretação e limitações
+- Não há planta de vias: raios, posições das agulhas, número de vias do feixe (4) e comprimentos são leituras das fotografias.
+- O motor desenha as vias no referencial de um único eixo: todas as vias de cais curvam juntas (o leque está na garganta e no
+  feixe). Não é possível um cais curvar ao contrário dos outros sem refazer o sistema de cais e paragens; não foi feito.
+- As vias do feixe são desenhadas com os carris afastados na perpendicular do eixo: com o desvio máximo (≈ 15°, na ponta da via 3)
+  a bitola aparente fica até ~3 % mais estreita. As travessas da textura do balastro ficam ligeiramente oblíquas.
+- Torre da Câmara, edifício de tijolo, casa de apoio, rua e semáforos: volumes simplificados, posições aproximadas.
+- O muro de pedra com casas por cima, entre o cais curvo e a via das carruagens (fotografia 2), não foi reproduzido: no motor
+  ficaria por cima das vias do feixe.
+- O corredor da Avenida de França (captura 3) não foi alterado neste trabalho.
+
+### 10.5 Testes
+| Teste | Resultado |
+|---|---|
+| Chegada às linhas 1–5 (agulha certa, paragem no batente) | todas a 0,03 m do batente; sem embates nem colisões; ≥ 13 m das unidades encostadas |
+| Partida das linhas 1–5 até depois da Avenida de França | sem colisões nem descarrilamentos |
+| Objetos em cima das vias (p < 800) | nenhum (verificação automática de todos os objetos contra todas as vias) |
+| `testes/continuidade.js` | OK |
+| `testes/suburbano.js` (Trindade ↔ Senhora da Hora, dois sentidos) | sem incidentes; 0 sobreposições |
+| `testes/bifurcacao.js` (Maia, Custóias e regressos) | sem incidentes; regresso parado na Trindade |
+| Três linhas: arranque, 5 min, gravação | sem erros JavaScript |
+| Desempenho (4 troços da Trindade) | 344 → 365 mil vértices (+6 %); construção ≤ 71 ms por troço |
+| Capturas | `docs/capturas/trindade/` (vista histórica, cais e palas, feixe) |

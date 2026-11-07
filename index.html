@@ -471,7 +471,7 @@ const LAY={
  // (reconstrução interpretativa: não se encontrou o quadro de vias de 1985).
  // Agulhas: as partidas (via 0) abrem um leque para o lado −x a partir de b=TRV.lad; as chegadas (via 4) atravessam a via de
  // partidas 30 m mais à frente e caem na mesma diagonal (travessia + leque, como na garganta junto ao portal do túnel)
- VT:{pl:[[-1.8,-6.6],[5.8,8.0],[-10.2,-12.6],[-20.4,-25.0]],ex:[[0,-8.4],[0,-14.4],[4,-8.4],[4,-14.4],[0,-18.6],[4,-18.6],[0,4],[4,0],[0,-28.6],[0,-32.6]]},
+ VT:{pl:[[-1.8,-6.6],[5.8,8.0],[-10.2,-12.6],[-20.4,-25.0]],ex:[[0,-8.4],[0,-14.4],[4,-8.4],[4,-14.4],[0,-18.6],[4,-18.6],[0,4],[4,0]]},
  VF:{pl:[[-1.8,-7.5],[5.8,9.2]],ex:[[0,4],[0,11]]},
  SX:{pl:[[-1.8,-5.2],[5.8,8.6]],ex:[[0,4]]},
  SL:{pl:[[-1.8,-4.6]],ex:[]},
@@ -518,7 +518,7 @@ PV.bc+=45;PV.pa+=45;PV.pb+=45;PV.stopF+=45;PV.stopR+=45;
 // Trindade (1985): planta interpretada da fotografia de 1972. TRV guarda a geometria da estação para o resto do código:
 // vias com cais (x, número), vias de resguardo, portal do túnel da Trindade (a garganta acaba «já dentro das vias de manobras»,
 // Wikipédia/Gazeta) e o sinal de entrada, à boca do túnel
-const TRV={lines:[{x:-18.6,n:1},{x:-14.4,n:2},{x:-8.4,n:3},{x:0,n:4},{x:4,n:5}],yard:[-28.6,-32.6],
+const TRV={lines:[{x:-18.6,n:1},{x:-14.4,n:2},{x:-8.4,n:3},{x:0,n:4},{x:4,n:5}],yard:[],
   lad:km(0.30),port:km(0.35),ent:km(0.35)+15,wallX:9.4,yardX:-36.5};
 TRV.platX=TRV.lines.map(l=>l.x);TRV.allX=TRV.platX.concat(TRV.yard);
 // leque das partidas: todas as vias do lado −x saem da via 0 na mesma diagonal (b = TRV.lad); as que vêm da via de chegada (4)
@@ -690,6 +690,21 @@ function tProf(t,D){const A=Math.abs(D);if(t<=0)return 0;const t1=AGS*AGR,y1=AGS
   return Math.sign(D)*y}
 function exOff(e,p){const t=Math.min(p-e.a,e.b-p);if(t<=0)return null;return e.from+tProf(t,e.to-e.from)}
 function branchOffs(p){return[]}
+// Trindade: feixe de parqueamento (fotografias dos anos 80 e 90, vistas da garganta para os para-choques): do lado oposto ao muro de
+// granito (−x), separado dos cais, um leque de vias de topo que sai da via 1 depois do fim dos cais e curva para fora, para uma zona de
+// balastro velho, erva e terra entre as vias e o muro da rua. Sem cais; as vias acabam em pontos diferentes, com para-choques.
+// Geometria interpretada das fotografias (não se encontrou planta): agulhas 1:7,5 como as da garganta, mais curvas de raio ~1,25 km.
+// As unidades ali encostadas não entram na circulação comercial; o campo «manobra» fica preparado para manobras futuras.
+TRV.park=[];
+// unidades encostadas no feixe: vias 1, 3 e 4 (a 2 fica livre); paradas, apagadas, sem passageiros e fora do horário
+TRV.parkUnits=()=>[[0,2],[2,4],[3,2]].map(([k,nc])=>{const X=TRV.park[k];return{o:X.f(X.a+7+TLEN(nc)/2),xo:X.f,sb:1,park:X.park,a:X.a+7,len:TLEN(nc),nc,c:'u',lit:false}});
+{const crv=(p,p0,c)=>p<p0?-c*(p0-p)*(p0-p):0,C=0.0004;
+ const P1=p=>-18.6+tProf(535-p,-8.4)+crv(p,457,C),
+       P2=p=>P1(p)+tProf(450-p,-4.4)+crv(p,380,C),
+       P3=p=>P2(p)+tProf(425-p,-4.4)+crv(p,360,C),
+       P4=p=>P3(p)+tProf(400-p,-4.4)+crv(p,340,C);
+ for(const[n,f,a,b,fr]of[[1,P1,300,535,-18.6],[2,P2,265,450,null],[3,P3,285,425,null],[4,P4,320,400,null]]){
+   const X={a,b,m:false,park:n,old:true,fr:fr??f(b),f,manobra:{entrada:b,fim:a,ocupada:false}};XTR.push(X);TRV.park.push(X)}}
 function capAt(k){if(GP&&k>KC1)return capG(k-DGV);if(RP){if(PVG&&k>(PVG.sC-OFF)/1000-0.3&&k<(PVG.sC-OFF)/1000+0.2)return 30;if(k<0.18)return 30;if(k<0.9)return 50;// túnel da Trindade (PK 0,35–0,85): 50 km/h
   if(k<SDH.k+0.35){if(Math.abs(k-SDH.k)<0.35)return 40;return 60}
   if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526){for(const[a0,b0]of[[30.85,31.8],[37.2,37.7],[43.4,44.3],[46.4,47.4],[50.1,50.8],[52.3,53.0],[54.1,54.8],[58.4,59.2]])if(k>=a0&&k<b0)return 30;return 50}return 70}
@@ -711,7 +726,7 @@ let LIMCH=[];
    até Ramalde; patamar de 173 m entre Ramalde e Circunvalação; pendente de 16 ‰ em 352 m; rampa de 20 ‰ em 744 m e de 16 ‰
    em 303 m à entrada da Senhora da Hora (80 m, Wikipédia). Cota da Trindade estimada (84 m). */
 const COR={p0:200,
-  els:[["L",0,-35.0,558.06,0],["C",558.06,-35.0,92.17,-0.3580986],["L",650.22,-68.0044,1335.9,0],["C",1986.12,-68.0044,65.63,0.2864789],["L",2051.75,-49.2018,782.62,0],["C",2834.37,-49.2018,110.34,0.1909859],["L",2944.71,-28.129,804.43,0],["C",3749.14,-28.129,79.77,-0.1432394],["L",3828.91,-39.5559,1265.62,0],["C",5094.53,-39.5559,103.13,0.1909859],["L",5197.66,-19.8594,480.49,0],["L",5678.16,-19.9,3000,0]],
+  els:[["C",0,-53.0,300,0.06],["L",300,-35.0,258.06,0],["C",558.06,-35.0,92.17,-0.3580986],["L",650.22,-68.0044,1335.9,0],["C",1986.12,-68.0044,65.63,0.2864789],["L",2051.75,-49.2018,782.62,0],["C",2834.37,-49.2018,110.34,0.1909859],["L",2944.71,-28.129,804.43,0],["C",3749.14,-28.129,79.77,-0.1432394],["L",3828.91,-39.5559,1265.62,0],["C",5094.53,-39.5559,103.13,0.1909859],["L",5197.66,-19.8594,480.49,0],["L",5678.16,-19.9,3000,0]],
   // perfil: [k, cota] (vértices; entre eles a cota varia linearmente, depois suaviza-se em ±40 m: concordâncias verticais)
   prof:[[-0.40,84],[0.12,84],[0.908,97.4],[0.95,97.4],[1.20,94.9],[1.24,94.9],[1.49,92.4],[1.53,92.4],[1.75,90.42],[1.95,90.42],
     [2.20,86.92],[2.23,86.92],[2.48,83.42],[2.51,83.42],[2.76,79.92],[2.79,79.92],[3.04,76.42],[3.07,76.42],[3.32,72.92],[3.35,72.92],[3.60,69.42],[3.609,69.42],
@@ -908,7 +923,7 @@ function minho(n){const c=[{m:'bloco',len:13.4,ht:[1,0],bog:[2.6,10.8],bm:'bbog'
 function paxTrain(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'coach',len:16.5,bog:[2.4,14.1]});return c}
 function freight(n){const c=[{m:'loco',len:10.5,ht:[1,0],bog:[2.3,8.2]}];for(let k=0;k<n;k++)c.push({m:'wag',len:8.2});return c}
 let LOCAT=()=>null;
-const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:-12,pv:1,a:PVG.sC+60,len:TLEN(2),c:'u',lit:false},{o:TRV.yard[0],sb:1,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:TRV.yard[1],sb:1,a:BUFFER_R+7,len:TLEN(4),c:'u',lit:false},{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}].concat(LSD?[{o:4,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}]:[],GP?[{o:13.3,gu:1,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false}]:[]):[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:13.3,gu:1,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},{o:TRV.yard[0],sb:1,a:BUFFER_R+7,len:TLEN(2),c:'u',lit:false},{o:TRV.yard[0],sb:1,a:BUFFER_R+49,len:TLEN(2),c:'u',lit:false},{o:TRV.yard[1],sb:1,a:BUFFER_R+7,len:TLEN(4),c:'u',lit:false},{o:-27,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}];
+const PARKED=RP?[{o:-9.5,a:FAM.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:-12,pv:1,a:PVG.sC+60,len:TLEN(2),c:'u',lit:false},...TRV.parkUnits(),{o:4,a:byNameE('Vila do Conde').pos-110,len:10.5+0.6+5*8.8,cons:freight(5),c:'loco',lit:false}].concat(LSD?[{o:4,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}]:[],GP?[{o:13.3,gu:1,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false}]:[]):[{o:-9.5,a:TRF.pos-150,len:13.4+0.6+4*24.1,cons:minho(4),c:'loco',lit:false},{o:13.3,gu:1,a:GUI.pos-120,len:TLEN(2),c:'u',lit:false},...TRV.parkUnits(),{o:-27,a:LSD.pos-185,len:13.4+0.6+3*24.1,cons:minho(3),c:'loco',lit:false}];
 /* carris com juntas (barras de 18 m) e agulhas */
 const JOINTS=[];
 for(let p=OFF;p<(FAF?BUFFER:END);p+=18)JOINTS.push(p+(rnd()-0.5)*0.4);
@@ -1480,7 +1495,10 @@ if(TRC){const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1),put=(p,o)=>spr[at(p)].pus
   // muros: x suave a partir das vias que existem em cada secção
   const ext=(k,s)=>{let m=s>0?2:-2;for(let q=Math.max(0,k-6);q<=Math.min(TOTAL-1,k+6);q++)for(const o of[0,...trk[q],...trkX[q]])if(Math.abs(o)<40)m=s>0?Math.max(m,o):Math.min(m,o);return m};
   for(let k=at(TRC.a);k<=at(TRC.b);k++){const p=k*SEG,hl=TRC.hL(p),hr=TRC.hR(p);wallL[k]=null;wallR[k]=null;
-    if(hl>0.3)wallL[k]={x:Math.min(TRV.yardX,ext(k,-1)-4.6),h:hl,t:'g',own:true,c:[166,160,148]};
+    // do lado do feixe (−x): até ao fim do feixe o muro da rua fica afastado (x=−63) e baixo (~3,6 m), com o jardim e a erva entre ele e
+    // as vias de parqueamento; depois volta ao muro alto junto à garganta e ao portal
+    {const t=sstep((p-470)/130),xw=lerp(-63,Math.min(TRV.yardX,ext(k,-1)-4.6),t),hw=lerp(3.6*sstep((p-BUFFER_R-10)/50),hl,t);
+     if(hw>0.3)wallL[k]={x:xw,h:hw,t:'g',own:true,c:[166,160,148]}}
     if(hr>0.3)wallR[k]={x:Math.max(TRV.wallX,ext(k,1)+5.4),h:hr,t:'g',own:true,c:[150,146,136]}}
   // hera, arbustos e jardins (estação florida) na muralha (+x) e no talude (−x)
   for(let p=BUFFER_R+40;p<TRC.b-4;p+=11)put(p,{t:'trin',k:'ivy',x:0,s:at(p)*7});
@@ -1489,9 +1507,9 @@ if(TRC){const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1),put=(p,o)=>spr[at(p)].pus
   // prédios: do lado −x por cima do talude, do lado +x recuados atrás da muralha, e por cima do túnel
   let s0=91;const rr=()=>{s0=(Math.imul(s0,1664525)+1013904223)>>>0;return s0/4294967296};
   // casario antigo de 3–4 pisos com telhado (fotografias de 1972 e 1990) misturado com alguns prédios altos dos anos 60/70 (1969, 1977)
-  const bk=(p,x,w,d,tall)=>put(p,{t:'trin',k:'block',x,w,d,fl:tall?8+Math.floor(rr()*4):3+Math.floor(rr()*2),col:Math.floor(rr()*9),apt:tall&&rr()<0.7,old:!tall});
-  for(let p=BUFFER_R+30;p<TRC.b+10;){const tall=rr()<0.28,w=tall?18+rr()*10:8+rr()*7,wl=wallL[at(p+w/2)];bk(p+w/2,-(Math.abs(wl?wl.x:40)+(tall?10:6)),w,tall?14:11,tall);p+=w+(tall?3:0.3)}
-  for(let p=BUFFER_R+60;p<TRC.b-10;){const tall=rr()<0.3,w=tall?20+rr()*10:8+rr()*7,wr=wallR[at(p+w/2)];bk(p+w/2,Math.abs(wr?wr.x:10)+(tall?14:7),w,tall?16:11,tall);p+=w+(tall?4:0.3)}
+  const bk=(p,x,w,d,tall)=>put(p,{t:'trin',k:'block',x,w,d,fl:tall?6+Math.floor(rr()*3):2+Math.floor(rr()*3),col:Math.floor(rr()*9),apt:tall&&rr()<0.7,old:!tall});
+  for(let p=BUFFER_R+30;p<TRC.b+10;){const pk=p<500,tall=rr()<(pk?0.08:0.14),w=tall?18+rr()*10:8+rr()*7,wl=wallL[at(p+w/2)];bk(p+w/2,-(Math.abs(wl?wl.x:40)+(tall?10:6)+(pk?13:0)),w,tall?14:11,tall);p+=w+(tall?3:0.3)}
+  for(let p=BUFFER_R+60;p<TRC.b-10;){const tall=rr()<0.12,w=tall?20+rr()*10:8+rr()*7,wr=wallR[at(p+w/2)];bk(p+w/2,Math.abs(wr?wr.x:10)+(tall?14:7),w,tall?16:11,tall);p+=w+(tall?4:0.3)}
   // manchas de humidade, escorrências e musgo nos muros
   for(let p=BUFFER_R+30;p<TRC.b-3;p+=4+rr()*7)put(p,{t:'trin',k:'stain',x:0,sd:rr()<0.55?1:-1,w:0.6+rr()*2.4,h:0.25+rr()*0.7,m:rr()<0.35});
   for(const[du,x,w,fl,apt]of[[45,-30,26,11,true],[60,4,22,9,false],[48,34,28,12,true],[95,-8,30,10,true]])put(TRC.b+du,{t:'trin',k:'block',x,w,d:16,fl,col:Math.floor(rr()*6),apt,face:1});
@@ -1506,6 +1524,39 @@ if(TRC){const at=p=>clamp(Math.floor(p/SEG),0,TOTAL-1),put=(p,o)=>spr[at(p)].pus
   put(BUFFER_R-70,{t:'trin',k:'house',x:-6});put(BUFFER_R-80,{t:'trin',k:'tower',x:-34});
   // cobertura de duas águas sobre o cais da linha 1, junto ao topo (fotografia de 1965; aproximação)
   put(BUFFER_R+26,{t:'trin',k:'shed',x:-22.7});
+  // palas curtas sobre os dois cais-ilha, junto ao topo (fotografias dos anos 80 e 90)
+  put(BUFFER_R+3,{t:'trin',k:'pala',x:-4.2,x0:-1.95,x1:-6.45,a:BUFFER_R+3,b:BUFFER_R+40});
+  put(BUFFER_R+3,{t:'trin',k:'pala',x:-11.4,x0:-10.35,x1:-12.45,a:BUFFER_R+3,b:BUFFER_R+31});
+  // feixe de parqueamento: para-choques, erva entre os carris, relva e terra até ao muro da rua (fotografias dos anos 80 e 90)
+  for(const X of TRV.park){spr[Math.floor(X.a/SEG)+1].push({t:'buffer',x:X.f(X.a+5)});}
+  for(let p=270;p<480;p+=SEG)put(p,{t:'trin',k:'erva',x:0});
+  {const outer=p=>{let m=-26;for(const X of TRV.park)if(p>=X.a-3&&p<=X.b)m=Math.min(m,X.f(Math.max(p,X.a)));return m};
+   for(let p=BUFFER_R+12;p<650;p+=15){const k=at(p);let m=p<420?-25:-2;for(const o of[0,...trk[k],...trkX[k],...trk[at(p+7)],...trkX[at(p+7)],...trk[at(p-7)],...trkX[at(p-7)]])if(o>-66)m=Math.min(m,o);
+     const x0=Math.min(m,outer(p))-2.6,wl=wallL[k],x1=wl?wl.x+1.2:-58.5;if(x0-x1>3)put(p,{t:'campo',k:'prado',x:(x0+x1)/2,w:15.5,d:x0-x1})}}
+  // terra batida e balastro velho junto aos materiais empilhados (fotografia dos anos 90: pilhas de carris e travessas)
+  put(500,{t:'patio',x:-35,w:50,d:7,c:[132,118,98],lift:0.13});
+  // jardim junto ao topo, árvores e arbustos entre o feixe e o muro (fotografia panorâmica: jardim e árvore grande à direita)
+  for(const[p,x,n,ru,k]of[[236,-36,3,8,'oak'],[262,-58,2,6,'oak'],[300,-59,3,8,'oak'],[338,-58,2,7,'oak'],[372,-59,3,9,'oak'],[410,-58,2,8,'oak'],[445,-57,3,9,'oak'],[226,-58,2,5,'oak'],[560,-34,2,6,'oak']])put(p,{t:'arvores',x,n,ru,rv:2.5,k});
+  // chão do recinto do lado do feixe: manchas de terra batida, balastro espalhado e erva mais alta (não é um relvado de jardim)
+  {let q=777;const r2=()=>{q=(Math.imul(q,1664525)+1013904223)>>>0;return q/4294967296};
+   for(let p=BUFFER_R+20;p<620;p+=9+r2()*14){const k=at(p),wl=wallL[k],x1=wl?wl.x+1.5:-60;let m=p<420?-25:-2;for(const q of[k-2,k,k+2])for(const o of[...(trk[q]||[]),...(trkX[q]||[])])if(o>-66)m=Math.min(m,o);
+     const x0=m-3.2,d=Math.min(3+r2()*6,x0-x1);if(d<2.5)continue;const x=x1+d/2+r2()*(x0-x1-d);put(p,{t:'patio',x,w:6+r2()*10,d,c:r2()<0.5?[128,116,96]:[110,112,92],lift:0.12+r2()*0.02})}}
+  // a linha telegráfica acaba na garganta: os postes que ficavam no meio do feixe saem
+  for(let k=at(BUFFER_R-100);k<at(560);k++)spr[k]=spr[k].filter(o=>o.t!=='tpole');
+  put(229,{t:'trin',k:'lwall',x:-28,len:22});
+  // edifício de tijolo junto ao jardim e pequena casa de apoio no fim do feixe (telha), materiais de via empilhados junto à garganta
+  put(240,{t:'trin',k:'tijolo',x:-45,w:16,d:10,fl:3});
+  put(285,{t:'trin',k:'block',x:-34,w:9,d:6,fl:1,col:3,old:true});
+  put(482,{t:'pilha',k:'carris',x:-33,len:12});put(500,{t:'pilha',x:-36.5,n:5,len:5});put(512,{t:'pilha',k:'carris',x:-33.5,len:9});put(522,{t:'pilha',x:-37,n:3,len:4});
+  // rua por cima do muro, com gradeamento e semáforos; prédios do outro lado (ver acima)
+  put(BUFFER_R+5,{t:'trilho',x:-70,x2:-70,len:262,wd:7,asf:true});
+  for(let p=BUFFER_R+30;p<480;p+=SEG)put(p,{t:'trin',k:'tgrade',x:0});
+  put(BUFFER_R+22,{t:'trin',k:'semaf',x:-66});put(BUFFER_R+24,{t:'trin',k:'semaf',x:-74});
+  // horizonte: torre dos Paços do Concelho ao fundo, à direita de quem olha para o topo; torre de escritórios dos anos 60 e bloco
+  // comprido de 8 pisos por trás do topo (fotografia panorâmica; posições aproximadas)
+  put(10,{t:'trin',k:'camara',x:-125});
+  put(BUFFER_R-105,{t:'trin',k:'block',x:18,w:16,d:14,fl:12,col:3,apt:false,face:1});
+  put(BUFFER_R-45,{t:'trin',k:'block',x:-76,w:38,d:13,fl:8,col:4,apt:true,face:1});
   // canteiros com o logótipo CP nas pontas dos cais
   for(const P of TRV.plats)for(const d of[60,120])put(BUFFER_R+d,{t:'trin',k:'planter',x:P.c});
 }
@@ -2976,7 +3027,9 @@ function glRetry(){try{if(sessionStorage.getItem('xfer')&&+(sessionStorage.getIt
 if(!gl)glRetry();else try{sessionStorage.removeItem('glRetry')}catch(e){}
 const G3=!!gl;
 let camMode='cab';const orbit={yaw:0.55,pitch:0.22,dist:38};let sideCam=null;
-const CAMS=['cab','salao','chase','side','top'],CAMN={cab:'Cabina',salao:'Salão de passageiros',chase:'Exterior',side:'Junto à via',top:'Aérea'};
+const CAMS=['cab','salao','chase','side','top','trin'],CAMN={cab:'Cabina',salao:'Salão de passageiros',chase:'Exterior',side:'Junto à via',top:'Aérea',trin:'Vista Histórica da Trindade'};
+// a vista histórica da Trindade só existe perto da estação (o cenário só é construído à volta da automotora)
+const trinCamOK=()=>!!(S&&SB&&S.pos<SB.pb+700);
 
 /* ---- geometria do mundo ---- */
 const WX=new Float64Array(TOTAL+1),WZ=new Float64Array(TOTAL+1);
@@ -3447,15 +3500,17 @@ function buildChunk(c){
       if(!X.pv&&Math.abs(o)>66&&Math.abs(o2)>66)continue;const pvx=X.pv&&pa>PVG.sC,w1=pvx?PVG.ws(pa):1,w2=pvx?PVG.ws(pb):1,ta=X.pv?PVG.tAt(X.pv.n,pa):pa,tb=X.pv?PVG.tAt(X.pv.n,pb):pb;const ia=pa>p?i+(pa-p)/SEG:i,ib=pb<p+SEG?i+(pb-p)/SEG:j;
       const LQ=(ii,oo,y)=>{const i0=Math.floor(ii),f=ii-i0;if(f<1e-6)return LP(i0,oo,y);const A=PI(i0,oo,y),B=PI(i0+1,oo,y);return L([A[0]+(B[0]-A[0])*f,A[1]+(B[1]-A[1])*f,A[2]+(B[2]-A[2])*f])};
       const tl=pa/0.6,tl2=pb/0.6,near=Math.min(Math.abs(o),Math.abs(o2))<3.4;
-      if(!near){mb.q(LQ(ia,o-1.6*w1,0.18),LQ(ia,o+1.6*w1,0.18),LQ(ib,o2+1.6*w2,0.18),LQ(ib,o2-1.6*w2,0.18),[1,1,1],LBAL,[0,ta/LTB,1,tb/LTB]);
+      // vias de parqueamento (X.old): balastro sujo e escurecido e carris sem brilho, com ferrugem (pouco uso)
+      const BC0=X.old?[0.78,0.74,0.66]:[1,1,1],RT=X.old?cc(128,100,82):cc(176,170,160),RS=X.old?cc(110,74,52):cc(96,74,56);
+      if(!near){mb.q(LQ(ia,o-1.6*w1,0.18),LQ(ia,o+1.6*w1,0.18),LQ(ib,o2+1.6*w2,0.18),LQ(ib,o2-1.6*w2,0.18),BC0,LBAL,[0,ta/LTB,1,tb/LTB]);
         mb.q(LQ(ia,o+1.6*w1,0.18),LQ(ia,o+2.4*w1,-0.4),LQ(ib,o2+2.4*w2,-0.4),LQ(ib,o2+1.6*w2,0.18),[1,1,1],3,[0,tl*0.3,0.3,tl2*0.3]);
         mb.q(LQ(ia,o-2.4*w1,-0.4),LQ(ia,o-1.6*w1,0.18),LQ(ib,o2-1.6*w2,0.18),LQ(ib,o2-2.4*w2,-0.4),[1,1,1],3,[0,tl*0.3,0.3,tl2*0.3])}
       else{// junto da nossa via: só as travessas que sobram, sem balastro por cima do nosso
         mb.q(LQ(ia,o-1.3,0.2),LQ(ia,o+1.3,0.2),LQ(ib,o2+1.3,0.2),LQ(ib,o2-1.3,0.2),cc(96,74,56),0,[0,0,1,1])}
       for(const sg of X.br?[-0.86,0.86]:X.m?[-0.536,0.536,-0.86,0.86]:[-0.536,0.536]){const a=o+sg*w1,b=o2+sg*w2;
-        mb.q(LQ(ia,a-0.03,0.36),LQ(ia,a+0.03,0.36),LQ(ib,b+0.03,0.36),LQ(ib,b-0.03,0.36),cc(176,170,160),12,[0,0,0.1,1]);
-        mb.q(LQ(ia,a+0.036,0.18),LQ(ia,a+0.036,0.36),LQ(ib,b+0.036,0.36),LQ(ib,b+0.036,0.18),cc(96,74,56),0,[0,0,1,1]);
-        mb.q(LQ(ia,a-0.036,0.36),LQ(ia,a-0.036,0.18),LQ(ib,b-0.036,0.18),LQ(ib,b-0.036,0.36),cc(96,74,56),0,[0,0,1,1])}}
+        mb.q(LQ(ia,a-0.03,0.36),LQ(ia,a+0.03,0.36),LQ(ib,b+0.03,0.36),LQ(ib,b-0.03,0.36),RT,X.old?0:12,[0,0,0.1,1]);
+        mb.q(LQ(ia,a+0.036,0.18),LQ(ia,a+0.036,0.36),LQ(ib,b+0.036,0.36),LQ(ib,b+0.036,0.18),RS,0,[0,0,1,1]);
+        mb.q(LQ(ia,a-0.036,0.36),LQ(ia,a-0.036,0.18),LQ(ib,b-0.036,0.18),LQ(ib,b-0.036,0.36),RS,0,[0,0,1,1])}}
     if(lc[i]){mb.q(LP(i,-40,0.22),LP(i,40,0.22),LP(j,40,0.22),LP(j,-40,0.22),[1,1,1],8,[0,0,8,1])}
     const pl=plat[i];
     if(pl){const ph=pl.ph;for(const r of(pl.plR||pl.pl)){if(r[2]!==undefined&&(p<(pl.bc0??pl.bc)+r[2]||p>=(pl.bc0??pl.bc)+r[3]))continue;const e=r[0],o=r[1],sd=Math.sign(e),lo=Math.min(e,o),hi=Math.max(e,o);
@@ -3992,7 +4047,7 @@ function trinObj(mb,sp,i,L,tree,r){
     for(let n=0;n<(s>0?9:5);n++){const u=(rnd2()-0.5)*10,yy=hy[i]+w.h*(0.25+rnd2()*0.75),rad=0.8+rnd2()*1.0,c=add(PI(i,w.x+s*(rad*0.6),0),mulv(F,u));blob(mb,L([c[0],yy,c[2]]),rad*1.2,rad*1.05,rad*1.2,cc(60+rnd2()*30,92+rnd2()*30,48+rnd2()*16),q&1023)}
     if(rnd2()<0.6){const c=PI(i,w.x+s*2.5,0);tree({c:L(c),y:hy[i]+w.h,R,F},rnd2()<0.5?'oak':'plane',6+rnd2()*4)}
     return}
-  if(/^(viaduct|conc|stbld|street|mobil|house|tower|shed|garden|stain|sdhB|sdhM|sdhG|planks|lwall)$/.test(sp.k)){trinHead(mb,sp,i,L,tree);return}
+  if(/^(viaduct|conc|stbld|street|mobil|house|tower|shed|garden|stain|sdhB|sdhM|sdhG|planks|lwall|pala|erva|tgrade|semaf|camara|tijolo)$/.test(sp.k)){trinHead(mb,sp,i,L,tree);return}
   if(sp.k==='planter'){const c=PI(i,sp.x,0),yb=hy[i]+0.35;boxRF(mb,L(c),R,F,0.9,1.4,yb,yb+0.6,cc(220,218,212),0);
     plateQ(mb,L(add(c,add(mulv(F,-0.71),[0,yb+0.3,0]))),mulv(F,-1),0.5,0.35,ATL['cpLogo'],0,false);
     for(let n=0;n<4;n++)blob(mb,L(add(c,add(mulv(F,(n-1.5)*0.32),[0,yb+0.9,0]))),0.35,0.32,0.35,cc(52,110,52),i*5+n);return}
@@ -4000,7 +4055,8 @@ function trinObj(mb,sp,i,L,tree,r){
 // Trindade 1985: topo da estação, envolvente e viaduto (ver docs/trindade-1985.md para as fontes e o que é aproximação)
 function trinHead(mb,sp,i,L,tree){
   const R=RV(i),F=FV(i),p0=i*SEG,GL=cc(46,56,68);
-  const W=(x,pp,yy)=>{const w=PI(i,x,0),d=pp-p0;return[w[0]+F[0]*d,yy,w[2]+F[2]*d]};
+  // ponto (x, p, y) no referencial da secção a que p pertence: os objetos compridos seguem a curva do eixo (a Trindade é curva)
+  const W=(x,pp,yy)=>{const j=clamp(Math.floor(pp/SEG),0,TOTAL-1),w=PI(j,x,0),Fj=FV(j),d=pp-j*SEG;return[w[0]+Fj[0]*d,yy,w[2]+Fj[2]*d]};
   const box=(x0,x1,a,b,y0,y1,col,l,tu,tv)=>boxRF(mb,L(W((x0+x1)/2,(a+b)/2,0)),R,F,Math.abs(x1-x0),Math.abs(b-a),y0,y1,col,l||0,tu,tv);
   // face vertical no plano p=pp, virada para −F (s=−1) ou +F (s=1)
   const fq=(x0,x1,pp,y0,y1,s,col,l,uv)=>{const a=s<0?x0:x1,b=s<0?x1:x0,o=s*0.02;mb.q(L(W(a,pp+o,y0)),L(W(b,pp+o,y0)),L(W(b,pp+o,y1)),L(W(a,pp+o,y1)),col,l||0,uv)};
@@ -4008,6 +4064,48 @@ function trinHead(mb,sp,i,L,tree){
   const fx=(xx,a,b,y0,y1,s,col,l,uv)=>{const u=s>0?b:a,v=s>0?a:b,o=s*0.02;mb.q(L(W(xx+o,u,y0)),L(W(xx+o,v,y0)),L(W(xx+o,v,y1)),L(W(xx+o,u,y1)),col,l||0,uv)};
   const plate=(x,pp,yy,s,w,h,key)=>{const uv=ATL[key];if(uv)plateQ(mb,L(W(x,pp+s*0.05,yy)),mulv(F,s),w,h,uv,0,false)};
   const yb=hy[i]+0.3;
+  if(sp.k==='pala'){// palas curtas de chapa sobre os cais-ilha, junto ao topo (fotografias dos anos 80 e 90): cobertura de uma água
+    // ligeiramente inclinada, sobre uma fila de pilares de ferro ao meio do cais
+    const xm=(sp.x0+sp.x1)/2,RF=cc(78,96,116),PST=cc(48,54,58);
+    for(let pp=sp.a;pp<sp.b-0.01;pp+=SEG){const q=Math.min(sp.b,pp+SEG),j=clamp(Math.floor(pp/SEG),0,TOTAL-1),ys=hy[j]+SB.ph;
+      mb.q(L(W(sp.x0,pp,ys+3.45)),L(W(sp.x0,q,ys+3.45)),L(W(sp.x1,q,ys+3.2)),L(W(sp.x1,pp,ys+3.2)),RF,11,[0,0,2,1]);
+      mb.q(L(W(sp.x1,pp,ys+3.12)),L(W(sp.x1,q,ys+3.12)),L(W(sp.x0,q,ys+3.37)),L(W(sp.x0,pp,ys+3.37)),cc(62,72,82),0);
+      for(const x of[sp.x0,sp.x1])mb.q(L(W(x,pp,ys+3.12)),L(W(x,q,ys+3.12)),L(W(x,q,ys+(x===sp.x0?3.45:3.2))),L(W(x,pp,ys+(x===sp.x0?3.45:3.2))),cc(60,66,72),0)}
+    for(let pp=sp.a+2.5;pp<sp.b;pp+=6.5){const j=clamp(Math.floor(pp/SEG),0,TOTAL-1),ys=hy[j]+SB.ph;box(xm-0.09,xm+0.09,pp-0.09,pp+0.09,ys,ys+3.3,PST,0);
+      box(xm-0.05,xm+0.05,pp-0.05,pp+0.05,ys+2.6,ys+3.3,PST,0);mb.q(L(W(xm,pp,ys+2.6)),L(W(sp.x0+0.3,pp,ys+3.38)),L(W(sp.x0+0.3,pp+0.06,ys+3.38)),L(W(xm,pp+0.06,ys+2.6)),PST,0);
+      mb.q(L(W(xm,pp,ys+2.6)),L(W(sp.x1-0.3,pp,ys+3.22)),L(W(sp.x1-0.3,pp+0.06,ys+3.22)),L(W(xm,pp+0.06,ys+2.6)),PST,0)}
+    return}
+  if(sp.k==='erva'){// feixe de parqueamento: erva rasteira e tufos amarelados entre e ao lado dos carris (balastro velho, pouco tratado)
+    let q=(i*2654435761)>>>0;const r2=()=>{q=(Math.imul(q,1664525)+1013904223)>>>0;return q/4294967296};
+    for(const X of TRV.park){for(let n=0;n<7;n++){const pp=p0+r2()*SEG;if(pp<X.a+1||pp>X.b-25)continue;const x=X.f(pp)+(r2()-0.5)*3.6,j=clamp(Math.floor(pp/SEG),0,TOTAL-1),c=W(x,pp,0),y=hy[j]+0.12;
+      const hgt=0.18+r2()*0.42,wd=0.35+r2()*0.6,g=r2(),col=g<0.6?cc(84+r2()*30,112+r2()*26,52+r2()*16):cc(150+r2()*30,146+r2()*24,84+r2()*20),Rj=RV(j),Fj=FV(j);
+      for(const D of[Rj,Fj])mb.q(L([c[0]-D[0]*wd/2,y,c[2]-D[2]*wd/2]),L([c[0]+D[0]*wd/2,y,c[2]+D[2]*wd/2]),L([c[0]+D[0]*wd*0.3,y+hgt,c[2]+D[2]*wd*0.3]),L([c[0]-D[0]*wd*0.3,y+hgt,c[2]-D[2]*wd*0.3]),col,0)}}
+    return}
+  if(sp.k==='tgrade'){// gradeamento de ferro no topo do muro da rua, do lado do feixe (fotografias dos anos 80 e 90)
+    const w=wallL[i];if(!w||w.h<1.2)return;const t=hy[i]+w.h,x=w.x-0.25,dk=cc(52,56,58);
+    box(x-0.03,x+0.03,p0,p0+SEG,t+1.0,t+1.06,dk,0);box(x-0.02,x+0.02,p0,p0+SEG,t+0.45,t+0.5,dk,0);
+    for(let pp=p0;pp<p0+SEG;pp+=1.25)box(x-0.03,x+0.03,pp-0.03,pp+0.03,t,t+1.06,dk,0);return}
+  if(sp.k==='semaf'){// semáforo de rua (anos 80): coluna cinzenta e caixa de três luzes, na rua por cima do feixe
+    const c=W(sp.x,p0+SEG/2,0),g=terrH(i,sp.x,c[0],c[2]);box(sp.x-0.07,sp.x+0.07,p0+SEG/2-0.07,p0+SEG/2+0.07,g,g+3.3,cc(110,112,110),0);
+    box(sp.x-0.2,sp.x+0.2,p0+SEG/2-0.17,p0+SEG/2+0.17,g+2.4,g+3.45,cc(34,36,36),0);
+    for(const[yy,cl]of[[3.2,cc(230,40,30)],[2.92,cc(70,58,24)],[2.64,cc(26,60,34)]])fq(sp.x-0.11,sp.x+0.11,p0+SEG/2+0.18,g+yy-0.1,g+yy+0.1,1,cl,0);
+    return}
+  if(sp.k==='tijolo'){// edifício de tijolo de três pisos junto ao jardim, entre as vias e a rua (fotografia panorâmica; uso não identificado)
+    const c=W(sp.x,p0+SEG/2,0),g=terrH(i,sp.x,c[0],c[2]),w=sp.w,d=sp.d,H=sp.fl*3.2+0.6,col=cc(184,98,78);
+    boxRF(mb,L(c),F,R,w,d,g-0.5,g+H,col,0);boxRF(mb,L(c),F,R,w+0.3,d+0.3,g+H,g+H+0.3,cc(200,190,176),0);hipRoof(mb,L(c),F,R,w,d,g+H+0.3,2.4,cc(160,86,62),0.35);
+    boxRF(mb,L(c),F,R,w+0.05,d+0.05,g-0.5,g+0.8,cc(160,150,136),13,2,2);
+    for(let f=0;f<sp.fl;f++)for(let u=-w/2+1.4;u<w/2-1;u+=2.6)for(const NN of[R,mulv(R,-1)]){const q=add(add(c,mulv(NN,d/2+0.03)),mulv(F,u));plateQ(mb,L([q[0],g+1.9+f*3.2,q[2]]),NN,1.1,1.7,ATL['histwindow']||ATL['gry'],0,false)}
+    return}
+  if(sp.k==='camara'){// torre dos Paços do Concelho (Câmara Municipal do Porto, torre do relógio de ~70 m): referência do horizonte na
+    // fotografia panorâmica, ao fundo à direita, por trás do topo das vias. Posição e escala aproximadas; edifício simplificado
+    const c=W(sp.x,p0,0),g=terrH(i,sp.x,c[0],c[2])-1,G=cc(204,198,182),D=cc(160,154,140),CU=cc(98,138,120);
+    boxRF(mb,L(c),R,F,26,46,g,g+19,G,13,4,4);hipRoof(mb,L(c),R,F,26,46,g+19,4.2,cc(92,94,96),0.3);
+    for(let f=0;f<4;f++)for(let u=-20;u<=20;u+=3.4){const q=add(add(c,mulv(R,13.03)),mulv(F,u));plateQ(mb,L([q[0],g+3+f*4.2,q[2]]),R,1.3,2.4,ATL['histwindow']||ATL['gry'],0,false)}
+    const t=add(c,mulv(R,4));boxRF(mb,L(t),R,F,10,10,g,g+52,G,13,3,3);for(const a of[-1,1])for(const b2 of[-1,1])boxRF(mb,L(add(t,add(mulv(R,a*5),mulv(F,b2*5)))),R,F,1.1,1.1,g,g+52,D,13,1,1);
+    boxRF(mb,L(t),R,F,11.4,11.4,g+52,g+53,D,13);boxRF(mb,L(t),R,F,9,9,g+53,g+60,G,13,2,2);
+    for(const N of[R,mulv(R,-1),F,mulv(F,-1)]){plateQ(mb,L(add([t[0],g+56.5,t[2]],mulv(N,4.55))),N,3.6,3.6,ATL['clock'],0,false);plateQ(mb,L(add([t[0],g+48,t[2]],mulv(N,5.05))),N,2.2,5.5,ATL['gry'],0,false)}
+    cyl(mb,L(t),g+60,g+61.2,5.2,5.2,14,D,13);cyl(mb,L(t),g+61.2,g+66.5,4.2,1.8,14,CU,0);cyl(mb,L(t),g+66.5,g+69,1.4,1.4,10,G,13);cyl(mb,L(t),g+69,g+72.5,1.5,0.15,10,CU,0);
+    return}
   if(sp.k==='conc'){// cais de topo: laje de betão com bordo de cantaria, de onde saem os cais; pala de chapa sobre pilares de ferro (fotografia de 1965)
     const a=BUFFER_R-14,b=(Math.floor(BUFFER_R/SEG)+1)*SEG+0.2,xl=-25.4,xr=TRV.wallX-0.2,ph=SB.ph;
     box(xl,xr,a,b,yb-0.6,hy[i]+ph,cc(198,190,172),14,3,3);
@@ -5764,6 +5862,9 @@ function camera(dtR){
   if(camMode==='side'){if(!sideCam||dir*(sideCam.p-pf)<-70){const p=pf+dir*(130+Math.random()*70),o=(Math.random()<0.5?-1:1)*(7+Math.random()*5)+(REV?4:0);
       const i=clamp(Math.floor(p/SEG),0,TOTAL-1),w=PI(i,o,0);sideCam={p,pos:[w[0],Math.max(terrH(i,o,w[0],w[2]),hy[i])+1.8,w[2]]}}
     const tgt=wp(pf-dir*20,tx(pf-dir*20),2);return{eye:sideCam.pos,fd:norm(sub(tgt,sideCam.pos)),fov:0.5,near:0.5}}
+  // Vista Histórica da Trindade: do alto, por cima da garganta e do lado do feixe, a olhar para o topo das vias (enquadramento da
+  // fotografia panorâmica: cais à esquerda, desvios ao centro, parqueamento à direita, torre da Câmara ao fundo)
+  if(camMode==='trin'&&trinCamOK()){const eye=wp(505,-37,19),tg=wp(250,-11,-5);return{eye,fd:norm(sub(tg,eye)),fov:0.95,near:1}}
   const eye=add(mid,add(add(mulv(F,-42),mulv(Rg,18)),[0,48,0]));const tg=wp(pf+dir*15,tx(pf),0);return{eye,fd:norm(sub(tg,eye)),fov:0.9,near:1}}
 // fontes de luz: candeeiros dos cais e das ruas, luz à porta das estações e das passagens de nível
 let LAMPS=null;
@@ -5833,7 +5934,7 @@ function render3D(dtR){
     else if(t.svc){if(!t.on)continue;const fwd=t.dir>0;if(!t.udd)t.udd=uddPick(t.id,t.nc,S.udd);trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.nc,uddLivs(t.udd))}
     else if(t.cross){const fwd=t.dir>0;if(!t.udd)t.udd=uddPick('x'+Math.round(t.len)+(t.id||''),t.len>50?4:2,S.udd);trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,t.xo,[1,0,0,1],eyeY,false,t.len>50?4:2,uddLivs(t.udd))}
     else if(t.mov){const fwd=t.dir>0;if(!t.udd)t.udd=uddPick('m'+Math.round(t.a),t.len>50?4:2,S.udd);trainDraw(fwd?t.a+t.len:t.a,fwd?1:-1,()=>t.o,[lit?1:0,0,0,lit?1:0],eyeY,false,t.len>50?4:2,uddLivs(t.udd))}
-    else{if(!t.udd)t.udd=uddPick('p'+Math.round(t.a)+'/'+t.o,t.len>50?4:2,S.udd);trainDraw(t.a+t.len,1,()=>t.o,[t.lit?1:0,0,0,t.lit?1:0],eyeY,false,undefined,uddLivs(t.udd))}}
+    else{if(!t.udd)t.udd=uddPick('p'+Math.round(t.a)+'/'+t.o,t.len>50?4:2,S.udd);trainDraw(t.a+t.len,1,t.xo||(()=>t.o),[t.lit?1:0,0,0,t.lit?1:0],eyeY,false,t.nc,uddLivs(t.udd))}}
   cpGlass();
   if(SMESH&&SMESH.n){gl.uniformMatrix4fv(UL.uM,false,new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,-eye[1],0,1]));gl.uniform2f(UL.uHT,0,0);
     gl.uniform1f(UL.uSmoke,1);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.bindVertexArray(SMESH.vao);gl.drawArrays(gl.TRIANGLES,0,SMESH.n);gl.depthMask(true);gl.disable(gl.BLEND);gl.uniform1f(UL.uSmoke,0);
@@ -6138,7 +6239,7 @@ document.querySelectorAll('#ovStart [data-r]').forEach(b=>b.onclick=()=>{if(b.da
 if(!RETRY&&GP){let r=null;try{r=sessionStorage.getItem('pendingRoute');sessionStorage.removeItem('pendingRoute')}catch(e){}
   if(r)setTimeout(()=>{const[a,z]=r.split('>').map(byNameE);if(a&&z){$('#ovStart').hidden=true;start(a.i,z.i,z.i<a.i)}},0)}$('#bAgain').onclick=()=>{$('#ovEnd').hidden=true;$('#ovStart').hidden=false};
 $('#bDoor').onclick=doorBtn;$('#bRev').onclick=revBtn;$('#bIgn').onclick=ignBtn;$('#bFuel').onclick=fuelBtn;$('#bSw').onclick=swBtn;
-$('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.','');return}setCam(CAMS[(CAMS.indexOf(camMode)+1)%CAMS.length])};
+$('#bCam').onclick=()=>{if(!use3D){toast('Vistas exteriores precisam de WebGL2.','');return}let n=CAMS[(CAMS.indexOf(camMode)+1)%CAMS.length];if(n==='trin'&&!trinCamOK())n=CAMS[0];setCam(n)};
 {let drag=null,pinch=null;const vw=$('#view');
  vw.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,id:e.pointerId}});
  vw.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId||camMode!=='chase')return;orbit.yaw-=(e.clientX-drag.x)*0.008;orbit.pitch=clamp(orbit.pitch+(e.clientY-drag.y)*0.006,0.03,1.35);drag.x=e.clientX;drag.y=e.clientY});
