@@ -788,8 +788,9 @@ COR.alt=k=>{const P=COR.prof;if(k<=P[0][0])return P[0][1];for(let j=1;j<P.length
     if(p>SB.pa-40&&p<SB.pos+160)wallL[k]={x:-13.5,h:9,t:'g'};
     // Lapa – Avenida de França: trincheira entre muros de granito (fotografia de 1973: muros e prédios junto à via a nascente do
     // apeadeiro), funda à saída do túnel (≈8 m) e cada vez mais baixa até perto do apeadeiro; a via dupla a 4 m de entre-eixo
+    // do lado das vias da Boavista (a partir de ~p 2009) não há muro: o terreno por trás dele ficava à cota do topo e tapava a via
     if(p>TUNT.b-2&&p<km(1.76)&&!plat[k]){const hh=1.4+6.6*sstep((km(1.32)-p)/470)+1.2*sstep((km(1.70)-p)/250);const hf=hh*sstep((km(1.76)-p)/60);
-      if(hf>0.6){wallL[k]={x:-3.7,h:hf,t:'g',c:[166,160,148]};wallR[k]={x:3.7+Math.max(0,...trk[k]),h:hf,t:'g',c:[160,154,142]}}}}
+      if(hf>0.6){if(!(trkX[k]||[]).some(v=>v<0))wallL[k]={x:-3.7,h:hf,t:'g',c:[166,160,148]};wallR[k]={x:3.7+Math.max(0,...trk[k]),h:hf,t:'g',c:[160,154,142]}}}}
 })();
 const limitAt=p=>LIMA[clamp(Math.floor(p/50),0,LIMA.length-1)];
 // Linha da Póvoa: horário calculado a partir do tempo mínimo de marcha (14% de folga, 30 s nos apeadeiros, 1 min nas estações)
