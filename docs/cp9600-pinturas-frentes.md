@@ -106,7 +106,10 @@ para-brisas são aberturas): a janela nova segue a mesma regra.
   A luz é a mesma em toda a frente (mesmas normais).
 - Peça que fecha a ranhura: assente nos dois planos medidos da frente, 3 mm por baixo das arestas dos módulos (sem frestas nem
   conflito de profundidade); janela central fixa (0,53 × 0,95 m) com borracha e aro, e fundo da cabina visto pela janela.
-- A chapa de pisar da porta (pormenores) não se desenha; a `portaF` também não. Os triângulos da frente dos módulos e a chapa só
+- Sem emenda: a chapa central fica no plano exato dos módulos (profundidade tirada dos vértices da aresta da ranhura) e passa 3 mm
+  por baixo deles com a mesma textura; os triângulos da frente (incluindo o chanfro da aresta) e a chapa têm a mesma normal plana,
+  por isso a luz é igual de um lado e do outro; as paredes da ranhura não se desenham.
+- A chapa de pisar da porta (a caixa inteira, que entra até à cabina) não se desenha; a `portaF` também não. Os triângulos da frente dos módulos e a chapa só
   mudam de ordem no índice (o desenho com porta é igual ao de antes).
 - Menu «Frentes 9600»: **Todas com porta** · **Teste (9611)** · **Com e sem porta** (por defeito; 11 das 22 UDD sem porta,
   determinístico, interpretativo) · **Todas sem porta**. Guardado no navegador e no JSON (`frt`).

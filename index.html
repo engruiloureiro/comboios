@@ -5350,9 +5350,11 @@ function b64bytes(id){const el=document.getElementById(id);if(!el)return null;co
    ranhura continua até à cabina. A frente sem porta é uma peça independente assente nesses dois planos, encostada às arestas da
    ranhura (sem sobreposição): chapa contínua, janela central com borracha e aro interior; a portaF não se desenha nesse veículo.
    O GLB, as texturas e as malhas originais não mudam. */
-const CPF={X0:-0.323,X1:0.328,Y0:0.94,YK:1.69,Y1:3.19,WX0:-0.2625,WX1:0.2675,WY0:2.075,WY1:3.025,RW:0.035,T:0.06,
-  zs:y=>y>=1.69?9.27-(y-1.69)*0.1556:9.27-(1.69-y)*0.3978,
-  n:y=>y>=1.69?[0,0.1537,0.9881]:[0,-0.3697,0.9291]};
+// a profundidade da chapa sai dos vértices da aresta da ranhura (os módulos acabam exatamente aí): y → z, por troços
+const CPF={X0:-0.323,X1:0.328,Y0:0.938,YK:1.686,Y1:3.195,WX0:-0.2625,WX1:0.2675,WY0:2.075,WY1:3.025,RW:0.035,T:0.06,
+  E:[[0.938,8.974],[1.148,9.057],[1.185,9.072],[1.686,9.27],[3.195,9.035]],
+  n:y=>y>=1.686?[0,0.15385,0.98809]:[0,-0.36809,0.92979]};
+CPF.zs=y=>{const E=CPF.E;let k=0;while(k<E.length-2&&y>E[k+1][0])k++;const[a,za]=E[k],[b,zb]=E[k+1];return za+(zb-za)*(y-a)/(b-a)};
 CPF.at=(x,y,off)=>{const n=CPF.n(y);return[x,y+n[1]*off,CPF.zs(y)+n[2]*off]};
 function cpLiveryB(G,imgs,TRI,mk){
   const C=CPLIV,ix=n=>G.images.findIndex(i=>i.name===n),mi=ix('1_1000_main.png'),ei=ix('1_1000_extras.png'),ri=ix('Red.png');
@@ -5486,9 +5488,9 @@ function cpFrontNP(G,imgs,TRI,mk){
   const quad=(L,A,B,C,D2,N,uv)=>{const t=(a,b,c,ua,ub,uc)=>{const cr=cross(sub(b,a),sub(c,a));if(cr[0]*N[0]+cr[1]*N[1]+cr[2]*N[2]>0)L.push([a,N,ua],[c,N,uc],[b,N,ub]);else L.push([a,N,ua],[b,N,ub],[c,N,uc])};
     const u=uv||[[0,0],[1,0],[1,1],[0,1]];t(A,B,C,u[0],u[1],u[2]);t(A,C,D2,u[0],u[2],u[3])};
   const F=CPF;
-  // a chapa passa 3 mm para cada lado da ranhura, 0,8 mm atrás do plano: fecha a fresta junto às arestas sem conflito de profundidade
-  const hx0=F.WX0-F.RW,hx1=F.WX1+F.RW,hy0=F.WY0-F.RW,hy1=F.WY1+F.RW,xs=[F.X0-0.003,hx0,hx1,F.X1+0.003],ys=[F.Y0,F.YK,hy0,hy1,F.Y1],o=-0.0008;
-  for(let i=0;i<3;i++)for(let j=0;j<4;j++){if(i===1&&j===2)continue;const x0=xs[i],x1=xs[i+1],y0=ys[j],y1=ys[j+1],Nn=F.n((y0+y1)/2),Nb=mulv(Nn,-1);
+  // a chapa fica no plano exato dos módulos e passa 3 mm por baixo deles (mesma textura e mesma normal: a sobreposição não se vê)
+  const hx0=F.WX0-F.RW,hx1=F.WX1+F.RW,hy0=F.WY0-F.RW,hy1=F.WY1+F.RW,xs=[F.X0-0.003,hx0,hx1,F.X1+0.003],ys=[F.Y0,1.148,1.185,F.YK,hy0,hy1,F.Y1],o=0;
+  for(let i=0;i<3;i++)for(let j=0;j<6;j++){if(i===1&&j===4)continue;const x0=xs[i],x1=xs[i+1],y0=ys[j],y1=ys[j+1],Nn=F.n((y0+y1)/2),Nb=mulv(Nn,-1);
     quad(Q.paint,F.at(x0,y0,o),F.at(x1,y0,o),F.at(x1,y1,o),F.at(x0,y1,o),Nn,[FUV(x0,y0),FUV(x1,y0),FUV(x1,y1),FUV(x0,y1)]);
     quad(Q.rub,F.at(x0,y0,-F.T),F.at(x1,y0,-F.T),F.at(x1,y1,-F.T),F.at(x0,y1,-F.T),Nb)}   // face de dentro (cabina)
   const g=0.006,Nw=F.n(2.5),R=[1,0,0],U=[0,Nw[2],-Nw[1]];
@@ -5504,7 +5506,11 @@ function cpFrontNP(G,imgs,TRI,mk){
     for(const[l,n,o]of[[0,3,0],[1,3,12],[2,3,24],[3,3,36],[4,2,48]]){gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,n,gl.FLOAT,false,NV*4,o)}
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,I2,gl.STATIC_DRAW);gl.bindVertexArray(null);return{vao:va,n:nv}};
   // cópia dos triângulos da face da frente dos módulos, com as UV planas da textura da frente
-  let nf=0;for(const p of CP.body)if(p.ff){const L=[];for(const k of p.ff.idx){const o=k*NV,P=[p.ff.d[o],p.ff.d[o+1],p.ff.d[o+2]];L.push([P,CPF.n(P[1]+(P[1]<1.69&&P[1]>1.685?-0.01:0)),FUV(P[0],P[1])])}   // normal da face (a mesma da peça nova): a luz é igual em toda a frente
+  let nf=0;for(const p of CP.body)if(p.ff){const L=[];for(const k of p.ff.idx){const o=k*NV,P=[p.ff.d[o],p.ff.d[o+1],p.ff.d[o+2]];L.push([P,[p.ff.d[o+3],p.ff.d[o+4],p.ff.d[o+5]],FUV(P[0],P[1])])}
+    // triângulos nos planos da frente: normal plana igual à da chapa central (a luz fica igual em toda a frente); os outros
+    // (cantos arredondados) mantêm as normais do modelo
+    for(let t=0;t<L.length;t+=3){const A=L[t][0],B=L[t+1][0],E=L[t+2][0],cr=cross(sub(B,A),sub(E,A)),l=Math.hypot(...cr);if(l<1e-9)continue;
+      const cy=(A[1]+B[1]+E[1])/3,cx=(A[0]+B[0]+E[0])/3,pn=CPF.n(cy),c=Math.abs(cr[0]*pn[0]+cr[1]*pn[1]+cr[2]*pn[2])/l;if(Math.abs(cx)<0.36||c>(Math.abs(cx)<0.75?0.98:0.9995))for(let q=0;q<3;q++)L[t+q][1]=pn}   // (o chanfro da aresta da ranhura fica com a normal da chapa)
     p.fAlt=vao(L,-3);nf+=L.length/3;p.ff=null}
   if(!nf)return null;
   const ci=document.createElement('canvas');ci.width=8;ci.height=32;const cx2=ci.getContext('2d');{const gr=cx2.createLinearGradient(0,0,0,32);gr.addColorStop(0,'#3a342b');gr.addColorStop(0.35,'#6b6150');gr.addColorStop(0.55,'#5a5244');gr.addColorStop(0.6,'#2a2a2c');gr.addColorStop(1,'#1e1e20');cx2.fillStyle=gr;cx2.fillRect(0,0,8,32)}
@@ -5534,10 +5540,14 @@ async function loadCP(){
       // frente sem porta: os triângulos da face da frente (textura principal) e a chapa de pisar da porta (pormenores) passam para o fim
       // do índice (só muda a ordem: o desenho com porta é o mesmo); nas unidades sem porta desenham-se à parte ou não se desenham
       let nfront=0,nskip=0,ff=null;{const mn=G.materials[prim.material].name;
-        if(collect===true&&(mn==='1_1000_main'||mn==='1_1000_extras')){const sel=[],rest=[];
-          for(let t=0;t<I.length;t+=3){const a=I[t]*NV,b=I[t+1]*NV,c=I[t+2]*NV,cx=(d[a]+d[b]+d[c])/3,cy=(d[a+1]+d[b+1]+d[c+1])/3,cz=(d[a+2]+d[b+2]+d[c+2])/3,nz=(d[a+5]+d[b+5]+d[c+5])/3;
-            const pick=mn==='1_1000_main'?(cz>8.7&&cy>0.9&&cy<3.62&&(nz>0.85||Math.abs(cx)<0.6&&nz>0.2)):(Math.abs(cx)<0.345&&cy>1.1&&cy<1.22&&cz>8.85);(pick?sel:rest).push(I[t],I[t+1],I[t+2])}
-          if(sel.length){I=Uint32Array.from(rest.concat(sel));if(mn==='1_1000_main'){nfront=sel.length;ff={d,idx:sel}}else nskip=sel.length}}}
+        if(collect===true&&(mn==='1_1000_main'||mn==='1_1000_extras')){const sel=[],rest=[],wall=[];
+          for(let t=0;t<I.length;t+=3){const a=I[t]*NV,b=I[t+1]*NV,c=I[t+2]*NV,cx=(d[a]+d[b]+d[c])/3,cy=(d[a+1]+d[b+1]+d[c+1])/3,cz=(d[a+2]+d[b+2]+d[c+2])/3,
+              nx=(d[a+3]+d[b+3]+d[c+3])/3,ny=(d[a+4]+d[b+4]+d[c+4])/3,nz=(d[a+5]+d[b+5]+d[c+5])/3;
+            // paredes da ranhura da porta (laterais, teto e degrau): na unidade sem porta ficam por trás da chapa e não se desenham
+            const isWall=mn==='1_1000_main'&&cz>7.9&&cz<9.3&&cy>0.9&&cy<3.25&&(Math.abs(nx)>0.8&&Math.abs(cx)>0.30&&Math.abs(cx)<0.34||Math.abs(ny)>0.8&&Math.abs(cx)<0.34&&(Math.abs(cy-3.195)<0.02||Math.abs(cy-1.185)<0.02||Math.abs(cy-0.938)<0.02));
+            const pick=!isWall&&(mn==='1_1000_main'?(cz>8.7&&cy>0.9&&cy<3.62&&(nz>0.85||Math.abs(cx)<0.6&&nz>0.2)):(Math.max(Math.abs(d[a]),Math.abs(d[b]),Math.abs(d[c]))<0.335&&Math.min(d[a+1],d[b+1],d[c+1])>1.14&&Math.max(d[a+1],d[b+1],d[c+1])<1.19&&Math.max(d[a+2],d[b+2],d[c+2])>9.36));   // a chapa de pisar inteira (caixa de 7,98 a 9,37 m)
+            (isWall?wall:pick?sel:rest).push(I[t],I[t+1],I[t+2])}
+          if(sel.length||wall.length){if(mn==='1_1000_main'){I=Uint32Array.from(rest.concat(wall,sel));nfront=sel.length;nskip=wall.length;ff={d,idx:sel}}else{I=Uint32Array.from(rest.concat(sel));nskip=sel.length}}}}
       const vao=gl.createVertexArray(),vb=gl.createBuffer(),ib=gl.createBuffer();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,d,gl.STATIC_DRAW);
       const S=NV*4;for(const[l,n,o]of[[0,3,0],[1,3,12],[2,3,24],[3,3,36],[4,2,48]]){gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,n,gl.FLOAT,false,S,o)}
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,I,gl.STATIC_DRAW);gl.bindVertexArray(null);
@@ -5597,7 +5607,7 @@ function cpDraw(prims,M,ht,liv,front){const B=liv==='B'||liv==='BR',TR=liv==='BR
     if(B&&p.altB&&p.altB.tex){gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,p.altB.tex);gl.bindVertexArray(p.altB.vao);gl.drawElements(gl.TRIANGLES,p.altB.n,gl.UNSIGNED_INT,0);continue}
     gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,TR&&TR[p.tex]?TR[p.tex]:B&&CP.TXB[p.tex]?CP.TXB[p.tex]:CP.TX[p.tex]);
     // sem porta: a face da frente dos módulos (no fim do índice) desenha-se com a textura da frente; a chapa de pisar não se desenha
-    const cnt=NP&&p.fAlt?p.n-p.nfront:NP&&p.nskip?p.n-p.nskip:p.n;
+    const cnt=NP?p.n-(p.fAlt?p.nfront:0)-(p.nskip||0):p.n;
     gl.bindVertexArray(p.vao);gl.drawElements(gl.TRIANGLES,cnt,gl.UNSIGNED_INT,0);
     if(NP&&p.fAlt){gl.bindTexture(gl.TEXTURE_2D,B?CP.fnp.texB:CP.fnp.texA);gl.bindVertexArray(p.fAlt.vao);gl.drawElements(gl.TRIANGLES,p.fAlt.n,gl.UNSIGNED_INT,0)}}
   if(NP){const f=CP.fnp;gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,B?f.texB:f.texA);gl.bindVertexArray(f.paint.vao);gl.drawElements(gl.TRIANGLES,f.paint.n,gl.UNSIGNED_INT,0);
