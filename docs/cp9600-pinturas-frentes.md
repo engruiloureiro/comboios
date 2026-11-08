@@ -79,19 +79,44 @@ Custo: ~0,6–0,8 s no arranque (sem GPU); texturas extra ≈ 50 MB de memória 
 - Variedade: com «Variantes livres» os outros comboios recebem as duas pinturas (determinístico por unidade e por comboio).
   Em «1985 (de origem)» todas são B, porque A só existe desde 1993.
 
-## 5. Frente sem porta (fase B — **pendente**, por falta de documentação)
-Investigação do objeto `1_1000_portaF`:
-- é uma **malha independente** (324 vértices; materiais Red, Glass, Shinny_Metal, Rubber): a porta central da frente da cabina,
-  com vidro, borracha e puxador, recuada ~0,3 m em relação à face da frente;
-- escondê-la (teste numa cópia temporária, fora do repositório) deixa **uma abertura** para o interior da cabina — vê-se o banco
-  (`docs/capturas/cp9600/portaF_com_e_sem_teste.jpg`); uma frente sem porta exigiria painel, janela, moldura, juntas e limpa-vidros
-  novos;
-- **nenhuma fonte** mostra uma 9600 sem porta frontal: a fotografia de J. Smit (sem data) e as de 1979, c. 1980, 1990, 1991 e 1996 têm todas a
-  mesma frente de três vãos com a porta ao centro, nas duas pinturas e nas duas extremidades.
+## 5. Frente sem porta (fase B — implementada em novembro de 2026)
+### 5.1 Documentação
+- Fotografias fornecidas pelo utilizador (sem data nem autor):
+  - **motora** (logótipo «cp», sem faixa amarela, numa oficina) — frente com **porta de intercomunicação**: porta branca recuada
+    entre os dois módulos dos para-brisas, janela estreita e puxador, a descer até ao engate; riscas interrompidas ao centro;
+  - **reboque** (com a faixa amarela da 1.ª classe por cima das janelas, numa estação) — frente **sem porta**: chapa plana e
+    contínua, três janelas (a do meio fixa, ≈ 0,76 da largura das laterais, à mesma altura), riscas contínuas de lado a lado,
+    farol, faróis baixos, farolins e engate iguais.
+- Pesquisa adicional na Internet: nada sobre as frentes. As fotografias anteriores (1979–1996) mostravam a frente com porta.
+- Conclusão: as duas frentes existiram; a diferença observada corresponde à **extremidade motora/reboque** (duas fotografias, uma de
+  cada). **Não há documentação unidade a unidade** — não se afirma que todos os reboques eram assim nem que unidade era qual.
 
-Pelas regras do pedido (não esconder a porta deixando um buraco; não inventar uma versão sem documentação; não criar listas de
-unidades), a variante sem porta **não foi feita**. Todas as unidades ficam `comPorta`, que é o que as fontes mostram. As
-combinações A2 e B2 da tabela de testes não existem.
+### 5.2 Auditoria do modelo
+`1_1000_portaF` é a porta (malha independente, materiais Red, Glass, Rubber e Shinny_Metal), numa ranhura x ∈ [−0,323; 0,328] entre
+os planos da frente dos módulos (inclinado de y = 0,94 a 1,69 m; quase vertical de 1,69 a 3,19 m); as paredes da ranhura (malha
+principal) seguem até à cabina, por isso esconder a porta deixa um buraco. A malha é a mesma nas duas pontas da UDD (cada veículo é
+desenhado com a cabina para fora: par = motora, ímpar = reboque). Os vidros da caixa (`CP.glass`) não são desenhados no jogo (os
+para-brisas são aberturas): a janela nova segue a mesma regra.
+
+### 5.3 Implementação
+- `CPF`, `cpFrontNP()`: peça nova (68 triângulos) assente nos dois planos medidos, encostada às arestas da ranhura sem sobreposição:
+  chapa contínua, janela central de 0,53 × 0,95 m com junta de borracha e aro interior, face de dentro escura. A `portaF` não se
+  desenha nesse veículo. GLB, malhas e texturas originais intactos.
+- Pintura da chapa: B pela mesma regra de cor da pintura B (riscas contínuas com as dos módulos); A tirada da textura original dos
+  módulos à mesma altura. Pintura e frente são independentes: as quatro combinações (A/B × com/sem porta) funcionam.
+- `cpDraw`/`cpVehicle`/`trainDraw` recebem a frente de cada veículo; `uddFront(n)` dá [motora, reboque].
+- Unidades: `frenteMotora: 'comPorta'` (documentada), `frenteReboque: null` (por documentar), `frenteReboqueLivre` (interpretativa,
+  determinística; a 9611 — unidade de teste — sem porta).
+- Menu «Frentes 9600»: **Todas com porta** (o modelo original) · **Teste (9611)** (só o reboque da 9611) · **Reboques variados**
+  (por defeito; 11 dos 22 reboques sem porta, interpretativo) · **Reboques sem porta** (generaliza a fotografia, interpretativo).
+  Guardado no navegador e no JSON (`frt`); jogos antigos ficam com o modo do menu.
+- Extremidades interiores (motora–reboque) não mudam; as motoras ficam sempre com porta.
+- Se a geração falhar, todas as unidades ficam com porta (sem erro).
+
+### 5.4 Aproximações
+- As janelas laterais são as do modelo (com porta): na fotografia do reboque estão um pouco mais perto da do meio (montantes mais
+  estreitos). Não se alteraram, para não deformar a frente original.
+- Sem limpa-vidros na janela central (a fotografia não mostra nenhum).
 
 ## 6. Testes
 | Teste | Resultado |
@@ -106,12 +131,15 @@ combinações A2 e B2 da tabela de testes não existem.
 | Três linhas (Guimarães, Póvoa, Póvoa↔Guimarães): arranque, 5 min de simulação, gravação | sem erros JavaScript |
 | Continuidade geométrica do corredor (`testes/continuidade.js`) | OK (nada mudou) |
 | Cabina (vista interior) | sem superfícies a tapar a vista |
+| Frente sem porta — unidade de teste 9611 (reboque), A e B: frente, 45°, lado, cima, perto, noite, dentro da cabina | correto — `docs/capturas/cp9600/frente_*.jpg`; frente original igual |
+| Modos das frentes: contagem, estabilidade em 60 s de simulação, outros comboios, dupla, gravação, jogo antigo | 0 / 1 / 11 / 22 reboques sem porta; estável; guardado e reposto |
+| Três linhas, 5 min, gravação (com a frente sem porta) | sem erros JavaScript |
 | Afinação 3.1/3.2 — pintura A antes/depois | textura igual; só o reflexo dos materiais muda (`pintura_A_antes_depois_materiais.jpg`) |
 | Afinação 3.1 — B: frente, cúpula, avental, lado, logótipo, placa, reboque com faixa da 1.ª classe, noite | `pintura_B_*.jpg` |
 | Afinação — modos 1985 / livre / pós-1993, dupla, túnel, câmaras, gravação | como antes (motora B e reboque com a faixa da 1.ª classe) |
 | Afinação — três linhas, 5 min, e `testes/continuidade.js` | sem erros; OK |
 
 ## 7. Por fazer
-- Frente sem porta: só com fotografia ou desenho que mostre essa versão.
+- Frentes unidade a unidade: só com documentação por número.
 - Inscrições das placas amarelas e número da unidade: ilegíveis nas fotografias disponíveis (as placas são genéricas).
 - Cor exata do creme e do vermelho: estimada pelas fotografias (desbotadas).
