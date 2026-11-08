@@ -98,24 +98,21 @@ principal) seguem até à cabina, por isso esconder a porta deixa um buraco. A m
 desenhado com a cabina para fora: par = motora, ímpar = reboque). Os vidros da caixa (`CP.glass`) não são desenhados no jogo (os
 para-brisas são aberturas): a janela nova segue a mesma regra.
 
-### 5.3 Implementação
-- `CPF`, `cpFrontNP()`: peça nova (68 triângulos) assente nos dois planos medidos, encostada às arestas da ranhura sem sobreposição:
-  chapa contínua, janela central de 0,53 × 0,95 m com junta de borracha e aro interior, face de dentro escura. A `portaF` não se
-  desenha nesse veículo. GLB, malhas e texturas originais intactos.
-- Pintura da chapa: B pela mesma regra de cor da pintura B (riscas contínuas com as dos módulos); A tirada da textura original dos
-  módulos à mesma altura. Pintura e frente são independentes: as quatro combinações (A/B × com/sem porta) funcionam.
-- `cpDraw`/`cpVehicle`/`trainDraw` recebem a frente de cada veículo; `uddFront(n)` dá [motora, reboque].
-- Unidades: `frenteMotora: 'comPorta'` (documentada), `frenteReboque: null` (por documentar), `frenteReboqueLivre` (interpretativa,
-  determinística; a 9611 — unidade de teste — sem porta).
-- Menu «Frentes 9600»: **Todas com porta** (o modelo original) · **Teste (9611)** (só o reboque da 9611) · **Reboques variados**
-  (por defeito; 11 dos 22 reboques sem porta, interpretativo) · **Reboques sem porta** (generaliza a fotografia, interpretativo).
-  Guardado no navegador e no JSON (`frt`); jogos antigos ficam com o modo do menu.
-- Extremidades interiores (motora–reboque) não mudam; as motoras ficam sempre com porta.
-- Se a geração falhar, todas as unidades ficam com porta (sem erro).
+### 5.3 Implementação (versão revista, a pedido do utilizador)
+- **Cada UDD inteira** com porta (motora e reboque, como o modelo original) ou sem porta (as duas cabinas).
+- Na unidade sem porta a **frente toda** (os dois módulos e a peça que fecha a ranhura) é desenhada com uma textura única e plana,
+  por pintura: longe da ranhura é cópia texel a texel da textura da carroçaria (respiros, sombras, riscas); na zona central a
+  pintura continua com o sombreado da própria linha. Não fica contorno nem costura da porta; as riscas atravessam a frente.
+  A luz é a mesma em toda a frente (mesmas normais).
+- Peça que fecha a ranhura: assente nos dois planos medidos da frente, 3 mm por baixo das arestas dos módulos (sem frestas nem
+  conflito de profundidade); janela central fixa (0,53 × 0,95 m) com borracha e aro, e fundo da cabina visto pela janela.
+- A chapa de pisar da porta (pormenores) não se desenha; a `portaF` também não. Os triângulos da frente dos módulos e a chapa só
+  mudam de ordem no índice (o desenho com porta é igual ao de antes).
+- Menu «Frentes 9600»: **Todas com porta** · **Teste (9611)** · **Com e sem porta** (por defeito; 11 das 22 UDD sem porta,
+  determinístico, interpretativo) · **Todas sem porta**. Guardado no navegador e no JSON (`frt`).
 
 ### 5.4 Aproximações
-- As janelas laterais são as do modelo (com porta): na fotografia do reboque estão um pouco mais perto da do meio (montantes mais
-  estreitos). Não se alteraram, para não deformar a frente original.
+- As janelas laterais são as do modelo (os montantes centrais ficam um pouco mais largos do que na fotografia).
 - Sem limpa-vidros na janela central (a fotografia não mostra nenhum).
 
 ## 6. Testes
@@ -131,8 +128,8 @@ para-brisas são aberturas): a janela nova segue a mesma regra.
 | Três linhas (Guimarães, Póvoa, Póvoa↔Guimarães): arranque, 5 min de simulação, gravação | sem erros JavaScript |
 | Continuidade geométrica do corredor (`testes/continuidade.js`) | OK (nada mudou) |
 | Cabina (vista interior) | sem superfícies a tapar a vista |
-| Frente sem porta — unidade de teste 9611 (reboque), A e B: frente, 45°, lado, cima, perto, noite, dentro da cabina | correto — `docs/capturas/cp9600/frente_*.jpg`; frente original igual |
-| Modos das frentes: contagem, estabilidade em 60 s de simulação, outros comboios, dupla, gravação, jogo antigo | 0 / 1 / 11 / 22 reboques sem porta; estável; guardado e reposto |
+| Frente sem porta — unidade de teste 9611 (reboque), A e B: frente, 45°, lado, cima, perto, noite, dentro da cabina | correto — `docs/capturas/cp9600/frente_com_e_sem_porta.jpg`; frente original igual |
+| Modos das frentes: contagem, estabilidade em 60 s de simulação, outros comboios, dupla, gravação, jogo antigo | 0 / 1 / 11 / 22 UDD sem porta; estável; guardado e reposto |
 | Três linhas, 5 min, gravação (com a frente sem porta) | sem erros JavaScript |
 | Afinação 3.1/3.2 — pintura A antes/depois | textura igual; só o reflexo dos materiais muda (`pintura_A_antes_depois_materiais.jpg`) |
 | Afinação 3.1 — B: frente, cúpula, avental, lado, logótipo, placa, reboque com faixa da 1.ª classe, noite | `pintura_B_*.jpg` |
