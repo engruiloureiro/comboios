@@ -2464,6 +2464,11 @@ function doorBtn(){
   if(S.v>0.05){toast('Pare o comboio antes de abrir as portas.','');return}
   const near=STN.find(s=>ahead(s)<=15&&ahead(s)>=-20.5||doorsInPlat(s));
   if(near&&near.dep===null){toast('Este comboio não tem paragem em '+near.n+'.','');return}
+  // estação de origem: antes da partida pode abrir-se as portas uma vez para os passageiros do cais embarcarem (não conta para a
+  // pontuação da paragem; não há desembarque)
+  {const o=S.startSt;if(o&&!S.startBoard&&o.pax3&&(ahead(o)<=15&&ahead(o)>=-20.5||doorsInPlat(o))&&(!o.dep||S.clock<o.dep+60)){
+    S.startBoard=true;S.atSt=o;S.doors=true;S.dwell=dwellFor(o);S.dwell0=S.dwell;S.dwX=0;S.depHorn=false;doorOpenSnd();
+    toast('Portas abertas: embarque em '+o.n+'.'+(o.dep?' Partida às '+fHM(o.dep)+'.':''),'good');return}}
   const s=STOPS.find(s=>!s.served&&(ahead(s)<=15&&ahead(s)>=-20.5||doorsInPlat(s)));
   if(!s){toast(S.atSt?'Embarque já feito. Feche as portas e siga.':'Não está junto à placa de paragem de uma plataforma.','');return}
   const err=-ahead(s),ae=Math.abs(err),acc=ae<1?100:Math.max(10,Math.round(100-(ae-1)*(err>0?4.2:5.5)));
