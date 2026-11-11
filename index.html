@@ -1895,6 +1895,7 @@ function annGong(){if(!AC||muted)return;const t=AC.currentTime;[[659,0],[523,0.4
   g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(0.18,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+d+1.3);o.connect(g);g.connect(A.bus);if(A.rev)g.connect(A.rev);o.start(t+d);o.stop(t+d+1.4)})}
 // gravações do anúncio (voz do autor): "Vai partir da linha número 1 o comboio com destino a", o destino e "para em todas"
 const VOZD={'Póvoa de Varzim':'povoa','Guimarães':'guimaraes','Fafe':'fafe','Famalicão':'famalicao','Porto-Trindade':'trindade'},VOZB={};let VOZP=null;
+const ANN_ON=false;   // anúncios de partida desligados (voz das gravações e síntese); para repor, pôr a true
 function vozLoad(){if(VOZP||!AC)return VOZP;VOZP=Promise.all(['anuncio','povoa','guimaraes','fafe','todos','famalicao','trindade'].map(k=>{const el=document.getElementById('voz-'+k);if(!el)return null;
   const bin=atob(el.textContent.trim()),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
   return new Promise((res,rej)=>{const p=AC.decodeAudioData(u.buffer,res,rej);if(p&&p.catch)p.catch(rej)}).then(b=>{VOZB[k]=b}).catch(()=>{})})).catch(()=>{});return VOZP}
@@ -1902,7 +1903,7 @@ function vozPlay(keys){const t0=AC.currentTime+1.6;let t=t0;for(const k of keys)
   if(A.rev){const r=AC.createGain();r.gain.value=0.22;g.connect(r);r.connect(A.rev)}s.start(t);t+=b.duration+0.12}}
 // o comboio para em todas as estações e apeadeiros do percurso que ainda faltam?
 function paraTodas(){if(!S.atSt)return false;const rest=ORD.filter(s=>(REV?s.i<S.atSt.i&&s.i>=S.endSt.i:s.i>S.atSt.i&&s.i<=S.endSt.i));return rest.every(s=>s.nostop||s.dep!==null)}
-function announceDep(dest){if(muted)return;try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}
+function announceDep(dest){if(muted||!ANN_ON)return;try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}
   const dk=VOZD[dest];if(dk&&AC){vozLoad();const go=()=>{if(!VOZB.anuncio||!VOZB[dk])return announceTTS(dest);annGong();vozPlay(['anuncio',dk].concat(paraTodas()&&VOZB.todos?['todos']:[]))};
     if(VOZB.anuncio&&VOZB[dk])go();else VOZP.then(go);return}
   announceTTS(dest)}
