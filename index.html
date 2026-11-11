@@ -660,7 +660,8 @@ const FUEL_L=400;let NOREF=false,XST=null,OFI_REQ=false;
 // oficina de Guimarães: o primeiro comboio da manhã para Fafe e o primeiro para a Trindade saem dela. A automotora sai pela via da
 // oficina até passar a agulha (fase 'shed'), inverte a marcha e segue pela linha 3 (13,3 m, à direita) até à via principal ('loop')
 const OFG=(RG||GP)&&GUI&&GUI.i>=0?GUI:null;
-function ofiX(p){const G=OFG,J=G.pb-40;if(S.ofi.ph==='shed'&&p>J)return 13.3+tProf(p-J,13.2);const v=exOff(G.ex[1],p);return v===null?0:v}   // litros de gasóleo por automotora
+const ofiE=()=>OFG.ex.find(e=>Math.abs(e.to-13.3)<0.01)||OFG.ex[1];
+function ofiX(p){const G=OFG,J=G.pb-40;if(S.ofi.ph==='shed'&&p>J)return 13.3+tProf(p-J,13.2);const v=exOff(ofiE(),p);return v===null?0:v}   // litros de gasóleo por automotora
 const DEPOTS=[['Porto-Trindade',1,60,1,1],['Guimarães',1,125,-1],['Fafe',-1,140,1],['Póvoa de Varzim',-1,140,1],['Famalicão',-1,140,-1]]
   .map(([n,d,o,sd,cp])=>{const s=byNameE(n);return s?{st:s,p:d>0?s.pb+o:s.pa-o,sd,x:sd*3.4,cp:!!cp}:null}).filter(Boolean);
 // Trindade: bomba encostada ao muro de granito, depois do fim do cais lateral (via 5); o lado −x é o feixe e o leque das agulhas
@@ -2274,7 +2275,7 @@ function step(dt,dr){
   // saída da oficina: passar a agulha, inverter, seguir pela linha 3 até à via principal; aí começa a ida ao posto de gasóleo
   if(S.ofi){const G=OFG,dm=REV?-1:1,len=TLEN(S.ncar),hi=Math.max(S.pos,S.pos-dm*len),lo=Math.min(S.pos,S.pos-dm*len);
     if(S.ofi.ph==='shed'&&hi<G.pb-43&&S.v<0.05){S.ofi.ph='loop';toast('Passou a agulha da oficina. O manobrista muda-a: inverta a marcha e siga pela linha 3 até à via principal, para o posto de gasóleo.','good')}
-    else if(S.ofi.ph==='loop'&&lo>G.pb+105){S.ofi=null;const dI=DEPOTS.findIndex(D=>D.st===G),p0=REV?G.stopR:G.stopF;
+    else if(S.ofi.ph==='loop'&&[lo,hi].every(q=>{const v=exOff(ofiE(),q);return v===null||Math.abs(v)<0.02})&&lo>G.pb+40){S.ofi=null;const dI=DEPOTS.findIndex(D=>D.st===G),p0=REV?G.stopR:G.stopF;
       if(dI>=0){const D=DEPOTS[dI];S.ref={d:dI,ph:'ir',ah:(D.p-p0)*dm>0}}toast('Na via principal: pare com a automotora junto à bomba de gasóleo.','good')}}
   // manobra ao posto de gasóleo: ir até à bomba, desligar o motor, abastecer, ligar e voltar ao cais
   if(S.ref){const Rf=S.ref,D=DEPOTS[Rf.d],p0=REV?S.startSt.stopR:S.startSt.stopF,dm=REV?-1:1;
@@ -6177,7 +6178,7 @@ function start(idx,endIdx,rev,svc){audioInit();reset(idx,endIdx,rev,svc);S.udd=[
   // continuação depois da mudança de linha ou jogo retomado: mantém o motor e o gasóleo
   if(XST){S.fuel=XST.fuel;S.eng=XST.eng;if(XST.ttn)S.ttn=XST.ttn;XST=null}
   // primeiro comboio da manhã de Guimarães: começa 20 min antes, dentro da oficina, com o depósito na reserva
-  if(OFI_REQ&&OFG&&st===OFG){const len=TLEN(S.ncar);S.ofi={ph:'shed'};S.pos=S.prevPos=REV?OFG.pb+101:OFG.pb+101+len;S.fuel=0.07+Math.random()*0.05;
+  if(OFI_REQ&&OFG&&st===OFG){const len=TLEN(S.ncar);S.ofi={ph:'shed'};for(const t of TRAINS)if(t.gu)t.o=8.8;for(const q of PARKED)if(q.gu)q.o=8.8;S.pos=S.prevPos=REV?OFG.pb+101:OFG.pb+101+len;S.fuel=0.07+Math.random()*0.05;
     S.clock=Math.min(S.clock,st.dep-1200);S.jI=0;while(S.jI<JOINTS.length&&JOINTS[S.jI]<S.pos)S.jI++;S.bgOff=hdgAt(S.pos)+(REV?Math.PI:0);
     setTimeout(()=>{if(S.ofi)toast('Primeiro comboio do dia: a automotora está na oficina. Ligue o motor e saia '+(REV?'em marcha à frente':'em marcha atrás (tecla R)')+' até passar a agulha; depois inverta e siga pela linha da direita até à via principal e ao posto de gasóleo. O manobrista orienta a manobra.','bad')},5200)}
   OFI_REQ=false;
@@ -6355,6 +6356,7 @@ function ttRender(){const tabs=$('#ttTabs'),body=$('#ttBody');tabs.innerHTML='';
     tb.innerHTML=hh;w.append(tb);body.append(w)}
   body.querySelectorAll('tr[data-n]').forEach(r=>r.onclick=()=>ttStart(r.dataset.n))}
 // conduz um comboio do horário; se for da outra linha, muda de linha e arranca depois de recarregar
+window.__ttStart=(n,l)=>ttStart(n,l);
 function ttStart(n,ln){const x=TTS.find(q=>q[0]===n);if(!x)return;const P=ttPlan(x),g=P.legs[0];audioInit();
   if(g.line!==LINE){try{sessionStorage.setItem('pendingTT',n)}catch(e){}running=false;setLine(g.line);return}
   // partida da Trindade ou de Guimarães: o maquinista escolhe a linha
