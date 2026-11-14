@@ -718,6 +718,8 @@ TRV.parkUnits=()=>[[0,2],[2,4],[3,2]].map(([k,nc])=>{const X=TRV.park[k];return{
        P4=p=>P3(p)+tProf(400-p,-4.4)+crv(p,340,C);
  for(const[n,f,a,b,fr]of[[1,P1,300,535,-18.6],[2,P2,265,450,null],[3,P3,285,425,null],[4,P4,320,400,null]]){
    const X={a,b,m:false,park:n,old:true,fr:fr??f(b),f,manobra:{entrada:b,fim:a,ocupada:false}};XTR.push(X);TRV.park.push(X)}}
+// linha de Guimarães: fator das curvas em S do traçado (1 = como antes; 1,3 = um pouco mais acentuadas)
+const CURVK=1.3;
 function capAt(k){if(GP&&k>KC1)return capG(k-DGV);if(RP){if(PVG&&k>(PVG.sC-OFF)/1000-0.3&&k<(PVG.sC-OFF)/1000+0.2)return 30;if(k<0.18)return 30;if(k<0.9)return 50;// túnel da Trindade (PK 0,35–0,85): 50 km/h
   if(k<SDH.k+0.35){if(Math.abs(k-SDH.k)<0.35)return 40;return 60}
   if(Math.abs(k-26.273)<0.2)return 40;for(const q of[13.165,21.973,26.951,30.283,59.526])if(Math.abs(k-q)<0.4)return 40;if(k>TOT_KM-0.5)return 30;if(k<30.852)return 80;if(k<59.526){for(const[a0,b0]of[[30.85,31.8],[37.2,37.7],[43.4,44.3],[46.4,47.4],[50.1,50.8],[52.3,53.0],[54.1,54.8],[58.4,59.2]])if(k>=a0&&k<b0)return 30;return 50}return 70}
@@ -753,7 +755,7 @@ COR.alt=k=>{const P=COR.prof;if(k<=P[0][0])return P[0][1];for(let j=1;j<P.length
   for(let pass=0;pass<3;pass++){const c=HDG.slice();for(let i=0;i<=TOTAL;i++){let s=0,n=0;for(let j=-12;j<=12;j++){const q=i+j;if(q>=0&&q<=TOTAL){s+=c[q];n++}}HDG[i]=s/n}}
   // via métrica sinuosa: curvas em S sobrepostas ao traçado geral (descrição: traçado apertado e cheio de curvas)
   {let ph=0,i=0;while(i<=TOTAL){const lam=380+rnd()*520,A=(0.18+rnd()*0.22)*(rnd()<0.5?-1:1),n=Math.round(lam/SEG);
-    const P5=i*SEG,sc=GP&&P5>km(KC0)-200&&P5<km(KC1)+150?0:RP&&!(GP&&P5>km(KC1))?(P5<km(30.852)?0.3:0.35):(P5<kR(42.5)?0.28:1)*(Math.abs(P5-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
+    const P5=i*SEG,sc=GP&&P5>km(KC0)-200&&P5<km(KC1)+150?0:RP&&!(GP&&P5>km(KC1))?(P5<km(30.852)?0.3:0.35):CURVK*(P5<kR(42.5)?0.28:1)*(Math.abs(P5-byNameE('Pereirinhas').pos)<420?0:1);for(let j=0;j<n&&i<=TOTAL;j++,i++){HDG[i]+=sc*A*Math.sin(2*Math.PI*j/n)*stF(i*SEG)}}}
   if(RG||GP){const Cp=byNameE('Cuca').pos;for(let i=0;i<=TOTAL;i++)HDG[i]-=0.55*sstep((i*SEG-(Cp-240))/420)}
   if(RG||GP){const Lp=byNameE('Lordelo').pos;for(let i=0;i<=TOTAL;i++)HDG[i]+=0.75*sstep((i*SEG-(Lp-320))/560)}
   // Covas: curvas apertadas dos dois lados da estação, em S (sem desviar o resto do traçado)
@@ -947,6 +949,18 @@ function addTree(k,x,y){const r=rnd(),z=zoneI[k];
   let v=r<0.3?3:r<0.55?2:r<0.8?1:0;if(z==='urban'||z==='city')v=r<0.5?1:0;
   spr[k].push({t:'tree',x,y:y||0,v,h:v===2?15+rnd()*9:v===3?12+rnd()*6:v===0?8+rnd()*4:6+rnd()*5,c:GREENS[Math.floor(rnd()*5)],s:rnd()})}
 function sideFree(k,side){const w=side<0?wallL[k]:wallR[k];return w}
+/* escala nas curvas (linha de Guimarães): o carril de fora sobe e o de dentro desce, em proporção à curvatura — c = 14 m × 1/R,
+   até 90 mm (máximo corrente em via métrica; R = 150 m → 90 mm, R = 300 m → 47 mm). Plana nas estações (onde as curvas em S já se
+   anulam), nas passagens de nível e onde há mais de uma via (agulhas, cruzamentos, via dupla). A rampa de escala acompanha a
+   curva de transição (média em ±25 m). CTAN = tangente do ângulo, com sinal (positivo: sobe o lado +x da via). */
+const CTAN=new Float32Array(TOTAL+1);
+{const on=p=>RG?true:GP?p>km(KC1):false,raw=new Float32Array(TOTAL+1);
+ for(let i=0;i<TOTAL;i++){const p=i*SEG;if(!on(p))continue;let k=0,n=0;for(let d=-2;d<=2;d++){const j=clamp(i+d,0,TOTAL-1);k+=curve[j];n++}k/=n*SEG*SEG;
+   let ok=true;for(let d=-4;d<=4&&ok;d++){const j=clamp(i+d,0,TOTAL-1);if((trk[j]&&trk[j].length)||(trkX[j]&&trkX[j].length))ok=false}
+   if(ok&&PN.some(q=>Math.abs(q.pos-p)<30))ok=false;
+   if(!ok)continue;const c=Math.min(0.09,14*Math.abs(k))*stF(p);raw[i]=-Math.sign(k)*c/1.06}
+ for(let i=0;i<=TOTAL;i++){let a=0,n=0;for(let d=-5;d<=5;d++){const j=clamp(i+d,0,TOTAL);a+=raw[j];n++}CTAN[i]=a/n}}
+const cantAt=p=>{const f=p/SEG,i=clamp(Math.floor(f),0,TOTAL-1),t=f-i;return CTAN[i]+(CTAN[i+1]-CTAN[i])*t};
 (function scenery(){
   const MX=[new Float32Array(TOTAL).fill(-1),new Float32Array(TOTAL).fill(-1)],OVK=[];
   for(const pn of PN){const k=Math.floor(pn.pos/SEG);lc[k]=1;lc[k+1]=1;if(pn.ung===undefined&&(RG||GP)&&/rural|valley|penha/.test(zoneI[k])&&h2(k*3+1,29)<0.35)pn.ung=true;
@@ -1841,10 +1855,12 @@ function hiss(dur,vol){if(!AC||muted)return;const s=AC.createBufferSource();s.bu
 function beep(f,d,vol,type,when){if(!AC||muted)return;const o=AC.createOscillator(),g=AC.createGain(),t=(when||AC.currentTime);
   o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+0.01);g.gain.exponentialRampToValueAtTime(0.001,t+d);
   o.connect(g);g.connect(A.bus);o.start(t);o.stop(t+d+.05)}
+// volume do «tam-tam» das juntas dos carris (antes 1,6)
+const JOINTG=3.0;
 function bogies(gain){if(!AC||muted||S.v<0.5)return;const t0=AC.currentTime;
   const ax0=[1.8,4.0,11.1,13.3,17.3,19.5,26.6,28.8],ax=S.ncar>2?ax0.concat(ax0.map(d=>d+31)):ax0;
-  const sp=Math.min(1.7,0.4+S.v/11),lp=camMode==='cab'||camMode==='salao'?['lowpass',1100+S.v*70]:null;
-  ax.forEach((d,i)=>oneShot(A.clicks[(i+(Math.random()*3|0))%3],1.6*gain*sp*(i%2?0.85:1)*(0.9+Math.random()*0.2)*Math.exp(-d/30),t0+d/S.v,0.94+Math.random()*0.12,lp))}
+  const sp=Math.min(1.7,0.4+S.v/11),lp=camMode==='cab'||camMode==='salao'?['lowpass',1700+S.v*90]:null;
+  ax.forEach((d,i)=>oneShot(A.clicks[(i+(Math.random()*3|0))%3],JOINTG*gain*sp*(i%2?0.85:1)*(0.9+Math.random()*0.2)*Math.exp(-d/30),t0+d/S.v,0.94+Math.random()*0.12,lp))}
 // buzina da automotora que se cruza connosco: amostra da buzina, um pouco mais grave e abafada pela distância
 let HONKS=0;
 function otherHorn(d){HONKS++;if(!AC||muted||!A.hornB)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=A.cp?A.cp[['horn_hi','horn_lo','horn'][Math.floor(rnd()*3)]]:A.hornB;s.playbackRate.value=0.93+rnd()*0.08;
@@ -3442,7 +3458,7 @@ function buildChunk(c){
   const i0=c*CH,i1=Math.min(TOTAL-1,i0+CH);if(i0>=TOTAL-1)return null;
   const ox=WX[i0],oz=WZ[i0];const mb=new MB();
   const L=(p)=>[p[0]-ox,p[1],p[2]-oz];
-  const LP=(i,o,y)=>L(PI(i,o,y));
+  const LP=(i,o,y)=>L(PI(i,o,y+(Math.abs(o)<2.7?o*CTAN[i]:0)));   // escala nas curvas (ver CTAN)
   /* terreno */
   const D=TD;
   const rows=[],row=i=>rows.push({i,cols:tOffs(i).map(o=>{const w=PI(i,o,0);return[w[0],terrH(i,o,w[0],w[2]),w[2],o]})});
@@ -5207,7 +5223,7 @@ function buildTrainMeshes(){
   TM={carB,car2B,bloco:mk(bloco,'bloco'),sfm:mk(sfm,'sfm'),bbog:mk(bbog,'bbog'),car:mk(mb=>car(mb,true),'car'),car2:mk(mb=>car(mb,false),'car2'),bog:mk(bogie,'bog'),bell:mk(bell,'bell'),int:mk(interior,'int')};
 }
 function mdlS(A,F,eye){const m=mdl(A,F,eye),k=CSP/15.5;m[8]*=k;m[9]*=k;m[10]*=k;return m}
-function mdl(A,F,eye){const R=norm(cross(F,[0,1,0])),U=cross(R,F);return new Float32Array([R[0],R[1],R[2],0,U[0],U[1],U[2],0,F[0],F[1],F[2],0,A[0]-eye[0],A[1]-eye[1],A[2]-eye[2],1])}
+function mdl(A,F,eye,th){let R=norm(cross(F,[0,1,0])),U=cross(R,F);if(th){const c=Math.cos(th),s=Math.sin(th),R2=[R[0]*c+U[0]*s,R[1]*c+U[1]*s,R[2]*c+U[2]*s];U=[U[0]*c-R[0]*s,U[1]*c-R[1]*s,U[2]*c-R[2]*s];R=R2}return new Float32Array([R[0],R[1],R[2],0,U[0],U[1],U[2],0,F[0],F[1],F[2],0,A[0]-eye[0],A[1]-eye[1],A[2]-eye[2],1])}
 function consistDraw(pf,sgn,xo,parts,eye,lit){let p=pf;
   for(const q of parts){const Bp=p-sgn*q.len,A=wp(p,xo(p),0.36),B=wp(Bp,xo(Bp),0.36),F=norm(sub(A,B));
     drawM(TM[q.m],mdl(A,F,eye),q.ht&&lit?q.ht:[0,0]);if(q.bog)for(const d of q.bog)drawM(TM[q.bm||'bog'],mdl(add(A,mulv(F,-d)),F,eye),[0,0]);p=Bp-sgn*0.6}}
@@ -5545,7 +5561,7 @@ function doorMats(id,f){const D=CP.AN[id],n=D.frames,fi=clamp(f,0,1)*(n-1),i0=Ma
     const L=qm([p0[0]+(p1[0]-p0[0])*t,p0[1]+(p1[1]-p0[1])*t,p0[2]+(p1[2]-p0[2])*t],q.map(v=>v/ql));W=W?m4c(W,L):L;out[nm.replace('1_1000_','')]=W}
   return out}
 // matriz de modelo do motor (colunas R,U,F; a reflexão é a mesma de mdl) composta com uma matriz local
-function mdlM(A,F,eye,Lm){const B=mdl(A,F,eye);return Lm?new Float32Array(m4c(Array.from(B),Lm)):B}
+function mdlM(A,F,eye,Lm,th){const B=mdl(A,F,eye,th);return Lm?new Float32Array(m4c(Array.from(B),Lm)):B}
 const CPGL=[];  // vidros a desenhar no fim, com transparência
 // liv: 'A' (textura original) ou 'B' (pintura de origem, se tiver sido gerada; senão cai na A)
 function cpDraw(prims,M,ht,liv,front){const B=liv==='B'||liv==='BR',TR=liv==='BR'&&CP.TXBR?CP.TXBR:null;gl.uniformMatrix4fv(UL.uM,false,M);gl.uniform2f(UL.uHT,ht[0],ht[1]);
@@ -5569,15 +5585,18 @@ function cpGlass(){if(!CPGL.length)return;gl.enable(gl.BLEND);gl.blendFuncSepara
 function cpVehicle(pc,sgn,rev,xo,ht,eye,livB,od,skipBody,front){const s=sgn*rev;
   const pa=pc+s*CP.FB,pb=pc+s*CP.RB,A=wp(pa,xo(pa),CPH),B=wp(pb,xo(pb),CPH);let F=norm(sub(A,B));
   const O=sub(A,mulv(F,CP.FB));            // origem do modelo: o pivô da frente fica sobre o bogie da frente
-  if(!skipBody)cpDraw(CP.body,mdl(O,F,eye),ht,livB,front);
+  // escala: inclinação da via em cada ponto, no sentido do veículo (o lado direito do veículo é o +x da via se olhar em frente)
+  const thAt=(q,Fq)=>{const t=cantAt(q);if(!t)return 0;const i=clamp(Math.floor(q/SEG),0,TOTAL-1),Rq=norm(cross(Fq,[0,1,0])),Rv=RV(i);return Math.atan(t)*Math.sign(Rq[0]*Rv[0]+Rq[2]*Rv[2])};
+  const thB=(thAt(pa,F)+thAt(pb,F))/2;
+  if(!skipBody)cpDraw(CP.body,mdl(O,F,eye,thB),ht,livB,front);
   // bogies: cada um segue a tangente da via no seu ponto; rodados giram com o caminho percorrido (raio 0,399 m)
   const ang=pc;   // ângulo dos rodados = caminho percorrido / raio
   for(const[k,pp]of[['bo01',pa],['bo02',pb]]){const bg=CP.bog[k];if(!bg)continue;const q=wp(pp,xo(pp),CPH),q2=wp(pp+s*0.6,xo(pp+s*0.6),CPH),Fb=norm(sub(q2,wp(pp-s*0.6,xo(pp-s*0.6),CPH)));
-    const Ob=add(q,[0,bg.pos[1],0]);cpDraw(bg.prims,mdl(Ob,Fb,eye),[0,0]);
+    const Ob=add(q,[0,bg.pos[1],0]),thb=thAt(pp,Fb);cpDraw(bg.prims,mdl(Ob,Fb,eye,thb),[0,0]);
     for(const w of['wh01','wh02']){const wh=CP.wh[k+w];if(!wh)continue;const dz=wh.pos[2]-bg.pos[2],a=ang/CP.WR*s,c=Math.cos(a),sn=Math.sin(a);
-      cpDraw(wh.prims,mdlM(Ob,Fb,eye,[1,0,0,0, 0,c,sn,0, 0,-sn,c,0, 0,wh.pos[1]-bg.pos[1],dz,1]),[0,0])}}
+      cpDraw(wh.prims,mdlM(Ob,Fb,eye,[1,0,0,0, 0,c,sn,0, 0,-sn,c,0, 0,wh.pos[1]-bg.pos[1],dz,1],thb),[0,0])}}
   // portas de fole: E02/E03 (esquerda), D02/D03 (direita)
-  if(!skipBody&&CP.AN)for(const[id,side]of[['E02',0],['E03',0],['D02',1],['D03',1]]){const W=doorMats(id,od?od[side]:0),Bm=Array.from(mdl(O,F,eye));
+  if(!skipBody&&CP.AN)for(const[id,side]of[['E02',0],['E03',0],['D02',1],['D03',1]]){const W=doorMats(id,od?od[side]:0),Bm=Array.from(mdl(O,F,eye,thB));
     for(const nm in W){const d=CP.door[nm];if(d)cpDraw(d.prims,new Float32Array(m4c(Bm,W[nm])),[0,0],livB)}}
 }
 function drawM(m,M,ht){gl.uniformMatrix4fv(UL.uM,false,M);gl.uniform2f(UL.uHT,ht[0],ht[1]);gl.bindVertexArray(m.vao);gl.drawArrays(gl.TRIANGLES,0,m.n)}
@@ -5930,8 +5949,11 @@ function camera(dtR){
   const front=wp(pf,tx(pf),0.36);
   if(camMode==='cab'&&CP.ok){// posição da câmara da cabina do pacote (Camera Cabine.xml): x −0,8, y 2,5, z 8,0 no espaço do veículo
     const pc=pf-dir*CSP/2,A=wp(pc+dir*CP.FB,tx(pc+dir*CP.FB),CPH),B=wp(pc+dir*CP.RB,tx(pc+dir*CP.RB),CPH),Fv=norm(sub(A,B)),Rv=norm(cross(Fv,[0,1,0])),O=sub(A,mulv(Fv,CP.FB));
-    const eye=add(add(add(O,mulv(Fv,8.0)),mulv(Rv,-0.8)),[0,2.5+S.bump*Math.sin(t*50)+Math.sin(t*7)*0.006*vv,0]);eye[0]+=Math.sin(t*1.7)*0.02*vv;
-    const ahead=wp(pf+dir*38,tx(pf+dir*38),2.0);const fd=norm(add(mulv(Fv,0.85),mulv(norm(sub(ahead,eye)),0.15)));return{eye,fd,fov:1.15,near:0.08}}
+    // escala: a caixa (e a câmara) inclinam com a via
+    const Ri=RV(clamp(Math.floor(pc/SEG),0,TOTAL-1)),th=(Math.atan(cantAt(pc+dir*CP.FB))+Math.atan(cantAt(pc+dir*CP.RB)))/2*Math.sign(Rv[0]*Ri[0]+Rv[2]*Ri[2]);
+    const Uv=cross(Rv,Fv),cs=Math.cos(th),sn=Math.sin(th),R2=add(mulv(Rv,cs),mulv(Uv,sn)),U2=sub(mulv(Uv,cs),mulv(Rv,sn));
+    const eye=add(add(add(O,mulv(Fv,8.0)),mulv(R2,-0.8)),mulv(U2,2.5+S.bump*Math.sin(t*50)+Math.sin(t*7)*0.006*vv));eye[0]+=Math.sin(t*1.7)*0.02*vv;
+    const ahead=wp(pf+dir*38,tx(pf+dir*38),2.0);const fd=norm(add(mulv(Fv,0.85),mulv(norm(sub(ahead,eye)),0.15)));return{eye,fd,fov:1.15,near:0.08,up:U2}}
   if(camMode==='cab'){const eye=add(add(add(front,mulv(F,-0.9)),mulv(Rg,-0.5)),[0,2.55+S.bump*Math.sin(t*50)+Math.sin(t*7)*0.006*vv,0]);
     eye[0]+=Math.sin(t*1.7)*0.02*vv;const ahead=wp(pf+dir*38,tx(pf+dir*38),2.3);const fd=norm(sub(ahead,eye));return{eye,fd,fov:1.05,near:0.3}}
   if(camMode==='salao'){const zb=pf-dir*8.15,eye=wp(zb,tx(zb),2.98);const pa=pf-dir*16.5,ahead=wp(pa,tx(pa),2.50);return{eye,fd:norm(sub(ahead,eye)),fov:1.1,near:0.08}}
@@ -5958,7 +5980,7 @@ function render3D(dtR){
   lighting();
   const cam=camera(dtR),eye=cam.eye;const w=glc.width,h=glc.height;gl.viewport(0,0,w,h);
   const asp=w/h,fovY=asp<1?cam.fov*1.25:cam.fov;const P=persp(fovY,asp,cam.near,3200);
-  const up=Math.abs(cam.fd[1])>0.98?[0,0,1]:[0,1,0];const V=lookDir(cam.fd,up);const VP=m4mul(P,V);
+  const up=cam.up||(Math.abs(cam.fd[1])>0.98?[0,0,1]:[0,1,0]);const V=lookDir(cam.fd,up);const VP=m4mul(P,V);
   const inTun=tun[clamp(Math.floor(S.pos/SEG),0,TOTAL-1)]===1;
   // sol
   const az=SUNAZ,el=Math.max(-6,sunE)*Math.PI/180;
