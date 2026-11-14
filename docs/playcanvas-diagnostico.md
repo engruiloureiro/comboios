@@ -54,6 +54,9 @@ O troço é Lordelo–Vizela, PK 46,6–54,0, em `playcanvas/`. O detalhe está 
 - Manhã, fim de tarde e noite.
 - Perfis Baixo, Médio e Alto, com contador de FPS.
 
+Capturas (renderização por software, perfil Baixo/Médio): `docs/capturas/playcanvas-prototipo.jpg` — câmara cinematográfica,
+entrada na via 2 de Vizela, noite em Lordelo e cabina.
+
 **Ligação ao simulador (início da fase 3):** botão «Lordelo → Vizela em 3D» no menu inicial. O simulador não foi alterado em mais nada.
 
 ## 4. Plano de migração
