@@ -1,4 +1,4 @@
-// Protótipo PlayCanvas do simulador: um troço da Linha de Guimarães (por omissão Vizela → Guimarães) com a UDD 9600.
+// Protótipo PlayCanvas do simulador: um troço da Linha de Guimarães (por omissão Lordelo → Santo Tirso) com a UDD 9600.
 // O traçado e o cenário vêm do próprio simulador, carregado num iframe escondido (bridge.js, world.js); aqui ficam a luz física,
 // a automotora, a marcha e a operação (paragens, portas, agulhas), separadas do motor gráfico.
 import * as pc from '../lib/playcanvas-2.23.3.min.mjs';
@@ -46,12 +46,12 @@ async function main() {
     // o simulador (escondido) dá o eixo, as estações e o cenário; dados técnicos da 9600
     progress(0.06, 'A abrir o simulador (traçado e cenário)…');
     const [game, CPJ] = await Promise.all([openGame('guimaraes'), fetch('../cp9600/cp9600.json').then(r => r.json())]);
-    // troço: origem e destino escolhidos (por omissão Vizela → Guimarães)
+    // troço: origem e destino escolhidos (por omissão Lordelo → Santo Tirso)
     const ST = game.stations.filter(s => s.stopF != null);
     const byN = n => ST.find(s => s.n === n);
-    let deN = 'Vizela', paraN = 'Guimarães';
+    let deN = 'Lordelo', paraN = 'Santo Tirso';
     try { deN = localStorage.getItem('pc-de') || deN; paraN = localStorage.getItem('pc-para') || paraN; } catch (e) { }
-    let de = byN(deN) || byN('Vizela') || ST[0], para = byN(paraN) || byN('Guimarães') || ST[ST.length - 1];
+    let de = byN(deN) || byN('Lordelo') || ST[0], para = byN(paraN) || byN('Santo Tirso') || ST[ST.length - 1];
     if (de === para) para = ST[ST.indexOf(de) + 1] || ST[ST.indexOf(de) - 1];
     const dir0 = para.pos > de.pos ? 1 : -1;
     const route = new Route(game.section(Math.min(de.pos, para.pos) - 700, Math.max(de.pos, para.pos) + 700));

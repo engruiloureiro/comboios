@@ -94,6 +94,14 @@ Capturas (renderização por software): `docs/capturas/playcanvas-prototipo.jpg`
 - Conferidos em capturas: o rio Vizela à direita da via, a passagem sobre a estrada, a trincheira com muros de granito e o túnel
   de Vizela (portal e interior escuro).
 
+**Lordelo → Santo Tirso** (sentido do Porto)
+- Condução automática com paragens em Giesteira, Vila das Aves, Caniços e Santo Tirso, entre 0,6 e 3 m do marco, sem erros.
+- Conferidos em capturas: a fábrica de Vila das Aves, a ponte de ferro de Caniços sobre o Ave, o rio ao lado da via e Santo Tirso.
+- Este teste encontrou um erro no perfil do simulador: um ponto de cota solto (58 m ao PK 41,25) a 250 m de Vila das Aves (70 m)
+  criava uma rampa de 58‰ dentro da estação, onde a automotora não conseguia parar. O ponto foi retirado do `index.html`; o perfil
+  entre Caniços (55 m) e Vila das Aves passa a ser a interpolação entre as cotas das duas estações (cerca de 4‰).
+- Fica por ver uma segunda rampa acima de 30‰ no jogo, entre os PK 67,1 e 67,8 (descida de Paçô Vieira), fora deste troço.
+
 **Outros**
 - Sentido inverso (Guimarães → Vizela) e noite: candeeiros, janelas e faróis.
 - Perfil Médio em Guimarães (sombras suaves, oficina e Penha ao fundo).

@@ -686,7 +686,7 @@ const riverX=(R,p)=>R.xf?R.xf(p):R.x;
 const RIVERP=[{a:km(26.007),b:km(26.221),side:1,x:30,w:60},{a:km(26.324),b:km(26.522),side:1,x:30,w:60}],RIVERG=[{a:kR(26.2),b:kR(26.9),side:-1,x:16,w:26},{a:kR(27.06),b:kR(37.935),side:1,x:22,w:30,xf:p=>{const P=kR(29.6);return 22+70*sstep((p-(P-650))/350)*sstep(((P+450)-p)/350)}},{a:kR(38.075),b:kR(40.9),side:1,x:18,w:28},{a:kR(40.9),b:kR(42.2),side:1,x:18,w:22},{a:kR(42.2),b:kR(50.4),side:1,x:20,w:24},{a:kR(50.4),b:kR(51.6),side:1,x:30,w:20},{a:kR(51.6),b:kR(52.8),side:1,x:20,w:24},{a:kmG(18.2),b:kmG(20.7),side:1,x:12,w:20},{a:kmG(14.9),b:kmG(15.37),side:-1,x:16,w:20},{a:kmG(15.44),b:kmG(15.9),side:1,x:14,w:20}];
 const RIVER=GP?RIVERP.concat(RIVERG.filter(q=>q.b>km(KC1)).map(q=>q.a<km(KC1)?{...q,a:km(KC1)}:q)):RP?RIVERP:RIVERG;
 
-const PROFP=[[26.273,7],[41.292,85],[44.854,104],[62.726,60]],PROFG=[[G0+12.72,280],[G0+15.40,232],[27.0,30],[41.25,58]];
+const PROFP=[[26.273,7],[41.292,85],[44.854,104],[62.726,60]],PROFG=[[G0+12.72,280],[G0+15.40,232],[27.0,30]];   // sem o ponto [41.25,58]: ficava a 250 m de Vila das Aves (70 m) e criava uma rampa de 58‰ dentro da estação
 const PROF=RAW.map(r=>[r[3],r[12]]).concat(GP?PROFP.concat(PROFG.filter(q=>q[0]>KCG).map(q=>[q[0]+DGV,q[1]])):RP?PROFP:PROFG).sort((a,b)=>a[0]-b[0]);
 const curve=new Float32Array(TOTAL), grade=new Float32Array(TOTAL), hy=new Float32Array(TOTAL+1), HDG=new Float32Array(TOTAL+1);
 const tun=new Uint8Array(TOTAL), shed=new Uint8Array(TOTAL), brg=new Uint8Array(TOTAL), lc=new Uint8Array(TOTAL), riv=new Int8Array(TOTAL);

@@ -1,6 +1,6 @@
 # Linha de Guimarães 3D — protótipo PlayCanvas
 
-Qualquer troço da Linha de Guimarães do simulador (por omissão Vizela → Guimarães) com a UDD 9600, desenhado com o PlayCanvas.
+Qualquer troço da Linha de Guimarães do simulador (por omissão Lordelo → Santo Tirso) com a UDD 9600, desenhado com o PlayCanvas.
 O traçado e a paisagem são exatamente os do jogo: o simulador (`../index.html`) é carregado num iframe escondido e fornece o eixo,
 as estações e a geometria do cenário em blocos de 200 m — terreno, via e agulhas, cais, rio, túneis, pontes, muros, edifícios,
 árvores, campos e sinais. O protótipo acrescenta a luz física, as sombras, o céu e a automotora.
