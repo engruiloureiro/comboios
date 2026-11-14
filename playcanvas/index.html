@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linha de Guimarães 3D</title>
+<meta name="description" content="Protótipo PlayCanvas do simulador: UDD 9600 entre Lordelo e Vizela, Linha de Guimarães (1985)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="app" aria-label="Cena 3D: via férrea entre Lordelo e Vizela com a automotora UDD 9600"></canvas>
+
+<!-- carregamento -->
+<div id="loading" role="status" aria-live="polite">
+  <div class="ld-card">
+    <div class="ld-kicker">Linha de Guimarães · 1985</div>
+    <h1>Lordelo — Vizela</h1>
+    <p class="ld-sub">UDD CP 9600 · protótipo PlayCanvas</p>
+    <div class="ld-bar"><i id="ldFill"></i></div>
+    <p id="ldText">A preparar o motor gráfico…</p>
+  </div>
+</div>
+
+<!-- barra superior -->
+<header id="top">
+  <div class="brand"><b>Lordelo → Vizela</b><span id="topLine">Linha de Guimarães · UDD 9611</span></div>
+  <nav class="tools" aria-label="Opções">
+    <div class="seg" id="camSeg" role="group" aria-label="Câmara">
+      <button data-cam="cab" title="Cabina (1)">Cabina</button><button data-cam="ext" title="Exterior (2)">Exterior</button><button data-cam="cine" title="Cinematográfica (3)">Cinema</button>
+    </div>
+    <div class="seg" id="todSeg" role="group" aria-label="Hora do dia">
+      <button data-t="dia">Manhã</button><button data-t="tarde">Fim de tarde</button><button data-t="noite">Noite</button>
+    </div>
+    <div class="seg" id="qSeg" role="group" aria-label="Qualidade gráfica">
+      <button data-q="baixo">Baixo</button><button data-q="medio">Médio</button><button data-q="alto">Alto</button>
+    </div>
+    <button class="icon" id="bSave" title="Gravar a posição">Gravar</button>
+    <button class="icon" id="bLoad" title="Recuperar a posição gravada">Recuperar</button>
+    <button class="icon" id="bHelp" title="Comandos (?)">?</button>
+    <a class="icon" href="../index.html" title="Voltar ao simulador">Simulador</a>
+  </nav>
+</header>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- painel de condução -->
+<section id="dash" aria-label="Painel de condução">
+  <div class="gauge">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <circle cx="100" cy="100" r="92" class="g-bezel"/>
+      <circle cx="100" cy="100" r="84" class="g-face"/>
+      <g id="ticks"></g>
+      <path id="limArc" class="g-lim" d=""/>
+      <line id="needle" x1="100" y1="100" x2="100" y2="30" class="g-needle"/>
+      <circle cx="100" cy="100" r="7" class="g-hub"/>
+    </svg>
+    <div class="g-read"><b id="spd">0</b><small>km/h</small></div>
+  </div>
+  <div class="cols">
+    <div class="row">
+      <div class="limit" title="Velocidade máxima permitida"><span id="lim">30</span></div>
+      <div class="next"><small>Próxima paragem</small><b id="nxt">—</b><span id="nxtD">—</span></div>
+    </div>
+    <div class="row meters">
+      <div class="meter"><small>Manípulo</small><b id="notch">0</b></div>
+      <div class="meter"><small>Cilindro</small><b id="bc">0</b><i>psi</i></div>
+      <div class="meter"><small>Motor</small><b id="rpm">—</b><i>rpm</i></div>
+      <div class="meter"><small>Portas</small><b id="doors">Fechadas</b></div>
+      <div class="meter"><small>Hora</small><b id="clock">07:40</b></div>
+    </div>
+    <div class="lever" id="lever" aria-label="Manípulo combinado: travão e tração"></div>
+  </div>
+</section>
+
+<div id="fps" aria-hidden="true"></div>
+
+<dialog id="help">
+  <h2>Comandos</h2>
+  <dl>
+    <dt>I</dt><dd>Ligar / desligar o motor</dd>
+    <dt>↑ / ↓ (8 / 2)</dt><dd>Manípulo: tração 1–5, 0, travão F1–F5, EM (emergência)</dd>
+    <dt>E</dt><dd>Abrir / fechar as portas (parado junto ao marco de paragem)</dd>
+    <dt>Espaço</dt><dd>Buzina</dd>
+    <dt>R</dt><dd>Inverter a marcha (parado): o maquinista muda de cabina</dd>
+    <dt>Z</dt><dd>Agulha da próxima estação: via principal ou via 2</dd>
+    <dt>C · 1 · 2 · 3</dt><dd>Câmaras: cabina, exterior, cinematográfica</dd>
+    <dt>Rato</dt><dd>Olhar (cabina) · rodar e aproximar (exterior)</dd>
+    <dt>P</dt><dd>Pausa</dd>
+  </dl>
+  <p class="note">Troço Lordelo–Vizela exportado do simulador. Protótipo: o horário, o encravamento e os outros comboios ainda não foram migrados.</p>
+  <form method="dialog"><button>Fechar</button></form>
+</dialog>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
