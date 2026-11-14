@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Linha de Guimarães 3D</title>
-<meta name="description" content="Protótipo PlayCanvas do simulador: UDD 9600 entre Lordelo e Vizela, Linha de Guimarães (1985)">
+<meta name="description" content="Protótipo PlayCanvas do simulador: UDD 9600 na Linha de Guimarães (1985), com o traçado e o cenário do simulador">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="app" aria-label="Cena 3D: via férrea entre Lordelo e Vizela com a automotora UDD 9600"></canvas>
+<canvas id="app" aria-label="Cena 3D: Linha de Guimarães com a automotora UDD 9600"></canvas>
 
 <!-- carregamento -->
 <div id="loading" role="status" aria-live="polite">
   <div class="ld-card">
     <div class="ld-kicker">Linha de Guimarães · 1985</div>
-    <h1>Lordelo — Vizela</h1>
+    <h1 id="ldTitle">Linha de Guimarães</h1>
     <p class="ld-sub">UDD CP 9600 · protótipo PlayCanvas</p>
     <div class="ld-bar"><i id="ldFill"></i></div>
     <p id="ldText">A preparar o motor gráfico…</p>
@@ -26,8 +26,9 @@
 
 <!-- barra superior -->
 <header id="top">
-  <div class="brand"><b>Lordelo → Vizela</b><span id="topLine">Linha de Guimarães · UDD 9611</span></div>
+  <div class="brand"><b id="brand">Linha de Guimarães</b><span id="topLine">Linha de Guimarães · UDD 9611</span></div>
   <nav class="tools" aria-label="Opções">
+    <div class="seg route" role="group" aria-label="Troço"><label>De <select id="selDe"></select></label><label>para <select id="selPara"></select></label></div>
     <div class="seg" id="camSeg" role="group" aria-label="Câmara">
       <button data-cam="cab" title="Cabina (1)">Cabina</button><button data-cam="ext" title="Exterior (2)">Exterior</button><button data-cam="cine" title="Cinematográfica (3)">Cinema</button>
     </div>
@@ -90,7 +91,7 @@
     <dt>Rato</dt><dd>Olhar (cabina) · rodar e aproximar (exterior)</dd>
     <dt>P</dt><dd>Pausa</dd>
   </dl>
-  <p class="note">Troço Lordelo–Vizela exportado do simulador. Protótipo: o horário, o encravamento e os outros comboios ainda não foram migrados.</p>
+  <p class="note">O traçado e o cenário são os do simulador (escolha a origem e o destino no topo). Protótipo: o horário, o encravamento, os outros comboios e os passageiros ainda não foram migrados.</p>
   <form method="dialog"><button>Fechar</button></form>
 </dialog>
 

@@ -1,12 +1,10 @@
-// Protótipo PlayCanvas do simulador: troço Lordelo–Vizela da Linha de Guimarães com a UDD 9600.
-// Lógica ferroviária (marcha, paragens, portas, agulhas) separada do motor gráfico; dados do troço exportados do simulador.
+// Protótipo PlayCanvas do simulador: um troço da Linha de Guimarães (por omissão Vizela → Guimarães) com a UDD 9600.
+// O traçado e o cenário vêm do próprio simulador, carregado num iframe escondido (bridge.js, world.js); aqui ficam a luz física,
+// a automotora, a marcha e a operação (paragens, portas, agulhas), separadas do motor gráfico.
 import * as pc from '../lib/playcanvas-2.23.3.min.mjs';
 import { Route } from './route.js';
-import { loadPBR } from './gfx.js';
-import { buildTrack, trackMaterials } from './track.js';
-import { buildTerrain } from './terrain.js';
-import { buildVegetation } from './vegetation.js';
-import { buildStations } from './stations.js';
+import { openGame } from './bridge.js';
+import { World } from './world.js';
 import { Sky } from './sky.js';
 import { Train, CSP } from './train.js';
 import { Physics, NOTCH } from './physics.js';
@@ -45,10 +43,25 @@ async function main() {
     app.start();
     window.__pc = { app, device: device.deviceType };
 
-    // dados do troço (exportados do simulador) e dados técnicos da 9600
-    progress(0.08, 'A ler o troço Lordelo–Vizela…');
-    const [D, CPJ] = await Promise.all([fetch('data/lordelo-vizela.json').then(r => r.json()), fetch('../cp9600/cp9600.json').then(r => r.json())]);
-    const route = new Route(D);
+    // o simulador (escondido) dá o eixo, as estações e o cenário; dados técnicos da 9600
+    progress(0.06, 'A abrir o simulador (traçado e cenário)…');
+    const [game, CPJ] = await Promise.all([openGame('guimaraes'), fetch('../cp9600/cp9600.json').then(r => r.json())]);
+    // troço: origem e destino escolhidos (por omissão Vizela → Guimarães)
+    const ST = game.stations.filter(s => s.stopF != null);
+    const byN = n => ST.find(s => s.n === n);
+    let deN = 'Vizela', paraN = 'Guimarães';
+    try { deN = localStorage.getItem('pc-de') || deN; paraN = localStorage.getItem('pc-para') || paraN; } catch (e) { }
+    let de = byN(deN) || byN('Vizela') || ST[0], para = byN(paraN) || byN('Guimarães') || ST[ST.length - 1];
+    if (de === para) para = ST[ST.indexOf(de) + 1] || ST[ST.indexOf(de) - 1];
+    const dir0 = para.pos > de.pos ? 1 : -1;
+    const route = new Route(game.section(Math.min(de.pos, para.pos) - 700, Math.max(de.pos, para.pos) + 700));
+    const title = `${de.n} → ${para.n}`;
+    document.title = title + ' · 3D'; $('#brand').textContent = title; $('#ldTitle').textContent = `${de.n} — ${para.n}`;
+    for (const [id, cur] of [['#selDe', de], ['#selPara', para]]) {
+        const sel = $(id);
+        for (const s of ST) { const o = document.createElement('option'); o.value = s.n; o.textContent = s.n; o.selected = s === cur; sel.appendChild(o); }
+        sel.onchange = () => { try { localStorage.setItem(id === '#selDe' ? 'pc-de' : 'pc-para', sel.value); } catch (e) { } toast('A carregar o novo troço…'); setTimeout(() => location.reload(), 400); };
+    }
 
     // câmara e pós-processamento
     const camE = new pc.Entity('câmara');
@@ -58,39 +71,34 @@ async function main() {
     applyFrame(cf, Q, device);
 
     const sky = new Sky(app, Q);
-    progress(0.12, 'A carregar o céu…');
+    progress(0.3, 'A carregar o céu…');
     let tod = 'dia'; try { tod = localStorage.getItem('pc-tod') || 'dia'; } catch (e) { }
     await sky.set(tod);
 
-    progress(0.2, 'A carregar texturas (Poly Haven, CC0)…');
-    const [grass, concrete, stucco, roof, asphalt, mats] = await Promise.all([
-        loadPBR(app, 'leafy_grass', Q), loadPBR(app, 'concrete_floor_01', Q), loadPBR(app, 'white_stucco', Q), loadPBR(app, 'clay_roof_tiles', Q), loadPBR(app, 'asphalt_02', Q),
-        trackMaterials(app, Q, loadPBR)
-    ]);
-    const world = new pc.Entity('mundo'); app.root.addChild(world);
-    progress(0.32, 'A modelar o terreno…');
-    const TF = await buildTerrain(app, route, world, grass, Q);
-    progress(0.5, 'A assentar a via…');
-    const chunks = await buildTrack(app, route, world, mats);
-    progress(0.66, 'A construir estações e casario…');
-    const ST = await buildStations(app, route, TF, world, { concrete, stucco, roof, asphalt }, Q);
-    progress(0.76, 'A plantar a vegetação…');
-    const trees = buildVegetation(app, route, TF, world, Q, ST.avoid);
-    progress(0.84, 'A preparar a UDD 9600…');
+    progress(0.4, 'A carregar as texturas do cenário…');
+    const world = new World(app, game, route, Q);
+    await world.loadTextures();
+    world.setNight(sky.night);
+    const p00 = dir0 > 0 ? de.stopF : de.stopR;
+    await world.preload(p00, dir0, f => progress(0.45 + 0.4 * f, 'A construir o cenário do simulador…'));
+    progress(0.88, 'A preparar a UDD 9600…');
     const train = new Train(app, route);
     await train.load(Q);
     const phys = new Physics(CPJ);
     const audio = new Audio();
+    // terreno do simulador (para a câmara cinematográfica); fora dos túneis
+    const TF = { pos: (p, o) => { const P = route.point(p, o, 0); return [P[0], game.terr(p, o) - route.oy, P[2]]; } };
     const cams = new Cameras(app, camE, route, TF);
+    cams.tunnels = route.D.tunnels || [];
 
     // estado da marcha
-    const lord = route.stations.find(s => s.n === 'Lordelo');
-    const S = { pFront: lord ? lord.stopF : route.p0 + 200, dir: 1, flip: false, v: 0, night: sky.night, lights: true, off: null, odo: 0,
-        clock: { dia: 7 * 3600 + 40 * 60, tarde: 18 * 3600 + 10 * 60, noite: 21 * 3600 + 40 * 60 }[tod], served: new Set(lord ? [lord.n] : []),
-        atStop: lord || null, doorsOpenT: 0, loopAt: null, paused: false, warned: 0 };
-    const LINES = route.lines();
-    // candeeiros dos cais: luz pontual (iluminação em grelha do PlayCanvas, sem sombras) acesa à noite
-    const lampLights = ST.lamps.map(L => { const e = new pc.Entity('luz do candeeiro'); e.addComponent('light', { type: 'omni', color: new pc.Color(1, 0.82, 0.55), intensity: 0, range: 16, castShadows: false }); e.setPosition(L.pos.x, L.pos.y - 0.25, L.pos.z); app.root.addChild(e); return e; });
+    const S = { pFront: p00, dir: dir0, flip: false, v: 0, night: sky.night, lights: true, off: null, odo: 0,
+        clock: { dia: 7 * 3600 + 40 * 60, tarde: 18 * 3600 + 10 * 60, noite: 21 * 3600 + 40 * 60 }[tod], served: new Set([de.n]),
+        atStop: route.stations.find(s => s.n === de.n) || null, doorsOpenT: 0, loopAt: null, paused: false, warned: 0 };
+    const LINES = route.lines(), SAVEK = `pc-save:${de.n}>${para.n}`;
+    // candeeiros: um conjunto de luzes pontuais que acompanha a câmara (as 14 mais próximas), acesas à noite
+    const LAMPS = game.lamps(route.p0, route.p1).map(([p, x, k]) => { const P = route.point(p, x, k ? 4.6 : 5.6); return new pc.Vec3(P[0], P[1], P[2]); });
+    const lampLights = Array.from({ length: Math.min(14, LAMPS.length) }, () => { const e = new pc.Entity('luz do candeeiro'); e.addComponent('light', { type: 'omni', color: new pc.Color(1, 0.82, 0.55), intensity: 0, range: 18, castShadows: false }); app.root.addChild(e); return e; });
 
     // ---- operação: paragens, agulhas, portas
     const stopPos = s => (S.dir > 0 ? s.stopF : s.stopR);
@@ -159,13 +167,13 @@ async function main() {
     const segOn = (sel, attr, val) => document.querySelectorAll(sel + ' button').forEach(b => b.classList.toggle('on', b.dataset[attr] === val));
     function setCam(m) { cams.set(m); segOn('#camSeg', 'cam', m); toast('Vista: ' + MODE_NAME[m]); }
     document.querySelectorAll('#camSeg button').forEach(b => b.onclick = () => setCam(b.dataset.cam));
-    document.querySelectorAll('#todSeg button').forEach(b => b.onclick = async () => { tod = b.dataset.t; try { localStorage.setItem('pc-tod', tod); } catch (e) { } segOn('#todSeg', 't', tod); await sky.set(tod); S.night = sky.night; });
+    document.querySelectorAll('#todSeg button').forEach(b => b.onclick = async () => { tod = b.dataset.t; try { localStorage.setItem('pc-tod', tod); } catch (e) { } segOn('#todSeg', 't', tod); await sky.set(tod); S.night = sky.night; world.setNight(sky.night); });
     document.querySelectorAll('#qSeg button').forEach(b => b.onclick = () => { saveProfile(b.dataset.q); toast('Qualidade «' + PROFILES[b.dataset.q].name + '»: a recarregar…'); setTimeout(() => location.reload(), 600); });
     segOn('#camSeg', 'cam', 'cab'); segOn('#todSeg', 't', tod); segOn('#qSeg', 'q', qk);
     $('#bHelp').onclick = () => $('#help').showModal();
-    $('#bSave').onclick = () => { try { localStorage.setItem('pc-save', JSON.stringify({ v: 1, pFront: S.pFront, dir: S.dir, flip: S.flip, clock: S.clock, served: [...S.served], tod, loop: S.loopAt ? S.loopAt.a : null, engine: phys.engine })); toast('Posição gravada.', 'good'); } catch (e) { toast('Não foi possível gravar.', 'warn'); } };
+    $('#bSave').onclick = () => { try { localStorage.setItem(SAVEK, JSON.stringify({ v: 1, pFront: S.pFront, dir: S.dir, flip: S.flip, clock: S.clock, served: [...S.served], tod, loop: S.loopAt ? S.loopAt.a : null, engine: phys.engine })); toast('Posição gravada.', 'good'); } catch (e) { toast('Não foi possível gravar.', 'warn'); } };
     $('#bLoad').onclick = () => {
-        let o = null; try { o = JSON.parse(localStorage.getItem('pc-save') || 'null'); } catch (e) { }
+        let o = null; try { o = JSON.parse(localStorage.getItem(SAVEK) || 'null'); } catch (e) { }
         if (!o || !Number.isFinite(o.pFront)) return toast('Não há posição gravada.', 'warn');
         Object.assign(S, { pFront: o.pFront, dir: o.dir === -1 ? -1 : 1, flip: !!o.flip, v: 0, clock: o.clock || S.clock, served: new Set(o.served || []) });
         S.loopAt = o.loop == null ? null : LINES.find(L => !L.main && Math.abs(L.a - o.loop) < 1) || null;
@@ -210,7 +218,7 @@ async function main() {
             S.pFront += S.dir * S.v * dt; S.odo += Math.abs(S.v) * dt;
             // fim do troço exportado: para-choques virtuais
             const lo = route.p0 + 2 * CSP + 30, hi = route.p1 - 30;
-            if (S.pFront > hi || S.pFront < lo) { S.pFront = Math.max(lo, Math.min(hi, S.pFront)); if (phys.v > 0.1) toast('Fim do troço exportado. Inverta a marcha (R).', 'warn'); phys.v = 0; S.v = 0; }
+            if (S.pFront > hi || S.pFront < lo) { S.pFront = Math.max(lo, Math.min(hi, S.pFront)); if (phys.v > 0.1) toast('Fim do troço escolhido. Inverta a marcha (R) ou escolha outro destino.', 'warn'); phys.v = 0; S.v = 0; }
             // passou a agulha e saiu da via 2: volta à principal
             if (S.loopAt && S.dir * (S.pFront - (S.dir > 0 ? S.loopAt.b : S.loopAt.a)) > 2 * CSP + 5) S.loopAt = null;
             // portas: a automotora não arranca com portas abertas
@@ -221,15 +229,16 @@ async function main() {
         train.update(dt, S);
         const cv = cams.update(dt, train, S);
         audio.update(dt, { v: S.v, rpm: phys.rpm, engine: phys.engine, curv: route.curvature(S.pFront), pAlong: S.odo, inside: cv.inside, camDist: cv.dist, compressor: phys.bc > 10 });
-        // nível de detalhe: travessas e árvores longe da câmara desligadas
+        // cenário: carrega os blocos à frente e liberta os de trás; candeeiros mais próximos acesos à noite
+        if (!S.paused) world.update(S.pFront - S.dir * CSP, S.dir);
         lodT += dt;
-        if (lodT > 0.4) {
+        if (lodT > 0.5) {
             lodT = 0; camPos.copy(camE.getPosition());
-            for (const c of chunks) if (c.sleepers) c.sleepers.enabled = c.center.distance(camPos) < Q.sleeperDist + 200;
-            for (const g of trees) g.ent.enabled = g.center.distance(camPos) < Q.treeDist + 200;
             const night = sky.night > 0.2;
-            ST.lampMat.emissiveIntensity = night ? 4 : 0; ST.lampMat.update();
-            for (const l of lampLights) l.light.intensity = night && l.getPosition().distance(camPos) < 700 ? 2.2 : 0;
+            if (night) {
+                const near = LAMPS.map(P => [P.distance(camPos), P]).filter(q => q[0] < 500).sort((a, b) => a[0] - b[0]);
+                lampLights.forEach((l, k) => { if (near[k]) { l.setPosition(near[k][1]); l.light.intensity = 2.4; } else l.light.intensity = 0; });
+            } else for (const l of lampLights) l.light.intensity = 0;
         }
         // painel
         hudT += dt;
@@ -249,14 +258,14 @@ async function main() {
             $('#rpm').textContent = phys.engine ? Math.round(phys.rpm) : phys.engineT > 0 ? 'arranque' : 'desligado';
             $('#doors').textContent = train.doorsMoving() ? 'A mover' : train.doorsOpen() ? 'Abertas' : 'Fechadas';
             $('#clock').textContent = fHM(S.clock);
-            $('#topLine').textContent = `Linha de Guimarães · UDD 9611 · ${S.dir > 0 ? 'para Vizela' : 'para Lordelo'}${S.loopAt ? ' · via 2' : ''}`;
+            $('#topLine').textContent = `Linha de Guimarães · UDD 9611 · PK ${(S.pFront / 1000).toFixed(1).replace('.', ',')}${S.loopAt ? ' · via 2' : ''}`;
         }
     });
 
     progress(1, 'Pronto.');
     setTimeout(() => $('#loading').classList.add('done'), 250);
-    toast('Lordelo, 1985. Ligue o motor (I) e solte o travão (↑). Próxima paragem: Cuca.');
-    window.__sim = { S, phys, train, route, cams, sky, setNotch, doors, ignition, reverse, switchLoop, setCam, Q, audio };
+    { const ns = nextStop(); toast(`${de.n}, 1985. Ligue o motor (I) e solte o travão (↑).${ns ? ' Próxima paragem: ' + ns.n + '.' : ''}`); }
+    window.__sim = { S, phys, train, route, cams, sky, setNotch, doors, ignition, reverse, switchLoop, setCam, Q, audio, world, game };
 }
 
 main().catch(e => { console.error(e); progress(0, 'Erro: ' + e.message); });

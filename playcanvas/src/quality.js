@@ -6,17 +6,17 @@ export const PROFILES = {
     baixo: {
         name: 'Baixo', pixelRatio: 1, scale: 0.8, samples: 1, shadows: true, shadowRes: 1024, cascades: 1, shadowDist: 90, softShadows: false,
         ssao: false, bloom: 0, taa: false, sharp: 0.25, treeDensity: 0.55, treeShadows: false, houses: 50, sleeperDist: 350, treeDist: 900,
-        farCell: 80, skySize: 512, aniso: 2, a2c: false, clearCoat: false, fogMul: 1.3, vignette: 0.15
+        farCell: 80, skySize: 512, aniso: 2, a2c: false, clearCoat: false, fogMul: 1.5, vignette: 0.15, chunksAhead: 5, chunksBehind: 2
     },
     medio: {
         name: 'Médio', pixelRatio: 1, scale: 1, samples: 2, shadows: true, shadowRes: 2048, cascades: 2, shadowDist: 160, softShadows: true,
         ssao: false, bloom: 0.004, taa: false, sharp: 0.15, treeDensity: 0.95, treeShadows: false, houses: 90, sleeperDist: 600, treeDist: 1500,
-        farCell: 60, skySize: 1024, aniso: 4, a2c: true, clearCoat: true, fogMul: 1, vignette: 0.2
+        farCell: 60, skySize: 1024, aniso: 4, a2c: true, clearCoat: true, fogMul: 1, vignette: 0.2, chunksAhead: 7, chunksBehind: 3
     },
     alto: {
         name: 'Alto', pixelRatio: Math.min(2, window.devicePixelRatio || 1), scale: 1, samples: 4, shadows: true, shadowRes: 4096, cascades: 4, shadowDist: 320, softShadows: true,
         ssao: true, bloom: 0.006, taa: false, sharp: 0.1, treeDensity: 1.4, treeShadows: true, houses: 140, sleeperDist: 900, treeDist: 2600,
-        farCell: 40, skySize: 1024, aniso: 8, a2c: true, clearCoat: true, fogMul: 0.85, vignette: 0.22
+        farCell: 40, skySize: 1024, aniso: 8, a2c: true, clearCoat: true, fogMul: 0.8, vignette: 0.22, chunksAhead: 10, chunksBehind: 4
     }
 };
 
@@ -35,7 +35,7 @@ export function saveProfile(k) { try { localStorage.setItem('pc-qual', k); } cat
 
 // pós-processamento (CameraFrame do PlayCanvas): tom ACES, MSAA, SSAO, bloom subtil, vinheta e nitidez
 export function applyFrame(cf, Q, device) {
-    cf.rendering.toneMapping = pc.TONEMAP_ACES2;
+    cf.rendering.toneMapping = pc.TONEMAP_NEUTRAL;   // neutro: não desvia os tons (o ACES avermelhava os telhados do simulador)
     cf.rendering.samples = Q.samples;
     cf.rendering.renderTargetScale = Q.scale;
     cf.rendering.sharpness = Q.sharp;
@@ -44,7 +44,7 @@ export function applyFrame(cf, Q, device) {
     cf.bloom.intensity = Q.bloom;
     cf.bloom.blurLevel = 6;
     cf.vignette.intensity = Q.vignette; cf.vignette.inner = 0.55; cf.vignette.outer = 1.2; cf.vignette.curvature = 0.6;
-    cf.grading.enabled = true; cf.grading.saturation = 1.05; cf.grading.contrast = 1.04; cf.grading.brightness = 1.0;
+    cf.grading.enabled = true; cf.grading.saturation = 0.9; cf.grading.contrast = 1.03; cf.grading.brightness = 1.0;
     cf.taa.enabled = Q.taa;
     cf.update();
     device.maxPixelRatio = Q.pixelRatio;

@@ -40,7 +40,11 @@ button { font: inherit; color: inherit; }
 .seg button:hover, .icon:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }
 .seg button.on { background: var(--ink); color: #111; }
 .icon { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--line); display: inline-flex; align-items: center; }
-button:focus-visible, a:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.seg.route { align-items: center; gap: 6px; padding: 3px 8px; font: 600 14px/1 'Barlow Condensed'; color: var(--ink-2); }
+.seg.route label { display: flex; align-items: center; gap: 5px; }
+.seg.route select { font: 600 14px/1 'Barlow Condensed'; color: var(--ink); background: rgba(255, 255, 255, .08); border: 0; border-radius: 6px; padding: 5px 4px; max-width: 150px; }
+.seg.route select option { color: #111; }
+button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 #toast { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); background: var(--glass-2); backdrop-filter: blur(10px); border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; font-weight: 500; opacity: 0; transition: opacity .25s; z-index: 6; max-width: calc(100vw - 32px); text-align: center; }
 #toast.show { opacity: 1; }

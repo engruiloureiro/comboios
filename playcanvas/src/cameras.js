@@ -7,7 +7,7 @@ export const MODES = ['cab', 'ext', 'cine'];
 export const MODE_NAME = { cab: 'Cabina', ext: 'Exterior', cine: 'Cinematográfica' };
 
 export class Cameras {
-    constructor(app, cam, route, TF) {
+    constructor(app, cam, route, TF) {   // TF.pos(p, o) = ponto do terreno a o metros do eixo
         this.app = app; this.cam = cam; this.route = route; this.TF = TF;
         this.mode = 'cab';
         this.yaw = 0; this.pitch = 0;               // olhar na cabina
@@ -60,7 +60,10 @@ export class Cameras {
         // cinematográfica: câmara fixa à frente do comboio, ao lado da via; muda quando o comboio passa
         if (!this.cine || s.dir * (s.pFront - this.cine.p) > 70) {
             const r = () => { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; };
-            const p = Math.max(this.route.p0 + 20, Math.min(this.route.p1 - 20, s.pFront + s.dir * (140 + r() * 140)));
+            let p = s.pFront + s.dir * (140 + r() * 140);
+            // dentro de um túnel a câmara ficaria enterrada: passa para a boca de saída
+            for (const t of this.tunnels || []) if (p > t[0] - 25 && p < t[1] + 25) p = s.dir > 0 ? t[1] + 40 : t[0] - 40;
+            p = Math.max(this.route.p0 + 20, Math.min(this.route.p1 - 20, p));
             const o = (r() < 0.5 ? -1 : 1) * (6 + r() * 9), P = this.TF.pos(p, o);
             this.cine = { p, pos: [P[0], P[1] + 1.4 + r() * 3.5, P[2]] };
         }

@@ -3,7 +3,7 @@
 // e inclinada pela escala, portas de fole com as animações originais (.IA), faróis, farolins e luz interior.
 import * as pc from '../lib/playcanvas-2.23.3.min.mjs';
 import { add, sub, mul, cross, norm, dot } from './gfx.js';
-import { RAIL_TOP } from './track.js';
+import { RAIL_TOP } from './route.js';
 
 export const CSP = 18.906;          // distância entre engates
 const FB = 6.059, RB = 6.519;       // pivô do bogie da frente (lado da cabina) e de trás, ao centro do modelo

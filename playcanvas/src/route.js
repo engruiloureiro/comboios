@@ -3,6 +3,7 @@
 // A escala (inclinação da via nas curvas) segue a mesma regra do simulador: c = 14 m × 1/R, até 90 mm, plana nas estações,
 // nas passagens de nível e onde há mais de uma via.
 
+export const RAIL_TOP = 0.36;   // topo do carril acima da cota do eixo (como no simulador)
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const sstep = t => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
 
@@ -57,6 +58,8 @@ export class Route {
             raw[i] = -Math.sign(k) * c / 1.06;
         }
         this.CT = new Float32Array(n);
+        // a escala do próprio simulador, quando vem com os dados (a via desenhada pelo jogo usa-a tal e qual)
+        if (this.D.cant && this.D.cant.length === n) { this.CT.set(this.D.cant); return; }
         for (let i = 0; i < n; i++) {
             let a = 0, m = 0;
             for (let d = -5; d <= 5; d++) { a += raw[clamp(i + d, 0, n - 1)]; m++; }
@@ -119,9 +122,10 @@ export class Route {
         };
         for (let i = 0; i < this.n; i++) {
             const L = this.LNS[i], p = this.p0 + i * this.seg;
-            const o = L.filter(v => Math.abs(v) > 0.01);
+            // só a via de cruzamento ao lado da principal (até 6,5 m): as vias de resguardo e de oficina não contam
+            const o = L.filter(v => Math.abs(v) > 0.01 && Math.abs(v) < 6.5);
             if (o.length) {
-                const v = o.reduce((m, x) => (Math.abs(x) > Math.abs(m) ? x : m), 0);
+                const far = o.filter(v => Math.abs(v) > 2.5), v = far.length ? far.reduce((m, x) => (Math.abs(x) < Math.abs(m) ? x : m)) : o.reduce((m, x) => (Math.abs(x) > Math.abs(m) ? x : m), 0);
                 if (!cur) cur = { a: p - this.seg, s: [0], b: p };
                 cur.s.push(v); cur.b = p;
             } else if (cur) { cur.s.push(0); cur.b = p; close(); }

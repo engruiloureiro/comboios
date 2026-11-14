@@ -5,9 +5,9 @@
 import * as pc from '../lib/playcanvas-2.23.3.min.mjs';
 
 export const TIMES = {
-    dia: { hdr: 'assets/hdri/qwantani_mid_morning_puresky_2k.hdr', sun: [42, 125], sunColor: [1, 0.96, 0.9], sunI: 2.6, sky: 1.25, fog: [0.72, 0.8, 0.88], fogD: 0.00055, exposure: 1.12, night: 0 },
-    tarde: { hdr: 'assets/hdri/qwantani_sunset_puresky_1k.hdr', sun: [9, 255], sunColor: [1, 0.66, 0.4], sunI: 2.0, sky: 0.42, fog: [0.62, 0.5, 0.42], fogD: 0.0007, exposure: 1.1, night: 0.25 },
-    noite: { hdr: 'assets/hdri/qwantani_night_puresky_1k.hdr', sun: [35, 200], sunColor: [0.55, 0.65, 1], sunI: 0.1, sky: 0.03, fog: [0.012, 0.015, 0.025], fogD: 0.0011, exposure: 1.5, night: 1 }
+    dia: { hdr: 'assets/hdri/qwantani_mid_morning_puresky_2k.hdr', sun: [42, 125], sunColor: [1, 0.96, 0.9], sunI: 2.6, sky: 1.25, fog: [0.72, 0.8, 0.88], fogD: 0.0011, exposure: 1.12, night: 0 },
+    tarde: { hdr: 'assets/hdri/qwantani_sunset_puresky_1k.hdr', sun: [9, 255], sunColor: [1, 0.66, 0.4], sunI: 2.0, sky: 0.42, fog: [0.62, 0.5, 0.42], fogD: 0.0012, exposure: 1.1, night: 0.25 },
+    noite: { hdr: 'assets/hdri/qwantani_night_puresky_1k.hdr', sun: [35, 200], sunColor: [0.55, 0.65, 1], sunI: 0.1, sky: 0.03, fog: [0.012, 0.015, 0.025], fogD: 0.0014, exposure: 1.5, night: 1 }
 };
 
 const cache = {};
@@ -53,7 +53,7 @@ export class Sky {
         this.sun.light.color = new pc.Color(...T.sunColor);
         this.sun.light.intensity = T.sunI;
         const fog = app.scene.fog;
-        fog.type = pc.FOG_EXP2; fog.color = new pc.Color(...T.fog); fog.density = T.fogD;
+        fog.type = pc.FOG_EXP2; fog.color = new pc.Color(...T.fog); fog.density = T.fogD * (this.Q.fogMul || 1);
         this.night = T.night;
         this.name = name;
     }

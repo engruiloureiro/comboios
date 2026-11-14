@@ -31,33 +31,33 @@ sem substituir o simulador atual.
 - **Reaproveitamento:** os dados da via são reaproveitados sem conversão manual, através de um exportador do simulador. O GLB da 9600, as pistas das portas e os sons são carregados diretamente de `cp9600/`, sem alterar o Base64 do jogo.
 - **Risco:** a lógica de exploração (cerca de dois terços do ficheiro) tem de ser separada do desenho antes de migrar. É trabalho de engenharia, não de motor.
 
-## 3. Cena demonstrativa (fase 2 — feita)
+## 3. Cena demonstrativa (fase 2 — feita) e ponte para o simulador (fase 3 — começada)
 
-O troço é Lordelo–Vizela, PK 46,6–54,0, em `playcanvas/`. O detalhe está em `playcanvas/LEIA-ME.md` e os créditos em `playcanvas/CREDITS.md`.
+Está em `playcanvas/`. O detalhe está em `playcanvas/LEIA-ME.md` e os créditos em `playcanvas/CREDITS.md`.
 
-**Via e cenário**
-- Via com carris perfilados, travessas de madeira e balastro, que seguem o eixo, a cota e a escala do simulador.
-- Terreno com parcelas agrícolas, árvores instanciadas, cais, edifícios das estações, casario, passagens de nível e sinais.
+**Primeira versão (Lordelo–Vizela).** Só o eixo, as cotas, os limites, as vias e as estações vinham do simulador. A paisagem era
+gerada à parte e não respeitava o jogo: faltavam o rio Vizela, a passagem sobre a estrada, o túnel de Vizela, os muros e os
+taludes, e as casas e árvores não estavam nos sítios certos.
 
-**UDD 9600**
-- Bogies orientados pela tangente da via, rodados a girar e caixa apoiada nos dois pivôs, com a escala das curvas.
-- Portas animadas com as pistas originais.
-- Faróis, farolins e luz interior.
+**Versão atual: o cenário é o do simulador.** O protótipo carrega o jogo num iframe escondido e pede-lhe, por uma ponte só de leitura
+(`window.__PCB`), o que precisa:
 
-**Marcha e operação**
-- Marcha com o manípulo combinado, motor diesel, freio a ar, aderência e rampas, com os sons originais.
-- Paragens com marco e portas do lado do cais.
-- Agulhas para a via 2 de Lordelo e de Vizela; inversão de marcha.
+- o eixo, a escala, os limites, as vias e as estações de qualquer troço;
+- a geometria de cada bloco de 200 m tal como o jogo a gera: terreno, via e agulhas, cais, rio, túneis e portais, pontes, muros,
+  edifícios das estações, casario, fábricas, árvores, campos, postes e sinais;
+- as texturas do cenário e o atlas dos letreiros.
 
-**Interface**
-- Painel completo; câmaras de cabina, exterior e cinematográfica.
-- Manhã, fim de tarde e noite.
-- Perfis Baixo, Médio e Alto, com contador de FPS.
+O PlayCanvas desenha essa geometria com sol e sombras em cascata, céu HDRI, neblina e pós-processamento, e acrescenta a automotora,
+a marcha, as paragens, as portas e as agulhas. Os blocos são carregados à frente do comboio e libertados atrás.
 
-Capturas (renderização por software, perfil Baixo/Médio): `docs/capturas/playcanvas-prototipo.jpg` — câmara cinematográfica,
-entrada na via 2 de Vizela, noite em Lordelo e cabina.
+**Vantagens:** fidelidade total ao jogo, a linha inteira disponível (origem e destino à escolha) e nenhum ficheiro de dados novo.
+**Custos:** o jogo (11,5 MB) é descarregado e inicializado em segundo plano no arranque, e as cores e texturas são as do jogo
+(simples), não materiais fotográficos.
 
-**Ligação ao simulador (início da fase 3):** botão «Lordelo → Vizela em 3D» no menu inicial. O simulador não foi alterado em mais nada.
+**Ligação ao simulador:** botão «Linha de Guimarães em 3D» no menu inicial. No jogo só entraram a ponte e o parâmetro `?linha=`
+(escolhe a linha sem mexer nas preferências guardadas); o jogo em si não usa nada disto.
+
+Capturas (renderização por software): `docs/capturas/playcanvas-prototipo.jpg` — Guimarães, Covas, o rio Vizela, o túnel de Vizela.
 
 ## 4. Plano de migração
 
@@ -65,46 +65,37 @@ entrada na via 2 de Vizela, noite em Lordelo e cabina.
 |---|---|---|
 | 1 | Diagnóstico (este documento) | — |
 | 2 | Cena demonstrativa com um troço real | Feito. Falta ser julgada pelo utilizador em computadores reais (escola e casa). |
-| 3 | Exportador genérico de troços: a linha inteira em blocos carregados à medida que o comboio avança, com o botão no menu. Separar a lógica ferroviária (horário, encravamento, marcha, passageiros) num módulo sem desenho, partilhado pelos dois motores. | O motor novo percorre Trindade–Fafe sem saltos. Os testes de continuidade passam com os dados exportados. |
+| 3 | Ponte para o simulador: a linha inteira em blocos pedidos ao jogo à medida que o comboio avança (feito para a Linha de Guimarães), com o botão no menu. Falta separar a lógica ferroviária (horário, encravamento, marcha, passageiros) num módulo sem desenho, partilhado pelos dois motores. | O motor novo percorre Trindade–Fafe sem saltos (por testar fora de Lordelo–Guimarães). |
 | 4 | Migrar sistema a sistema: sinais com encravamento, outras automotoras e cruzamentos, horário, passageiros e chefe, Trindade de 1985, Linha da Póvoa, pinturas B e frentes sem porta. | Cada sistema tem o seu teste e é comparado com o simulador atual na mesma situação. |
 | 5 | O motor novo passa a principal e o antigo fica como modo «compatível» para computadores sem WebGL2. | Paridade de funções e desempenho aceitável no perfil Baixo nos computadores da escola. |
 
 ## 5. Limitações conhecidas do protótipo
 
-- **Âmbito:** só existe um troço de 7,4 km. Horário, encravamento (os sinais estão fixos), outras composições, passageiros e chefe de estação ainda não foram migrados.
-- **Material circulante:**
-  - Pintura: a do GLB (pós-1993). A pintura B e as frentes sem porta ainda não foram portadas.
-  - Massa do reboque estimada em 30 t: o pacote só traz a da motora.
-- **Cenário:**
-  - Árvores procedimentais em cartões cruzados: ficam aquém do resto da cena.
-  - Edifícios e casas genéricos: não são levantamentos das estações reais.
-  - Terreno a partir das cotas exportadas e de relevo procedimental para lá de 1 km.
-- **Desempenho:** não foi medido em hardware real. O contentor de testes não tem GPU e todas as medições foram feitas com renderização por software (SwiftShader):
-  - perfil Baixo: cerca de 10–18 FPS em WebGL2 e 2–3 FPS em WebGPU;
-  - o perfil Alto mal anda nesse renderizador.
-
-  Estes números servem só para comparar perfis entre si.
-- **Recursos:** o protótipo depende do Google Fonts para a letra Barlow. Sem rede, usa a letra do sistema.
+- **Ainda por migrar:** horário, encravamento (os sinais são os do jogo, mas com o aspeto fixo), outras composições, passageiros e
+  chefe de estação, barreiras das passagens de nível em movimento.
+- **Linhas:** só a Linha de Guimarães; a ponte aceita as outras, mas não foram testadas.
+- **Material circulante:** pintura do GLB (pós-1993); a pintura B e as frentes sem porta ainda não foram portadas. Massa do reboque
+  estimada em 30 t.
+- **Aspeto:** a geometria, as cores e as texturas são as do jogo; o salto está na luz, nas sombras e no céu. Materiais fotográficos
+  (balastro, pedra, telha) ficam para depois, camada a camada.
+- **Arranque:** o simulador é carregado em segundo plano, o que soma alguns segundos e memória.
+- **Desempenho:** não foi medido aqui em hardware real (o contentor não tem GPU). O utilizador mediu 30–36 FPS no perfil Alto com
+  a primeira versão; a versão atual tem mais geometria e tem de ser medida outra vez. As sombras só são calculadas para os blocos
+  ao alcance da sombra, e o chão e a água não fazem sombra.
 
 ## 6. Testes efetuados (Playwright, Chromium sem GPU)
 
-**Arranque**
-- Arranca sem erros de JavaScript em Baixo e Médio com WebGL2, e em Baixo com WebGPU (o SwiftShader é demasiado lento para os outros perfis em WebGPU).
-- No caminho WebGPU, o céu ficava branco porque o sol do HDRI (cerca de 150 000) saturava a meia-precisão. Foi corrigido limitando o sol dos HDRI a 400.
+**Vizela → Guimarães**
+- Arranque sem erros de JavaScript; condução automática com paragens em Nespereira, Covas e Guimarães, todas a cerca de 1 m do
+  marco, portas abertas e fechadas, sem exceder os limites (2 amostras ligeiramente acima em Covas, do condutor de teste).
+- Os blocos são carregados e libertados durante a viagem (8 a 9 blocos em memória no perfil Baixo).
 
-**Marcha Lordelo → Cuca**
-- Arranque, velocidade máxima de 54 km/h com limite de 60, e travagem até ao marco.
-- Paragem a 0,6 m do marco; portas abertas do lado do cais e depois fechadas.
+**Lordelo → Vizela**
+- Conferidos em capturas: o rio Vizela à direita da via, a passagem sobre a estrada, a trincheira com muros de granito e o túnel
+  de Vizela (portal e interior escuro).
 
-**Agulha de Vizela**
-- Mudança para a via 2 com Z.
-- A automotora segue o desvio de 4 m, com limite de 30 km/h.
-- Paragem a 0,8 m do marco; portas do lado certo.
-
-**Câmaras, hora do dia e qualidade**
-- Câmaras de cabina, exterior e cinematográfica conferidas em capturas.
-- Manhã, fim de tarde e noite: a noite com o céu acertado, os candeeiros e a luz interior.
-- Perfis com nível de detalhe das árvores e das travessas pela distância à câmara. Este nível de detalhe estava a medir a partir da origem; foi corrigido.
-
-**Simulador atual**
-- Teste de regressão das três linhas depois de acrescentar o botão no menu.
+**Outros**
+- Sentido inverso (Guimarães → Vizela) e noite: candeeiros, janelas e faróis.
+- Perfil Médio em Guimarães (sombras suaves, oficina e Penha ao fundo).
+- WebGPU: arranque e imagem corretos no perfil Baixo (Vizela → Guimarães).
+- Teste de regressão do jogo principal nas três linhas, depois de acrescentar a ponte: sem erros.
