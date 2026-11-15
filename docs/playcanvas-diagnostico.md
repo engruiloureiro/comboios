@@ -61,19 +61,26 @@ Capturas (renderização por software): `docs/capturas/playcanvas-prototipo.jpg`
 
 ## 4. Plano de migração
 
-| Fase | Conteúdo | Critério para avançar |
+| Fase | Conteúdo | Estado |
 |---|---|---|
-| 1 | Diagnóstico (este documento) | — |
-| 2 | Cena demonstrativa com um troço real | Feito. Falta ser julgada pelo utilizador em computadores reais (escola e casa). |
-| 3 | Ponte para o simulador: a linha inteira em blocos pedidos ao jogo à medida que o comboio avança (feito para a Linha de Guimarães), com o botão no menu. Falta separar a lógica ferroviária (horário, encravamento, marcha, passageiros) num módulo sem desenho, partilhado pelos dois motores. | O motor novo percorre Trindade–Fafe sem saltos (por testar fora de Lordelo–Guimarães). |
-| 4 | Migrar sistema a sistema: sinais com encravamento, outras automotoras e cruzamentos, horário, passageiros e chefe, Trindade de 1985, Linha da Póvoa, pinturas B e frentes sem porta. | Cada sistema tem o seu teste e é comparado com o simulador atual na mesma situação. |
-| 5 | O motor novo passa a principal e o antigo fica como modo «compatível» para computadores sem WebGL2. | Paridade de funções e desempenho aceitável no perfil Baixo nos computadores da escola. |
+| 1 | Diagnóstico (este documento) | Feito. |
+| 2 | Cena demonstrativa com um troço real | Feito. |
+| 3 | Ponte para o simulador: o cenário da linha inteira pedido ao jogo em blocos | Feito para a Linha de Guimarães. |
+| 4a | **Jogo completo no PlayCanvas, 1.ª fase:** Trindade ↔ Guimarães com o horário de 1985, os outros comboios e cruzamentos, sinais, chefe de estação, passageiros nos cais, pontuação, buzinas, homem-morto e o painel novo. O simulador corre escondido como motor de regras (`?embed`); o PlayCanvas comanda o ciclo e desenha. | Feito (ver os testes). |
+| 4b | 2.ª fase: abastecimento e manobras de oficina, unidade dupla e acoplagem, pinturas de origem e frentes sem porta, passageiros a bordo, fumo, gravar e retomar, Fafe e as outras linhas. | Por fazer. |
+| 5 | Separar as regras do desenho dentro do próprio simulador (hoje o PlayCanvas usa o jogo inteiro, escondido), para deixar de carregar o motor gráfico antigo. O motor novo passa a principal e o antigo fica como modo «compatível». | Por fazer. |
+
+**Como funciona a 1.ª fase do jogo.** O `index.html` do jogo ganhou um modo `?embed`: não desenha nem corre o seu ciclo; em vez
+disso, a ponte `window.__PCB` oferece `tick(dt)` (um passo das regras e do som), `state()` (posição, sentido, portas e via do
+comboio do jogador e dos outros), `dyn()` (geometria dinâmica: sinais, cancelas, agulhas, passageiros e chefe), `hud()` (dados do
+painel), `timetable()` e `startTT()` (horário) e os comandos. As teclas são reenviadas ao jogo, por isso o comportamento é o mesmo.
+No modo embutido ficam desligados o abastecimento, a saída da oficina e a acoplagem (2.ª fase).
 
 ## 5. Limitações conhecidas do protótipo
 
-- **Ainda por migrar:** horário, encravamento (os sinais são os do jogo, mas com o aspeto fixo), outras composições, passageiros e
-  chefe de estação, barreiras das passagens de nível em movimento.
-- **Linhas:** só a Linha de Guimarães; a ponte aceita as outras, mas não foram testadas.
+- **Ainda por migrar (2.ª fase):** abastecimento, manobras de oficina, unidade dupla, pinturas de origem e frentes sem porta,
+  passageiros a bordo, fumo do escape, gravar e retomar o jogo.
+- **Linhas:** só a Linha de Guimarães entre a Trindade e Guimarães; os comboios que seguem para Fafe e as outras linhas ficam de fora.
 - **Material circulante:** pintura do GLB (pós-1993); a pintura B e as frentes sem porta ainda não foram portadas. Massa do reboque
   estimada em 30 t.
 - **Aspeto:** a geometria, as cores e as texturas são as do jogo; o salto está na luz, nas sombras e no céu. Materiais fotográficos
@@ -85,25 +92,30 @@ Capturas (renderização por software): `docs/capturas/playcanvas-prototipo.jpg`
 
 ## 6. Testes efetuados (Playwright, Chromium sem GPU)
 
-**Vizela → Guimarães**
-- Arranque sem erros de JavaScript; condução automática com paragens em Nespereira, Covas e Guimarães, todas a cerca de 1 m do
-  marco, portas abertas e fechadas, sem exceder os limites (2 amostras ligeiramente acima em Covas, do condutor de teste).
-- Os blocos são carregados e libertados durante a viagem (8 a 9 blocos em memória no perfil Baixo).
+**Jogo completo, 1.ª fase** (condutor automático que usa as mesmas teclas do jogador: I, E, 8/2, 9, 7)
 
-**Lordelo → Vizela**
-- Conferidos em capturas: o rio Vizela à direita da via, a passagem sobre a estrada, a trincheira com muros de granito e o túnel
-  de Vizela (portal e interior escuro).
+- **Comboio 7341, Trindade → Guimarães (17:39), viagem inteira:** ignição, embarque na origem, partida depois do apito do chefe e
+  paragem em todas as estações do horário, a 1–3 m do marco. Cruzamento na Maia com entrada pela via desviada e espera pelo outro
+  comboio; outros cruzamentos a seguir. Homem-morto confirmado com o 9 e buzina nas passagens de nível (+15 pontos cada). O céu
+  passou de dia a fim de tarde e a noite. Chegou a Guimarães com 2 556 pontos e 18 minutos de atraso (o condutor de teste é
+  prudente e esperou pelos cruzamentos). Sem erros de JavaScript.
+- **Tranvia 7901, Trindade → Senhora da Hora (05:55, de noite), serviço completo:** 5 paragens de 5, fim de serviço ao desligar o
+  motor, painel final com três estrelas e 1 064 pontos em 1 100.
+- **Comboio 7342, Guimarães → Trindade (sentido inverso):** partida e paragens em Vizela e Lordelo, com um cruzamento.
+- **Regras conferidas por erros do próprio condutor de teste:** passar um sinal de saída fechado depois de falhar a paragem da Maia
+  acabou em colisão com o comboio contrário e serviço interrompido; partir antes do apito deixou o sinal de saída fechado.
+- **Som:** o contexto de áudio do simulador fica a correr depois da primeira tecla; não foi possível ouvi-lo neste ambiente.
+- **Painel:** losangos da velocidade máxima e da seguinte, sinal adiante com o aspeto e a distância, passagem de nível com o aviso
+  de buzinar, mensagens do serviço e painel final, conferidos em capturas.
 
-**Lordelo → Santo Tirso** (sentido do Porto)
-- Condução automática com paragens em Giesteira, Vila das Aves, Caniços e Santo Tirso, entre 0,6 e 3 m do marco, sem erros.
-- Conferidos em capturas: a fábrica de Vila das Aves, a ponte de ferro de Caniços sobre o Ave, o rio ao lado da via e Santo Tirso.
-- Este teste encontrou um erro no perfil do simulador: um ponto de cota solto (58 m ao PK 41,25) a 250 m de Vila das Aves (70 m)
-  criava uma rampa de 58‰ dentro da estação, onde a automotora não conseguia parar. O ponto foi retirado do `index.html`; o perfil
-  entre Caniços (55 m) e Vila das Aves passa a ser a interpolação entre as cotas das duas estações (cerca de 4‰).
-- Fica por ver uma segunda rampa acima de 30‰ no jogo, entre os PK 67,1 e 67,8 (descida de Paçô Vieira), fora deste troço.
+**Cenário** (versão anterior, sem alterações)
 
-**Outros**
-- Sentido inverso (Guimarães → Vizela) e noite: candeeiros, janelas e faróis.
-- Perfil Médio em Guimarães (sombras suaves, oficina e Penha ao fundo).
-- WebGPU: arranque e imagem corretos no perfil Baixo (Vizela → Guimarães).
-- Teste de regressão do jogo principal nas três linhas, depois de acrescentar a ponte: sem erros.
+- Vizela → Guimarães, Lordelo → Vizela (rio, passagem sobre a estrada, túnel), Lordelo → Santo Tirso (ponte de Caniços), noite e
+  perfil Médio. WebGPU só foi testado antes de o jogo completo entrar; a 1.ª fase do jogo foi testada em WebGL2.
+
+**Jogo principal**
+
+- Teste de regressão nas três linhas e teste de continuidade, depois de acrescentar o modo `?embed` e a ponte: sem erros.
+
+**Por medir:** o desempenho em hardware real. Com muita gente nos cais (Trindade: cerca de 190 mil vértices de geometria dinâmica)
+essa geometria é refeita de 3 em 3 imagens para não pesar.

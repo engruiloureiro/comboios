@@ -1,8 +1,9 @@
 // UDD CP 9600 com o modelo original do pacote CP_9600_RW (BSD-3), o mesmo do simulador: motora e reboque (a mesma malha;
-// cada veículo com a cabina para fora). Bogies orientados pela via no seu ponto, rodados a girar, caixa apoiada nos dois pivôs
-// e inclinada pela escala, portas de fole com as animações originais (.IA), faróis, farolins e luz interior.
+// os veículos alternam o sentido, cada UDD com as cabinas para fora). Bogies orientados pela via no seu ponto, rodados a girar,
+// caixa apoiada nos dois pivôs e inclinada pela escala, portas de fole com as animações originais (.IA), faróis e farolins.
+// A posição, a via, as portas e as luzes de cada composição vêm do estado do simulador (a do jogador e as outras).
 import * as pc from '../lib/playcanvas-2.23.3.min.mjs';
-import { add, sub, mul, cross, norm, dot } from './gfx.js';
+import { add, sub, mul, cross, norm } from './gfx.js';
 import { RAIL_TOP } from './route.js';
 
 export const CSP = 18.906;          // distância entre engates
@@ -44,79 +45,82 @@ function setWorld(ent, P, R, U, F) {
     ent.setRotation(tmpQ);
 }
 
-export class Train {
-    constructor(app, route) { this.app = app; this.route = route; this.cars = []; this.dist = 0; this.doorF = [[0, 0], [0, 0]]; this.doorT = [[0, 0], [0, 0]]; }
+export class Trains {
+    constructor(app, route, Q) { this.app = app; this.route = route; this.Q = Q; this.units = []; this.tuned = new Set(); }
 
-    async load(Q) {
+    async load() {
         const app = this.app;
         const [asset, AN] = await Promise.all([
             new Promise((res, rej) => app.assets.loadFromUrl('../cp9600/cp9600_motora.glb', 'container', (e, a) => e ? rej(e) : res(a))),
             fetch('../cp9600/portas.json').then(r => r.json())
         ]);
-        this.AN = AN;
-        for (let k = 0; k < 2; k++) {
-            const root = asset.resource.instantiateRenderEntity({ castShadows: true, receiveShadows: true });
-            root.name = k === 0 ? 'motora' : 'reboque';
-            app.root.addChild(root);
-            const car = { root, nodes: {}, glow: [], k };
-            root.forEach(e => { if (e !== root) car.nodes[e.name] = e; });
-            // posições de repouso dos bogies, rodados e portas (para as transformações próprias)
-            car.rest = {};
-            for (const [n, e] of Object.entries(car.nodes)) car.rest[n] = e.getLocalPosition().clone();
-            this._materials(car, Q);
-            // faróis (do cp9600.json: dois em baixo e um em cima, ao lado da cabina) e luz interior
-            car.spots = [];
+        this.asset = asset; this.AN = AN;
+    }
+
+    // um veículo: nós do modelo, posições de repouso, farolins próprios e (só na composição do jogador) faróis e luz interior
+    _car(player) {
+        const root = this.asset.resource.instantiateRenderEntity({ castShadows: true, receiveShadows: true });
+        this.app.root.addChild(root);
+        const car = { root, nodes: {}, glow: [], rest: {}, doorF: [-1, -1], spots: [], cabin: [] };
+        root.forEach(e => { if (e !== root) car.nodes[e.name] = e; });
+        for (const [n, e] of Object.entries(car.nodes)) car.rest[n] = e.getLocalPosition().clone();
+        root.findComponents('render').forEach(rc => rc.meshInstances.forEach(mi => {
+            const m = mi.material; if (!m) return;
+            const n = m.name || '';
+            if (/Glow/.test(n)) {
+                const c = m.clone(); c.name = n; c.emissive = /Red/.test(n) ? new pc.Color(1, 0.08, 0.04) : new pc.Color(1, 0.95, 0.85); c.emissiveIntensity = 0; c.update();
+                mi.material = c; car.glow.push({ mat: c, red: /Red/.test(n), v: 0 }); return;
+            }
+            if (this.tuned.has(m)) return;
+            this.tuned.add(m);
+            if (/Glass/.test(n)) { m.blendType = pc.BLEND_NORMAL; m.opacity = 0.28; m.depthWrite = false; m.useMetalness = true; m.metalness = 0; m.gloss = 0.95; m.specularityFactor = 1; m.cull = pc.CULLFACE_NONE; }
+            else if (/Shinny_Metal/.test(n)) { m.useMetalness = true; m.metalness = 1; m.gloss = 0.72; }
+            else if (/Rubber/.test(n)) { m.useMetalness = true; m.metalness = 0; m.gloss = 0.15; }
+            else if (/main|extras|^Red$|^White$/.test(n)) { m.useMetalness = true; m.metalness = 0; m.gloss = 0.55; if (this.Q.clearCoat) { m.clearCoat = 0.25; m.clearCoatGloss = 0.82; } }
+            else if (/bo$|Bogey|engate|underside/.test(n)) { m.useMetalness = true; m.metalness = 0.35; m.gloss = 0.3; }
+            else if (/interior|bancos/.test(n)) { m.useMetalness = true; m.metalness = 0; m.gloss = 0.35; }
+            m.update();
+        }));
+        if (player) {
             for (const [x, y, z] of [[0.957, 1.467, 9.328], [-0.951, 1.467, 9.328]]) {
                 const s = new pc.Entity('farol');
                 s.addComponent('light', { type: 'spot', color: new pc.Color(1, 0.94, 0.82), intensity: 0, range: 140, innerConeAngle: 9, outerConeAngle: 24, castShadows: false });
                 s.setLocalPosition(x, y, -z); s.setLocalEulerAngles(90, 0, 0); root.addChild(s); car.spots.push(s);
             }
-            car.cabin = [];
             for (const z of [-4, 3]) {
                 const l = new pc.Entity('luz interior'); l.addComponent('light', { type: 'omni', color: new pc.Color(1, 0.86, 0.62), intensity: 0, range: 7, castShadows: false });
                 l.setLocalPosition(0, 2.4, z); root.addChild(l); car.cabin.push(l);
             }
-            this.cars.push(car);
         }
+        return car;
     }
 
-    _materials(car, Q) {
-        car.root.findComponents('render').forEach(rc => rc.meshInstances.forEach(mi => {
-            const m = mi.material; if (!m || m._tuned === car.k + 1) return;
-            const n = m.name || '';
-            if (/Glow/.test(n)) {
-                // farolins e faróis: material próprio de cada veículo (acendem conforme o sentido)
-                const c = m.clone(); c.name = n; c.emissive = /Red/.test(n) ? new pc.Color(1, 0.08, 0.04) : new pc.Color(1, 0.95, 0.85); c.emissiveIntensity = 0; c.update();
-                mi.material = c; car.glow.push({ mat: c, red: /Red/.test(n) }); return;
-            }
-            if (m._tuned) return;
-            m._tuned = 1;
-            if (/Glass/.test(n)) { m.blendType = pc.BLEND_NORMAL; m.opacity = 0.28; m.depthWrite = false; m.useMetalness = true; m.metalness = 0; m.gloss = 0.95; m.specularityFactor = 1; m.cull = pc.CULLFACE_NONE; }
-            else if (/Shinny_Metal/.test(n)) { m.useMetalness = true; m.metalness = 1; m.gloss = 0.72; }
-            else if (/Rubber/.test(n)) { m.useMetalness = true; m.metalness = 0; m.gloss = 0.15; }
-            else if (/main|extras|^Red$|^White$/.test(n)) { m.useMetalness = true; m.metalness = 0; m.gloss = 0.55; if (Q.clearCoat) { m.clearCoat = 0.25; m.clearCoatGloss = 0.82; } }
-            else if (/bo$|Bogey|engate|underside/.test(n)) { m.useMetalness = true; m.metalness = 0.35; m.gloss = 0.3; }
-            else if (/interior|bancos/.test(n)) { m.useMetalness = true; m.metalness = 0; m.gloss = 0.35; }
-            m.update();
-        }));
-    }
+    // uma composição (a do jogador ou outra); os veículos são criados quando fazem falta
+    unit(player = false) { const u = new Unit(this, player); this.units.push(u); return u; }
+}
 
-    // posição: pFront = engate da frente da composição (cabina da motora), dir = +1 a caminho de Vizela
-    update(dt, s) {
-        const route = this.route;
-        this._last = s;
-        this.dist += s.v * s.dir * dt;      // caminho percorrido no sentido +p (com sinal)
-        const ang = this.dist / WR;
-        // via em que circula: s.off(p) = desvio lateral da via 2 nas estações de cruzamento (0 na principal)
+export class Unit {
+    constructor(T, player) { this.T = T; this.player = player; this.cars = []; this.on = false; }
+    hide() { if (this.on) { this.on = false; for (const c of this.cars) c.root.enabled = false; } }
+
+    // s: { front, dir, nc, off(p), od: [0..1, 0..1], head, tail, night }
+    //   front = engate da frente (m ao longo da linha), dir = ±1, off(p) = desvio lateral da via em que circula,
+    //   od = abertura das portas dos dois lados (como S.dOpen do simulador), head/tail = faróis à frente e farolins atrás
+    update(s) {
+        const T = this.T, route = T.route;
+        while (this.cars.length < s.nc) this.cars.push(T._car(this.player));
+        this.on = true;
         const fr = p => {
-            const f = route.frame(p), o = s.off ? s.off(p) : 0;
+            const f = route.frame(p), o = s.off ? s.off(p) || 0 : 0;
             if (o) { const f0 = route.frame(p, false); f.C = [f.C[0] + f0.R[0] * o, f.C[1], f.C[2] + f0.R[2] * o]; }
             return f;
         };
-        for (const car of this.cars) {
-            // depois de inverter a marcha (s.flip) o reboque vai à frente: cada veículo mantém a cabina para fora
-            const k = car.k, pos = s.flip ? 1 - k : k, sgn = pos === 0 ? s.dir : -s.dir, pc_ = s.pFront - s.dir * (pos * CSP + CSP / 2);
-            car.lead = pos === 0; car.pc = pc_;
+        this.cars.forEach((car, k) => {
+            if (k >= s.nc) { car.root.enabled = false; return; }
+            car.root.enabled = true;
+            // como no simulador: os veículos alternam o sentido (k par com a cabina para a frente)
+            const rev = k % 2 ? -1 : 1, sgn = s.dir * rev, pc_ = s.front - s.dir * (k * CSP + CSP / 2);
+            car.lead = k === 0; car.pc = pc_;
             const pa = pc_ + sgn * FB, pb = pc_ - sgn * RB;
             const fa = fr(pa), fb = fr(pb);
             const A = add(fa.C, mul(fa.U, RAIL_TOP)), B = add(fb.C, mul(fb.U, RAIL_TOP));
@@ -124,7 +128,7 @@ export class Train {
             const O = sub(A, mul(F, FB));
             setWorld(car.root, O, R, U, F);
             car.F = F; car.O = O; car.R = R; car.U = U;
-            // bogies e rodados
+            const ang = pc_ / WR * sgn;      // os rodados giram com o caminho percorrido
             for (const [bn, pp] of [['1_1000_bo01', pa], ['1_1000_bo02', pb]]) {
                 const bg = car.nodes[bn]; if (!bg) continue;
                 const rest = car.rest[bn], fp = fr(pp);
@@ -136,49 +140,32 @@ export class Train {
                     const wn = bn + w, wh = car.nodes[wn]; if (!wh) continue;
                     const wr = car.rest[wn], dy = wr.y - rest.y, dz = wr.z - rest.z;
                     const Pw = add(add(Pb, mul(Ub, dy)), mul(Fb, -dz));
-                    const c = Math.cos(ang * sgn), sn = Math.sin(ang * sgn);
-                    // rotação em torno do eixo do rodado (x local)
+                    const c = Math.cos(ang), sn = Math.sin(ang);
                     const U2 = add(mul(Ub, c), mul(Fb, sn)), F2 = sub(mul(Fb, c), mul(Ub, sn));
                     setWorld(wh, Pw, Rb, U2, F2);
                 }
             }
-            // portas: lado direito (D) e esquerdo (E) do veículo
-            for (const [side, ids] of [[1, ['D02', 'D03']], [0, ['E02', 'E03']]]) {
-                const tgt = this.doorT[k][side];
-                let f = this.doorF[k][side];
-                f += Math.sign(tgt - f) * Math.min(Math.abs(tgt - f), dt / 1.07);
-                if (f !== this.doorF[k][side] || !car._doorInit) {
-                    this.doorF[k][side] = f;
-                    for (const id of ids) {
-                        const W = doorMats(this.AN, id, f);
-                        for (const nm in W) {
-                            const e = car.nodes[nm]; if (!e) continue;
-                            const m = mirror(W[nm]); tmpM.set(m);
-                            const pos = tmpM.getTranslation(); tmpQ.setFromMat4(tmpM);
-                            e.setLocalPosition(pos); e.setLocalRotation(tmpQ);
-                        }
+            // portas: od[0] é o lado esquerdo (E) e od[1] o direito (D) dos veículos virados para a frente; nos outros troca
+            const od = s.od ? (rev > 0 ? s.od : [s.od[1], s.od[0]]) : [0, 0];
+            for (const [side, ids] of [[0, ['E02', 'E03']], [1, ['D02', 'D03']]]) {
+                const f = od[side] || 0;
+                if (Math.abs(f - car.doorF[side]) < 1e-4) continue;
+                car.doorF[side] = f;
+                for (const id of ids) {
+                    const W = doorMats(T.AN, id, f);
+                    for (const nm in W) {
+                        const e = car.nodes[nm]; if (!e) continue;
+                        tmpM.set(mirror(W[nm]));
+                        tmpQ.setFromMat4(tmpM);
+                        e.setLocalPosition(tmpM.getTranslation()); e.setLocalRotation(tmpQ);
                     }
                 }
             }
-            car._doorInit = true;
-            // luzes: faróis na frente da composição, farolins atrás
-            const on = s.lights !== false;
-            for (const g of car.glow) { g.mat.emissiveIntensity = !on ? 0 : g.red ? (car.lead ? 0 : 2.2) : (car.lead ? 3.5 : 0); g.mat.update(); }
-            for (const sp of car.spots) sp.light.intensity = car.lead && on ? (s.night > 0.2 ? 6 : 0) : 0;
+            // luzes: faróis brancos no primeiro veículo, farolins vermelhos no último
+            const white = k === 0 ? (s.head ? 3.5 : 0) : 0, red = k === s.nc - 1 ? (s.tail ? 2.2 : 0) : 0;
+            for (const g of car.glow) { const v = g.red ? red : white; if (v !== g.v) { g.v = v; g.mat.emissiveIntensity = v; g.mat.update(); } }
+            for (const sp of car.spots) sp.light.intensity = k === 0 && s.head && s.night > 0.2 ? 6 : 0;
             for (const l of car.cabin) l.light.intensity = s.night > 0.2 ? 0.8 : 0;
-        }
+        });
     }
-
-    // portas do lado do cais: platformSide = lado do cais na via (−1 esquerda, +1 direita de quem segue para +p)
-    openDoors(platformSide, open) {
-        for (const car of this.cars) {
-            if (!car.R) continue;
-            const fr = this.route.frame(car.pc, false);
-            const side = dot(car.R, fr.R) * platformSide > 0 ? 1 : 0;   // 1 = portas D (direita do veículo), 0 = E
-            this.doorT[car.k][side] = open ? 1 : 0;
-            if (!open) this.doorT[car.k][1 - side] = 0;
-        }
-    }
-    doorsMoving() { return this.doorF.some((f, k) => f.some((v, i) => Math.abs(v - this.doorT[k][i]) > 1e-3)); }
-    doorsOpen() { return this.doorF.some(f => f.some(v => v > 0.02)); }
 }

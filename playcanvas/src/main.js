@@ -1,22 +1,24 @@
-// Protótipo PlayCanvas do simulador: um troço da Linha de Guimarães (por omissão Lordelo → Santo Tirso) com a UDD 9600.
-// O traçado e o cenário vêm do próprio simulador, carregado num iframe escondido (bridge.js, world.js); aqui ficam a luz física,
-// a automotora, a marcha e a operação (paragens, portas, agulhas), separadas do motor gráfico.
+// Linha de Guimarães em PlayCanvas: o jogo completo entre a Trindade e Guimarães, com o horário de 1985.
+// As regras são as do simulador, que corre escondido (bridge.js): marcha, horário, outros comboios e cruzamentos, sinais, chefe de
+// estação, pontuação e som. Aqui comanda-se o ciclo, enviam-se os comandos e desenha-se tudo: cenário do jogo com luz física
+// (world.js), automotoras (train.js), céu (sky.js), câmaras e painel.
 import * as pc from '../lib/playcanvas-2.23.3.min.mjs';
 import { Route } from './route.js';
 import { openGame } from './bridge.js';
 import { World } from './world.js';
 import { Sky } from './sky.js';
-import { Train, CSP } from './train.js';
-import { Physics, NOTCH } from './physics.js';
-import { Audio } from './audio.js';
+import { Trains, CSP } from './train.js';
 import { Cameras, MODES, MODE_NAME } from './cameras.js';
 import { PROFILES, loadProfile, saveProfile, applyFrame } from './quality.js';
 
 const $ = s => document.querySelector(s);
 const progress = (f, t) => { $('#ldFill').style.width = Math.round(f * 100) + '%'; $('#ldText').textContent = t; };
 let toastT = 0;
-function toast(msg, cls = '') { const el = $('#toast'); el.textContent = msg; el.className = 'show ' + cls; clearTimeout(toastT); toastT = setTimeout(() => el.className = cls, 4200); }
-const fHM = t => { t = ((t % 86400) + 86400) % 86400; const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60; return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'); };
+function toast(msg, cls = '') { const el = $('#toast'); el.textContent = msg; el.className = 'show ' + cls; clearTimeout(toastT); toastT = setTimeout(() => el.className = cls, 5200); }
+const p2 = v => String(v).padStart(2, '0');
+const fHM = t => { t = ((Math.round(t) % 86400) + 86400) % 86400; return p2(Math.floor(t / 3600)) + ':' + p2(Math.floor(t / 60) % 60); };
+const fHMS = t => { t = ((Math.floor(t) % 86400) + 86400) % 86400; return p2(Math.floor(t / 3600)) + ':' + p2(Math.floor(t / 60) % 60) + ':' + p2(t % 60); };
+const NOTCH = ['EM', 'F5', 'F4', 'F3', 'F2', 'F1', '0', '1', '2', '3', '4', '5'];
 
 async function createDevice(canvas) {
     const want = new URLSearchParams(location.search).get('gpu');
@@ -43,25 +45,11 @@ async function main() {
     app.start();
     window.__pc = { app, device: device.deviceType };
 
-    // o simulador (escondido) dá o eixo, as estações e o cenário; dados técnicos da 9600
-    progress(0.06, 'A abrir o simulador (traçado e cenário)…');
-    const [game, CPJ] = await Promise.all([openGame('guimaraes'), fetch('../cp9600/cp9600.json').then(r => r.json())]);
-    // troço: origem e destino escolhidos (por omissão Lordelo → Santo Tirso)
-    const ST = game.stations.filter(s => s.stopF != null);
-    const byN = n => ST.find(s => s.n === n);
-    let deN = 'Lordelo', paraN = 'Santo Tirso';
-    try { deN = localStorage.getItem('pc-de') || deN; paraN = localStorage.getItem('pc-para') || paraN; } catch (e) { }
-    let de = byN(deN) || byN('Lordelo') || ST[0], para = byN(paraN) || byN('Santo Tirso') || ST[ST.length - 1];
-    if (de === para) para = ST[ST.indexOf(de) + 1] || ST[ST.indexOf(de) - 1];
-    const dir0 = para.pos > de.pos ? 1 : -1;
-    const route = new Route(game.section(Math.min(de.pos, para.pos) - 700, Math.max(de.pos, para.pos) + 700));
-    const title = `${de.n} → ${para.n}`;
-    document.title = title + ' · 3D'; $('#brand').textContent = title; $('#ldTitle').textContent = `${de.n} — ${para.n}`;
-    for (const [id, cur] of [['#selDe', de], ['#selPara', para]]) {
-        const sel = $(id);
-        for (const s of ST) { const o = document.createElement('option'); o.value = s.n; o.textContent = s.n; o.selected = s === cur; sel.appendChild(o); }
-        sel.onchange = () => { try { localStorage.setItem(id === '#selDe' ? 'pc-de' : 'pc-para', sel.value); } catch (e) { } toast('A carregar o novo troço…'); setTimeout(() => location.reload(), 400); };
-    }
+    // o simulador (escondido) é o motor do jogo e dá o eixo e o cenário
+    progress(0.06, 'A abrir o simulador (regras, horário e cenário)…');
+    const game = await openGame('guimaraes');
+    progress(0.22, 'A ler a linha…');
+    const route = new Route(game.section(0, game.len));
 
     // câmara e pós-processamento
     const camE = new pc.Entity('câmara');
@@ -70,202 +58,238 @@ async function main() {
     const cf = new pc.CameraFrame(app, camE.camera);
     applyFrame(cf, Q, device);
 
+    // céu conforme a hora do jogo (escuridão do simulador: 0 de dia, 1 de noite)
     const sky = new Sky(app, Q);
+    const todOf = (dark, cur) => { const h = 0.04; if (cur === 'noite') return dark < 0.6 - h ? (dark < 0.3 ? 'dia' : 'tarde') : 'noite'; if (cur === 'tarde') return dark > 0.6 + h ? 'noite' : dark < 0.3 - h ? 'dia' : 'tarde'; return dark > 0.6 ? 'noite' : dark > 0.3 + h ? 'tarde' : 'dia'; };
+    let st = game.state();
+    let tod = todOf(st.dark, 'dia'), skyBusy = false;
     progress(0.3, 'A carregar o céu…');
-    let tod = 'dia'; try { tod = localStorage.getItem('pc-tod') || 'dia'; } catch (e) { }
     await sky.set(tod);
 
-    progress(0.4, 'A carregar as texturas do cenário…');
+    progress(0.38, 'A carregar as texturas do cenário…');
     const world = new World(app, game, route, Q);
     await world.loadTextures();
     world.setNight(sky.night);
-    const p00 = dir0 > 0 ? de.stopF : de.stopR;
-    await world.preload(p00, dir0, f => progress(0.45 + 0.4 * f, 'A construir o cenário do simulador…'));
-    progress(0.88, 'A preparar a UDD 9600…');
-    const train = new Train(app, route);
-    await train.load(Q);
-    const phys = new Physics(CPJ);
-    const audio = new Audio();
-    // terreno do simulador (para a câmara cinematográfica); fora dos túneis
+    try { world.addStatic(game.landmarks()); } catch (e) { console.warn('Sem o casario distante', e); }
+    await world.preload(st.pos, st.dir, f => progress(0.45 + 0.4 * f, 'A construir o cenário do simulador…'));
+    progress(0.88, 'A preparar as automotoras…');
+    const trains = new Trains(app, route, Q);
+    await trains.load();
+    const me = trains.unit(true);
+    const others = new Map(), spare = [];      // comboio do simulador → composição desenhada
     const TF = { pos: (p, o) => { const P = route.point(p, o, 0); return [P[0], game.terr(p, o) - route.oy, P[2]]; } };
     const cams = new Cameras(app, camE, route, TF);
     cams.tunnels = route.D.tunnels || [];
 
-    // estado da marcha
-    const S = { pFront: p00, dir: dir0, flip: false, v: 0, night: sky.night, lights: true, off: null, odo: 0,
-        clock: { dia: 7 * 3600 + 40 * 60, tarde: 18 * 3600 + 10 * 60, noite: 21 * 3600 + 40 * 60 }[tod], served: new Set([de.n]),
-        atStop: route.stations.find(s => s.n === de.n) || null, doorsOpenT: 0, loopAt: null, paused: false, warned: 0 };
-    const LINES = route.lines(), SAVEK = `pc-save:${de.n}>${para.n}`;
-    // candeeiros: um conjunto de luzes pontuais que acompanha a câmara (as 14 mais próximas), acesas à noite
-    const LAMPS = game.lamps(route.p0, route.p1).map(([p, x, k]) => { const P = route.point(p, x, k ? 4.6 : 5.6); return new pc.Vec3(P[0], P[1], P[2]); });
-    const lampLights = Array.from({ length: Math.min(14, LAMPS.length) }, () => { const e = new pc.Entity('luz do candeeiro'); e.addComponent('light', { type: 'omni', color: new pc.Color(1, 0.82, 0.55), intensity: 0, range: 18, castShadows: false }); app.root.addChild(e); return e; });
-
-    // ---- operação: paragens, agulhas, portas
-    const stopPos = s => (S.dir > 0 ? s.stopF : s.stopR);
-    const nextStop = () => route.stations.filter(s => !S.served.has(s.n) && S.dir * (stopPos(s) - S.pFront) > -12).sort((a, b) => S.dir * (stopPos(a) - stopPos(b)))[0] || null;
-    const loopFor = s => LINES.find(L => !L.main && s.pos > L.a && s.pos < L.b) || null;
-    function offAt(p) { if (!S.loopAt) return 0; const L = S.loopAt; return p > L.a && p < L.b ? L.off(p) : 0; }
-    S.off = offAt;
-    function platformSide(s) {
-        // cais junto à via em que está a automotora (a 1,8 m do eixo dessa via)
-        const o = offAt(s.bc ?? s.pos);
-        const pl = s.pl.find(r => Math.abs(Math.abs(r[0] - o) - 1.8) < 0.05) || s.pl[0];
-        return Math.sign(pl[0] - o);
-    }
-    function doors() {
-        if (Math.abs(S.v) > 0.1) return toast('Pare a automotora antes de abrir as portas.', 'warn');
-        if (train.doorsOpen()) { train.openDoors(0, false); audio.one('door_close', 0.7); toast('Portas fechadas.'); return; }
-        const s = route.stations.find(s => Math.abs(stopPos(s) - S.pFront) < 10);
-        if (!s) return toast('Não está junto ao marco de paragem de um cais.', 'warn');
-        const err = (S.pFront - stopPos(s)) * S.dir;
-        train.openDoors(platformSide(s), true); audio.one('door_open', 0.7);
-        S.served.add(s.n); S.atStop = s; S.doorsOpenT = 0;
-        toast(`${s.n}: portas abertas. Paragem a ${Math.abs(err).toFixed(1)} m do marco${Math.abs(err) < 1.5 ? ' — precisa!' : '.'}`, Math.abs(err) < 1.5 ? 'good' : '');
-    }
-    function switchLoop() {
-        const s = route.stations.filter(st => loopFor(st) && S.dir * (st.pos - S.pFront) > 40).sort((a, b) => S.dir * (a.pos - b.pos))[0];
-        if (!s) return toast('Não há agulhas à frente neste troço.', 'warn');
-        const L = loopFor(s);
-        const toe = S.dir > 0 ? L.a : L.b;
-        if (S.dir * (toe - S.pFront) < 25) return toast('Já não é possível mudar a agulha: a automotora está perto.', 'warn');
-        S.loopAt = S.loopAt === L ? null : L;
-        toast(`${s.n}: agulha para a ${S.loopAt ? 'via 2 (desviada, 30 km/h)' : 'via principal'}.`, 'good');
-    }
-    function reverse() {
-        if (Math.abs(S.v) > 0.05) return toast('Só se inverte a marcha com a automotora parada.', 'warn');
-        if (train.doorsOpen()) return toast('Feche as portas primeiro.', 'warn');
-        S.pFront = S.pFront - S.dir * 2 * CSP; S.dir = -S.dir; S.flip = !S.flip; phys.notch = 6; S.served = new Set(S.atStop ? [S.atStop.n] : []);
-        toast('Marcha invertida: o maquinista mudou de cabina.', 'good');
-    }
-    function ignition() {
-        audio.init().then(() => audio.resume());
-        if (phys.engine) { phys.stopEngine(); audio.one('shutdown', 0.8); toast('Motor desligado.'); }
-        else if (phys.startEngine()) { audio.one('startup', 0.9); toast('A pôr o motor a trabalhar…'); }
-    }
-    function setNotch(i) {
-        i = Math.max(0, Math.min(11, i)); if (i === phys.notch) return;
-        if (i < phys.notch && i <= 5) audio.one('airbrake1', 0.35); else if (i > phys.notch && phys.notch <= 5) audio.one('air1', 0.25);
-        if (i === 0) audio.one('ebrake', 0.8);
-        phys.notch = i; updLever();
-    }
+    // candeeiros: um conjunto de luzes pontuais que acompanha a câmara (as mais próximas), acesas à noite
+    const LAMPS = game.lamps(0, game.len).map(([p, x, k]) => { const P = route.point(p, x, k ? 4.6 : 5.6); return new pc.Vec3(P[0], P[1], P[2]); });
+    const lampLights = Array.from({ length: 14 }, () => { const e = new pc.Entity('luz do candeeiro'); e.addComponent('light', { type: 'omni', color: new pc.Color(1, 0.82, 0.55), intensity: 0, range: 18, castShadows: false }); app.root.addChild(e); return e; });
 
     // ---- painel
     const lever = $('#lever');
-    NOTCH.forEach((n, i) => { const e = document.createElement('span'); e.textContent = n; e.className = i === 0 ? 'e' : i < 6 ? 'b' : i > 6 ? 't' : ''; e.onclick = () => setNotch(i); lever.appendChild(e); });
+    NOTCH.forEach((n, i) => { const e = document.createElement('span'); e.textContent = n; e.className = i === 0 ? 'e' : i < 6 ? 'b' : i > 6 ? 't' : ''; e.onclick = () => game.cmd.notch(i); lever.appendChild(e); });
     const lspans = [...lever.children];
-    function updLever() { lspans.forEach((e, i) => e.classList.toggle('on', i === phys.notch)); $('#notch').textContent = NOTCH[phys.notch]; }
-    updLever();
-    // mostrador: 0–80 km/h em 270°
+    const VMAX = 100;   // escala do velocímetro
     { const g = $('#ticks'), ns = 'http://www.w3.org/2000/svg';
-      for (let v = 0; v <= 80; v += 5) { const a = (-135 + v / 80 * 270) * Math.PI / 180, r1 = v % 10 ? 76 : 72, l = document.createElementNS(ns, 'line');
+      for (let v = 0; v <= VMAX; v += 5) { const a = (-135 + v / VMAX * 270) * Math.PI / 180, r1 = v % 10 ? 76 : 72, l = document.createElementNS(ns, 'line');
         l.setAttribute('x1', 100 + Math.sin(a) * r1); l.setAttribute('y1', 100 - Math.cos(a) * r1); l.setAttribute('x2', 100 + Math.sin(a) * 82); l.setAttribute('y2', 100 - Math.cos(a) * 82);
         l.setAttribute('class', 'g-tick' + (v % 10 ? '' : ' major')); g.appendChild(l);
         if (v % 20 === 0) { const t = document.createElementNS(ns, 'text'); t.setAttribute('x', 100 + Math.sin(a) * 58); t.setAttribute('y', 100 - Math.cos(a) * 58); t.setAttribute('class', 'g-num'); t.textContent = v; g.appendChild(t); } } }
-    const arc = v => { const a0 = -135 * Math.PI / 180, a1 = (-135 + Math.min(80, v) / 80 * 270) * Math.PI / 180, r = 88; const p = a => `${100 + Math.sin(a) * r} ${100 - Math.cos(a) * r}`; return `M ${p(a1)} A ${r} ${r} 0 ${(a1 - a0) > Math.PI ? 1 : 0} 1 ${p((-135 + 270) * Math.PI / 180)}`; };
+    const arc = v => { const a1 = (-135 + Math.min(VMAX, v) / VMAX * 270) * Math.PI / 180, a2 = 135 * Math.PI / 180, r = 88; const P = a => `${100 + Math.sin(a) * r} ${100 - Math.cos(a) * r}`; return `M ${P(a1)} A ${r} ${r} 0 ${(a2 - a1) > Math.PI ? 1 : 0} 1 ${P(a2)}`; };
+    const dist = d => d >= 1000 ? (d / 1000).toFixed(1).replace('.', ',') + ' km' : (d < 300 ? Math.round(d) : Math.round(d / 10) * 10) + ' m';
+    const setTxt = (id, v) => { const e = $(id); if (e.textContent !== v) e.textContent = v; };
+    function hud() {
+        const h = game.hud(), kmh = Math.abs(h.kmh);
+        setTxt('#spd', String(Math.round(kmh)));
+        $('#needle').setAttribute('transform', `rotate(${-135 + Math.min(VMAX + 4, kmh) / VMAX * 270} 100 100)`);
+        $('#limArc').setAttribute('d', arc(h.lim));
+        // velocidade máxima: losango branco; a seguinte, mais pequena, com a distância (destaque quando é mais baixa)
+        setTxt('#lim', String(h.lim));
+        $('#limBox').classList.toggle('over', kmh > h.lim + 2);
+        setTxt('#nl', h.nl ? String(h.nl.v) : '–');
+        setTxt('#nlD', h.nl ? 'a ' + dist(Math.max(0, h.nl.d)) : 'sem mudança');
+        $('#nlRow').className = 'signrow' + (h.nl && h.nl.v < h.lim ? (h.nl.d < 400 && kmh > h.nl.v + 2 ? ' stop' : ' warn') : '');
+        // sinal adiante
+        const sg = h.sig, blink = sg && sg.st === 'YF' && (performance.now() / 620 | 0) % 2;
+        $('#sigLamp').className = 'lamp' + (sg ? ' ' + (blink ? '' : sg.st === 'YF' ? 'Y' : sg.st) : '');
+        setTxt('#sigN', sg ? sg.nm + ({ G: ' · via livre', Y: ' · precaução', YF: ' · precaução', R: ' · paragem' }[sg.st] || '') : 'Sinal');
+        setTxt('#sigD', sg ? 'a ' + dist(sg.d) + (sg.vista ? ' · à vista' : '') : 'nenhum a menos de 1,5 km');
+        $('#sigRow').className = 'signrow' + (sg ? (sg.st === 'R' ? ' stop' : sg.st === 'G' ? '' : ' warn') : '');
+        // passagem de nível
+        setTxt('#pnD', h.pn ? 'a ' + dist(h.pn.d) + (h.pn.honk ? ' · buzinar!' : '') : 'nenhuma a menos de 1,5 km');
+        $('#pnRow').className = 'signrow' + (h.pn && h.pn.honk ? ' stop' : '');
+        // paragem, horas e pontuação (textos do próprio simulador)
+        setTxt('#nxt', h.next || '—'); setTxt('#nxtD', h.dist || '—'); setTxt('#arr', h.arr || '—');
+        setTxt('#clock', fHMS(h.clock)); setTxt('#trip', h.trip || '--'); setTxt('#delay', h.delay || 'Pontual'); setTxt('#score', String(h.score));
+        setTxt('#fuel', Math.round(Math.max(0, Math.min(1, h.fuel || 0)) * 100) + ' %');
+        const bad = h.emerg || h.vigOn;
+        setTxt('#msg', h.vigOn ? `Homem-morto: carregue no 9 (${Math.ceil(h.vigLeft)} s)` : h.msg || '');
+        $('#msg').className = 'msg' + (bad ? ' bad' : '');
+        $('#dash').classList.toggle('alarm', !!h.vigOn);
+        lspans.forEach((e, i) => e.classList.toggle('on', i === h.notch));
+        // botões
+        const bi = $('#bIgn'); setTxt('#bIgn', h.engS > 0 ? 'A arrancar…' : h.eng >= 1 ? 'Motor ligado' : 'Ignição'); bi.classList.toggle('go', h.eng >= 1);
+        setTxt('#bDoor', h.doors ? 'Fechar portas' : 'Abrir portas'); $('#bDoor').classList.toggle('go', !!h.doors);
+        $('#bVig').classList.toggle('warn', !!h.vigOn);
+        setTxt('#bRev', h.back ? 'Marcha: atrás' : 'Marcha: frente');
+        setTxt('#bWarp', 'Tempo ×' + (h.warp || 1));
+        setTxt('#brand', h.ttn ? `Comboio ${h.ttn} → ${h.dest}` : 'Linha de Guimarães');
+        setTxt('#topLine', `De ${h.from || '—'} · PK ${(st.pos / 1000).toFixed(1).replace('.', ',')}`);
+    }
 
-    // ---- botões e teclas
+    // ---- horário
+    const TT = game.timetable();
+    function menu(show) {
+        $('#menu').hidden = !show; $('#dash').hidden = show; $('#endOv').hidden = true; $('#pauseOv').hidden = true;
+        if (!show) return;
+        setTxt('#brand', 'Linha de Guimarães'); setTxt('#topLine', 'Horário de 1985');
+        const body = $('#ttBody'); body.innerHTML = '';
+        const secs = [['Porto-Trindade → Guimarães', x => x.de === 'Porto-Trindade' && x.tipo !== 'T'], ['Guimarães → Porto-Trindade', x => x.para === 'Porto-Trindade' && x.tipo !== 'T'],
+            ['Outros serviços', x => x.de !== 'Porto-Trindade' && x.para !== 'Porto-Trindade' && x.tipo !== 'T'], ['Tranvias Trindade ↔ Senhora da Hora', x => x.tipo === 'T']];
+        const key = x => { const [h, m] = x.dep.split(':').map(Number), v = h * 60 + m; return v < 240 ? v + 1440 : v; };
+        for (const [title, f] of secs) {
+            const rows = TT.filter(f).sort((a, b) => key(a) - key(b)); if (!rows.length) continue;
+            const h3 = document.createElement('h3'); h3.textContent = title; body.appendChild(h3);
+            const tb = document.createElement('table'); tb.className = 'tt';
+            tb.innerHTML = '<tr><th>Comboio</th><th>Partida</th><th>De</th><th>Para</th><th>Chegada</th><th>Paragens</th><th></th></tr>';
+            for (const x of rows) {
+                const tr = document.createElement('tr'); tr.className = 'r';
+                const tag = x.tipo === 'R' ? '<span class="tag">rápido</span>' : x.tipo === 'S' ? '<span class="tag">semidireto</span>' : '';
+                tr.innerHTML = `<td class="n">${x.n}${tag}</td><td class="h">${x.dep}</td><td>${x.de}</td><td>${x.para}</td><td>${fHM(x.stops[x.stops.length - 1][1])}</td><td>${x.stops.length - 1}</td><td><button aria-label="Conduzir o comboio ${x.n}">Conduzir</button></td>`;
+                tr.onclick = () => pick(x); tb.appendChild(tr);
+            }
+            body.appendChild(tb);
+        }
+    }
+    function pick(x) {
+        if (busy) return;
+        const lo = game.lineOpts(x.n);
+        if (lo.length < 2) return begin(x, 0);
+        $('#lnTitle').innerHTML = `Linha de partida<small>Comboio ${x.n} · ${x.de}, ${x.dep}</small>`;
+        const box = $('#lnBtns'); box.innerHTML = '';
+        const add = (txt, f) => { const b = document.createElement('button'); b.textContent = txt; b.onclick = f; box.appendChild(b); };
+        for (const k of lo) add('Linha ' + k, () => { $('#lineDlg').hidden = true; begin(x, k); });
+        add('Ao acaso', () => { $('#lineDlg').hidden = true; begin(x, 0); });
+        add('Voltar', () => { $('#lineDlg').hidden = true; });
+        $('#lineDlg').hidden = false;
+    }
+    let busy = false, playing = false, last = performance.now();
+    async function begin(x, ln) {
+        busy = true; menu(false); $('#dash').hidden = true;
+        game.audio();
+        game.start(x.n, ln);
+        st = game.state();
+        // cenário do ponto de partida e céu da hora do comboio
+        $('#loading').classList.remove('done'); $('#ldTitle').textContent = `${x.de} — ${x.para}`;
+        progress(0.1, `Comboio ${x.n}: a construir o cenário de ${x.de}…`);
+        const t2 = todOf(st.dark, tod); if (t2 !== tod) { tod = t2; await sky.set(tod); world.setNight(sky.night); }
+        await world.preload(st.pos, st.dir, f => progress(0.1 + 0.9 * f, `Comboio ${x.n}: a construir o cenário de ${x.de}…`));
+        $('#loading').classList.add('done');
+        setCam('cab', true); $('#dash').hidden = false;
+        playing = true; busy = false; last = performance.now();
+    }
+    $('#bAgain').onclick = () => { playing = false; menu(true); };
+    $('#bMenu').onclick = () => { if (busy) return; if (playing && !st.over && !confirm('Deixar este comboio e voltar ao horário?')) return; playing = false; game.cmd.pause(false); menu(true); };
+
+    // ---- câmaras, botões e teclas
     const segOn = (sel, attr, val) => document.querySelectorAll(sel + ' button').forEach(b => b.classList.toggle('on', b.dataset[attr] === val));
-    function setCam(m) { cams.set(m); segOn('#camSeg', 'cam', m); toast('Vista: ' + MODE_NAME[m]); }
-    document.querySelectorAll('#camSeg button').forEach(b => b.onclick = () => setCam(b.dataset.cam));
-    document.querySelectorAll('#todSeg button').forEach(b => b.onclick = async () => { tod = b.dataset.t; try { localStorage.setItem('pc-tod', tod); } catch (e) { } segOn('#todSeg', 't', tod); await sky.set(tod); S.night = sky.night; world.setNight(sky.night); });
-    document.querySelectorAll('#qSeg button').forEach(b => b.onclick = () => { saveProfile(b.dataset.q); toast('Qualidade «' + PROFILES[b.dataset.q].name + '»: a recarregar…'); setTimeout(() => location.reload(), 600); });
-    segOn('#camSeg', 'cam', 'cab'); segOn('#todSeg', 't', tod); segOn('#qSeg', 'q', qk);
+    function setCam(m, quiet) { cams.set(m); segOn('#camSeg', 'cam', m); game.setCam(m === 'cab' ? 'cab' : m === 'ext' ? 'chase' : 'side'); if (!quiet) toast('Vista: ' + MODE_NAME[m]); }
+    document.querySelectorAll('#camSeg button').forEach(b => b.onclick = () => { if (playing) setCam(b.dataset.cam); });
+    document.querySelectorAll('#qSeg button').forEach(b => b.onclick = () => { if (playing && !confirm('Mudar a qualidade recarrega a página e interrompe este comboio. Continuar?')) return; saveProfile(b.dataset.q); location.reload(); });
+    segOn('#camSeg', 'cam', 'cab'); segOn('#qSeg', 'q', qk);
     $('#bHelp').onclick = () => $('#help').showModal();
-    $('#bSave').onclick = () => { try { localStorage.setItem(SAVEK, JSON.stringify({ v: 1, pFront: S.pFront, dir: S.dir, flip: S.flip, clock: S.clock, served: [...S.served], tod, loop: S.loopAt ? S.loopAt.a : null, engine: phys.engine })); toast('Posição gravada.', 'good'); } catch (e) { toast('Não foi possível gravar.', 'warn'); } };
-    $('#bLoad').onclick = () => {
-        let o = null; try { o = JSON.parse(localStorage.getItem(SAVEK) || 'null'); } catch (e) { }
-        if (!o || !Number.isFinite(o.pFront)) return toast('Não há posição gravada.', 'warn');
-        Object.assign(S, { pFront: o.pFront, dir: o.dir === -1 ? -1 : 1, flip: !!o.flip, v: 0, clock: o.clock || S.clock, served: new Set(o.served || []) });
-        S.loopAt = o.loop == null ? null : LINES.find(L => !L.main && Math.abs(L.a - o.loop) < 1) || null;
-        phys.v = 0; phys.notch = 6; if (o.engine) { phys.engine = true; phys.rpm = phys.rpmIdle; } updLever();
-        toast('Posição recuperada.', 'good');
-    };
+    $('#bPause').onclick = () => { if (playing) game.cmd.pause(); };
+    $('#bResume').onclick = () => game.cmd.pause(false);
+    $('#bIgn').onclick = () => { game.audio(); game.cmd.ign(); };
+    $('#bDoor').onclick = () => game.cmd.door();
+    $('#bVig').onclick = () => game.cmd.vig();
+    $('#bRev').onclick = () => game.cmd.rev();
+    $('#bSw').onclick = () => game.cmd.sw();
+    $('#bWarp').onclick = () => game.cmd.warp();
+    { const b = $('#bHorn'); b.onpointerdown = e => { e.preventDefault(); game.audio(); game.key('keydown', '7', 'Digit7'); }; b.onpointerup = b.onpointerleave = () => game.key('keyup', '7', 'Digit7'); }
+    game.onToast = (t, kind) => toast(t, kind === 'bad' ? 'warn' : kind === 'good' ? 'good' : '');
+    // teclas: as do simulador (8/2 manípulo, 9 homem-morto, 7/3/1/4 buzinas, E, R, Z, T, P, I) vão para o jogo; C muda de câmara
+    const LOCAL = new Set(['c', 'f', '?', 'v', 'h', 'g', 'escape', 'tab']);
     addEventListener('keydown', e => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
         if (e.target.closest && e.target.closest('dialog')) return;
-        const k = e.key.toLowerCase(), code = e.code;
-        audio.init().then(() => audio.resume());
-        if (k === 'arrowup' || code === 'Numpad8' || k === '8') { setNotch(phys.notch + 1); e.preventDefault(); }
-        else if (k === 'arrowdown' || code === 'Numpad2' || k === '2' && code !== 'Digit2') { setNotch(phys.notch - 1); e.preventDefault(); }
-        else if (k === 'i') ignition();
-        else if (k === 'e') doors();
-        else if (k === ' ') { audio.horn(true); e.preventDefault(); }
-        else if (k === 'r') reverse();
-        else if (k === 'z') switchLoop();
-        else if (k === 'c') setCam(MODES[(MODES.indexOf(cams.mode) + 1) % MODES.length]);
-        else if (code === 'Digit1') setCam('cab'); else if (code === 'Digit2') setCam('ext'); else if (code === 'Digit3') setCam('cine');
-        else if (k === 'p') { S.paused = !S.paused; toast(S.paused ? 'Pausa' : 'A continuar'); }
-        else if (k === '?') $('#help').showModal();
+        const k = e.key.toLowerCase();
+        if (k === '?') return $('#help').showModal();
+        if (k === 'f') { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => { }); } catch (x) { } return; }
+        if (!playing || busy) return;
+        game.audio();
+        if (k === 'c') { if (!e.repeat) setCam(MODES[(MODES.indexOf(cams.mode) + 1) % MODES.length]); return; }
+        if (LOCAL.has(k)) return;
+        // a repetição automática só interessa ao manípulo (8/2 e setas); nas outras teclas contaria como vários toques
+        if (e.repeat && !/^(arrowup|arrowdown)$/.test(k) && !/^(Digit|Numpad)[28]$/.test(e.code)) { e.preventDefault(); return; }
+        game.key('keydown', e.key, e.code);
+        if (k === ' ' || k.startsWith('arrow') || /^(Digit|Numpad)\d$/.test(e.code)) e.preventDefault();
     });
-    addEventListener('keyup', e => { if (e.key === ' ') audio.horn(false); });
-    canvas.addEventListener('pointerdown', () => audio.init().then(() => audio.resume()), { once: true });
+    addEventListener('keyup', e => { if (playing) game.key('keyup', e.key, e.code); });
+    addEventListener('blur', () => { if (playing) for (const c of ['Digit7', 'Digit3', 'Digit1']) game.key('keyup', c.slice(-1), c); });
+    canvas.addEventListener('pointerdown', () => game.audio());
 
     // ---- ciclo
-    let fpsT = 0, fpsN = 0, lodT = 0, hudT = 0;
+    let fpsT = 0, fpsN = 0, lodT = 0, hudT = 0, idle = 0, dynN = 0;
     const camPos = new pc.Vec3();
-    app.on('update', dtR => {
-        const dt = Math.min(0.1, dtR);
-        // FPS medido pelo relógio (o dt do PlayCanvas vem limitado a 0,1 s)
-        const now = performance.now(); fpsN++;
-        if (!fpsT) fpsT = now;
+    function frame(dtForced) {
+        const now = performance.now(), dt = dtForced ?? Math.min(0.1, (now - last) / 1000); last = now;
+        fpsN++; if (!fpsT) fpsT = now;
         if (now - fpsT > 500) { $('#fps').textContent = `${Math.round(fpsN * 1000 / (now - fpsT))} FPS · ${Q.name} · ${device.deviceType === 'webgpu' ? 'WebGPU' : 'WebGL2'}`; fpsT = now; fpsN = 0; }
-        if (!S.paused) {
-            S.clock += dt;
-            // marcha: dois subpassos
-            const mid = S.pFront - S.dir * CSP;
-            const grade = route.grade(mid), curv = route.curvature(S.pFront);
-            for (let k = 0; k < 2; k++) phys.step(dt / 2, { grade, curv, dir: S.dir });
-            S.v = phys.v;
-            S.pFront += S.dir * S.v * dt; S.odo += Math.abs(S.v) * dt;
-            // fim do troço exportado: para-choques virtuais
-            const lo = route.p0 + 2 * CSP + 30, hi = route.p1 - 30;
-            if (S.pFront > hi || S.pFront < lo) { S.pFront = Math.max(lo, Math.min(hi, S.pFront)); if (phys.v > 0.1) toast('Fim do troço escolhido. Inverta a marcha (R) ou escolha outro destino.', 'warn'); phys.v = 0; S.v = 0; }
-            // passou a agulha e saiu da via 2: volta à principal
-            if (S.loopAt && S.dir * (S.pFront - (S.dir > 0 ? S.loopAt.b : S.loopAt.a)) > 2 * CSP + 5) S.loopAt = null;
-            // portas: a automotora não arranca com portas abertas
-            if (train.doorsOpen() && phys.traction > 0) { phys.notch = 6; updLever(); toast('Feche as portas antes de arrancar.', 'warn'); }
-            // partida: deixa de estar parada no cais
-            if (S.atStop && Math.abs(S.pFront - stopPos(S.atStop)) > 30) S.atStop = null;
+        if (busy) return;
+        // o simulador avança (marcha, horário, outros comboios, sinais, som) e diz onde está tudo
+        if (playing) game.tick(dt);
+        st = game.state();
+        const night = sky.night, off = p => game.tx(p);
+        me.update({ front: st.pos, dir: st.dir, nc: st.nc, off, od: st.od, head: 1, tail: 1, night });
+        const seen = new Set();
+        for (const t of st.trains) {
+            let u = others.get(t.ref);
+            if (!u) { u = spare.pop() || trains.unit(false); others.set(t.ref, u); }
+            const o = t.o;
+            u.update({ front: t.front, dir: t.dir, nc: t.nc, off: t.xo || (() => o), od: null, head: t.head, tail: t.tail, night });
+            seen.add(t.ref);
         }
-        train.update(dt, S);
-        const cv = cams.update(dt, train, S);
-        audio.update(dt, { v: S.v, rpm: phys.rpm, engine: phys.engine, curv: route.curvature(S.pFront), pAlong: S.odo, inside: cv.inside, camDist: cv.dist, compressor: phys.bc > 10 });
-        // cenário: carrega os blocos à frente e liberta os de trás; candeeiros mais próximos acesos à noite
-        if (!S.paused) world.update(S.pFront - S.dir * CSP, S.dir);
+        for (const [ref, u] of others) if (!seen.has(ref)) { u.hide(); others.delete(ref); spare.push(u); }
+        world.update(st.pos - st.dir * CSP, st.dir);
+        // câmara: no horário, a exterior roda devagar à volta da automotora
+        if (!playing) { idle += dt; if (cams.mode !== 'ext') cams.set('ext'); cams.oyaw = 2.2 + idle * 0.05; cams.odist = 46; cams.opitch = 0.24; }
+        cams.update(dt, me, { pFront: st.pos, dir: st.dir, v: st.v, off });
+        // sinais, cancelas, agulhas, passageiros e chefe de estação: geometria do simulador, refeita em cada imagem
+        camPos.copy(camE.getPosition());
+        const ex = camPos.x + route.ox, ez = camPos.z + route.oz;
+        // com muita gente nos cais (Trindade: ~190 mil vértices) refaz-se de 2 em 2 ou de 3 em 3 imagens, para não pesar
+        { const every = window.__dynSkip || (world.dynVerts > 120000 ? 3 : world.dynVerts > 50000 ? 2 : 1);   // __dynSkip: só nos testes
+          if (dynN++ % every === 0) world.dynUpdate(game.dyn(ex, ez), ex, ez); }
+        // céu pela hora do jogo; candeeiros mais próximos acesos à noite
         lodT += dt;
         if (lodT > 0.5) {
-            lodT = 0; camPos.copy(camE.getPosition());
-            const night = sky.night > 0.2;
-            if (night) {
-                const near = LAMPS.map(P => [P.distance(camPos), P]).filter(q => q[0] < 500).sort((a, b) => a[0] - b[0]);
+            lodT = 0;
+            const t2 = todOf(st.dark, tod);
+            if (t2 !== tod && !skyBusy) { tod = t2; skyBusy = true; sky.set(tod).then(() => { world.setNight(sky.night); skyBusy = false; }); }
+            if (sky.night > 0.2) {
+                const near = []; for (const P of LAMPS) { const d = P.distance(camPos); if (d < 500) near.push([d, P]); }
+                near.sort((a, b) => a[0] - b[0]);
                 lampLights.forEach((l, k) => { if (near[k]) { l.setPosition(near[k][1]); l.light.intensity = 2.4; } else l.light.intensity = 0; });
             } else for (const l of lampLights) l.light.intensity = 0;
         }
-        // painel
+        // painel, pausa e fim de serviço
         hudT += dt;
-        if (hudT > 0.08) {
-            hudT = 0;
-            const kmh = Math.abs(S.v) * 3.6;
-            $('#spd').textContent = Math.round(kmh);
-            $('#needle').setAttribute('transform', `rotate(${-135 + Math.min(85, kmh) / 80 * 270} 100 100)`);
-            const lim = S.loopAt && S.pFront > S.loopAt.a - 60 && S.pFront < S.loopAt.b + 60 ? 30 : route.limit(S.pFront);
-            $('#lim').textContent = lim;
-            $('#limArc').setAttribute('d', arc(lim));
-            $('.limit').classList.toggle('over', kmh > lim + 2);
-            const ns = nextStop();
-            $('#nxt').textContent = ns ? ns.n : '—';
-            $('#nxtD').textContent = ns ? `${Math.max(0, Math.round(S.dir * (stopPos(ns) - S.pFront)))} m · cais ${platformSide(ns) < 0 ? 'à esquerda' : 'à direita'}` : 'Fim do troço';
-            $('#bc').textContent = Math.round(phys.bc);
-            $('#rpm').textContent = phys.engine ? Math.round(phys.rpm) : phys.engineT > 0 ? 'arranque' : 'desligado';
-            $('#doors').textContent = train.doorsMoving() ? 'A mover' : train.doorsOpen() ? 'Abertas' : 'Fechadas';
-            $('#clock').textContent = fHM(S.clock);
-            $('#topLine').textContent = `Linha de Guimarães · UDD 9611 · PK ${(S.pFront / 1000).toFixed(1).replace('.', ',')}${S.loopAt ? ' · via 2' : ''}`;
+        if (hudT > 0.1 && playing) {
+            hudT = 0; hud();
+            $('#pauseOv').hidden = !st.paused;
+            if (st.over && $('#endOv').hidden) {
+                const E = game.end();
+                if (E) { $('#endTitle').innerHTML = E.title; $('#endStars').textContent = E.stars; $('#endTbl').innerHTML = E.rows; $('#endOv').hidden = false; }
+            }
         }
-    });
+    }
+    app.on('update', () => { if (!window.__manual) frame(); });
 
     progress(1, 'Pronto.');
     setTimeout(() => $('#loading').classList.add('done'), 250);
-    { const ns = nextStop(); toast(`${de.n}, 1985. Ligue o motor (I) e solte o travão (↑).${ns ? ' Próxima paragem: ' + ns.n + '.' : ''}`); }
-    window.__sim = { S, phys, train, route, cams, sky, setNotch, doors, ignition, reverse, switchLoop, setCam, Q, audio, world, game };
+    menu(true);
+    window.__sim = { game, route, world, trains, me, others, cams, sky, Q, setCam, pick, begin, TT, step: frame, hud, get st() { return st; }, get playing() { return playing; }, get busy() { return busy; } };
 }
 
 main().catch(e => { console.error(e); progress(0, 'Erro: ' + e.message); });

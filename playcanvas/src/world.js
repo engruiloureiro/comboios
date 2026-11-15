@@ -20,7 +20,7 @@ export class World {
         this.night = 0;
         this.len = game.ch * game.seg;    // comprimento de um bloco (m)
         this.c0 = Math.floor(route.p0 / this.len); this.c1 = Math.floor((route.p1 - 1) / this.len);
-        this.verts = 0;
+        this.verts = 0; this.dynVerts = 0;
     }
 
     async loadTextures() {
@@ -84,11 +84,8 @@ export class World {
         for (const m of this.mats.values()) if (m._night) { m.emissiveIntensity = n > 0.2 ? 2.4 * n : 0; m.update(); }
     }
 
-    // um bloco: separa os triângulos por camada e por tipo de luz própria e cria uma malha para cada grupo
-    build(c) {
-        if (this.chunks.has(c)) return false;
-        const g = this.game.chunk(c);
-        if (!g || !g.d || !g.d.length) { this.chunks.set(c, null); return true; }
+    // converte a geometria de um bloco do simulador (14 números por vértice) numa entidade com uma malha por camada
+    _entity(g, name, shadows) {
         const d = g.d, nv = d.length / 14, dev = this.app.graphicsDevice, cnt = new Map();
         for (let v = 0; v < nv; v += 3) { const o = v * 14, e = d[o + 12], k = Math.round(d[o + 11]) * 4 + (e > 0 ? 1 : e < 0 ? 2 : 0); cnt.set(k, (cnt.get(k) || 0) + 3); }
         const G = new Map();
@@ -106,7 +103,7 @@ export class World {
                 g2.uv[i * 2] = rep ? d[o + 9] - du : d[o + 9]; g2.uv[i * 2 + 1] = rep ? d[o + 10] - dv : d[o + 10];
             }
         }
-        const ent = new pc.Entity('bloco ' + c), meshes = [], casters = [];
+        const ent = new pc.Entity(name), meshes = [], casters = [];
         ent.setPosition(g.ox - this.route.ox, -this.route.oy, g.oz - this.route.oz);
         for (const [k, g2] of G) {
             const l = Math.floor(k / 4), ec = k - l * 4;
@@ -115,15 +112,81 @@ export class World {
             mesh.update(pc.PRIMITIVE_TRIANGLES);
             const mi = new pc.MeshInstance(mesh, this.material(l, ec));
             const e = new pc.Entity('c' + l);
-            const cast = !NOCAST[l] && (l !== 10 || this.Q.treeShadows);
+            const cast = shadows && !NOCAST[l] && (l !== 10 || this.Q.treeShadows);
             e.addComponent('render', { meshInstances: [mi], castShadows: cast, receiveShadows: true });
             ent.addChild(e); meshes.push(mesh); if (cast) casters.push(e);
         }
+        return { ent, meshes, casters, nv };
+    }
+
+    // um bloco: separa os triângulos por camada e por tipo de luz própria e cria uma malha para cada grupo
+    build(c) {
+        if (this.chunks.has(c)) return false;
+        const g = this.game.chunk(c);
+        if (!g || !g.d || !g.d.length) { this.chunks.set(c, null); return true; }
+        const E = this._entity(g, 'bloco ' + c, true), ent = E.ent, meshes = E.meshes, casters = E.casters, nv = E.nv;
         this.root.addChild(ent);
         this.chunks.set(c, { ent, meshes, nv, casters, cast: true });
         this.verts += nv;
         this._atlas();
         return true;
+    }
+
+    // geometria dinâmica do simulador (sinais e braços, cancelas, agulhas, passageiros, chefe de estação): refeita em cada imagem
+    // d = vértices relativos ao ponto (ex, ez) do mundo do jogo, com y absoluto
+    dynUpdate(d, ex, ez) {
+        if (!this.dyn) { this.dyn = { ent: new pc.Entity('dinâmico'), G: new Map() }; this.root.addChild(this.dyn.ent); }
+        const D = this.dyn, dev = this.app.graphicsDevice;
+        D.ent.setPosition(ex - this.route.ox, -this.route.oy, ez - this.route.oz);
+        for (const g of D.G.values()) g.n = 0;
+        const nv = d ? d.length / 14 : 0;
+        this.dynVerts = nv;
+        for (let v = 0; v < nv; v += 3) {
+            const o = v * 14, e = d[o + 12], k = Math.round(d[o + 11]) * 4 + (e > 0 ? 1 : e < 0 ? 2 : 0);
+            let g = D.G.get(k);
+            if (!g) { g = { n: 0, cap: 0, p: null, nr: null, uv: null, col: null, mesh: null, ent: null, l: Math.floor(k / 4), ec: k - Math.floor(k / 4) * 4 }; D.G.set(k, g); }
+            g.n += 3;
+        }
+        for (const g of D.G.values()) {
+            if (g.n > g.cap) { g.cap = Math.ceil(g.n * 1.3 / 3) * 3; g.p = new Float32Array(g.cap * 3); g.nr = new Float32Array(g.cap * 3); g.uv = new Float32Array(g.cap * 2); g.col = new Uint8ClampedArray(g.cap * 4); }
+            g.i = 0;
+        }
+        for (let v = 0; v < nv; v += 3) {
+            const o0 = v * 14, e = d[o0 + 12], g = D.G.get(Math.round(d[o0 + 11]) * 4 + (e > 0 ? 1 : e < 0 ? 2 : 0));
+            const rep = d[o0 + 11] >= 0;
+            const du = rep ? Math.floor(Math.min(d[o0 + 9], d[o0 + 23], d[o0 + 37])) : 0, dv = rep ? Math.floor(Math.min(d[o0 + 10], d[o0 + 24], d[o0 + 38])) : 0;
+            for (let t = 0; t < 3; t++) {
+                const o = o0 + t * 14, i = g.i++, a = d[o + 13], ao = a >= 1 ? 1 : Math.pow(Math.max(0, a), 0.4545);
+                g.p[i * 3] = d[o]; g.p[i * 3 + 1] = d[o + 1]; g.p[i * 3 + 2] = d[o + 2];
+                g.nr[i * 3] = d[o + 3]; g.nr[i * 3 + 1] = d[o + 4]; g.nr[i * 3 + 2] = d[o + 5];
+                g.col[i * 4] = d[o + 6] * ao * 255; g.col[i * 4 + 1] = d[o + 7] * ao * 255; g.col[i * 4 + 2] = d[o + 8] * ao * 255; g.col[i * 4 + 3] = 255;
+                g.uv[i * 2] = d[o + 9] - du; g.uv[i * 2 + 1] = d[o + 10] - dv;
+            }
+        }
+        for (const g of D.G.values()) {
+            if (!g.n) { if (g.ent) g.ent.enabled = false; continue; }
+            if (!g.mesh) {
+                g.mesh = new pc.Mesh(dev);
+                g.ent = new pc.Entity('d' + g.l);
+                g.mesh.setPositions(g.p, 3, g.n); g.mesh.setNormals(g.nr, 3, g.n); g.mesh.setUvs(0, g.uv, 2, g.n); g.mesh.setColors32(g.col, g.n);
+                g.mesh.update(pc.PRIMITIVE_TRIANGLES);
+                g.ent.addComponent('render', { meshInstances: [new pc.MeshInstance(g.mesh, this.material(g.l, g.ec))], castShadows: true, receiveShadows: true });
+                D.ent.addChild(g.ent);
+            } else {
+                g.mesh.setPositions(g.p, 3, g.n); g.mesh.setNormals(g.nr, 3, g.n); g.mesh.setUvs(0, g.uv, 2, g.n); g.mesh.setColors32(g.col, g.n);
+                g.mesh.update(pc.PRIMITIVE_TRIANGLES);
+            }
+            g.ent.enabled = true;
+        }
+        this._atlas();
+    }
+
+    // casario distante das cidades (Porto e Guimarães): malhas fixas do simulador
+    addStatic(list) {
+        for (const L of list) {
+            const e = this._entity({ d: L.d, ox: L.ox, oz: L.oz }, 'cidade ao longe', false);
+            if (e) this.root.addChild(e.ent);
+        }
     }
 
     drop(c) {

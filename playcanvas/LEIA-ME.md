@@ -1,38 +1,45 @@
-# Linha de Guimarães 3D — protótipo PlayCanvas
+# Linha de Guimarães em PlayCanvas
 
-Qualquer troço da Linha de Guimarães do simulador (por omissão Lordelo → Santo Tirso) com a UDD 9600, desenhado com o PlayCanvas.
-O traçado e a paisagem são exatamente os do jogo: o simulador (`../index.html`) é carregado num iframe escondido e fornece o eixo,
-as estações e a geometria do cenário em blocos de 200 m — terreno, via e agulhas, cais, rio, túneis, pontes, muros, edifícios,
-árvores, campos e sinais. O protótipo acrescenta a luz física, as sombras, o céu e a automotora.
+O jogo completo entre a Trindade e Guimarães, com o horário de 1985, desenhado com o PlayCanvas.
+
+As regras são as do simulador (`../index.html`), que corre escondido num iframe em modo `?embed`: marcha, horário, outros comboios e
+cruzamentos, sinais, chefe de estação, passageiros, pontuação e som. O simulador fornece também o eixo da via e a geometria do
+cenário. O PlayCanvas comanda o ciclo, envia os comandos e desenha tudo com luz física, sombras e céu HDRI.
 
 Abrir: `playcanvas/index.html` servido por HTTP (o Cloudflare Pages serve-o tal como está; não há passo de compilação).
 Em local: `python3 -m http.server` na raiz do repositório e abrir `http://localhost:8000/playcanvas/`. Por `file://` não funciona
 (módulos ES, `fetch` e o iframe do simulador).
 
-## O que tem
+## 1.ª fase (feita)
 
-- Escolha da origem e do destino no topo (qualquer par de estações da linha); o sentido de marcha segue a escolha.
-- WebGPU quando o navegador o oferece, com recurso automático a WebGL2 (`?gpu=webgl2` força WebGL2, `?gpu=webgpu` tenta WebGPU).
-- Luz física sobre o cenário do simulador: céu HDRI (iluminação ambiente e reflexos), sol com sombras em cascata, neblina,
-  MSAA, SSAO (Alto), bloom e vinheta. Manhã, fim de tarde e noite (janelas e candeeiros acesos, faróis).
-- Três perfis: Baixo (gráficos integrados), Médio e Alto: mudam a distância de cenário carregado, as sombras e o pós-processamento.
-- UDD 9600 com bogies a seguir a via, rodados a girar, escala nas curvas, portas animadas com as pistas originais, faróis e
-  farolins conforme o sentido, luz interior à noite.
-- Marcha com o manípulo combinado (EM, F5–F1, 0, 1–5), motor diesel, freio a ar, aderência, resistências e rampas; sons originais.
-- Paragens com marco, portas do lado do cais, agulha para a via de cruzamento das estações (30 km/h), inversão de marcha.
-- Painel, câmaras (cabina, exterior em órbita, cinematográfica) e gravação da posição por troço.
+- Lista do horário de 1985: os comboios que circulam só entre a Trindade e Guimarães (regionais, rápidos, serviços de Lousado e
+  Santo Tirso e tranvias da Senhora da Hora). Na Trindade e em Guimarães escolhe-se a linha de partida.
+- Outros comboios à hora, com cruzamentos nas estações; sinais com o aspeto real, cancelas, agulhas, passageiros nos cais e chefe
+  de estação (geometria dinâmica do simulador, refeita em cada imagem).
+- Teclas do simulador: 8/2 (ou setas) manípulo, 9 homem-morto, 7/3/1/4 buzinas (Espaço = aguda), E portas, R inversor, Z agulha,
+  T tempo acelerado, P pausa, I ignição. C muda de câmara.
+- Painel: velocímetro, velocidade máxima em losango branco (sinalização ferroviária), próxima mudança de velocidade com a
+  distância, próximo sinal (aspeto e distância), próxima passagem de nível (com o aviso de buzinar), próxima paragem, hora,
+  tempo de viagem, pontualidade, pontos, gasóleo, mensagens do serviço e alarme do homem-morto.
+- Céu conforme a hora do comboio (manhã, fim de tarde, noite), com candeeiros, janelas e faróis à noite.
+- Fim de serviço com a pontuação do simulador; pausa.
+
+## 2.ª fase (por fazer)
+
+Abastecimento e manobras de oficina, unidade dupla e acoplagem, pinturas de origem e frentes sem porta, passageiros a bordo vistos
+pelas janelas, fumo do escape, gravar e retomar o jogo, comboios para lá de Guimarães (Fafe) e as outras linhas.
 
 ## Ficheiros
 
 | Ficheiro | Função |
 |---|---|
-| `index.html`, `style.css` | página, painel e menus |
-| `src/main.js` | arranque, escolha do troço, operação (paragens, portas, agulhas), teclas, painel |
-| `src/bridge.js` | ponte para o simulador: abre-o num iframe escondido e lê o eixo, as estações, os blocos de cenário e as texturas (`window.__PCB` no `index.html` do jogo) |
-| `src/world.js` | cenário: converte os blocos do simulador em malhas e materiais do PlayCanvas; carrega-os à frente do comboio e liberta-os atrás |
-| `src/route.js` | eixo do troço: posição, rumo, cota, escala, curvatura, limites e vias |
+| `index.html`, `style.css` | página, painel, horário e sobreposições |
+| `src/main.js` | arranque, horário, ciclo (tick do simulador, espelho dos comboios, cenário), teclas e painel |
+| `src/bridge.js` | ponte para o simulador (`window.__PCB` no `index.html` do jogo) |
+| `src/world.js` | cenário: blocos de 200 m do simulador convertidos em malhas do PlayCanvas, geometria dinâmica e casario distante |
+| `src/train.js` | automotoras UDD 9600: a do jogador e as outras, com 2 ou 4 veículos |
+| `src/route.js` | eixo da linha: posição, rumo, cota, escala |
 | `src/sky.js`, `src/quality.js` | céu e luz por hora do dia; perfis gráficos e pós-processamento |
-| `src/train.js`, `src/physics.js`, `src/audio.js`, `src/cameras.js` | automotora, dinâmica, som e câmaras |
-| `src/gfx.js` | vetores |
+| `src/cameras.js`, `src/gfx.js` | câmaras (cabina, exterior, cinematográfica); vetores |
 
 Recursos e licenças: `CREDITS.md`.
