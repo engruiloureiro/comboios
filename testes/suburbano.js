@@ -1,7 +1,7 @@
 const {chromium}=require('playwright');const {drive}=require('./condutor.js');
 (async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader']});
 for(const [dir,all,h] of [[0,1,'08:10'],[1,1,'18:05']]){const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));
- await p.goto('file://'+require('path').resolve(__dirname,'../index.html'));await p.waitForTimeout(2500);await p.click('#bSub');await p.waitForTimeout(300);
+ await p.goto('file://'+require('path').resolve(__dirname,'../simulador.html'));await p.waitForTimeout(2500);await p.click('#bSub');await p.waitForTimeout(300);
  await p.click(`#ovSub button[data-d="${dir}"]`);await p.click(`#ovSub button[data-s="${all}"]`);await p.fill('#subT',h);await p.click('#subGo');await p.waitForTimeout(3500);
  const G=await p.evaluate(()=>({JSH:window.__GEO().JSH}));
  const r=await drive(p,{stopAt:dir?260:G.JSH-120,max:20000});

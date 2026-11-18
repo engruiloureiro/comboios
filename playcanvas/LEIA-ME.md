@@ -2,7 +2,7 @@
 
 O jogo completo entre a Trindade e Guimarães, com o horário de 1985, desenhado com o PlayCanvas.
 
-As regras são as do simulador (`../index.html`), que corre escondido num iframe em modo `?embed`: marcha, horário, outros comboios e
+As regras são as do simulador (`../simulador.html`), que corre escondido num iframe em modo `?embed`: marcha, horário, outros comboios e
 cruzamentos, sinais, chefe de estação, passageiros, pontuação e som. O simulador fornece também o eixo da via e a geometria do
 cenário. O PlayCanvas comanda o ciclo, envia os comandos e desenha tudo com luz física, sombras e céu HDRI.
 
@@ -35,7 +35,7 @@ pelas janelas, fumo do escape, gravar e retomar o jogo, comboios para lá de Gui
 |---|---|
 | `index.html`, `style.css` | página, painel, horário e sobreposições |
 | `src/main.js` | arranque, horário, ciclo (tick do simulador, espelho dos comboios, cenário), teclas e painel |
-| `src/bridge.js` | ponte para o simulador (`window.__PCB` no `index.html` do jogo) |
+| `src/bridge.js` | ponte para o simulador (`window.__PCB` no `simulador.html`) |
 | `src/world.js` | cenário: blocos de 200 m do simulador convertidos em malhas do PlayCanvas, geometria dinâmica e casario distante |
 | `src/train.js` | automotoras UDD 9600: a do jogador e as outras, com 2 ou 4 veículos |
 | `src/route.js` | eixo da linha: posição, rumo, cota, escala |

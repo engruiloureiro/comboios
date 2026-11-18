@@ -1,4 +1,4 @@
-// Ponte para o simulador atual (../index.html): é carregado num iframe escondido, em modo «embed», e passa a ser o motor do jogo.
+// Ponte para o simulador atual (../simulador.html): é carregado num iframe escondido, em modo «embed», e passa a ser o motor do jogo.
 // O simulador faz as regras — marcha, horário, outros comboios, cruzamentos, sinais, chefe de estação, pontuação e som — e fornece
 // o eixo da via e a geometria do cenário; o PlayCanvas comanda o ciclo (tick), envia os comandos e desenha tudo.
 // Do lado do jogo, tudo isto está em window.__PCB.
@@ -7,12 +7,12 @@ export async function openGame(line = 'guimaraes') {
     const f = document.createElement('iframe');
     f.setAttribute('aria-hidden', 'true'); f.tabIndex = -1;
     f.style.cssText = 'position:absolute;width:640px;height:360px;left:-9999px;top:0;visibility:hidden;border:0';
-    f.src = '../index.html?linha=' + line + '&embed=1';
+    f.src = '../simulador.html?linha=' + line + '&embed=1';
     document.body.appendChild(f);
-    await new Promise((res, rej) => { f.onload = res; f.onerror = () => rej(new Error('Não foi possível carregar o simulador (../index.html).')); });
+    await new Promise((res, rej) => { f.onload = res; f.onerror = () => rej(new Error('Não foi possível carregar o simulador (../simulador.html).')); });
     const w = f.contentWindow;
     for (let k = 0; k < 200 && !w.__PCB; k++) await new Promise(r => setTimeout(r, 50));
-    if (!w.__PCB || !w.__PCB.tick) throw new Error('O simulador carregado não tem a ponte do protótipo (versão antiga do index.html?).');
+    if (!w.__PCB || !w.__PCB.tick) throw new Error('O simulador carregado não tem a ponte do protótipo (versão antiga do simulador.html?).');
     return new Game(w, f);
 }
 

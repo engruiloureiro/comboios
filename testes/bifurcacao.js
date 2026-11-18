@@ -1,7 +1,7 @@
 const {chromium}=require('playwright');const {drive}=require('./condutor.js');
 (async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader']});
 for(const [line,dir,stop] of [['guimaraes',0,12600],['povoa',0,8200],['guimaraes',1,260],['povoa',1,260]]){const ctx=await b.newContext();const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));
- await p.goto('file://'+require('path').resolve(__dirname,'../index.html'));await p.evaluate(l=>localStorage.setItem('gf-line',l),line);await p.reload();await p.waitForTimeout(2500);
+ await p.goto('file://'+require('path').resolve(__dirname,'../simulador.html'));await p.evaluate(l=>localStorage.setItem('gf-line',l),line);await p.reload();await p.waitForTimeout(2500);
  // partida: personalizado entre Trindade e (Maia | Custóias), ou o inverso
  await p.evaluate(([line,dir])=>{const n=line==='povoa'?'Custóias':'Maia';const s=[...document.querySelectorAll('#cFrom option')];document.querySelector('#bCustom').click();
    const f=document.querySelector('#cFrom'),t=document.querySelector('#cTo');const idx=x=>[...f.options].find(o=>o.textContent.includes(x)).value;

@@ -2,7 +2,7 @@
 const {chromium}=require('playwright');const fs=require('fs');
 (async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader']});const G={};let bad=0;
 for(const line of ['guimaraes','povoa','gp']){const ctx=await b.newContext();const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
- await p.goto('file://'+require('path').resolve(__dirname,'../index.html'));await p.evaluate(l=>localStorage.setItem('gf-line',l),line);await p.reload();await p.waitForTimeout(2500);
+ await p.goto('file://'+require('path').resolve(__dirname,'../simulador.html'));await p.evaluate(l=>localStorage.setItem('gf-line',l),line);await p.reload();await p.waitForTimeout(2500);
  G[line]=await p.evaluate(()=>window.__GEO());if(errs.length){console.log(line,'ERROS',errs.join('|'));bad++}await ctx.close()}
 const g=G.guimaraes,S=g.SEG,iE=Math.floor(g.JSH/S);
 // 1) continuidade: saltos de rumo, curvatura, cota e declive em cada linha até 1,5 km depois da bifurcação

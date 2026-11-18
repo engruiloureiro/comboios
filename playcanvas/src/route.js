@@ -1,4 +1,4 @@
-// Eixo da via a partir dos dados exportados do simulador (index.html): posição, rumo, cota, limites e vias em cada 5 m.
+// Eixo da via a partir dos dados exportados do simulador (simulador.html): posição, rumo, cota, limites e vias em cada 5 m.
 // Coordenadas: x para leste, z = −norte (como no simulador), y para cima; origem no primeiro ponto do troço.
 // A escala (inclinação da via nas curvas) segue a mesma regra do simulador: c = 14 m × 1/R, até 90 mm, plana nas estações,
 // nas passagens de nível e onde há mais de uma via.
