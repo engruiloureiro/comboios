@@ -199,16 +199,47 @@ async function main() {
         busy = true; menu(false); $('#dash').hidden = true;
         game.audio();
         game.start(x.n, ln, comp);
+        await prepare(`${x.de} — ${x.para}`, `Comboio ${x.n}: a construir o cenário de ${x.de}…`);
+    }
+    // cenário do ponto onde o comboio está e céu da hora do jogo; depois o jogo corre
+    async function prepare(title, txt) {
         st = game.state();
-        // cenário do ponto de partida e céu da hora do comboio
-        $('#loading').classList.remove('done'); $('#ldTitle').textContent = `${x.de} — ${x.para}`;
-        progress(0.1, `Comboio ${x.n}: a construir o cenário de ${x.de}…`);
+        $('#loading').classList.remove('done'); $('#ldTitle').textContent = title;
+        progress(0.1, txt);
         const t2 = todOf(st.dark, tod); if (t2 !== tod) { tod = t2; await sky.set(tod); world.setNight(sky.night); }
-        await world.preload(st.pos, st.dir, f => progress(0.1 + 0.9 * f, `Comboio ${x.n}: a construir o cenário de ${x.de}…`));
+        await world.preload(st.pos, st.dir, f => progress(0.1 + 0.9 * f, txt));
         $('#loading').classList.add('done');
         setCam('cab', true); $('#dash').hidden = false;
         playing = true; busy = false; last = performance.now();
     }
+
+    // ---- gravação: guardar (navegador + ficheiro .json), retomar o guardado, abrir um .json
+    async function resume(o) {
+        if (busy || !o) return;
+        if (o.line && o.line !== 'guimaraes' || !game.saveOK(o)) { toast('Este jogo guardado não é da Linha de Guimarães ou já não é compatível com esta versão.', 'bad'); return; }
+        if (playing && !st.over && !confirm('Deixar o comboio atual e retomar o jogo guardado?')) return;
+        busy = true; playing = false; menu(false); $('#dash').hidden = true; $('#lineDlg').hidden = true;
+        game.audio();
+        if (!game.apply(o)) { busy = false; menu(true); toast('Não foi possível retomar este jogo.', 'bad'); return; }
+        await prepare('Jogo guardado', 'A retomar o jogo guardado…');
+    }
+    $('#bSave').onclick = () => {
+        if (!playing || busy) { toast('Não há viagem em curso para guardar.', ''); return; }
+        const o = game.saveObj(); if (!o) { toast('Não há viagem em curso para guardar.', ''); return; }
+        game.store();
+        const stn = game.stations, a = (stn[o.start] || {}).n || 'inicio', b = (stn[o.end] || {}).n || 'fim';
+        const fn = ('comboio-' + a + '-' + b + '-' + fHMS(o.clock ?? (o.s && o.s.clock) ?? 0).slice(0, 5).replace(':', 'h') + '.json').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9.\-]+/g, '-');
+        const u = URL.createObjectURL(new Blob([JSON.stringify(o, null, 1)], { type: 'application/json' })), l = document.createElement('a');
+        l.href = u; l.download = fn; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
+    };
+    $('#bLoad').onclick = () => { const o = game.readSave(); if (!o) { toast('Não há nenhum jogo guardado neste navegador.', ''); return; } resume(o); };
+    $('#bLoadF').onclick = () => $('#fLoad').click();
+    $('#fLoad').onchange = e => {
+        const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+        const r = new FileReader();
+        r.onload = () => { let o = null; try { o = JSON.parse(r.result); } catch (err) { } if (!o || !o.s || o.start === undefined) { toast('Este ficheiro não é um jogo guardado.', 'bad'); return; } resume(o); };
+        r.readAsText(f);
+    };
     $('#bAgain').onclick = () => { playing = false; menu(true); };
     $('#bMenu').onclick = () => { if (busy) return; if (playing && !st.over && !confirm('Deixar este comboio e voltar ao horário?')) return; playing = false; game.cmd.pause(false); menu(true); };
 

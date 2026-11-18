@@ -48,6 +48,12 @@ export class Game {
     lineOpts(n) { return Array.from(this.B.lineOpts(n)); }
     start(n, ln, nc = 2) { this.B.startTT(n, ln, nc); }
     tick(dt) { this.B.tick(dt); }
+    // gravação (a do simulador): objeto do jogo, guardar no navegador, ler o guardado, validar e retomar
+    saveObj() { const o = this.B.saveObj(); return o ? JSON.parse(JSON.stringify(o)) : null; }
+    store() { this.B.store(); }
+    readSave() { const o = this.B.readSave(); return o ? JSON.parse(JSON.stringify(o)) : null; }
+    saveOK(o) { return this.B.saveOK(o); }
+    apply(o) { return this.B.apply(this.w.JSON.parse(JSON.stringify(o))); }
     state() { return this.B.state(); }
     hud() { return this.B.hud(); }
     end() { return this.B.end(); }
