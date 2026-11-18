@@ -1,12 +1,17 @@
 @echo off
 setlocal
 
-rem Arranca um servidor local na pasta deste ficheiro (porta 8000) e abre a página de entrada.
+rem Arranca um servidor local na pasta deste ficheiro (porta 8000) e abre o jogo.
+rem Chamado pelo botao da pagina (comboios://), recebe o endereco como %1 e abre o PlayCanvas.
+rem Chamado com duplo clique, regista primeiro o endereco comboios:// no Windows.
 set "GAME_DIR=%~dp0"
 if "%GAME_DIR:~-1%"=="\" set "GAME_DIR=%GAME_DIR:~0,-1%"
 set "GAME_URL=http://localhost:8000/"
+if not "%~1"=="" set "GAME_URL=http://localhost:8000/playcanvas/"
 
 if not exist "%GAME_DIR%\index.html" goto :missing
+
+if "%~1"=="" powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%GAME_DIR%\registar-comboios.ps1"
 
 netstat -ano | findstr /r /c:":8000 .*LISTENING" >nul
 if errorlevel 1 goto :startserver
