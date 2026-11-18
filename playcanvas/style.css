@@ -36,6 +36,11 @@ button { font: inherit; color: inherit; }
 .brand span { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
 .tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .seg { display: flex; background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: var(--r); padding: 3px; }
+.saves{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 12px}
+.saves button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:9px;padding:8px 12px;cursor:pointer;font:600 15px/1.1 'Barlow Condensed';color:var(--ink);text-align:left}
+.saves button:hover{background:rgba(255,255,255,.12)}
+.saves button small{font:400 12px/1.2 Barlow,sans-serif;color:var(--ink-2)}
+.saves button[hidden]{display:none}
 .comp{display:flex;align-items:center;gap:10px;margin:4px 0 12px;font:600 14px 'Barlow Condensed';letter-spacing:.04em;color:var(--ink-2)}
 .seg button, .icon { border: 0; background: transparent; padding: 6px 10px; border-radius: 7px; cursor: pointer; font: 600 14px/1 'Barlow Condensed'; letter-spacing: .03em; color: var(--ink-2); text-decoration: none; }
 .seg button:hover, .icon:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }

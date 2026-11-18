@@ -164,6 +164,11 @@ async function main() {
         $('#menu').hidden = !show; $('#dash').hidden = show; $('#endOv').hidden = true; $('#pauseOv').hidden = true;
         if (!show) return;
         setTxt('#brand', 'Linha de Guimarães'); setTxt('#topLine', 'Horário de 1985');
+        // jogo guardado neste navegador: botão para continuar, com o percurso e a hora do jogo
+        { const o = game.readSave(), ok = o && (!o.line || o.line === 'guimaraes') && game.saveOK(o);
+          $('#mLoad').hidden = !ok;
+          if (ok) { const stn = game.stations, c = o.clock ?? (o.s && o.s.clock) ?? 0;
+            setTxt('#mLoadInfo', `${(stn[o.start] || {}).n || '—'} → ${(stn[o.end] || {}).n || '—'} · ${fHMS(c).slice(0, 5)} (hora do jogo)` + (o.t ? ' · guardado ' + new Date(o.t).toLocaleString('pt-PT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '')); } }
         const body = $('#ttBody'); body.innerHTML = '';
         const secs = [['Porto-Trindade → Guimarães', x => x.de === 'Porto-Trindade' && x.tipo !== 'T'], ['Guimarães → Porto-Trindade', x => x.para === 'Porto-Trindade' && x.tipo !== 'T'],
             ['Outros serviços', x => x.de !== 'Porto-Trindade' && x.para !== 'Porto-Trindade' && x.tipo !== 'T'], ['Tranvias Trindade ↔ Senhora da Hora', x => x.tipo === 'T']];
@@ -233,7 +238,8 @@ async function main() {
         l.href = u; l.download = fn; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
     };
     $('#bLoad').onclick = () => { const o = game.readSave(); if (!o) { toast('Não há nenhum jogo guardado neste navegador.', ''); return; } resume(o); };
-    $('#bLoadF').onclick = () => $('#fLoad').click();
+    $('#bLoadF').onclick = $('#mLoadF').onclick = () => $('#fLoad').click();
+    $('#mLoad').onclick = () => $('#bLoad').onclick();
     $('#fLoad').onchange = e => {
         const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
         const r = new FileReader();
