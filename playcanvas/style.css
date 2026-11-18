@@ -36,6 +36,7 @@ button { font: inherit; color: inherit; }
 .brand span { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
 .tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .seg { display: flex; background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: var(--r); padding: 3px; }
+.comp{display:flex;align-items:center;gap:10px;margin:4px 0 12px;font:600 14px 'Barlow Condensed';letter-spacing:.04em;color:var(--ink-2)}
 .seg button, .icon { border: 0; background: transparent; padding: 6px 10px; border-radius: 7px; cursor: pointer; font: 600 14px/1 'Barlow Condensed'; letter-spacing: .03em; color: var(--ink-2); text-decoration: none; }
 .seg button:hover, .icon:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }
 .seg button.on { background: var(--ink); color: #111; }

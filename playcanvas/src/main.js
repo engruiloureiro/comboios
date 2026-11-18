@@ -139,6 +139,11 @@ async function main() {
 
     // ---- horário
     const TT = game.timetable();
+    let comp = 2;   // 2 = automotora simples; 4 = unidade dupla (duas automotoras, a segunda acopla no arranque)
+    document.querySelectorAll('#compSeg button').forEach(b => b.onclick = () => {
+        comp = +b.dataset.c;
+        document.querySelectorAll('#compSeg button').forEach(q => q.classList.toggle('on', q === b));
+    });
     function menu(show) {
         $('#menu').hidden = !show; $('#dash').hidden = show; $('#endOv').hidden = true; $('#pauseOv').hidden = true;
         if (!show) return;
@@ -177,7 +182,7 @@ async function main() {
     async function begin(x, ln) {
         busy = true; menu(false); $('#dash').hidden = true;
         game.audio();
-        game.start(x.n, ln);
+        game.start(x.n, ln, comp);
         st = game.state();
         // cenário do ponto de partida e céu da hora do comboio
         $('#loading').classList.remove('done'); $('#ldTitle').textContent = `${x.de} — ${x.para}`;

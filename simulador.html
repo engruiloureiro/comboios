@@ -6546,7 +6546,7 @@ window.__PCB={ver:1,line:LINE,seg:SEG,total:TOTAL,ch:CH,tsg:TSG,
  timetable:()=>TTS.filter(x=>x[1]==='G').map(x=>{const P=ttPlan(x),st=Object.entries(P.all).sort((a,b)=>a[1]-b[1]);return{n:x[0],de:x[2],para:x[3],dep:x[4],tipo:x[5]||'',stops:st}})
    .filter(r=>r.stops.every(q=>{const s=byNameE(q[0]);return s&&s.pos<=GUI.pos+1})),
  lineOpts:n=>{const x=TTS.find(q=>q[0]===n);if(!x)return[];const g=ttPlan(x).legs[0],o=byNameE(g.a);return o&&(o===SB||o===GUI)&&o.ex&&o.ex.length?lineOpts(o,g.rev).map(q=>q.no).sort((u,w)=>u-w):[]},
- startTT:(n,ln)=>{FORCE_NC=2;ttStart(n,ln||0)},
+ startTT:(n,ln,nc)=>{FORCE_NC=nc===4?4:2;ttStart(n,ln||0)},
  tx:p=>trackX(p),setCam:m=>{camMode=m},
  state:()=>{const tr=[];if(S)for(const t of TRAINS){if(Math.abs(t.a-S.pos)>1800||t.cons)continue;
      if(t.svc){if(!t.on)continue;const f=t.dir>0;tr.push({ref:t,front:f?t.a+t.len:t.a,dir:f?1:-1,xo:t.xo,nc:t.nc,head:1,tail:1})}

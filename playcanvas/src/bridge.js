@@ -46,7 +46,7 @@ export class Game {
     // jogo
     timetable() { return JSON.parse(JSON.stringify(this.B.timetable())); }
     lineOpts(n) { return Array.from(this.B.lineOpts(n)); }
-    start(n, ln) { this.B.startTT(n, ln); }
+    start(n, ln, nc = 2) { this.B.startTT(n, ln, nc); }
     tick(dt) { this.B.tick(dt); }
     state() { return this.B.state(); }
     hud() { return this.B.hud(); }
