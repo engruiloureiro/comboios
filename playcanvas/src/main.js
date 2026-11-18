@@ -95,6 +95,12 @@ async function main() {
         l.setAttribute('x1', 100 + Math.sin(a) * r1); l.setAttribute('y1', 100 - Math.cos(a) * r1); l.setAttribute('x2', 100 + Math.sin(a) * 82); l.setAttribute('y2', 100 - Math.cos(a) * 82);
         l.setAttribute('class', 'g-tick' + (v % 10 ? '' : ' major')); g.appendChild(l);
         if (v % 20 === 0) { const t = document.createElementNS(ns, 'text'); t.setAttribute('x', 100 + Math.sin(a) * 58); t.setAttribute('y', 100 - Math.cos(a) * 58); t.setAttribute('class', 'g-num'); t.textContent = v; g.appendChild(t); } } }
+    // barra compacta: velocímetro pequeno (cópia do grande) e escolha guardada entre sessões
+    const mG = $('.gauge svg').cloneNode(true); mG.querySelectorAll('[id]').forEach(e => e.removeAttribute('id')); $('#mGauge').prepend(mG);
+    const mNeedle = mG.querySelector('.g-needle'), mArc = mG.querySelector('.g-lim');
+    const setCompact = on => { document.body.classList.toggle('compact', on); try { localStorage.setItem('pc-dash', on ? 'mini' : 'full'); } catch (e) { } };
+    { let v = null; try { v = localStorage.getItem('pc-dash'); } catch (e) { } setCompact(v !== 'full'); }
+    $('#bMore').onclick = () => setCompact(false); $('#bLess').onclick = () => setCompact(true);
     const arc = v => { const a1 = (-135 + Math.min(VMAX, v) / VMAX * 270) * Math.PI / 180, a2 = 135 * Math.PI / 180, r = 88; const P = a => `${100 + Math.sin(a) * r} ${100 - Math.cos(a) * r}`; return `M ${P(a1)} A ${r} ${r} 0 ${(a2 - a1) > Math.PI ? 1 : 0} 1 ${P(a2)}`; };
     const dist = d => d >= 1000 ? (d / 1000).toFixed(1).replace('.', ',') + ' km' : (d < 300 ? Math.round(d) : Math.round(d / 10) * 10) + ' m';
     const setTxt = (id, v) => { const e = $(id); if (e.textContent !== v) e.textContent = v; };
@@ -127,6 +133,16 @@ async function main() {
         $('#msg').className = 'msg' + (bad ? ' bad' : '');
         $('#dash').classList.toggle('alarm', !!h.vigOn);
         lspans.forEach((e, i) => e.classList.toggle('on', i === h.notch));
+        // barra compacta
+        setTxt('#mSpd', String(Math.round(kmh)));
+        mNeedle.setAttribute('transform', `rotate(${-135 + Math.min(VMAX + 4, kmh) / VMAX * 270} 100 100)`); mArc.setAttribute('d', arc(h.lim));
+        setTxt('#mNotch', NOTCH[h.notch] ?? '–');
+        setTxt('#mLim', String(h.lim)); $('#mLimBox').classList.toggle('over', kmh > h.lim + 2);
+        $('#mLamp').className = $('#sigLamp').className; $('#mSigRow').className = $('#sigRow').className;
+        setTxt('#mSigN', $('#sigN').textContent); setTxt('#mSigD', $('#sigD').textContent);
+        setTxt('#mNxt', h.next || '—'); setTxt('#mNxtD', h.dist || '—'); setTxt('#mClock', fHMS(h.clock)); setTxt('#mArr', h.arr || '—');
+        setTxt('#mMsg', $('#msg').textContent); $('#mMsg').className = $('#msg').className;
+        $('#mini').classList.toggle('alarm', !!h.vigOn);
         // botões
         const bi = $('#bIgn'); setTxt('#bIgn', h.engS > 0 ? 'A arrancar…' : h.eng >= 1 ? 'Motor ligado' : 'Ignição'); bi.classList.toggle('go', h.eng >= 1);
         setTxt('#bDoor', h.doors ? 'Fechar portas' : 'Abrir portas'); $('#bDoor').classList.toggle('go', !!h.doors);

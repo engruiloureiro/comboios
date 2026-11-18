@@ -148,7 +148,29 @@ dialog#help::backdrop { background: rgba(0, 0, 0, .5); }
 #help .note { color: var(--ink-3); font-size: 13px; margin: 14px 0 10px; }
 #help button { background: var(--ink); color: #111; border: 0; border-radius: 8px; padding: 7px 16px; font-weight: 600; cursor: pointer; }
 
+/* barra compacta (por omissão) e painel completo («Detalhes») */
+#mini { position: fixed; left: 14px; bottom: 14px; z-index: 5; display: flex; align-items: center; gap: 16px; background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px 8px 8px; max-width: calc(100vw - 28px); width: max-content; flex-wrap: wrap; }
+body:not(.compact) #mini, #dash[hidden] + #mini { display: none; }
+body.compact #dash { display: none; }
+#mini.alarm { border-color: var(--cp); box-shadow: 0 0 0 3px rgba(211, 42, 47, .45); animation: alarm .5s infinite alternate; }
+.m-gauge { position: relative; width: 72px; height: 72px; flex: none; }
+.m-gauge svg { width: 100%; height: 100%; }
+.m-gauge .g-num { display: none; }
+.m-read { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; color: var(--face-ink); line-height: 1; }
+.m-read b { font: 700 16px 'Barlow Condensed'; font-variant-numeric: tabular-nums; }
+.m-read small { display: block; font-size: 8px; letter-spacing: .08em; color: #6b665c; text-transform: uppercase; }
+.m-cell { display: flex; flex-direction: column; line-height: 1.1; }
+.m-cell small { font: 600 11px 'Barlow Condensed'; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.m-cell b { font: 700 22px 'Barlow Condensed'; font-variant-numeric: tabular-nums; }
+#mini .losango.small { margin: 4px 2px; }
+#mini .signrow { padding-right: 10px; }
+#mini .msg { position: absolute; left: 0; bottom: calc(100% + 6px); min-height: 0; white-space: nowrap; background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; }
+#mini .msg:empty { display: none; }
+.dtoggle { align-self: flex-start; border: 1px solid var(--line); background: rgba(255, 255, 255, .06); border-radius: 7px; padding: 6px 10px; cursor: pointer; font: 600 14px/1 'Barlow Condensed'; letter-spacing: .03em; color: var(--ink-2); }
+.dtoggle:hover { color: var(--ink); background: rgba(255, 255, 255, .12); }
+
 @media (max-width: 900px) {
+  #mini { left: 8px; right: 8px; bottom: 8px; gap: 10px; }
   #top { flex-direction: column; align-items: stretch; padding: 8px; }
   .tools { justify-content: flex-start; }
   #dash { left: 8px; right: 8px; bottom: 8px; padding: 8px; gap: 8px; flex-wrap: wrap; }

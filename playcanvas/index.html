@@ -94,6 +94,23 @@
       <button id="bHorn" title="Buzina (7 aguda, 3 média, 1 grave, 4 dois tons)">Buzina</button><button id="bRev" title="Inversor de marcha (R)">Marcha: frente</button><button id="bSw" title="Agulha (Z)">Agulha</button><button id="bWarp" title="Tempo acelerado (T)">Tempo ×1</button>
     </div>
   </div>
+  <button class="dtoggle" id="bLess" title="Mostrar só o essencial">Resumir</button>
+</section>
+
+<!-- barra compacta: o essencial, com «Detalhes» para abrir o painel completo -->
+<section id="mini" aria-label="Painel de condução (resumo)">
+  <div class="m-gauge" id="mGauge"><div class="m-read"><b id="mSpd">0</b><small>km/h</small></div></div>
+  <div class="m-cell"><small>Manípulo</small><b id="mNotch">0</b></div>
+  <div class="losango small" id="mLimBox" title="Velocidade máxima neste ponto"><span id="mLim">30</span></div>
+  <div class="signrow" id="mSigRow" title="Próximo sinal">
+    <div class="lamp" id="mLamp"></div>
+    <div class="signtxt"><small id="mSigN">Sinal</small><b id="mSigD">—</b></div>
+  </div>
+  <div class="next"><small>Próxima paragem</small><b id="mNxt">—</b><span id="mNxtD">—</span></div>
+  <div class="meter"><small>Hora</small><b id="mClock">--:--:--</b></div>
+  <div class="meter"><small>Chegada</small><b id="mArr">—</b></div>
+  <button class="dtoggle" id="bMore" title="Mostrar o painel completo">Detalhes</button>
+  <div class="msg" id="mMsg" role="status" aria-live="polite"></div>
 </section>
 
 <div id="fps" aria-hidden="true"></div>
