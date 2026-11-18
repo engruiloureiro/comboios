@@ -49,11 +49,15 @@ export class Cameras {
         const mid = s.pFront - s.dir * 18.9, C = this.route.frame(mid, false), om = s.off ? s.off(mid) : 0;
         const target = add(add(C.C, mul(C.R, om)), [0, 2.2, 0]);
         if (this.mode === 'ext') {
-            const h = Math.atan2(C.F[0], -C.F[2]) * (s.dir > 0 ? 1 : 1) + (s.dir < 0 ? Math.PI : 0) + this.oyaw;
+            // a câmara fica presa ao comboio (distância constante): suavizar a posição no mundo criava um atraso que variava
+            // com o tempo de cada imagem e o comboio parecia avançar e recuar; só o rumo da órbita é suavizado (curvas)
+            const h0 = Math.atan2(C.F[0], -C.F[2]) + (s.dir < 0 ? Math.PI : 0);
+            if (this.smooth == null || typeof this.smooth !== 'number') this.smooth = h0;
+            else { let dh = h0 - this.smooth; dh -= Math.round(dh / (2 * Math.PI)) * 2 * Math.PI; this.smooth += dh * (1 - Math.exp(-dt * 4)); }
+            const h = this.smooth + this.oyaw;
             const d = this.odist, eye = [target[0] + Math.sin(h) * d * Math.cos(this.opitch), target[1] + d * Math.sin(this.opitch), target[2] - Math.cos(h) * d * Math.cos(this.opitch)];
             const p = this._terrainClamp(eye, mid);
-            if (!this.smooth) this.smooth = p.slice(); else for (let k = 0; k < 3; k++) this.smooth[k] += (p[k] - this.smooth[k]) * Math.min(1, dt * 6);
-            cam.setPosition(...this.smooth); cam.lookAt(target[0], target[1], target[2]);
+            cam.setPosition(...p); cam.lookAt(target[0], target[1], target[2]);
             cam.camera.fov = 50; cam.camera.nearClip = 0.3;
             return { inside: false, dist: d };
         }
@@ -68,7 +72,7 @@ export class Cameras {
             this.cine = { p, pos: [P[0], P[1] + 1.4 + r() * 3.5, P[2]] };
         }
         const pos = this.cine.pos, dist = Math.hypot(pos[0] - target[0], pos[2] - target[2]);
-        if (!this.smooth) this.smooth = target.slice(); else for (let k = 0; k < 3; k++) this.smooth[k] += (target[k] - this.smooth[k]) * Math.min(1, dt * 3);
+        if (!Array.isArray(this.smooth)) this.smooth = target.slice(); else for (let k = 0; k < 3; k++) this.smooth[k] += (target[k] - this.smooth[k]) * (1 - Math.exp(-dt * 3));
         cam.setPosition(...pos); cam.lookAt(...this.smooth);
         // objetiva: teleobjetiva ao longe, grande angular perto
         cam.camera.fov = Math.max(18, Math.min(60, Math.atan2(26, dist) * 2 * 180 / Math.PI));
