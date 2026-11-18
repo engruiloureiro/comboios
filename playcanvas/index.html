@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linha de Guimarães 3D</title>
+<meta name="description" content="Protótipo PlayCanvas do simulador: UDD 9600 na Linha de Guimarães (1985), com o traçado e o cenário do simulador">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="app" aria-label="Cena 3D: Linha de Guimarães com a automotora UDD 9600"></canvas>
+
+<!-- carregamento -->
+<div id="loading" role="status" aria-live="polite">
+  <div class="ld-card">
+    <div class="ld-kicker">Linha de Guimarães · 1985</div>
+    <h1 id="ldTitle">Trindade — Guimarães</h1>
+    <p class="ld-sub">UDD CP 9600 · horário de 1985 · PlayCanvas</p>
+    <div class="ld-bar"><i id="ldFill"></i></div>
+    <p id="ldText">A preparar o motor gráfico…</p>
+  </div>
+</div>
+
+<!-- barra superior -->
+<header id="top">
+  <div class="brand"><b id="brand">Linha de Guimarães</b><span id="topLine">Horário de 1985</span></div>
+  <nav class="tools" aria-label="Opções">
+    <div class="seg" id="camSeg" role="group" aria-label="Câmara">
+      <button data-cam="cab" title="Cabina (C muda de câmara)">Cabina</button><button data-cam="ext" title="Exterior (C)">Exterior</button><button data-cam="cine" title="Cinematográfica (C)">Cinema</button>
+    </div>
+    <div class="seg" id="qSeg" role="group" aria-label="Qualidade gráfica">
+      <button data-q="baixo">Baixo</button><button data-q="medio">Médio</button><button data-q="alto">Alto</button>
+    </div>
+    <button class="icon" id="bPause" title="Pausa (P)">Pausa</button>
+    <button class="icon" id="bSave" title="Guardar o jogo neste navegador e num ficheiro .json">Guardar</button>
+    <button class="icon" id="bLoad" title="Retomar o último jogo guardado neste navegador">Retomar</button>
+    <button class="icon" id="bLoadF" title="Abrir um jogo guardado num ficheiro .json">Abrir JSON</button>
+    <input type="file" id="fLoad" accept=".json,application/json" hidden>
+    <button class="icon" id="bMenu" title="Deixar este comboio e voltar ao horário">Horário</button>
+    <button class="icon" id="bHelp" title="Comandos (?)">?</button>
+    <a class="icon" href="../simulador.html" title="Abrir o simulador original">Simulador</a>
+    <a class="icon" href="../" title="Voltar ao início">Início</a>
+  </nav>
+</header>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- painel de condução -->
+<section id="dash" aria-label="Painel de condução" hidden>
+  <div class="gauge">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <circle cx="100" cy="100" r="92" class="g-bezel"/>
+      <circle cx="100" cy="100" r="84" class="g-face"/>
+      <g id="ticks"></g>
+      <path id="limArc" class="g-lim" d=""/>
+      <line id="needle" x1="100" y1="100" x2="100" y2="30" class="g-needle"/>
+      <circle cx="100" cy="100" r="7" class="g-hub"/>
+    </svg>
+    <div class="g-read"><b id="spd">0</b><small>km/h</small></div>
+  </div>
+  <div class="signs" aria-label="Sinalização">
+    <div class="signrow" title="Velocidade máxima neste ponto">
+      <div class="losango" id="limBox"><span id="lim">30</span></div>
+      <div class="signtxt"><small>Velocidade máxima</small><b>agora</b></div>
+    </div>
+    <div class="signrow" id="nlRow" title="Próxima mudança de velocidade máxima">
+      <div class="losango small" id="nlBox"><span id="nl">–</span></div>
+      <div class="signtxt"><small>Adiante</small><b id="nlD">—</b></div>
+    </div>
+    <div class="signrow" id="sigRow" title="Próximo sinal">
+      <div class="lamp" id="sigLamp"></div>
+      <div class="signtxt"><small id="sigN">Sinal</small><b id="sigD">—</b></div>
+    </div>
+    <div class="signrow" id="pnRow" title="Próxima passagem de nível">
+      <div class="pn" aria-hidden="true">PN</div>
+      <div class="signtxt"><small>Passagem de nível</small><b id="pnD">—</b></div>
+    </div>
+  </div>
+  <div class="cols">
+    <div class="row">
+      <div class="next"><small>Próxima paragem</small><b id="nxt">—</b><span id="nxtD">—</span></div>
+      <div class="meter right"><small>Chegada</small><b id="arr">—</b></div>
+    </div>
+    <div class="row meters">
+      <div class="meter"><small>Hora</small><b id="clock">--:--:--</b></div>
+      <div class="meter"><small>Viagem</small><b id="trip">--</b></div>
+      <div class="meter"><small>Horário</small><b id="delay">Pontual</b></div>
+      <div class="meter"><small>Pontos</small><b id="score">0</b></div>
+      <div class="meter"><small>Gasóleo</small><b id="fuel">–</b></div>
+    </div>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    <div class="lever" id="lever" aria-label="Manípulo combinado: travão e tração"></div>
+    <div class="btns">
+      <button id="bIgn" title="Ignição (I)">Ignição</button><button id="bDoor" title="Portas (E)">Abrir portas</button><button id="bVig" title="Homem-morto (9)">Homem-morto</button>
+      <button id="bHorn" title="Buzina (7 aguda, 3 média, 1 grave, 4 dois tons)">Buzina</button><button id="bRev" title="Inversor de marcha (R)">Marcha: frente</button><button id="bSw" title="Agulha (Z)">Agulha</button><button id="bWarp" title="Tempo acelerado (T)">Tempo ×1</button>
+    </div>
+  </div>
+  <button class="dtoggle" id="bLess" title="Mostrar só o essencial">Resumir</button>
+</section>
+
+<!-- barra compacta: o essencial, com «Detalhes» para abrir o painel completo -->
+<section id="mini" aria-label="Painel de condução (resumo)">
+  <div class="m-gauge" id="mGauge"><div class="m-read"><b id="mSpd">0</b><small>km/h</small></div></div>
+  <div class="m-cell"><small>Manípulo</small><b id="mNotch">0</b></div>
+  <div class="losango small" id="mLimBox" title="Velocidade máxima neste ponto"><span id="mLim">30</span></div>
+  <div class="signrow" id="mSigRow" title="Próximo sinal">
+    <div class="lamp" id="mLamp"></div>
+    <div class="signtxt"><small id="mSigN">Sinal</small><b id="mSigD">—</b></div>
+  </div>
+  <div class="next"><small>Próxima paragem</small><b id="mNxt">—</b><span id="mNxtD">—</span></div>
+  <div class="meter"><small>Hora</small><b id="mClock">--:--:--</b></div>
+  <div class="meter"><small>Chegada</small><b id="mArr">—</b></div>
+  <button class="dtoggle" id="bMore" title="Mostrar o painel completo">Detalhes</button>
+  <div class="msg" id="mMsg" role="status" aria-live="polite"></div>
+</section>
+
+<div id="fps" aria-hidden="true"></div>
+
+<!-- horário -->
+<div class="ov" id="menu" hidden>
+  <div class="panel">
+    <div class="ld-kicker">Linha de Guimarães · outono de 1985</div>
+    <h1>Horário</h1>
+    <p class="ld-sub">Escolha o comboio que quer conduzir entre a Trindade e Guimarães. Os outros comboios circulam à hora e cruzam consigo nas estações.</p>
+    <div class="comp"><span>Composição</span>
+      <div class="seg" id="compSeg" role="group" aria-label="Composição do comboio">
+        <button data-c="2" class="on" title="Uma automotora UDD 9600">Simples</button><button data-c="4" title="Duas automotoras acopladas: a segunda aproxima-se e acopla antes da partida (vista exterior)">Unidade dupla</button>
+      </div>
+    </div>
+    <div class="saves">
+      <button id="mLoad" hidden>Continuar o jogo guardado<small id="mLoadInfo"></small></button>
+      <button id="mLoadF">Abrir jogo guardado em ficheiro<small>Escolha o ficheiro .json que guardou</small></button>
+    </div>
+    <div id="ttBody"></div>
+  </div>
+</div>
+<div class="ov" id="lineDlg" hidden>
+  <div class="panel small"><h2 id="lnTitle">Linha de partida</h2><p>De que linha quer partir?</p><div id="lnBtns" class="btns"></div></div>
+</div>
+<div class="ov" id="endOv" hidden>
+  <div class="panel small"><h2 id="endTitle"></h2><div id="endStars"></div><table id="endTbl"></table><div class="btns"><button id="bAgain">Escolher outro comboio</button></div></div>
+</div>
+<div class="ov light" id="pauseOv" hidden><div class="panel small"><h2>Pausa</h2><p>Carregue em P ou no botão para continuar.</p><div class="btns"><button id="bResume">Continuar</button></div></div></div>
+
+<dialog id="help">
+  <h2>Comandos</h2>
+  <dl>
+    <dt>I</dt><dd>Ligar / desligar o motor</dd>
+    <dt>8 ou ↑ · 2 ou ↓</dt><dd>Manípulo: acelerar (1–5) · travar (F1–F5, EM = emergência)</dd>
+    <dt>9</dt><dd>Homem-morto: confirmar a vigilância quando o painel pedir</dd>
+    <dt>7 · 3 · 1 · 4</dt><dd>Buzinas: aguda · média · grave · dois tons (Espaço = aguda)</dd>
+    <dt>E</dt><dd>Abrir / fechar as portas (parado junto à placa de paragem)</dd>
+    <dt>R</dt><dd>Inversor de marcha (parado, manípulo em 0 ou travão)</dd>
+    <dt>Z</dt><dd>Agulha</dd>
+    <dt>T · P</dt><dd>Tempo acelerado · pausa</dd>
+    <dt>C</dt><dd>Mudar de câmara: cabina, exterior, cinematográfica</dd>
+    <dt>Rato</dt><dd>Olhar (cabina) · rodar e aproximar (exterior)</dd>
+  </dl>
+  <p class="note">As regras são as do simulador: espere o apito do chefe nas estações, buzine antes das passagens de nível, respeite os sinais e os limites. Nesta 1.ª fase ainda não há abastecimento, manobras de oficina nem unidade dupla.</p>
+  <form method="dialog"><button>Fechar</button></form>
+</dialog>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
