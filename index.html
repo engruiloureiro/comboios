@@ -39,6 +39,7 @@ a.choice:hover,a.choice:focus-visible{border-color:var(--c);transform:translateY
 .choice .tag{font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
 .choice b{font:700 28px/1.05 'Barlow Condensed',sans-serif}
 .choice p{margin:0;color:var(--dim);font-size:14.5px}
+.choice.local{opacity:.7}
 .choice .go{margin-top:auto;padding-top:12px;font:600 15px 'Barlow Condensed',sans-serif;letter-spacing:.04em;color:var(--c)}
 .choice.off{opacity:.55;pointer-events:none}
 #note{display:none;margin:4px 0 0;font-size:13px;color:var(--dim)}
@@ -68,19 +69,20 @@ footer{margin-top:32px;font-size:13px;color:var(--dim)}
       <b>Linha de Guimarães 3D</b>
       <p>Trindade ↔ Guimarães com o horário de 1985, luz física, sombras e céu HDRI. 1.ª fase: sem oficina nem unidade dupla.</p>
       <span class="go">Entrar →</span>
-      <span id="note">Precisa de ser servido por HTTP (não abre por <code>file://</code>).</span>
+      <span id="note">Abriu o ficheiro diretamente, por isso o PlayCanvas não arranca. Faça duplo clique em <code>Iniciar-Linha-Guimaraes.cmd</code> (Windows) e a página abre por HTTP.</span>
     </a>
   </div>
 
   <footer>A versão PlayCanvas usa o simulador original como motor: as regras, o horário e os sons são os mesmos.</footer>
 </main>
 <script>
-// o PlayCanvas precisa de HTTP (módulos ES, fetch e o iframe do simulador)
+// o PlayCanvas precisa de HTTP (módulos ES, fetch e o iframe do simulador): por file:// mostra a instrução do lançador
 if (location.protocol === 'file:') {
   var pc = document.getElementById('pc');
-  pc.classList.add('off'); pc.removeAttribute('href');
   document.getElementById('note').style.display = 'block';
   pc.querySelector('.go').style.display = 'none';
+  pc.classList.add('local');
+  pc.addEventListener('click', function (e) { e.preventDefault(); });
 }
 </script>
 </body>
